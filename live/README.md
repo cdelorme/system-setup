@@ -19,3 +19,9 @@ Where `Live` boots to the USB, and the other three run the custom installation, 
 
 _This project is still in the planning phase._
 
+
+---
+
+**Reference Material:**
+
+- [Debian Custom Reference](http://crunchbang.org/forums/viewtopic.php?id=25489)
