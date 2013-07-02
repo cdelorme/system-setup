@@ -1,0 +1,38 @@
+#!/bin/sh
+# Configuration File
+# Set the variables below to your liking and initiate the script to process
+
+# Username for customization (default: user)
+USERNAME=user
+
+# Password if user does not yet exist (default: pass1)
+PASSWORD=pass1
+
+# Development Directory (default: /home/src)
+DEV_DIR=/home/src
+
+# Add trim support to `/etc/lvm/lvm.conf` and cron-job fstrim weekly (default: true)
+TRIM=true
+
+# Custom SSH Port (default: 22)
+SSH_PORT=22
+
+# Headless eg No Gui (default: false)
+HEADLESS=false
+
+# Dual Interfaces for Internet Output Separation
+DUAL_LAN=true
+
+
+
+# ---------------------------------------- INCOMPLETE FEATURES
+
+# Remove any USB devices from fstab & ensure UUID's have replaced the hard partitions (default: true)
+FSTAB=true
+
+# Xen configuration settings in grub (default: dom0_mem=4096M dom0_max_vcpus=2)
+XEN_CONF="dom0_mem=4096M dom0_max_vcpus=2"
+
+# PCI BDF (Bus Device Function) from lspci for devices to hide using xen-pciback.hide (in array format):
+#PCI_BDF=( "00:1d.0" "03:00.0" "03:00.1" "04:00.0" )
+PCI_BDF=()
