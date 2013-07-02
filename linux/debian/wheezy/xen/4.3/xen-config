@@ -35,4 +35,3 @@ XEN_CONF="dom0_mem=4096M dom0_max_vcpus=2"
 
 # PCI BDF (Bus Device Function) from lspci for devices to hide using xen-pciback.hide (in array format):
 #PCI_BDF=( "00:1d.0" "03:00.0" "03:00.1" "04:00.0" )
-PCI_BDF=()

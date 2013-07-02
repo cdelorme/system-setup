@@ -18,8 +18,8 @@ passwordless_sudo_xl()
 {
 
     # Add passwordless xl for sudo group
-    echo -e "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
-    echo -e "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
+    echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
+    echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
 
 }
 
@@ -45,20 +45,20 @@ patch_xen_grub()
 
     # Update Grub (Iterate PCI devices & add xen conf flags)
     cp /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
-    PCIBACK=" xen-pciback.hide=";for i in "${}";do PCIBACK="$PCIBACK($i)";done;
-    sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
+    # PCIBACK=" xen-pciback.hide=";for i in "$PCI_BDF";do PCIBACK="$PCIBACK($i)";done;
+    # sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
     sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
     update-grub
 
 }
 
-patch_xendomains()
-{
+# patch_xendomains()
+# {
 
-    # I have not yet fixed the xendomains script so this is just a placeholder
-    # Supposedly 4.3 has been fixed, but I need to test it to be sure
+#     # I have not yet fixed the xendomains script so this is just a placeholder
+#     # Supposedly 4.3 has been fixed, but I need to test it to be sure
 
-}
+# }
 
 insserv_xen_configuration()
 {
@@ -141,13 +141,16 @@ setup_xen()
     xen_interfaces
     passwordless_sudo_xl
 
+    # UNFINISHED
+    # patch_xendomains
+
 }
 
 kernel_installation()
 {
 
     # Add Concurrency /w automatic core detection
-    echo -e "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
+    echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
 
     # If kernel debs exist install them
     if [ -d $FILES/kernel ] && ls $FILES/kernel/*.deb >/dev/null 2>&1;then
@@ -224,8 +227,8 @@ gui_configuration()
     tar xf Sublime\ Text\ 2.0.1\ x64.tar.bz2
     mv Sublime\ Text\ 2 /usr/share/sublime_text
     ln -s /usr/share/sublime_text/sublime_text /usr/bin/subl
-    echo -e "[Desktop Entry]\nName=Sublime Text 2\nComment=The Best Text Editor in the World!\nTryExec=subl\nExec=subl\nIcon=/usr/share/sublime_text/Icon/256x256/sublime_text.png\nType=Application\nCategories=Office;Sublime Text;" > /usr/share/applications/subl.desktop
-    echo -e "text/plain=subl.desktop\ntext/css=subl.desktop\ntext/htm=subl.desktop\ntext/javascript=subl.desktop\ntext/x-c=subl.desktop\ntext/csv=subl.desktop\ntext/x-java-source=subl.desktop\ntext/java=subl.desktop\n" >> /usr/share/applications/defaults.list
+    echo "[Desktop Entry]\nName=Sublime Text 2\nComment=The Best Text Editor in the World!\nTryExec=subl\nExec=subl\nIcon=/usr/share/sublime_text/Icon/256x256/sublime_text.png\nType=Application\nCategories=Office;Sublime Text;" > /usr/share/applications/subl.desktop
+    echo "text/plain=subl.desktop\ntext/css=subl.desktop\ntext/htm=subl.desktop\ntext/javascript=subl.desktop\ntext/x-c=subl.desktop\ntext/csv=subl.desktop\ntext/x-java-source=subl.desktop\ntext/java=subl.desktop\n" >> /usr/share/applications/defaults.list
     update-desktop-database
     rm -rf "Sublime Text 2.0.1*"
 
@@ -247,9 +250,9 @@ setup_firewall()
 
     # Define firewall at `/etc/firewall.conf`
     if $DUAL_LAN;then
-        echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\niptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 22 -d 192.168.20.2 -j REJECT\niptables -A FORWARD -i eth0 -o xenbr1 -p tcp --dport 22 -d 192.168.20.2 -j REJECT\niptables -A FORWARD -i eth1 -o eth0 -p tcp --dport 22 -d 192.168.20.2 -j REJECT\niptables -A FORWARD -i eth1 -o xenbr0 -p tcp --dport 22 -d 192.168.20.2 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\niptables -A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
+        echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o eth1 -j REJECT\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n-A FORWARD -i eth1 -o eth0 -j REJECT\n-A FORWARD -i eth1 -o xenbr0 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
     else
-        echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\niptables -A FORWARD -i eth0 -o xenbr1 -p tcp --dport 22 -d 192.168.20.2 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\niptables -A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.con
+        echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
     fi
 
     # Prepare firewall auto-loading
@@ -278,7 +281,7 @@ user_configuration()
     # Create important user directories
     mkdir -p /home/$USERNAME/.config/autostart
 
-    # Update permissions
+    # Update Ownership
     chmod -R $USERNAME:$USERNAME /home/$USERNAME
 
 }
@@ -299,7 +302,7 @@ ssh_config()
 {
 
     # Set SSH Port
-    sed -i 's/Port 22/Port $SSH_PORT/' /etc/ssh/sshd_config
+    sed -i "s/Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
     service ssh restart
 
 }
@@ -374,7 +377,7 @@ gui_packages()
 {
 
     # Append Gnome Packages
-    PACKAGES="$PACKAGES gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 pulseaudio xorg-dev ia32-libs-gtk binfmt-support libc6-dev libc6-dev-i386 libcurl3 xdg-users-dirs-gtk xdg-utils network-manager libnss3-1d"
+    PACKAGES="$PACKAGES gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 pulseaudio xorg-dev ia32-libs-gtk binfmt-support libc6-dev libc6-dev-i386 libcurl3 xdg-user-dirs-gtk xdg-utils network-manager libnss3-1d"
 
     # Append GUI Software
     PACKAGES="$PACKAGES gparted guake eog gnash vlc gtk-recordmydesktop chromium"
@@ -425,9 +428,9 @@ stage_one_config_and_kernel()
 
     # Create Crontab to continue on reboot
     if crontab -l > /dev/null 2>&1;then
-        echo "$(crontab -l)\n@reboot $(readlink -f $0) 2" > /var/spool/cron/crontabs/root
+        echo "$(crontab -l)\n@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
     else
-        echo "@reboot $(readlink -f $0) \"two\"" > /var/spool/cron/crontabs/root
+        echo "@reboot $SCRIPT \"two\"" > /var/spool/cron/crontabs/root
     fi
 
     # Reboot System
@@ -445,7 +448,7 @@ stage_two_xen()
     setup_xen
 
     # Remove crontab record
-    sed -i '/$(readlink -f $0)/d' /var/spool/cron/crontabs/root
+    sed -i '/$SCRIPT/d' /var/spool/cron/crontabs/root
 
     # Reboot System
     reboot
