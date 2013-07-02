@@ -1,5 +1,5 @@
 
-# Windows 8 Multimedia Platform
+# Windows 8 Multimedia ReadMe
 
 I use this system on a Xen server.
 

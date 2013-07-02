@@ -5,6 +5,8 @@ This section is dedicated to my project to create a custom Debian Installer, com
 
 The installer would come with an answer file, additional packages preferred by default, and be modifiable on a USB key for persistent state.
 
+In addition a custom kernel configuration could be used to give us the latest and greatest features and hardware compatibility.
+
 This would allow the packages to be updated keeping the Live boot up-to-date and reducing the installer process.
 
 Ideally when loaded a menu should provide options for:
