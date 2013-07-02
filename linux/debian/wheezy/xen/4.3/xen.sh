@@ -459,7 +459,7 @@ stage_two_xen()
 # -------------------------------- Execution
 
 # Log Output
-exec &> xen.log
+exec 1> xen.log 2> xen.log
 
 # Hide Output
 # exec &> /dev/null
