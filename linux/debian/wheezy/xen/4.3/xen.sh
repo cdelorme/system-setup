@@ -164,8 +164,8 @@ kernel_installation()
         wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.9.8.tar.xz
 
         # Extract to dev directory & enter
-        tar -xf linux-3*
-        cd linux-3*
+        tar -xf linux*
+        cd linux*
 
         # Copy the latest config
         for CONFIG in /boot/config-*;do
@@ -185,11 +185,11 @@ kernel_installation()
         # Install
         dpkg -i ../*.deb
 
-        # Wipe $DEV_DIR
-        rm -rf $DEV_DIR/*
-
         # Move back to current script dir
         cd $PWD
+
+        # Wipe $DEV_DIR
+        rm -rf $DEV_DIR/*
 
     fi
 
@@ -430,7 +430,7 @@ stage_one_config_and_kernel()
     if crontab -l > /dev/null 2>&1;then
         echo "$(crontab -l)\n@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
     else
-        echo "@reboot $SCRIPT \"two\"" > /var/spool/cron/crontabs/root
+        echo "@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
     fi
 
     # Reboot System
@@ -457,6 +457,9 @@ stage_two_xen()
 
 
 # -------------------------------- Execution
+
+# Log Output
+exec &> xen.log
 
 # Hide Output
 # exec &> /dev/null
