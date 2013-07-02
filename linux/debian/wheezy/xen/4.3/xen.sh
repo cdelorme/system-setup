@@ -282,7 +282,7 @@ user_configuration()
     mkdir -p /home/$USERNAME/.config/autostart
 
     # Update Ownership
-    chmod -R $USERNAME:$USERNAME /home/$USERNAME
+    chown -R $USERNAME:$USERNAME /home/$USERNAME
 
 }
 
