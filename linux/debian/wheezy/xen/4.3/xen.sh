@@ -80,6 +80,12 @@ insserv_xen_configuration()
         fi
     done
 
+    # Remove XENDOMAINS_SAVE set its path to nothing
+    sed -i "s/XENDOMAINS_SAVE=\/var\/lib\/xen\/save/XENDOMAINS_SAVE=/" /etc/default/xendomains
+
+    # Set XENDOMAINS_RESTORE to false
+    sed -i "s/XENDOMAINS_RESTORE=true/XENDOMAINS_RESTORE=false/" /etc/default/xendomains
+
 }
 
 xen_cleanup()
