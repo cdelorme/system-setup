@@ -533,14 +533,8 @@ stage_one_config_and_kernel()
     # Install Kernel
     kernel_installation
 
-    # Next Attempt will use /etc/rc.local
-    # Crontab failed, need to try another approach.
-    # Create Crontab to continue on reboot
-    # if crontab -l > /dev/null 2>&1;then
-    #     echo "$(crontab -l)\n@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
-    # else
-    #     echo "@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
-    # fi
+    # Continue after Reboot (try /etc/rc.local replacement)
+    sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
 
     # Reboot System
     reboot
@@ -549,6 +543,9 @@ stage_one_config_and_kernel()
 
 stage_two_xen()
 {
+
+    # Remove on-Reboot Process
+    sed -i "\!$SCRIPT!d" '/etc/rc.local'
 
     # Setup Logging & Post status
     exec 1> $PWD/logs/xen.log 2> $PWD/logs/xen.error.log
@@ -559,9 +556,6 @@ stage_two_xen()
 
     # Run Xen Install
     # setup_xen
-
-    # Remove crontab record
-    # sed -i "/$SCRIPT/d" /var/spool/cron/crontabs/root
 
     # Reboot System
     # reboot
