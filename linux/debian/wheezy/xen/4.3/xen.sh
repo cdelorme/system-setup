@@ -45,20 +45,11 @@ patch_xen_grub()
 
     # Update Grub (Iterate PCI devices & add xen conf flags)
     cp /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
-    # PCIBACK=" xen-pciback.hide=";for i in "$PCI_BDF";do PCIBACK="$PCIBACK($i)";done;
-    # sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
+    sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
     sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
     update-grub
 
 }
-
-# patch_xendomains()
-# {
-
-#     # I have not yet fixed the xendomains script so this is just a placeholder
-#     # Supposedly 4.3 has been fixed, but I need to test it to be sure
-
-# }
 
 insserv_xen_configuration()
 {
@@ -68,21 +59,18 @@ insserv_xen_configuration()
     update-rc.d xendomains defaults
     update-rc.d xen-watchdog defaults
 
-    # Depending on
-    # THIS STEP MAY NO-LONGER BE NECESSARY
-    # Also check all scripts for proper insserv headers, those may fix all the problems
     # xen-watchdog must be modified to S22 and K02.
-    # for DIR in /etc/rc*
-    # do
-    #     START_FILE=$( ls $DIR | grep S[0-9]*xen-w )
-    #     STOP_FILE=$( ls $DIR | grep K[0-9]*xen-w )
-    #     if [[ -f $DIR/$START_FILE ]]; then
-    #         mv $DIR/START_FILE $DIR/S22xen-watchdog
-    #     fi
-    #     if [[ -f $DIR/$STOP_FILE ]]; then
-    #         mv $DIR/STOP_FILE $DIR/K02xen-watchdog
-    #     fi
-    # done
+    for DIR in /etc/rc*
+    do
+        START_FILE=$( ls $DIR | grep S[0-9]*xen-w )
+        STOP_FILE=$( ls $DIR | grep K[0-9]*xen-w )
+        if [ -f "$DIR/$START_FILE" ]; then
+            mv "$DIR/$START_FILE" $DIR/S22xen-watchdog
+        fi
+        if [ -f "$DIR/$STOP_FILE" ]; then
+            mv "$DIR/$STOP_FILE" $DIR/K02xen-watchdog
+        fi
+    done
 
 }
 
@@ -90,9 +78,9 @@ xen_cleanup()
 {
 
     # Post installation Cleanup (remove symlinks & debug symbols from /boot)
-    for FILE in /boot/*
+    for FILE in /boot/xen*
     do
-        if [[ $FILE =~ xen* ]] && [ -L $FILE ];then
+        if [ -L $FILE ];then
             rm -f $FILE
         fi
     done
@@ -104,7 +92,6 @@ xen_build_install()
 {
 
     # install if .deb exists
-    # If kernel debs exist install them
     if [ -d $FILES/xen ] && ls $FILES/xen/*.deb >/dev/null 2>&1;then
         dpkg -i $FILES/xen/*.deb
     else
@@ -121,8 +108,8 @@ xen_build_install()
         # Configure & Build a .deb /w automatic core detection for compiling
         ./configure && make -j$(nproc) world && make -j$(nproc) debball
 
-        # Install the .deb
-        # dpkg -i dist/*.deb
+        # Install the .deb produced by make debball inside ./dist/
+        dpkg -i dist/*.deb
 
     fi
 
