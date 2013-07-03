@@ -523,6 +523,7 @@ stage_one_config_and_kernel()
     # Install Kernel
     kernel_installation
 
+    # Next Attempt will use /etc/rc.local
     # Crontab failed, need to try another approach.
     # Create Crontab to continue on reboot
     # if crontab -l > /dev/null 2>&1;then
@@ -539,9 +540,12 @@ stage_one_config_and_kernel()
 stage_two_xen()
 {
 
+    # Setup Logging & Post status
+    exec 1> $PWD/logs/xen.log 2> $PWD/logs/xen.error.log
+    echo "Testing Script Execution on Reboot"
+
     # Fresh Kernel so run aptitude cleansing
-    package_management_process
-    echo "Testing Reboot Process"
+    # package_management_process
 
     # Run Xen Install
     # setup_xen
