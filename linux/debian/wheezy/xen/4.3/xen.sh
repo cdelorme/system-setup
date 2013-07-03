@@ -434,7 +434,7 @@ stage_one_config_and_kernel()
     fi
 
     # Reboot System
-    # reboot
+    reboot
 
 }
 
@@ -461,12 +461,12 @@ stage_two_xen()
 # Log Output
 exec 1> xen.log 2> xen.log
 
-# Hide Output
-# exec &> /dev/null
+# Hide Output (Alternative)
+# exec 1> /dev/null 2> /dev/null
 
 # Execute Operation according to supplied state
-if [ -z "$1" ] || [ "$1" == "1" ];then
+if [ -z "$1" ] || [ "$1" == 1 ];then
     stage_one_config_and_kernel
-elif [ ! -z "$1" ] && [ "$1" == "2" ];then
+elif [ ! -z "$1" ] && [ "$1" -eq 2 ];then
     stage_two_xen
 fi
