@@ -49,8 +49,12 @@ patch_xen_grub()
 
     # Update Grub (Iterate PCI devices & add xen conf flags)
     cp /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
-    sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
-    sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
+    if ! -z "$PCIBACK";then
+        sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
+    fi
+    if ! -z "$XEN_CONF";then
+        sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
+    fi
     update-grub
 
 }
