@@ -232,7 +232,7 @@ gui_configuration()
     echo "[Desktop Entry]\nName=Sublime Text 2\nComment=The Best Text Editor in the World!\nTryExec=subl\nExec=subl\nIcon=/usr/share/sublime_text/Icon/256x256/sublime_text.png\nType=Application\nCategories=Office;Sublime Text;" > /usr/share/applications/subl.desktop
     echo "text/plain=subl.desktop\ntext/css=subl.desktop\ntext/htm=subl.desktop\ntext/javascript=subl.desktop\ntext/x-c=subl.desktop\ntext/csv=subl.desktop\ntext/x-java-source=subl.desktop\ntext/java=subl.desktop\n" >> /usr/share/applications/defaults.list
     update-desktop-database
-    rm -rf "Sublime Text 2.0.1*"
+    rm -rf "$PWD/Sublime*"
 
     # Add User Configuration
     if [ -d $FILES/sublime_text ] && [ ! -z "$USERNAME" ];then
