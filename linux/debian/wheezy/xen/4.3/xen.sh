@@ -157,15 +157,17 @@ kernel_installation()
         dpkg -i $FILES/kernel/*.deb
     else
 
+        # Make Directory for development
+        mkdir -p $DEV_DIR/kernel
+
         # Navigate to work folder
-        cd $DEV_DIR
+        cd $DEV_DIR/kernel
 
         # Manually download 3.9.8
         wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.9.8.tar.xz
 
         # Extract to dev directory & enter
         tar -xf linux*
-        rm *.xz
         cd linux*
 
         # Copy the latest config
@@ -188,9 +190,6 @@ kernel_installation()
 
         # Move back to current script dir
         cd $PWD
-
-        # Wipe $DEV_DIR
-        rm -rf $DEV_DIR/*
 
     fi
 
@@ -402,9 +401,6 @@ system_packages()
 
 stage_one_config_and_kernel()
 {
-
-    # Create Dev Directory
-    mkdir -p $DEV_DIR
 
     # Prepare System Packages
     system_packages
