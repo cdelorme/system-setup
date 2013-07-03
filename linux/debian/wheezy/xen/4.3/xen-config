@@ -14,9 +14,6 @@ PASSWORD=pass1
 DEV_DIR=/home/src
 # Choose a location with at least 6GB of space so we can compile a kernel and xen there
 
-# Keep compiled source files after built & installed (default: false)
-KEEP_DEV=false
-
 # Add trim support to `/etc/lvm/lvm.conf` and cron-job fstrim weekly (default: true)
 TRIM=true
 
