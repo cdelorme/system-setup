@@ -4,11 +4,9 @@
 
 # Username for customization (default: user)
 USERNAME=user
-# Username may already exist, it will be created otherwise
-
-# Password if user does not yet exist (OPTIONAL, default: pass1)
 PASSWORD=pass1
-# If above user has to be created, this will set their password.
+# Username must be supplied to setup gui components
+# If no user exists a password must be supplied to create the user
 
 # Development Directory (default: /home/src)
 DEV_DIR=/home/src
