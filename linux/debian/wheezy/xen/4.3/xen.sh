@@ -165,6 +165,7 @@ kernel_installation()
 
         # Extract to dev directory & enter
         tar -xf linux*
+        rm *.xz
         cd linux*
 
         # Copy the latest config

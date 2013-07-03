@@ -4,12 +4,18 @@
 
 # Username for customization (default: user)
 USERNAME=user
+# Username may already exist, it will be created otherwise
 
-# Password if user does not yet exist (default: pass1)
+# Password if user does not yet exist (OPTIONAL, default: pass1)
 PASSWORD=pass1
+# If above user has to be created, this will set their password.
 
 # Development Directory (default: /home/src)
 DEV_DIR=/home/src
+# Choose a location with at least 6GB of space so we can compile a kernel and xen there
+
+# Keep compiled source files after built & installed (default: false)
+KEEP_DEV=false
 
 # Add trim support to `/etc/lvm/lvm.conf` and cron-job fstrim weekly (default: true)
 TRIM=true
@@ -27,7 +33,7 @@ DUAL_LAN=true
 
 # ---------------------------------------- INCOMPLETE FEATURES
 
-# Remove any USB devices from fstab & ensure UUID's have replaced the hard partitions (default: true)
+# Remove any USB devices from fstab & ensure UUID's for non-lvm partitions (default: true)
 FSTAB=true
 
 # Xen configuration settings in grub (default: dom0_mem=4096M dom0_max_vcpus=2)
