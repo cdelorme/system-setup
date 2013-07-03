@@ -443,15 +443,16 @@ stage_two_xen()
 
     # Fresh Kernel so run aptitude cleansing
     package_management_process
+    echo "Testing Reboot Process"
 
     # Run Xen Install
-    setup_xen
+    # setup_xen
 
     # Remove crontab record
-    sed -i '/$SCRIPT/d' /var/spool/cron/crontabs/root
+    # sed -i "/$SCRIPT/d" /var/spool/cron/crontabs/root
 
     # Reboot System
-    reboot
+    # reboot
 
 }
 
