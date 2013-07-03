@@ -266,6 +266,12 @@ setup_firewall()
 user_configuration()
 {
 
+    # Add Colors globally
+    # export CLICOLORS=1
+    # export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
+    # export GREP_OPTIONS='--color=auto'
+    # alias ls='ls -FGa'
+
     # Create user if not exists
     if ! id -u "$USERNAME" >/dev/null 2>&1 && [ ! -z "$PASSWORD" ]; then
         useradd -m -s /bin/bash -p $(mkpasswd -m md5 $PASSWORD) $USERNAME
@@ -395,8 +401,25 @@ system_packages()
 
 }
 
+prepare_logs()
+{
+
+    # Delete old logs
+    rmdir -rf $PWD/logs
+
+    # Re-create dir
+    mkdir $PWD/logs
+
+}
+
 stage_one_config_and_kernel()
 {
+
+    # Prepare Logs
+    prepare_logs
+
+    # Direct logs for packages
+    exec 1> $PWD/logs/packages.log 2> $PWD/logs/packages.error.log
 
     # Prepare System Packages
     system_packages
@@ -409,6 +432,9 @@ stage_one_config_and_kernel()
     # Package Management Process
     package_management_process
 
+    # Direct logging for system configuration
+    exec 1> $PWD/logs/config.log 2> $PWD/logs/config.error.log
+
     # System Configuration
     system_configuration
 
@@ -416,6 +442,9 @@ stage_one_config_and_kernel()
     if ! $HEADLESS;then
         gui_configuration
     fi
+
+    # Direct logging for Kernel Process
+    exec 1> $PWD/logs/kernel.log 2> $PWD/logs/kernel.error.log
 
     # Install Kernel
     kernel_installation
@@ -454,11 +483,8 @@ stage_two_xen()
 
 # -------------------------------- Execution
 
-# Log Output
-exec 1> xen.log 2> xen.log
-
-# Hide Output (Alternative)
-# exec 1> /dev/null 2> /dev/null
+# Temporary Log Output
+exec 1> xen.log 2> xen.error.log
 
 # Execute Operation according to supplied state
 if [ -z "$1" ] || [ "$1" == "1" ];then
