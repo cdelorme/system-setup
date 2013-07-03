@@ -200,6 +200,9 @@ kernel_installation()
 gui_configuration()
 {
 
+    # Log Data
+    echo "Modifying Runlevel Kernel Components."
+
     # Adjustments for gui settings
     update-rc.d gdm3 disable 2
     update-rc.d network-manager disable 2
@@ -210,6 +213,9 @@ gui_configuration()
     update-rc.d bluetooth disable 3
     update-rc.d bluetooth disable 4
     update-rc.d bluetooth disable 5
+
+    # Log Data
+    echo "Patching Guake & setting to Autostart."
 
     # Patch Guake Gnome3 notification bug and remove autostart prevention
     sed -i 's/notification.show()/try:\n                notification.show()\n            except Exception:\n                pass/' /usr/bin/guake
@@ -223,6 +229,9 @@ gui_configuration()
     else
         ln -s /usr/share/applications/guake.desktop /etc/xdg/autostart/guake.desktop
     fi
+
+    # Log Data
+    echo "Setting up Sublime Text 2."
 
     # Sublime Text 2
     wget --no-check-certificate http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.1%20x64.tar.bz2
@@ -246,6 +255,9 @@ gui_configuration()
 setup_firewall()
 {
 
+    # Log Data
+    echo "Setting up firewall."
+
     # Xen generates vifs dynamically
     # Securing that without a script would be very difficult
     # So we use a blacklist instead of a whitelist to control what we know
@@ -263,14 +275,42 @@ setup_firewall()
 
 }
 
+git_setup()
+{
+
+    # Log Data
+    echo "Configuring Git."
+
+    # Run global config as root
+    if ! -z $GIT_NAME;then
+        git config --global user.name "$GIT_NAME"
+    fi
+    if ! -z $GIT_EMAIL;then
+        git config --global user.email "$GIT_EMAIL"
+    fi
+    git config --global core.editor "vim"
+    git config --global help.autocorrect -1
+    git config --global color.ui true
+
+    # Run global config as user
+    su -c "git config --global user.name \"$GIT_NAME\"" $USERNAME
+    su -c "git config --global user.email \"$GIT_EMAIL\"" $USERNAME
+    su -c "git config --global core.editor \"vim\"" $USERNAME
+    su -c "git config --global help.autocorrect -1" $USERNAME
+    su -c "git config --global color.ui true" $USERNAME
+
+    # Load any awesome saved git configs
+    cp -ra $FILES/git/. /home/$USERNAME
+    echo "\n\t[alias]\n\t\tl = \"!. ~/.githelpers && pretty_git_log\"" >> /home/$USERNAME/.gitconfig
+    echo "\n# Git Additions\n. ~/.git_completion\n. ~/.git-prompt" >> /home/$USERNAME/.profile
+
+}
+
 user_configuration()
 {
 
-    # Add Colors globally
-    # export CLICOLORS=1
-    # export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
-    # export GREP_OPTIONS='--color=auto'
-    # alias ls='ls -FGa'
+    # Log Data
+    echo "Configure Supplied User: $USERNAME."
 
     # Create user if not exists
     if ! id -u "$USERNAME" >/dev/null 2>&1 && [ ! -z "$PASSWORD" ]; then
@@ -291,6 +331,9 @@ user_configuration()
 install_fonts()
 {
 
+    # Log Data
+    echo "Install custom fonts."
+
     # Install my fonts
     mkdir -p /usr/share/fonts/truetype
     if [ -d $FILES/fonts/ ];then
@@ -303,6 +346,9 @@ install_fonts()
 ssh_config()
 {
 
+    # Log Data
+    echo "Update SSH Port."
+
     # Set SSH Port
     sed -i "s/Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
     service ssh restart
@@ -311,6 +357,9 @@ ssh_config()
 
 ssd_trim_config()
 {
+
+    # Log Data
+    echo "Add trim to ssh & weekly crontab for file systems."
 
     # Add discard flag to LVMs and execute it manually every week via crontab
     sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
@@ -333,9 +382,19 @@ system_configuration()
     # Install Fonts
     install_fonts
 
+    # Update Terminal
+    if $COLORIZE_TERMINAL;then
+        update_terminal
+    fi
+
     # If USERNAME configure User
     if [ ! -z "$USERNAME" ];then
         user_configuration
+    fi
+
+    # Setup Git
+    if $CONFIGURE_GIT;then
+        git_setup
     fi
 
     # Get the firewall setup
@@ -346,6 +405,9 @@ system_configuration()
 setup_automatic_updates()
 {
 
+    # Log Data
+    echo "Creating Automatic Updates."
+
     # Create file `/etc/cron.weekly/aptitude` with executable flag and contents:
     echo "#!/bin/sh\n# Weekly Software Update Processing\naptitude clean\naptitude update\naptitude upgrade -y\naptitude upgrade -y\naptitude safe-upgrade -y" > /etc/cron.weekly/aptitude
     chmod +x /etc/cron.weekly/aptitude
@@ -354,6 +416,9 @@ setup_automatic_updates()
 
 package_management_process()
 {
+
+    # Log Data
+    echo "Installing all Packages."
 
     # Clean Package Manager
     aptitude clean
@@ -370,7 +435,7 @@ package_management_process()
     fi
 
     # Add Automatic Updates
-    if [ ! -f /etc/cron.weekly/aptitude ];then
+    if $AUTOMATIC_UPDATES && [ ! -f /etc/cron.weekly/aptitude ];then
         setup_automatic_updates
     fi
 
@@ -378,6 +443,9 @@ package_management_process()
 
 gui_packages()
 {
+
+    # Log Data
+    echo "Adding GUI Packages."
 
     # Append Gnome Packages
     PACKAGES="$PACKAGES gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 pulseaudio xorg-dev ia32-libs-gtk binfmt-support libc6-dev libc6-dev-i386 libcurl3 xdg-user-dirs-gtk xdg-utils network-manager libnss3-1d"
@@ -393,6 +461,9 @@ gui_packages()
 system_packages()
 {
 
+    # Log Data
+    echo "Adding System Packages."
+
     # Basic System Packages
     PACKAGES="$PACKAGES screen tmux sudo ssh vim parted ntp p7zip-full build-essential libncurses-dev kernel-package fakeroot git mercurial"
 
@@ -403,6 +474,9 @@ system_packages()
 
 prepare_logs()
 {
+
+    # Log Data
+    echo "Setting up log space."
 
     # Delete old logs
     rmdir -rf $PWD/logs

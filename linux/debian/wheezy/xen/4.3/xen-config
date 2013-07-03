@@ -30,3 +30,11 @@ XEN_CONF=" dom0_mem=4096M dom0_max_vcpus=2"
 # Xen pciback.hide process requires a list of `lspci` BDF
 # PCIBACK=" xen-pciback.hide=(00:1d.0)(03:00.0)(03:00.1)(06:00.0)(07:00.0)(0b:00.0)(0e:00.0)(0f:00.0)"
 # Above is an example and may vary by BDF according to lspci output
+
+# Automatic Updates, create a shell script to run weekly (default: true)
+AUTOMATIC_UPDATES=true
+
+# Configure Git globals (default: true)
+CONFIGURE_GIT=true
+GIT_EMAIL=""
+GIT_NAME=""
