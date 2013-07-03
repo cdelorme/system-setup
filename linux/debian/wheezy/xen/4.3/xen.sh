@@ -426,12 +426,13 @@ stage_one_config_and_kernel()
     # Install Kernel
     kernel_installation
 
+    # Crontab failed, need to try another approach.
     # Create Crontab to continue on reboot
-    if crontab -l > /dev/null 2>&1;then
-        echo "$(crontab -l)\n@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
-    else
-        echo "@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
-    fi
+    # if crontab -l > /dev/null 2>&1;then
+    #     echo "$(crontab -l)\n@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
+    # else
+    #     echo "@reboot $SCRIPT 2" > /var/spool/cron/crontabs/root
+    # fi
 
     # Reboot System
     reboot
