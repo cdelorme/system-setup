@@ -20,6 +20,10 @@ passwordless_sudo_xl()
     # Add passwordless xl for sudo group
     echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
     echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
+    echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/skel/.bashrc
+    if ! -z "$USERNAME";then
+        echo "\n# XL Alias\nalias xl='sudo xl'" >> /home/$USERNAME/.bashrc
+    fi
 
 }
 
@@ -33,9 +37,9 @@ xen_interfaces()
 
     # Setup network interfaces for Xen
     if $DUAL_LAN;then
-        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface eth1 inet manual\niface xenbr0 inet manual\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet dhcp\n\tbridge_ports eth1\n\tbridge_maxwait 0" > /etc/network/interfaces
+        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface eth1 inet manual\niface xenbr0 inet dhcp\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet manual\n\tbridge_ports eth1\n\tbridge_maxwait 0" > /etc/network/interfaces
     else
-        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface xenbr0 inet dhcp\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet dhcp\n\tbridge_maxwait 0" > /etc/network/interfaces
+        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface xenbr0 inet dhcp\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet manual\n\tbridge_maxwait 0" > /etc/network/interfaces
     fi
 
 }
@@ -104,9 +108,10 @@ xen_build_install()
 
         # Enter Dir & Checkout Tag
         cd xen*
+        git checkout 4.3.0-rc6
 
         # Configure & Build a .deb /w automatic core detection for compiling
-        ./configure && make -j$(nproc) world && make -j$(nproc) debball
+        ./configure --prefix=/usr && make -j$(nproc) world && make -j$(nproc) debball
 
         # Install the .deb produced by make debball inside ./dist/
         dpkg -i dist/*.deb
