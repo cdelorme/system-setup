@@ -409,8 +409,21 @@ setup_automatic_updates()
     echo "Creating Automatic Updates."
 
     # Create file `/etc/cron.weekly/aptitude` with executable flag and contents:
-    echo "#!/bin/sh\n# Weekly Software Update Processing\naptitude clean\naptitude update\naptitude upgrade -y\naptitude upgrade -y\naptitude safe-upgrade -y" > /etc/cron.weekly/aptitude
+    echo "#!/bin/sh\n# Weekly Software Update Processing\naptitude clean\naptitude update\naptitude upgrade -y || aptitude upgrade -y\naptitude safe-upgrade -y || aptitude safe-upgrade -y" > /etc/cron.weekly/aptitude
     chmod +x /etc/cron.weekly/aptitude
+
+}
+
+package_updates()
+{
+
+    # Handle updates recursively on failure
+    if ! -z $PACKAGES;then
+        APTITUDE_SUCCESS=$(aptitude install -y $PACKAGES >/dev/null 2>&1)
+        if ! $APTITUDE_SUCCESS;then
+            package_updates
+        fi
+    fi
 
 }
 
@@ -429,10 +442,7 @@ package_management_process()
     aptitdue safe-upgrade -y
 
     # Install Packages
-    if ! -z $PACKAGES;then
-        aptitude install -y $PACKAGES
-        aptitude install -y $PACKAGES
-    fi
+    package_updates
 
     # Add Automatic Updates
     if $AUTOMATIC_UPDATES && [ ! -f /etc/cron.weekly/aptitude ];then
