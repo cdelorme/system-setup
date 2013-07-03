@@ -267,14 +267,8 @@ user_configuration()
 {
 
     # Create user if not exists
-    if ! id -u "$USERNAME" >/dev/null 2>&1;then
-        useradd $USERNAME
-
-        # Set Password (without this you will need to access as root to set initial password)
-        if [ ! -z "$PASSWORD" ];then
-            echo "$PASSWORD" | passwd $USERNAME
-        fi
-
+    if ! id -u "$USERNAME" >/dev/null 2>&1 && [ ! -z "$PASSWORD" ]; then
+        useradd -m -s /bin/bash -p $(mkpasswd -m md5 $PASSWORD) $USERNAME
     fi
 
     # Add to sudo group
