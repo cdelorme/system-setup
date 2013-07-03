@@ -119,7 +119,7 @@ xen_build_install()
         cd xen*
 
         # Configure & Build a .deb /w automatic core detection for compiling
-        ./configure && make -j$(nproc) world && make -j$(nproc) deb
+        ./configure && make -j$(nproc) world && make -j$(nproc) debball
 
         # Install the .deb
         # dpkg -i dist/*.deb
