@@ -275,7 +275,25 @@ setup_firewall()
 
 }
 
-git_setup()
+git_config()
+{
+
+    # Log Data
+    echo "Adding Git Helpers."
+
+    # Move awesome helper files
+    cp -ra $FILES/git/. /etc/skel
+    cp -ra $FILES/git/. /root
+
+    # Load any awesome saved git configs
+    echo "\n\t[alias]\n\t\tl = \"!. ~/.githelpers && pretty_git_log\"" >> /root/.gitconfig
+    echo "\n# Git Additions\n. ~/.git-completion\n. ~/.git-prompt" >> /root/.profile
+    echo "\n\t[alias]\n\t\tl = \"!. ~/.githelpers && pretty_git_log\"" >> /etc/skel/.gitconfig
+    echo "\n# Git Additions\n. ~/.git-completion\n. ~/.git-prompt" >> /etc/skel/.profile
+
+}
+
+git_user_config()
 {
 
     # Log Data
@@ -298,11 +316,6 @@ git_setup()
     su -c "git config --global core.editor \"vim\"" $USERNAME
     su -c "git config --global help.autocorrect -1" $USERNAME
     su -c "git config --global color.ui true" $USERNAME
-
-    # Load any awesome saved git configs
-    cp -ra $FILES/git/. /home/$USERNAME
-    echo "\n\t[alias]\n\t\tl = \"!. ~/.githelpers && pretty_git_log\"" >> /home/$USERNAME/.gitconfig
-    echo "\n# Git Additions\n. ~/.git_completion\n. ~/.git-prompt" >> /home/$USERNAME/.profile
 
 }
 
@@ -387,14 +400,19 @@ system_configuration()
         update_terminal
     fi
 
+    # Setup Git
+    if $CONFIGURE_GIT;then
+        git_config
+    fi
+
     # If USERNAME configure User
     if [ ! -z "$USERNAME" ];then
         user_configuration
     fi
 
-    # Setup Git
+    # Setup Git for users
     if $CONFIGURE_GIT;then
-        git_setup
+        git_user_config
     fi
 
     # Get the firewall setup
