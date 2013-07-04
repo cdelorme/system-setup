@@ -489,7 +489,7 @@ prepare_logs()
     echo "Setting up log space."
 
     # Delete old logs
-    rmdir -rf $PWD/logs
+    rm -rf $PWD/logs
 
     # Re-create dir
     mkdir $PWD/logs
