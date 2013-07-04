@@ -21,7 +21,7 @@ passwordless_sudo_xl()
     echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
     echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
     echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/skel/.bashrc
-    if ! -z "$USERNAME";then
+    if [ ! -z "$USERNAME" ];then
         echo "\n# XL Alias\nalias xl='sudo xl'" >> /home/$USERNAME/.bashrc
     fi
 
@@ -49,10 +49,10 @@ patch_xen_grub()
 
     # Update Grub (Iterate PCI devices & add xen conf flags)
     cp /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
-    if ! -z "$PCIBACK";then
+    if [ ! -z "$PCIBACK" ];then
         sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
     fi
-    if ! -z "$XEN_CONF";then
+    if [ ! -z "$XEN_CONF" ];then
         sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
     fi
     update-grub
@@ -282,10 +282,10 @@ git_setup()
     echo "Configuring Git."
 
     # Run global config as root
-    if ! -z $GIT_NAME;then
+    if [ ! -z "$GIT_NAME" ];then
         git config --global user.name "$GIT_NAME"
     fi
-    if ! -z $GIT_EMAIL;then
+    if [ ! -z "$GIT_EMAIL" ];then
         git config --global user.email "$GIT_EMAIL"
     fi
     git config --global core.editor "vim"
@@ -418,9 +418,9 @@ package_updates()
 {
 
     # Handle updates recursively on failure
-    if ! -z "$PACKAGES";then
+    if [ ! -z "$PACKAGES"];then
         APTITUDE_SUCCESS=$(aptitude install -y $PACKAGES >/dev/null 2>&1)
-        if ! $APTITUDE_SUCCESS;then
+        if [ ! $APTITUDE_SUCCESS ];then
             package_updates
         fi
     fi
@@ -490,8 +490,8 @@ prepare_logs()
 
     # Delete old logs
     rm -rf $PWD/logs
-    rm -rf xen.log
-    rm -rf xen.error.log
+    rm -rf $PWD/xen.log
+    rm -rf $PWD/xen.error.log
 
     # Re-create dir
     mkdir $PWD/logs
@@ -568,7 +568,7 @@ stage_two_xen()
 # -------------------------------- Execution
 
 # Temporary Log Output
-exec 1> xen.log 2> xen.error.log
+exec 1> $PWD/xen.log 2> $PWD/xen.error.log
 
 # Execute Operation according to supplied state
 if [ -z "$1" ] || [ "$1" == "1" ];then
