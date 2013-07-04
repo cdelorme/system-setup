@@ -490,8 +490,6 @@ prepare_logs()
 
     # Delete old logs
     rm -rf $PWD/logs
-    rm -rf $PWD/xen.log
-    rm -rf $PWD/xen.error.log
 
     # Re-create dir
     mkdir $PWD/logs
@@ -567,7 +565,9 @@ stage_two_xen()
 
 # -------------------------------- Execution
 
-# Temporary Log Output
+# Temporary Log Output (delete files first)
+rm -rf $PWD/xen.log
+rm -rf $PWD/xen.error.log
 exec 1> $PWD/xen.log 2> $PWD/xen.error.log
 
 # Execute Operation according to supplied state
