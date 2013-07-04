@@ -436,7 +436,7 @@ package_updates()
 {
 
     # Handle updates recursively on failure
-    if [ ! -z "$PACKAGES"];then
+    if [ ! -z "$PACKAGES" ];then
         APTITUDE_SUCCESS=$(aptitude install -y $PACKAGES >/dev/null 2>&1)
         if [ ! $APTITUDE_SUCCESS ];then
             package_updates
