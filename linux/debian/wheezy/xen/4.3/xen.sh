@@ -118,13 +118,21 @@ xen_build_install()
 
         # Enter Dir & Checkout Tag
         cd xen*
-        git checkout 4.3.0-rc6
+        git checkout -b stable-4.3
+
+        # Exchange Config.mk Python args
+        sed -i "s/^PYTHON_PREFIX_ARG.*/PYTHON_PREFIX_ARG ?= --install-layout=deb/" Config.mk
 
         # Configure & Build a .deb /w automatic core detection for compiling
-        ./configure --prefix=/usr && make -j$(nproc) world && make -j$(nproc) debball
+        ./configure --enable-githttp
+        make -j$(nproc) world
+        make -j$(nproc) debball
 
         # Install the .deb produced by make debball inside ./dist/
         dpkg -i dist/*.deb
+
+        # Load Configuration Cache
+        ldconfig
 
     fi
 
