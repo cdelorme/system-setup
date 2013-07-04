@@ -445,8 +445,10 @@ package_updates()
 
     # Handle updates recursively on failure
     if [ ! -z "$PACKAGES" ];then
-        APTITUDE_SUCCESS=$(aptitude install -y $PACKAGES >/dev/null 2>&1)
-        if [ ! $APTITUDE_SUCCESS ];then
+        aptitude install -y $PACKAGES
+
+        # Check with arbitrary software package in the list (assuming one failure halts the entire process)
+        if command -v bison >/dev/null 2>1&;then
             package_updates
         fi
     fi
