@@ -490,6 +490,8 @@ prepare_logs()
 
     # Delete old logs
     rm -rf $PWD/logs
+    rm -rf xen.log
+    rm -rf xen.error.log
 
     # Re-create dir
     mkdir $PWD/logs
