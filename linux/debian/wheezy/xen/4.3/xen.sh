@@ -234,14 +234,14 @@ gui_configuration()
     echo "Setting up Sublime Text 2."
 
     # Sublime Text 2
-    wget --no-check-certificate http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.1%20x64.tar.bz2
-    tar xf Sublime\ Text\ 2.0.1\ x64.tar.bz2
-    mv Sublime\ Text\ 2 /usr/share/sublime_text
+    wget -O $PWD/sublime.tar.bz2 "http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.1%20x64.tar.bz2"
+    tar xf sublime.tar.bz2
+    rm $PWD/*.bz2
+    mv Sublime* /usr/share/sublime_text
     ln -s /usr/share/sublime_text/sublime_text /usr/bin/subl
     echo "[Desktop Entry]\nName=Sublime Text 2\nComment=The Best Text Editor in the World!\nTryExec=subl\nExec=subl\nIcon=/usr/share/sublime_text/Icon/256x256/sublime_text.png\nType=Application\nCategories=Office;Sublime Text;" > /usr/share/applications/subl.desktop
     echo "text/plain=subl.desktop\ntext/css=subl.desktop\ntext/htm=subl.desktop\ntext/javascript=subl.desktop\ntext/x-c=subl.desktop\ntext/csv=subl.desktop\ntext/x-java-source=subl.desktop\ntext/java=subl.desktop\n" >> /usr/share/applications/defaults.list
     update-desktop-database
-    rm -rf "$PWD/Sublime*"
 
     # Add User Configuration
     if [ -d $FILES/sublime_text ] && [ ! -z "$USERNAME" ];then
@@ -571,7 +571,7 @@ rm -rf $PWD/xen.error.log
 exec 1> $PWD/xen.log 2> $PWD/xen.error.log
 
 # Execute Operation according to supplied state
-if [ -z "$1" ] || [ "$1" == "1" ];then
+if [ -z "$1" ] || [ "$1" -eq "1" ];then
     stage_one_config_and_kernel
 elif [ ! -z "$1" ] && [ "$1" -eq "2" ];then
     stage_two_xen
