@@ -448,7 +448,7 @@ package_updates()
         aptitude install -y $PACKAGES
 
         # Check with arbitrary software package in the list (assuming one failure halts the entire process)
-        if command -v bison >/dev/null 2>1&;then
+        if command -v bison >/dev/null 2>&1;then
             package_updates
         fi
     fi
