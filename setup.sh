@@ -48,10 +48,21 @@ set_log_file()
 
 prepare_for_reboot()
 {
-
     echo "Preparing for Reboot execution"
-
     # Not sure yet how to make this work
+}
+
+install_packages()
+{
+
+    echo "Run one-time package installation process"
+
+}
+
+build_kernel()
+{
+
+    echo "If kernel flags are set, build a kernel"
 
 }
 
@@ -61,6 +72,11 @@ prepare_for_reboot()
 install_xen_server()
 {
     echo "Setting up Xen Server"
+    if [ -z "$XEN_REBOOT" ];then
+        echo "Handling xen setup pre-reboot"
+    else
+        echo "Handling xen setup post-reboot"
+    fi
 }
 
 install_comm_server()
