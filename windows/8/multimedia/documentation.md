@@ -162,17 +162,15 @@ I configure my Logitech K810 keyboard to use the Function keys by default instea
 
 Finally here is any software that I will want on the machine for multimedia:
 
-- [iTunes]()
-- [Faststone Image Viewer]()
-- [Inkscape]()
-- [Fraps]()
-- [Blender3D]()
-- [Windows Movie Maker]()
-- [Cave Story]()
-    - [Translation]()
-- [Steam]()
+- [iTunes](http://www.apple.com/itunes/)
+- [Faststone Image Viewer](http://www.faststone.org/FSViewerDetail.htm)
+- [Inkscape](http://inkscape.org/)
+- [Fraps](http://www.fraps.com/)
+- [Blender3D](http://www.blender.org/)
+- [Windows Movie Maker](http://windows.microsoft.com/en-us/windows-live/movie-maker#t1=overview)
+- [Cave Story](http://www.cavestory.org/downloads_game.php)
+- [Steam](http://store.steampowered.com/)
     - The Last Remnant
-- [FF14 Beta!]()
 - FF7
 - FF8
 
