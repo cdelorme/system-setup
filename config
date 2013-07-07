@@ -19,13 +19,3 @@ LOG_TO_FILE=true
 
 # Where to keep log files (default: logs)
 KEEP_LOGS_AT="$SCRIPT_PATH/logs"
-
-
-# --------------- Below options are probably part of a different config
-
-# Running in Xen (default: false)
-RUNNING_IN_XEN=false
-
-# Running in Parallels (default: false)
-RUNNING_IN_PARALLELS=false
-
