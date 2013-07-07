@@ -1,9 +1,18 @@
 # Configuration Data for Setup
 # ----------------------------
 
+# -------------------------------- Versions (must match paths)
+
 # Distribution (default: debian)
 DISTRIBUTION="debian"
-# must match case for paths under linux
+
+# Distribution Version (defaut: wheezy)
+DISTRIBUTION_VERSION="wheezy"
+
+# Xen Version (defaut: 4.3)
+XEN_VERSION="4.3"
+
+# -------------------------------- Logging
 
 # Log to file (default: true)
 LOG_TO_FILE=true
