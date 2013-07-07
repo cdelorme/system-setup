@@ -12,6 +12,13 @@ DISTRIBUTION_VERSION="wheezy"
 # Xen Version (defaut: 4.3)
 XEN_VERSION="4.3"
 
+
+# -------------------------------- Environment
+
+# Development Directory for downloading & building software (default: /home/src)
+DEV_DIR=/home/src
+
+
 # -------------------------------- Logging
 
 # Log to file (default: true)
