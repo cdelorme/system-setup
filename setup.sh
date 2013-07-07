@@ -10,6 +10,11 @@ SCRIPT_PATH=$(dirname $SCRIPT)
 # Load Config
 . $SCRIPT_PATH/config
 
+# Apply Argument for State/Operation
+if [ -n "$STATE" ];then
+    STATE="$1"
+fi
+
 
 # -------------------------------- Global Methods
 
@@ -83,19 +88,26 @@ install_template()
 # -------------------------------- Execution
 
 # Check Argument
-if [ -n "$1" ];then
-    if [ "$1" = "xen" ];then
-        install_xen_server
-    elif [ "$1" = "comm" ];then
-        install_comm_server
-    elif [ "$1" = "web" ];then
-        install_web_server
-    elif [ "$1" = "template" ];then
+case "$STATE" in
+    template)
         install_template
-    else
-        echo "invalid argument..."
+        ;;
+
+    comm)
+        install_comm_server
+        ;;
+
+    web)
+        install_web_server
+        ;;
+
+    xen)
+        install_xen_server
+        ;;
+
+    *)
         print_instructions
-    fi
-else
-    print_instructions
-fi
+        exit 3;
+        ;;
+
+esac
