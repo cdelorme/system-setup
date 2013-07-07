@@ -71,6 +71,12 @@ install_web_server()
 install_template()
 {
     echo "Setting up Template"
+
+    # Load Template Function Library
+    . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/template/setup.sh
+
+    # Execute template setup operations
+
 }
 
 
