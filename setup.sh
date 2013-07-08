@@ -41,26 +41,43 @@ set_log_file()
         if [ -n "$1" ];then
             exec 1> "$KEEP_LOGS_AT/$1" 2>&1
         fi
-
     fi
-
 }
 
 install_packages()
 {
+    echo "cleaning up aptitude..."
 
-    echo "Install Packages: $PACKAGES"
+    # Command duplicates exist to handle scenarios where first-attempts fail
+    # The problem steps from aptitude failing to return error codes
 
-}
+    aptitude clean
+    aptitude update
+    aptitude update
 
-build_kernel()
-{
-    echo "Build Kernel"
+    echo "running through system upgrades..."
+
+    aptitude safe-upgrade -y
+    aptitude safe-upgrade -y
+    aptitude upgrade -y
+    aptitude upgrade -y
+
+    echo "executing package installation..."
+
+    aptitude install -y $PACKAGES
+    aptitude install -y $PACKAGES
+
+    echo "package installation completed."
 }
 
 install_kernel()
 {
     echo "Install Kernel"
+}
+
+build_kernel()
+{
+    echo "Build Kernel"
 }
 
 # kernel_installation()
