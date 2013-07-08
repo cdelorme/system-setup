@@ -127,7 +127,7 @@ setup_template_firewall()
         echo "" >> /etc/firewall.conf
         echo "# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)" >> /etc/firewall.conf
         echo "-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT" >> /etc/firewall.conf
-        # ADD CUSTOM EXCEPTION BLURBS HERE
+        echo "$FILEWALL_RULES" >> /etc/firewall.conf
         echo "# Set other traffic defaults" >> /etc/firewall.conf
         echo "-A INPUT -j REJECT" >> /etc/firewall.conf
         echo "-A FORWARD -j ACCEPT" >> /etc/firewall.conf
@@ -147,7 +147,7 @@ setup_template_firewall()
 pam_gdm_root()
 {
     if [ -n "$ALLOW_ROOT_LOGIN" ] && $ALLOW_ROOT_LOGIN;then
-        echo "enabling root login to gdm3 (requires reboot)..."
+        echo "enabling root login to gdm3..."
         sed -i "s/user != root//" /etc/pam.d/gdm3
     fi
 }
