@@ -17,41 +17,32 @@ TEMPLATE_PATH=$(dirname $TEMPLATE_SCRIPT)
 
 # -------------------------------- Library Methods
 
-
-kernel_cleanup()
+kernel_install()
 {
-    echo "resolving boot-time modules..."
-#     # Adjustments for gui settings
-#     update-rc.d gdm3 disable 2
-#     update-rc.d network-manager disable 2
-#     update-rc.d network-manager disable 3
-#     update-rc.d network-manager disable 4
-#     update-rc.d network-manager disable 5
-#     update-rc.d bluetooth disable 2
-#     update-rc.d bluetooth disable 3
-#     update-rc.d bluetooth disable 4
-#     update-rc.d bluetooth disable 5
+    echo "installing kernel..."
 }
 
-
-
-
-
-install_kernel()
+kernel_build()
 {
-    echo "Install Kernel"
+    echo "building kernel..."
 }
 
-build_kernel()
+kernel_preparations()
 {
-    echo "Build Kernel"
+    echo "configuring services for building a kernel..."
+    echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
+}
+
+kernel_process()
+{
+    echo "beginning build and install kernel process..."
+    kernel_preparations
+    kernel_build
+    kernel_install
 }
 
 # kernel_installation()
 # {
-
-#     # Add Concurrency /w automatic core detection
-#     echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
 
 #     # If kernel debs exist install them
 #     if [ -d $FILES/kernel ] && ls $FILES/kernel/*.deb >/dev/null 2>&1;then
@@ -143,6 +134,21 @@ setup_template_firewall()
     fi
 }
 
+gui_cleanup()
+{
+    if [ -n "$LATE_START_GUI" ] && $LATE_START_GUI;then
+        echo "resolving boot-time services..."
+        update-rc.d gdm3 disable 2
+        update-rc.d network-manager disable 2
+        update-rc.d network-manager disable 3
+        update-rc.d network-manager disable 4
+        update-rc.d network-manager disable 5
+        update-rc.d bluetooth disable 2
+        update-rc.d bluetooth disable 3
+        update-rc.d bluetooth disable 4
+        update-rc.d bluetooth disable 5
+    fi
+}
 
 pam_gdm_root()
 {
@@ -195,6 +201,7 @@ gui_configuration()
     sublime_text_config
     guake_config
     pam_gdm_root
+    gui_cleanup
 }
 
 user_git_configuration()
