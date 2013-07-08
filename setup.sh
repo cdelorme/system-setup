@@ -30,7 +30,7 @@ set_log_file()
 {
 
     # If we are logging to a file then listen to the command
-    if $LOG_TO_FILE;then
+    if [ -n "$LOG_TO_FILE" ] && $LOG_TO_FILE;then
 
         # Make logs directory if not exists
         if [ ! -d "$KEEP_LOGS_AT" ];then
