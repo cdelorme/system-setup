@@ -6,6 +6,9 @@
 # Change default SSH port? (default: 22)
 SSH_PORT=22
 
+# Set a firewall (default: true)
+SETUP_FIREWALL=true
+
 
 # -------------------------------- GUI Options
 
@@ -29,8 +32,10 @@ TRIM=true
 
 # -------------------------------- User Information (Optional)
 
-# Username (default: user)
-USERNAME=user
+# Username (default: )
+USERNAME=
+# If no username is provided it will skip any user-specific modifications
+# Many of these same changes will be applied to root
 
 # Password (default: password)
 PASSWORD=password
