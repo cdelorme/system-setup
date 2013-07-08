@@ -120,43 +120,13 @@ git_user_config()
     fi
 }
 
-user_configuration()
+
+
+
+
+kernel_cleanup()
 {
-    if [ -n "$USERNAME" ]; then
-        echo "Configure Supplied User: $USERNAME."
-
-        # Create user if not exists
-        if ! id -u "$USERNAME" >/dev/null 2>&1;then
-            if [ -n "$PASSWORD" ];then
-                useradd -m -s /bin/bash -p $(mkpasswd -m md5 $PASSWORD) $USERNAME
-            else
-                echo "You will have to add a password to the $USERNAME from root with passwd..."
-                useradd -m -s /bin/bash $USERNAME
-            fi
-        fi
-
-        # Add to sudo group
-        usermod -aG sudo $USERNAME
-
-        # Create important user directories
-        mkdir -p /home/$USERNAME/.config/autostart
-
-        # Update Ownership
-        chown -R $USERNAME:$USERNAME /home/$USERNAME
-    fi
-}
-
-
-
-
-
-
-
-
-# gui_configuration()
-# {
-#     echo "Modifying Runlevel Kernel Components."
-
+    echo "resolving boot-time modules..."
 #     # Adjustments for gui settings
 #     update-rc.d gdm3 disable 2
 #     update-rc.d network-manager disable 2
@@ -167,9 +137,11 @@ user_configuration()
 #     update-rc.d bluetooth disable 3
 #     update-rc.d bluetooth disable 4
 #     update-rc.d bluetooth disable 5
+}
 
-#     echo "Patching Guake & setting to Autostart."
-
+guake_config()
+{
+    echo "setting up guake..."
 #     # Patch Guake Gnome3 notification bug and remove autostart prevention
 #     sed -i 's/notification.show()/try:\n                notification.show()\n            except Exception:\n                pass/' /usr/bin/guake
 #     rm /etc/xdg/autostart/guake.desktop
@@ -182,9 +154,16 @@ user_configuration()
 #     else
 #         ln -s /usr/share/applications/guake.desktop /etc/xdg/autostart/guake.desktop
 #     fi
+# # Create important user directories
+# mkdir -p /home/$USERNAME/.config/autostart
 
-#     echo "Setting up Sublime Text 2."
+# # Update Ownership
+# chown -R $USERNAME:$USERNAME /home/$USERNAME
+}
 
+sublime_text_config()
+{
+    echo "setting up sublime text 2..."
 #     # Sublime Text 2
 #     wget -O $PWD/sublime.tar.bz2 "http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.1%20x64.tar.bz2"
 #     tar xf sublime.tar.bz2
@@ -201,11 +180,35 @@ user_configuration()
 #         cp -R $FILES/sublime_text/* /home/$USERNAME/.config/sublime-text-2/
 #         chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 #     fi
+}
 
-# }
+create_user()
+{
+    if [ -n "$PASSWORD" ];then
+        useradd -m -s /bin/bash -p $(mkpasswd -m md5 $PASSWORD) $USERNAME
+    else
+        echo "You will have to add a password to the $USERNAME from root with passwd..."
+        useradd -m -s /bin/bash $USERNAME
+    fi
+}
 
+user_configuration()
+{
+    if [ -n "$USERNAME" ]; then
+        echo "Configure Supplied User: $USERNAME."
 
+        # Create user if not exists
+        if ! id -u "$USERNAME" >/dev/null 2>&1;then
+            echo "creating user: $USERNAME..."
+            create_user
+        fi
 
+        if [ -n "$HAS_SUDO_PRIVS" ] && $HAS_SUDO_PRIVS;then
+            echo "Adding user to sudo group..."
+            usermod -aG sudo $USERNAME
+        fi
+    fi
+}
 
 add_template_packages()
 {
@@ -272,3 +275,121 @@ add_template_packages()
     fi
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+install_kernel()
+{
+    echo "Install Kernel"
+}
+
+build_kernel()
+{
+    echo "Build Kernel"
+}
+
+# kernel_installation()
+# {
+
+#     # Add Concurrency /w automatic core detection
+#     echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
+
+#     # If kernel debs exist install them
+#     if [ -d $FILES/kernel ] && ls $FILES/kernel/*.deb >/dev/null 2>&1;then
+#         dpkg -i $FILES/kernel/*.deb
+#     else
+
+#         # Make Directory for development
+#         mkdir -p $DEV_DIR/kernel
+
+#         # Navigate to work folder
+#         cd $DEV_DIR/kernel
+
+#         # Manually download 3.9.8
+#         wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.9.8.tar.xz
+
+#         # Extract to dev directory & enter
+#         tar -xf linux*
+#         cd linux*
+
+#         # Copy the latest config
+#         for CONFIG in /boot/config-*;do
+#             cp $CONFIG .config
+#         done
+
+#         # Set xen flags
+#         echo "# Xen Manual Configs\nCONFIG_VIRT_CPU_ACCOUNTING_GEN=y\nCONFIG_NUMA_BALANCING=y\nCONFIG_PARAVIRT_TIME_ACCOUNTING=y\nCONFIG_PREEMPT=y\nCONFIG_MOVABLE_NODE=y\nCONFIG_CLEANCACHE=y\nCONFIG_FRONTSWAP=y\nCONFIG_HZ_1000=y\nCONFIG_PCI_STUB=y\nCONFIG_XEN_PCIDEV_FRONTEND=y\nCONFIG_XEN_BLKDEV_FRONTEND=y\nCONFIG_XEN_BLKDEV_BACKEND=y\nCONFIG_XEN_NETDEV_FRONTEND=y\nCONFIG_XEN_NETDEV_BACKEND=y\nCONFIG_XEN_WDT=y\nCONFIG_XEN_SELFBALLOONING=y\nCONFIG_XEN_BALLOON_MEMORY_HOTPLUG=y\nCONFIG_XEN_DEV_EVTCHN=y\nCONFIG_XENFS=y\nCONFIG_XEN_GNTDEV=y\nCONFIG_XEN_GRANT_DEV_ALLOC=y\nCONFIG_XEN_PCIDEV_BACKEND=y" >> .config
+
+#         # Automate corrections and missing flags
+#         yes "" | make oldconfig
+
+#         # Build
+#         make-kpkg clean
+#         fakeroot make-kpkg --initrd --revision=4.3.xen.custom kernel_image
+
+#         # Install
+#         dpkg -i ../*.deb
+
+#         # Move back to current script dir
+#         cd $PWD
+
+#     fi
+
+# }
+
+setup_firewall()
+{
+    if [ -n "$SETUP_FIREWALL" ] && $SETUP_FIREWALL;then
+        echo "Setting up firewall."
+#         # Xen generates vifs dynamically
+#         # Securing that without a script would be very difficult
+#         # So we use a blacklist instead of a whitelist to control what we know
+
+#         # Define firewall at `/etc/firewall.conf`
+#         if $DUAL_LAN;then
+#             echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o eth1 -j REJECT\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n-A FORWARD -i eth1 -o eth0 -j REJECT\n-A FORWARD -i eth1 -o xenbr0 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
+#         else
+#             echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
+#         fi
+
+#         # Prepare firewall auto-loading
+#         echo "#!/bin/sh\niptables -F\niptables-restore < /etc/firewall.conf" > "/etc/network/if-up.d/iptables"
+#         chmod +x "/etc/network/if-up.d/iptables"
+    fi
+}
+
+install_packages()
+{
+    echo "cleaning up aptitude..."
+
+    # Command duplicates exist to handle scenarios where first-attempts fail
+    # The problem steps from aptitude failing to return error codes
+
+    aptitude clean
+    aptitude update
+    aptitude update
+
+    echo "running through system upgrades..."
+
+    aptitude safe-upgrade -y
+    aptitude safe-upgrade -y
+    aptitude upgrade -y
+    aptitude upgrade -y
+
+    echo "executing package installation..."
+
+    aptitude install -y $PACKAGES
+    aptitude install -y $PACKAGES
+
+    echo "package installation completed."
+}
