@@ -40,8 +40,8 @@ USERNAME=
 # If no username is provided it will skip any user-specific modifications
 # Many of these same changes will be applied to root
 
-# Password (default: password)
-PASSWORD=password
+# Password (default: )
+PASSWORD=
 
 # Make user a sudo member (default: true)
 HAS_SUDO_PRIVS=true
