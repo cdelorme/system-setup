@@ -349,59 +349,8 @@ user_configuration()
 
 }
 
-install_fonts()
-{
-
-    # Log Data
-    echo "Install custom fonts."
-
-    # Install my fonts
-    mkdir -p /usr/share/fonts/truetype
-    if [ -d $FILES/fonts/ ];then
-        mv $FILES/fonts/*.ttf /usr/share/fonts/truetype
-        fc-cache -rf
-    fi
-
-}
-
-ssh_config()
-{
-
-    # Log Data
-    echo "Update SSH Port."
-
-    # Set SSH Port
-    sed -i "s/Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
-    service ssh restart
-
-}
-
-ssd_trim_config()
-{
-
-    # Log Data
-    echo "Add trim to ssh & weekly crontab for file systems."
-
-    # Add discard flag to LVMs and execute it manually every week via crontab
-    sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
-    echo "#!/bin/sh\nfor mount in / /boot /home /var/log /tmp; do\n\tfstrim $mount\ndone" > /etc/cron.weekly/fstab
-    chmod +x /etc/cron.weekly/fstab
-
-}
-
 system_configuration()
 {
-
-    # (OPTIONAL) Setup trim capabilities
-    if $TRIM; then
-        ssd_trim_config
-    fi
-
-    # Configure SSH
-    ssh_config
-
-    # Install Fonts
-    install_fonts
 
     # Update Terminal
     if $COLORIZE_TERMINAL;then
@@ -591,18 +540,3 @@ stage_two_xen()
     # reboot
 
 }
-
-
-# -------------------------------- Execution
-
-# Temporary Log Output (delete files first)
-rm -rf $PWD/xen.log
-rm -rf $PWD/xen.error.log
-exec 1> $PWD/xen.log 2> $PWD/xen.error.log
-
-# Execute Operation according to supplied state
-if [ -z "$1" ] || [ "$1" -eq "1" ];then
-    stage_one_config_and_kernel
-elif [ ! -z "$1" ] && [ "$1" -eq "2" ];then
-    stage_two_xen
-fi
