@@ -148,21 +148,25 @@ xen_build_install()
 
 add_vfio_kernel_packages()
 {
-    echo "adding vfio kernel packages"
-    # CONFIG_VFIO_IOMMU_TYPE1=y
-    # CONFIG_VFIO=y
-    # CONFIG_VFIO_PCI=y
-    # CONFIG_VFIO_PCI_VGA=y
+    if [ -n "$ENABLE_VFIO" ] && $ENABLE_VFIO;then
+        echo "adding vfio kernel packages"
+        # CONFIG_VFIO_IOMMU_TYPE1=y
+        # CONFIG_VFIO=y
+        # CONFIG_VFIO_PCI=y
+        # CONFIG_VFIO_PCI_VGA=y
+    fi
 }
 
 add_virtio_kernel_packages()
 {
-    echo "adding virtio kernel packages"
-    # CONFIG_VIRTIO_MMIO=y
-    # CONFIG_VIRTIO_PCI=y
-    # CONFIG_VIRTIO_NET=y
-    # CONFIG_VIRTIO_BALLOON=y
-    # CONFIG_VIRTIO_BLK=y
+    if [ -n "$ENABLE_VIRTIO" ] && $ENABLE_VIRTIO;then
+        echo "adding virtio kernel packages"
+        # CONFIG_VIRTIO_MMIO=y
+        # CONFIG_VIRTIO_PCI=y
+        # CONFIG_VIRTIO_NET=y
+        # CONFIG_VIRTIO_BALLOON=y
+        # CONFIG_VIRTIO_BLK=y
+    fi
 }
 
 prepare_reboot_procedure()
