@@ -31,36 +31,33 @@ kernel_build()
         cp $FILES/kernel/$KERNEL_PACKAGE_SUFFIX $DEV_DIR
     else
         echo "downloading kernel..."
-#         # Make Directory for development
-#         mkdir -p $DEV_DIR/kernel
 
-#         # Navigate to work folder
-#         cd $DEV_DIR/kernel
+        # Make & traverse directory
+        mkdir -p $DEV_DIR/kernel
+        cd $DEV_DIR/kernel
 
-#         # Manually download 3.9.8
-#         wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.9.8.tar.xz
+        # Manually download 3.9.8
+        wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.9.9.tar.xz
+        tar -xf linux*
+        cd linux*
 
-#         # Extract to dev directory & enter
-#         tar -xf linux*
-#         cd linux*
 
-#         # Copy the latest config
-#         for CONFIG in /boot/config-*;do
-#             cp $CONFIG .config
-#         done
+        echo "preparing kernel module configuration..."
+        # Copy latest configuration file
+        for CONFIG in /boot/config-*;do
+            cp $CONFIG .config
+        done
+        echo "\n\n# Custom Modules\n$KERNEL_MODULES" >> .config
+        yes "" | make oldconfig
 
-#         # Set xen flags
-#         echo "# Xen Manual Configs\nCONFIG_VIRT_CPU_ACCOUNTING_GEN=y\nCONFIG_NUMA_BALANCING=y\nCONFIG_PARAVIRT_TIME_ACCOUNTING=y\nCONFIG_PREEMPT=y\nCONFIG_MOVABLE_NODE=y\nCONFIG_CLEANCACHE=y\nCONFIG_FRONTSWAP=y\nCONFIG_HZ_1000=y\nCONFIG_PCI_STUB=y\nCONFIG_XEN_PCIDEV_FRONTEND=y\nCONFIG_XEN_BLKDEV_FRONTEND=y\nCONFIG_XEN_BLKDEV_BACKEND=y\nCONFIG_XEN_NETDEV_FRONTEND=y\nCONFIG_XEN_NETDEV_BACKEND=y\nCONFIG_XEN_WDT=y\nCONFIG_XEN_SELFBALLOONING=y\nCONFIG_XEN_BALLOON_MEMORY_HOTPLUG=y\nCONFIG_XEN_DEV_EVTCHN=y\nCONFIG_XENFS=y\nCONFIG_XEN_GNTDEV=y\nCONFIG_XEN_GRANT_DEV_ALLOC=y\nCONFIG_XEN_PCIDEV_BACKEND=y" >> .config
+        echo "building kernel..."
+        make-kpkg clean
+        make-kpkg --initrd --revision=3.9.9.$STATE.custom kernel_image
 
-#         # Automate corrections and missing flags
-#         yes "" | make oldconfig
+        # Move back to script dir
+        cd $SCRIPT_PATH
 
-#         # Build
-#         make-kpkg clean
-#         fakeroot make-kpkg --initrd --revision=4.3.xen.custom kernel_image
-
-#         # Move back to current script dir
-#         cd $PWD
+        echo "finished building kernel..."
     fi
 }
 
