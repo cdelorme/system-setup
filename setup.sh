@@ -68,12 +68,19 @@ install_xen_server()
         set_log_file "xen.config"
         template_configuraton
         xen_configuraton
+        # setup_xen_firewall
+        # setup_template_firewall
 
-        # Universal ending?
-        # setup_firewall
-        # build_kernel
-        # install_kernel
+        # Build Kernel
+        set_log_file "xen.kernel"
 
+
+        # Setup Reboot Preparations
+        set_log_file "xen.reboot"
+
+        # Reboot
+        echo "Rebooting"
+        reboot
     else
         echo "Handling xen setup post-reboot"
 
