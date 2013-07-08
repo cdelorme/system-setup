@@ -134,7 +134,7 @@ xen_configuration()
     echo "configuring xen components..."
 }
 
-prepare_reboot_procedure()
+xen_reboot_procedure()
 {
     echo "preparing for reboot procedure..."
     # Before building & installing xen we will want to execute a method to handle
