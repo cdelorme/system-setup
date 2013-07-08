@@ -207,8 +207,6 @@ kernel_installation()
 
 gui_configuration()
 {
-
-    # Log Data
     echo "Modifying Runlevel Kernel Components."
 
     # Adjustments for gui settings
@@ -222,7 +220,6 @@ gui_configuration()
     update-rc.d bluetooth disable 4
     update-rc.d bluetooth disable 5
 
-    # Log Data
     echo "Patching Guake & setting to Autostart."
 
     # Patch Guake Gnome3 notification bug and remove autostart prevention
@@ -238,7 +235,6 @@ gui_configuration()
         ln -s /usr/share/applications/guake.desktop /etc/xdg/autostart/guake.desktop
     fi
 
-    # Log Data
     echo "Setting up Sublime Text 2."
 
     # Sublime Text 2
@@ -263,7 +259,6 @@ gui_configuration()
 setup_firewall()
 {
 
-    # Log Data
     echo "Setting up firewall."
 
     # Xen generates vifs dynamically
@@ -286,7 +281,6 @@ setup_firewall()
 git_config()
 {
 
-    # Log Data
     echo "Adding Git Helpers."
 
     # Move awesome helper files
@@ -304,7 +298,6 @@ git_config()
 git_user_config()
 {
 
-    # Log Data
     echo "Configuring Git."
 
     # Run global config as root
@@ -330,7 +323,6 @@ git_user_config()
 user_configuration()
 {
 
-    # Log Data
     echo "Configure Supplied User: $USERNAME."
 
     # Create user if not exists
@@ -380,7 +372,6 @@ system_configuration()
 setup_automatic_updates()
 {
 
-    # Log Data
     echo "Creating Automatic Updates."
 
     # Create file `/etc/cron.weekly/aptitude` with executable flag and contents:
@@ -409,7 +400,6 @@ package_updates()
 package_management_process()
 {
 
-    # Log Data
     echo "Installing all Packages."
 
     # Clean Package Manager
@@ -433,7 +423,6 @@ package_management_process()
 gui_packages()
 {
 
-    # Log Data
     echo "Adding GUI Packages."
 
     # Append Gnome Packages
@@ -450,7 +439,6 @@ gui_packages()
 system_packages()
 {
 
-    # Log Data
     echo "Adding System Packages."
 
     # Basic System Packages
@@ -465,9 +453,6 @@ system_packages()
 stage_one_config_and_kernel()
 {
 
-    # Direct logs for packages
-    exec 1> $PWD/logs/packages.log 2> $PWD/logs/packages.error.log
-
     # Prepare System Packages
     system_packages
 
@@ -479,9 +464,6 @@ stage_one_config_and_kernel()
     # Package Management Process
     package_management_process
 
-    # Direct logging for system configuration
-    exec 1> $PWD/logs/config.log 2> $PWD/logs/config.error.log
-
     # System Configuration
     system_configuration
 
@@ -490,8 +472,6 @@ stage_one_config_and_kernel()
         gui_configuration
     fi
 
-    # Direct logging for Kernel Process
-    exec 1> $PWD/logs/kernel.log 2> $PWD/logs/kernel.error.log
 
     # Install Kernel
     kernel_installation
@@ -510,8 +490,6 @@ stage_two_xen()
     # Remove on-Reboot Process
     sed -i "\!$SCRIPT!d" '/etc/rc.local'
 
-    # Setup Logging & Post status
-    exec 1> $PWD/logs/xen.log 2> $PWD/logs/xen.error.log
     echo "Testing Script Execution on Reboot"
 
     # Fresh Kernel so run aptitude cleansing
