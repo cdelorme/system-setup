@@ -72,6 +72,7 @@ install_xen_server()
 
         # Build Kernel
         set_log_file "xen.kernel"
+        prepare_xen_kernel
 
 
         # Setup Reboot Preparations
