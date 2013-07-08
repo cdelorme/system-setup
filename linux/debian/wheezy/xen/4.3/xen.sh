@@ -156,34 +156,6 @@ setup_xen()
 
 }
 
-system_configuration()
-{
-
-    # Update Terminal
-    if $COLORIZE_TERMINAL;then
-        update_terminal
-    fi
-
-    # Setup Git
-    if $CONFIGURE_GIT;then
-        git_config
-    fi
-
-    # If USERNAME configure User
-    if [ ! -z "$USERNAME" ];then
-        user_configuration
-    fi
-
-    # Setup Git for users
-    if $CONFIGURE_GIT;then
-        git_user_config
-    fi
-
-    # Get the firewall setup
-    setup_firewall
-
-}
-
 package_updates()
 {
 
