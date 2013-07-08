@@ -18,6 +18,9 @@ HEADLESS=false
 # Late Start gdm3 and disable network-manager and bluetooth (default: true)
 LATE_START_GUI=true
 
+# If gdm3 allow root login (default: true)
+ALLOW_ROOT_LOGIN=true
+
 # Configure Git globals (default: true)
 CONFIGURE_GIT=true
 GIT_EMAIL=""

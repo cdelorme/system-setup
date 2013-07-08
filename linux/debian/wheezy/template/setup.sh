@@ -144,7 +144,13 @@ setup_template_firewall()
 }
 
 
-
+pam_gdm_root()
+{
+    if [ -n "$ALLOW_ROOT_LOGIN" ] && $ALLOW_ROOT_LOGIN;then
+        echo "enabling root login to gdm3 (requires reboot)..."
+        sed -i "s/user != root//" /etc/pam.d/gdm3
+    fi
+}
 
 guake_config()
 {
@@ -188,6 +194,7 @@ gui_configuration()
     echo "running gui configuration..."
     sublime_text_config
     guake_config
+    pam_gdm_root
 }
 
 user_git_configuration()
