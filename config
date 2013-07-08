@@ -18,6 +18,9 @@ XEN_VERSION="4.3"
 # Development Directory for downloading & building software (default: /home/src)
 DEV_DIR=/home/src
 
+# Set a firewall (default: true)
+SETUP_FIREWALL=true
+
 
 # -------------------------------- Logging
 
