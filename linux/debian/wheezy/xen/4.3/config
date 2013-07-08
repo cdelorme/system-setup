@@ -24,3 +24,6 @@ ENABLE_VFIO=true
 
 # Debian Xen suffix to install (default: *.deb)
 XEN_PACKAGE_SUFFIX="*.deb"
+
+# Disable xen save/restore features to address low HDD (default: true)
+DISABLE_SAVE_RESTORE=true
