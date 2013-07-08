@@ -144,7 +144,18 @@ xen_build_install()
 
 
 
+
 # ---------------- Revised methods (not yet tested but cleaner)
+
+custom_firewall_rules()
+{
+    echo "adding xen firewall rules..."
+    # # Forwarding Rules (for Dual LAN Xen)
+    # -A FORWARD -i eth0 -o eth1 -j REJECT
+    # -A FORWARD -i eth0 -o xenbr1 -j REJECT
+    # -A FORWARD -i eth1 -o eth0 -j REJECT
+    # -A FORWARD -i eth1 -o xenbr0 -j REJECT
+}
 
 add_vfio_kernel_packages()
 {
