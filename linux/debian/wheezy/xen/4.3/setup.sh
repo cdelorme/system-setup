@@ -15,43 +15,33 @@ XEN_PATH=$(dirname $XEN_SCRIPT)
 . $XEN_PATH/config
 
 
-# -------------------------------- Define Functions
+# -------------------------------- Library Methods
 
-passwordless_sudo_xl()
+xen_script_cleanup()
 {
-    # Add passwordless xl for sudo group
-    echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
-    echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
-    echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/skel/.bashrc
-    if [ ! -z "$USERNAME" ];then
-        echo "\n# XL Alias\nalias xl='sudo xl'" >> /home/$USERNAME/.bashrc
+    echo "cleaning and polishing script leavings..."
+    sed -i "\!$SCRIPT!d" '/etc/rc.local'
+}
+
+xen_passwordless_xl()
+{
+    if [ -n "$PASSWORDLESS_XL" ] && $PASSWORDLESS_XL;then
+        echo "making sudo passwordless..."
+        echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
+        echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
+        echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/skel/.bashrc
+        if [ -n "$USERNAME" ];then
+            echo "\n# XL Alias\nalias xl='sudo xl'" >> /home/$USERNAME/.bashrc
+        fi
     fi
 }
 
-patch_xen_grub()
+xen_insserv_configuration()
 {
-
-    # Update Grub (Iterate PCI devices & add xen conf flags)
-    cp /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
-    if [ ! -z "$PCIBACK" ];then
-        sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
-    fi
-    if [ ! -z "$XEN_CONF" ];then
-        sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
-    fi
-    update-grub
-
-}
-
-insserv_xen_configuration()
-{
-
-    # Add Xen Script Defaults on boot
+    echo "adding xen scripts to services and fixing order..."
     update-rc.d xencommons defaults
     update-rc.d xendomains defaults
     update-rc.d xen-watchdog defaults
-
-    # xen-watchdog must be modified to S22 and K02.
     for DIR in /etc/rc*
     do
         START_FILE=$( ls $DIR | grep S[0-9]*xen-w )
@@ -63,19 +53,32 @@ insserv_xen_configuration()
             mv "$DIR/$STOP_FILE" $DIR/K02xen-watchdog
         fi
     done
-
-    # Remove XENDOMAINS_SAVE set its path to nothing
-    sed -i "s/XENDOMAINS_SAVE=\/var\/lib\/xen\/save/XENDOMAINS_SAVE=/" /etc/default/xendomains
-
-    # Set XENDOMAINS_RESTORE to false
-    sed -i "s/XENDOMAINS_RESTORE=true/XENDOMAINS_RESTORE=false/" /etc/default/xendomains
-
 }
 
-xen_cleanup()
+xen_save_restore()
 {
+    if [ -n "$DISABLE_SAVE_RESTORE" ] && $DISABLE_SAVE_RESTORE;then
+        echo "disabling save and restore features to reduce disk consumption..."
+        sed -i "s/XENDOMAINS_SAVE=\/var\/lib\/xen\/save/XENDOMAINS_SAVE=/" /etc/default/xendomains
+        sed -i "s/XENDOMAINS_RESTORE=true/XENDOMAINS_RESTORE=false/" /etc/default/xendomains
+    fi
+}
 
-    # Post installation Cleanup (remove symlinks & debug symbols from /boot)
+xen_patch_grub()
+{
+    echo "patching grub parameters for xen..."
+    mv /etc/grub.d/20_linux_xen /etc/grub.d/09_linux_xen
+    if [ ! -z "$PCIBACK" ];then
+        sed -r -i "s/(module.*ro.*)/\1$PCIBACK/" /etc/grub.d/09_linux_xen
+    fi
+    if [ ! -z "$XEN_CONF" ];then
+        sed -r -i "s/(multiboot.*)/\1$XEN_CONF/" /etc/grub.d/09_linux_xen
+    fi
+    update-grub
+}
+
+xen_remove_boot_symlinks()
+{
     for FILE in /boot/xen*
     do
         if [ -L $FILE ];then
@@ -83,71 +86,68 @@ xen_cleanup()
         fi
     done
     rm -f /boot/xen-syms*
-
 }
 
-xen_build_install()
+xen_cleanup_configuration()
 {
+    echo "cleaning up after xen install..."
+    ldconfig
+    xen_remove_boot_symlinks
+    xen_patch_grub
+    xen_save_restore
+    xen_insserv_configuration
+    xen_passwordless_xl
+}
 
-    # install if .deb exists
-    if [ -d $FILES/xen ] && ls $FILES/xen/*.deb >/dev/null 2>&1;then
-        dpkg -i $FILES/xen/*.deb
+xen_install()
+{
+    echo "installing xen..."
+    dpkg -i $DEV_DIR/xen/*.deb
+}
+
+xen_build()
+{
+    if [ -d $FILES/xen ] && ls $FILES/xen/$XEN_PACKAGE_SUFFIX >/dev/null 2>&1;then
+        echo "loading prebuilt deb package..."
+        mkdir -p $DEV_DIR/xen
+        cp $FILES/xen/$XEN_PACKAGE_SUFFIX $DEV_DIR/xen/
     else
+        echo "preparing build directory..."
+        mkdir -p $DEV_DIR/xen
+        cd $DEV_DIR/xen
 
-        # Enter Directory
-        cd $DEV_DIR
-
-        # Clone Xen Source
+        echo "downloading xen source..."
         git clone git://xenbits.xen.org/xen.git
-
-        # Enter Dir & Checkout Tag
         cd xen*
         git checkout -b stable-4.3
 
-        # Exchange Config.mk Python args
+        echo "configuring xen source..."
         sed -i "s/^PYTHON_PREFIX_ARG.*/PYTHON_PREFIX_ARG ?= --install-layout=deb/" Config.mk
-
-        # Configure & Build a .deb /w automatic core detection for compiling
         ./configure --enable-githttp
+
+        echo "building xen..."
         make -j$(nproc) world
         make -j$(nproc) debball
 
-        # Install the .deb produced by make debball inside ./dist/
-        dpkg -i dist/*.deb
-
-        # Load Configuration Cache
-        ldconfig
-
+        echo "preparing package for installation..."
+        cp dist/*.deb $DEV_DIR/xen/
     fi
-
 }
 
-
-
-
-
-
-# ----------------
-
-xen_configuration()
+xen_process()
 {
-    echo "configuring xen components..."
+    echo "running xen process..."
+    xen_build
+    xen_install
+    xen_cleanup_configuration
 }
 
 xen_reboot_procedure()
 {
     echo "preparing for reboot procedure..."
-    # Before building & installing xen we will want to execute a method to handle
-    # rebooting in debian (using /etc/rc.local)
-    # Continue after Reboot (try /etc/rc.local replacement)
-    # sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
-    # Remove on-Reboot Process
-    # sed -i "\!$SCRIPT!d" '/etc/rc.local'
+    echo "\n\n# SCRIPT-ADDED PARAMETERS FOR XEN REBOOT\nXEN_REBOOT=true" >> $SCRIPT_PATH/config
+    sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
 }
-
-
-
-# ---------------- Revised methods (not yet tested but cleaner)
 
 add_vfio_kernel_modules()
 {

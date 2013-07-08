@@ -6,6 +6,9 @@
 # Dual Interfaces for Internet Output Separation
 DUAL_LAN=true
 
+# Make xl toolstack passwordless for sudo group? (default: true)
+PASSWORDLESS_XL=true
+
 
 # -------------------------------- Kernel Options
 
