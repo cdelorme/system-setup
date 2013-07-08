@@ -171,22 +171,17 @@ case "$STATE" in
     template)
         install_template
         ;;
-
     comm)
         install_comm_server
         ;;
-
     web)
         install_web_server
         ;;
-
     xen)
         install_xen_server
         ;;
-
     *)
         print_instructions
         exit 3;
         ;;
-
 esac
