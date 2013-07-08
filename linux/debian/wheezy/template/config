@@ -1,0 +1,63 @@
+# Configuration Data for Setup
+# ----------------------------
+
+# -------------------------------- Environment Configuration Options
+
+# Change default SSH port? (default: 22)
+SSH_PORT=22
+
+
+# -------------------------------- GUI Options
+
+# No-GUI Server (default: false)
+HEADLESS=false
+
+# Late Start gdm3 and disable network-manager and bluetooth (default: true)
+LATE_START_GUI=true
+
+# Configure Git globals (default: true)
+CONFIGURE_GIT=true
+GIT_EMAIL=""
+GIT_NAME=""
+
+# Automatically update packages weekly (default: true)
+AUTOMATIC_UPDATES=true
+
+# Add trim support to `/etc/lvm/lvm.conf` and cron-job fstrim weekly (default: true)
+TRIM=true
+
+
+# -------------------------------- User Information (Optional)
+
+# Username (default: user)
+USERNAME=user
+
+# Password (default: password)
+PASSWORD=password
+
+# Make user a sudo member (default: true)
+HAS_SUDO_PRIVS=true
+
+
+# -------------------------------- Fonts & Software (depends on HEADLESS=false)
+
+# Install truetype fonts to machine (default: true)
+INSTALL_FONTS=true
+
+# Add JIS fonts & Locale (default: false)
+JIS_FONTS=false
+
+# Install Sublime Text (default: true)
+INSTALL_SUBLIME=true
+
+# Install Guake & Set Autostart (default: true)
+INSTALL_GUAKE=true
+
+
+# -------------------------------- Virtual Environment Flags
+
+# Running in Xen (default: false)
+RUNNING_IN_XEN=false
+
+# Running in Parallels (default: false)
+RUNNING_IN_PARALLELS=false
