@@ -12,6 +12,9 @@ DISTRIBUTION_VERSION="wheezy"
 # Xen Version (defaut: 4.3)
 XEN_VERSION="4.3"
 
+# Debian Kernel package suffix to install (default: *.deb)
+KERNEL_PACKAGE_SUFFIX="*.deb"
+
 
 # -------------------------------- Environment
 

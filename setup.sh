@@ -151,6 +151,14 @@ build_kernel()
 # }
 
 
+universal_completion()
+{
+    echo "Install Packages"
+    echo "Build Kernel"
+    echo "Install Kernel"
+}
+
+
 # -------------------------------- Installation Options
 
 install_xen_server()
