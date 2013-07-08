@@ -210,71 +210,6 @@ user_configuration()
     fi
 }
 
-add_template_packages()
-{
-    echo "adding software packages..."
-
-    # Basic System Packages
-    PACKAGES="$PACKAGES screen"
-    PACKAGES="$PACKAGES tmux"
-    PACKAGES="$PACKAGES ssh"
-    PACKAGES="$PACKAGES sudo"
-    PACKAGES="$PACKAGES vim"
-    PACKAGES="$PACKAGES parted"
-    PACKAGES="$PACKAGES ntp"
-    PACKAGES="$PACKAGES git"
-    PACKAGES="$PACKAGES mercurial"
-
-    if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
-        echo "adding optional software..."
-        PACKAGES="$PACKAGES p7zip-full"
-        PACKAGES="$PACKAGES exfat-fuse"
-        PACKAGES="$PACKAGES exfat-utils"
-    fi
-
-    if [ -n "$RUNNING_IN_XEN" ] && $RUNNING_IN_XEN || [ "$STATE" = "xen" ];then
-        echo "adding kernel packages..."
-        PACKAGES="$PACKAGES build-essential"
-        PACKAGES="$PACKAGES libncurses-dev"
-        PACKAGES="$PACKAGES kernel-package"
-        PACKAGES="$PACKAGES fakeroot"
-    fi
-
-    if [ -n "$HEADLESS" ] && ! $HEADLESS;then
-        echo "adding minimalist gui packages..."
-        PACKAGES="$PACKAGES gnome-session"
-        PACKAGES="$PACKAGES gnome-terminal"
-        PACKAGES="$PACKAGES gnome-disk-utility"
-        PACKAGES="$PACKAGES gnome-screenshot"
-        PACKAGES="$PACKAGES gnome-screensaver"
-        PACKAGES="$PACKAGES desktop-base"
-        PACKAGES="$PACKAGES gksu"
-        PACKAGES="$PACKAGES gdm3"
-        PACKAGES="$PACKAGES pulseaudio"
-        PACKAGES="$PACKAGES xorg-dev"
-        PACKAGES="$PACKAGES ia32-libs-gtk"
-        PACKAGES="$PACKAGES binfmt-support"
-        PACKAGES="$PACKAGES libc6-dev"
-        PACKAGES="$PACKAGES libc6-dev-i386"
-        PACKAGES="$PACKAGES libcurl3"
-        PACKAGES="$PACKAGES xdg-user-dirs-gtk"
-        PACKAGES="$PACKAGES xdg-utils"
-        PACKAGES="$PACKAGES network-manager"
-        PACKAGES="$PACKAGES libnss3-1d"
-
-        if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
-            echo "adding optional gui software..."
-            PACKAGES="$PACKAGES gparted"
-            PACKAGES="$PACKAGES guake"
-            PACKAGES="$PACKAGES eog"
-            PACKAGES="$PACKAGES gnash"
-            PACKAGES="$PACKAGES vlc"
-            PACKAGES="$PACKAGES gtk-recordmydesktop"
-            PACKAGES="$PACKAGES chromium"
-        fi
-    fi
-}
-
 
 
 
@@ -350,23 +285,51 @@ build_kernel()
 setup_firewall()
 {
     if [ -n "$SETUP_FIREWALL" ] && $SETUP_FIREWALL;then
-        echo "Setting up firewall."
-#         # Xen generates vifs dynamically
-#         # Securing that without a script would be very difficult
-#         # So we use a blacklist instead of a whitelist to control what we know
+        echo "setting up firewall..."
 
-#         # Define firewall at `/etc/firewall.conf`
-#         if $DUAL_LAN;then
-#             echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o eth1 -j REJECT\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n-A FORWARD -i eth1 -o eth0 -j REJECT\n-A FORWARD -i eth1 -o xenbr0 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
-#         else
-#             echo "*filter\n\n# Prevent use of Loopback on non-loopback dervice (lo0):\n-A INPUT -i lo -j ACCEPT\n-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT\n\n# Accepts all established inbound connections\n-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n\n# Allows all outbound traffic (Can be limited at discretion)\n-A OUTPUT -j ACCEPT\n\n# Allow ping\n-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT\n\n# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)\n-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT\n\n# Forwarding Rules (for Dual LAN Xen)\n-A FORWARD -i eth0 -o xenbr1 -j REJECT\n\n# Set other traffic defaults\n-A INPUT -j REJECT\n-A FORWARD -j ACCEPT\n\nCOMMIT" > /etc/firewall.conf
-#         fi
+        # Xen generates vifs dynamically
+        # Securing that without a script would be very difficult
+        # So we use a blacklist instead of a whitelist to control what we know
 
-#         # Prepare firewall auto-loading
-#         echo "#!/bin/sh\niptables -F\niptables-restore < /etc/firewall.conf" > "/etc/network/if-up.d/iptables"
-#         chmod +x "/etc/network/if-up.d/iptables"
+        if [ -f "/etc/firewall.conf" ];then
+            rm /etc/firewall.conf
+        fi
+
+        # Define all rules
+        echo "*filter" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "# Prevent use of Loopback on non-loopback dervice (lo0):" >> /etc/firewall.conf
+        echo "-A INPUT -i lo -j ACCEPT" >> /etc/firewall.conf
+        echo "-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "# Accepts all established inbound connections" >> /etc/firewall.conf
+        echo "-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "# Allows all outbound traffic (Can be limited at discretion)" >> /etc/firewall.conf
+        echo "-A OUTPUT -j ACCEPT" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "# Allow ping" >> /etc/firewall.conf
+        echo "-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "# Enable SSH Connection (custom port in /etc/ssh/sshd_conf)" >> /etc/firewall.conf
+        echo "-A INPUT -p tcp -m state --state NEW --dport $SSH_PORT -j ACCEPT" >> /etc/firewall.conf
+        # ADD CUSTOM EXCEPTION BLURBS HERE
+        echo "# Set other traffic defaults" >> /etc/firewall.conf
+        echo "-A INPUT -j REJECT" >> /etc/firewall.conf
+        echo "-A FORWARD -j ACCEPT" >> /etc/firewall.conf
+        echo "" >> /etc/firewall.conf
+        echo "COMMIT" >> /etc/firewall.conf
+
+        # Auto-load Firewall at boot time
+        echo "#!/bin/sh" >> "/etc/network/if-up.d/iptables"
+        echo "iptables -F" >> "/etc/network/if-up.d/iptables"
+        echo "iptables-restore < /etc/firewall.conf" >> "/etc/network/if-up.d/iptables"
+        # echo "#!/bin/sh\niptables -F\niptables-restore < /etc/firewall.conf" > "/etc/network/if-up.d/iptables"
+        chmod +x "/etc/network/if-up.d/iptables"
     fi
 }
+
+
 
 install_packages()
 {
@@ -393,3 +356,69 @@ install_packages()
 
     echo "package installation completed."
 }
+
+add_template_packages()
+{
+    echo "adding software packages..."
+
+    # Basic System Packages
+    PACKAGES="$PACKAGES screen"
+    PACKAGES="$PACKAGES tmux"
+    PACKAGES="$PACKAGES ssh"
+    PACKAGES="$PACKAGES sudo"
+    PACKAGES="$PACKAGES vim"
+    PACKAGES="$PACKAGES parted"
+    PACKAGES="$PACKAGES ntp"
+    PACKAGES="$PACKAGES git"
+    PACKAGES="$PACKAGES mercurial"
+
+    if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
+        echo "adding optional software..."
+        PACKAGES="$PACKAGES p7zip-full"
+        PACKAGES="$PACKAGES exfat-fuse"
+        PACKAGES="$PACKAGES exfat-utils"
+    fi
+
+    if [ -n "$RUNNING_IN_XEN" ] && $RUNNING_IN_XEN || [ "$STATE" = "xen" ];then
+        echo "adding kernel packages..."
+        PACKAGES="$PACKAGES build-essential"
+        PACKAGES="$PACKAGES libncurses-dev"
+        PACKAGES="$PACKAGES kernel-package"
+        PACKAGES="$PACKAGES fakeroot"
+    fi
+
+    if [ -n "$HEADLESS" ] && ! $HEADLESS;then
+        echo "adding minimalist gui packages..."
+        PACKAGES="$PACKAGES gnome-session"
+        PACKAGES="$PACKAGES gnome-terminal"
+        PACKAGES="$PACKAGES gnome-disk-utility"
+        PACKAGES="$PACKAGES gnome-screenshot"
+        PACKAGES="$PACKAGES gnome-screensaver"
+        PACKAGES="$PACKAGES desktop-base"
+        PACKAGES="$PACKAGES gksu"
+        PACKAGES="$PACKAGES gdm3"
+        PACKAGES="$PACKAGES pulseaudio"
+        PACKAGES="$PACKAGES xorg-dev"
+        PACKAGES="$PACKAGES ia32-libs-gtk"
+        PACKAGES="$PACKAGES binfmt-support"
+        PACKAGES="$PACKAGES libc6-dev"
+        PACKAGES="$PACKAGES libc6-dev-i386"
+        PACKAGES="$PACKAGES libcurl3"
+        PACKAGES="$PACKAGES xdg-user-dirs-gtk"
+        PACKAGES="$PACKAGES xdg-utils"
+        PACKAGES="$PACKAGES network-manager"
+        PACKAGES="$PACKAGES libnss3-1d"
+
+        if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
+            echo "adding optional gui software..."
+            PACKAGES="$PACKAGES gparted"
+            PACKAGES="$PACKAGES guake"
+            PACKAGES="$PACKAGES eog"
+            PACKAGES="$PACKAGES gnash"
+            PACKAGES="$PACKAGES vlc"
+            PACKAGES="$PACKAGES gtk-recordmydesktop"
+            PACKAGES="$PACKAGES chromium"
+        fi
+    fi
+}
+
