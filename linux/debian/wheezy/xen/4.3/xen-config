@@ -13,6 +13,7 @@ XEN_CONF=" dom0_mem=4096M dom0_max_vcpus=2"
 # Above is an example and may vary by BDF according to lspci output
 
 
+
 # -------------------------------- New Flags
 
 # Enable Virtio Kernel Extensions (default: true)
@@ -20,3 +21,6 @@ ENABLE_VIRTIO=true
 
 # Enable VFIO Kernel Extensions (default: true)
 ENABLE_VFIO=true
+
+# Debian Xen suffix to install (default: *.deb)
+XEN_PACKAGE_SUFFIX="*.deb"
