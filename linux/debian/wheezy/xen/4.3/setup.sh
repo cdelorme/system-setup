@@ -144,41 +144,10 @@ xen_build_install()
 
 
 
-
 # ---------------- Revised methods (not yet tested but cleaner)
 
-setup_xen_firewall()
-{
-    echo "adding xen firewall rules..."
-    # # Forwarding Rules (for Dual LAN Xen)
-    # -A FORWARD -i eth0 -o eth1 -j REJECT
-    # -A FORWARD -i eth0 -o xenbr1 -j REJECT
-    # -A FORWARD -i eth1 -o eth0 -j REJECT
-    # -A FORWARD -i eth1 -o xenbr0 -j REJECT
-}
 
-add_vfio_kernel_packages()
-{
-    if [ -n "$ENABLE_VFIO" ] && $ENABLE_VFIO;then
-        echo "adding vfio kernel packages"
-        # CONFIG_VFIO_IOMMU_TYPE1=y
-        # CONFIG_VFIO=y
-        # CONFIG_VFIO_PCI=y
-        # CONFIG_VFIO_PCI_VGA=y
-    fi
-}
 
-add_virtio_kernel_packages()
-{
-    if [ -n "$ENABLE_VIRTIO" ] && $ENABLE_VIRTIO;then
-        echo "adding virtio kernel packages"
-        # CONFIG_VIRTIO_MMIO=y
-        # CONFIG_VIRTIO_PCI=y
-        # CONFIG_VIRTIO_NET=y
-        # CONFIG_VIRTIO_BALLOON=y
-        # CONFIG_VIRTIO_BLK=y
-    fi
-}
 
 prepare_reboot_procedure()
 {
@@ -189,6 +158,53 @@ prepare_reboot_procedure()
     # sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
     # Remove on-Reboot Process
     # sed -i "\!$SCRIPT!d" '/etc/rc.local'
+}
+
+
+
+# ---------------- Revised methods (not yet tested but cleaner)
+
+prepare_xen_kernel()
+{
+    echo "preparing xen kernel configuration..."
+    add_kernel_modules
+    add_vfio_kernel_modules
+    add_virtio_kernel_modules
+}
+
+setup_xen_firewall()
+{
+    echo "adding xen firewall rules..."
+    FILEWALL_RULES="$FILEWALL_RULES\n\n# Forwarding Rules (for Dual LAN Xen)"
+    FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o xenbr1 -j REJECT"
+    if [ -n "$DUAL_LAN" ] && $DUAL_LAN;then
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o eth1 -j REJECT"
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o eth0 -j REJECT"
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o xenbr0 -j REJECT"
+    fi
+}
+
+add_vfio_kernel_modules()
+{
+    if [ -n "$ENABLE_VFIO" ] && $ENABLE_VFIO;then
+        echo "adding vfio kernel modules..."
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VFIO_IOMMU_TYPE1=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VFIO=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VFIO_PCI=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VFIO_PCI_VGA=y"
+    fi
+}
+
+add_virtio_kernel_modules()
+{
+    if [ -n "$ENABLE_VIRTIO" ] && $ENABLE_VIRTIO;then
+        echo "adding virtio kernel modules..."
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_MMIO=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_PCI=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_NET=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_BALLOON=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_BLK=y"
+    fi
 }
 
 add_xen_packages()
