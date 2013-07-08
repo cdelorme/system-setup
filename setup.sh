@@ -73,10 +73,11 @@ install_xen_server()
         # Build Kernel
         set_log_file "xen.kernel"
         prepare_xen_kernel
-
+        kernel_process
 
         # Setup Reboot Preparations
         set_log_file "xen.reboot"
+        xen_reboot_procedure
 
         # Reboot
         echo "Rebooting"
@@ -106,14 +107,27 @@ install_web_server()
 
 install_template()
 {
-    # Set Logging
     set_log_file "template"
-
-    # Load Related Libraries
+    echo "loading libraries..."
     . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/template/setup.sh
 
-    # Execute template setup operations
+    # Add & Install Packages
+    set_log_file "template.packages"
+    add_template_packages
+    install_packages
 
+    # Run system-specific configuration
+    set_log_file "template.config"
+    template_configuraton
+    setup_template_firewall
+
+    # Build Kernel
+    set_log_file "xen.kernel"
+    kernel_process
+
+    # Reboot
+    echo "Rebooting"
+    reboot
 }
 
 
