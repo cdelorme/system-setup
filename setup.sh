@@ -134,11 +134,26 @@ build_kernel()
 
 install_xen_server()
 {
+    # Set Logging
+    set_log_file "xen"
     echo "Setting up Xen Server"
     if [ -z "$XEN_REBOOT" ];then
         echo "Handling xen setup pre-reboot"
+
+        # Load Related Libraries
+        . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/template/setup.sh
+        . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/xen/$XEN_VERSION/setup.sh
+
+        # Execute template setup operations
+
     else
         echo "Handling xen setup post-reboot"
+
+        # Load Related Libraries
+        . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/xen/$XEN_VERSION/setup.sh
+
+        # Call remaining operations
+
     fi
 }
 
@@ -154,9 +169,10 @@ install_web_server()
 
 install_template()
 {
-    echo "Setting up Template"
+    # Set Logging
+    set_log_file "template"
 
-    # Load Template Function Library
+    # Load Related Libraries
     . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/template/setup.sh
 
     # Execute template setup operations
