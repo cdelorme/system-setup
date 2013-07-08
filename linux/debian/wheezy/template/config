@@ -9,6 +9,9 @@ SSH_PORT=22
 # Set a firewall (default: true)
 SETUP_FIREWALL=true
 
+# Debian Kernel package suffix to install (default: *.deb)
+KERNEL_PACKAGE_SUFFIX="*.deb"
+
 
 # -------------------------------- GUI Options
 
