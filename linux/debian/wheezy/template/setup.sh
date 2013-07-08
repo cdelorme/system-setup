@@ -20,35 +20,17 @@ TEMPLATE_PATH=$(dirname $TEMPLATE_SCRIPT)
 kernel_install()
 {
     echo "installing kernel..."
+    dpkg -i $DEV_DIR/*.deb
 }
 
 kernel_build()
 {
     echo "building kernel..."
-}
-
-kernel_preparations()
-{
-    echo "configuring services for building a kernel..."
-    echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
-}
-
-kernel_process()
-{
-    echo "beginning build and install kernel process..."
-    kernel_preparations
-    kernel_build
-    kernel_install
-}
-
-# kernel_installation()
-# {
-
-#     # If kernel debs exist install them
-#     if [ -d $FILES/kernel ] && ls $FILES/kernel/*.deb >/dev/null 2>&1;then
-#         dpkg -i $FILES/kernel/*.deb
-#     else
-
+    if [ -d $FILES/kernel ] && ls $FILES/kernel/$KERNEL_PACKAGE_SUFFIX >/dev/null 2>&1;then
+        echo "moving prepared kernel"
+        cp $FILES/kernel/$KERNEL_PACKAGE_SUFFIX $DEV_DIR
+    else
+        echo "downloading kernel..."
 #         # Make Directory for development
 #         mkdir -p $DEV_DIR/kernel
 
@@ -77,15 +59,39 @@ kernel_process()
 #         make-kpkg clean
 #         fakeroot make-kpkg --initrd --revision=4.3.xen.custom kernel_image
 
-#         # Install
-#         dpkg -i ../*.deb
-
 #         # Move back to current script dir
 #         cd $PWD
+    fi
+}
 
-#     fi
+kernel_configuration()
+{
+    if [ -n "$RUNNING_IN_XEN" ] && $RUNNING_IN_XEN;then
+        echo "adding xen guest kernel configuration flags..."
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_XEN=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_PARAVIRT=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_PARAVIRT_GUEST=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_XEN_BLKDEV_FRONTEND=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_XEN_NETDEV_FRONTEND=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_XEN_PCIDEV_FRONTEND=y"
+        KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_NETXEN_NIC=y"
+    fi
+}
 
-# }
+kernel_preparations()
+{
+    echo "configuring services for building a kernel..."
+    echo "\n# Concurrency Level\nCONCURRENCY_LEVEL=$(nproc)" >> /etc/kernel-pkg.conf
+}
+
+kernel_process()
+{
+    echo "beginning build and install kernel process..."
+    kernel_preparations
+    kernel_configuration
+    kernel_build
+    kernel_install
+}
 
 setup_template_firewall()
 {
@@ -197,11 +203,13 @@ sublime_text_config()
 
 gui_configuration()
 {
-    echo "running gui configuration..."
-    sublime_text_config
-    guake_config
-    pam_gdm_root
-    gui_cleanup
+    if [ -n "$HEADLESS" ] && ! $HEADLESS;then
+        echo "running gui configuration..."
+        sublime_text_config
+        guake_config
+        pam_gdm_root
+        gui_cleanup
+    fi
 }
 
 user_git_configuration()
