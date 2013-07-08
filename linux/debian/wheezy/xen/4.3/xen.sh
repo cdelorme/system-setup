@@ -1,22 +1,24 @@
 #!/bin/sh
-# Xen 4.3 Setup Script!
+# Xen Method Library
 
-# -------------------------------- Preparation & Loading
+# -------------------------------- Setup
 
-# Grab Important Paths (Script, Script Exec Path, Install Files)
-SCRIPT=$(readlink -f $0)
-PWD=$(dirname $SCRIPT)
-FILES=$(readlink -f $PWD/../../../../../files)
+# Prepare Paths
+if [ -z "$SCRIPT_PATH" ];then
+    XEN_SCRIPT=$(readlink -f $0)
+else
+    XEN_SCRIPT="$SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/xen/$XEN_VERSION/setup.sh"
+fi
+XEN_PATH=$(dirname $XEN_SCRIPT)
 
-# Load Configuration Flags (should be with the actual scripts location)
-. $PWD/xen-config
+# Load configuration
+. $XEN_PATH/config
 
 
 # -------------------------------- Define Functions
 
 passwordless_sudo_xl()
 {
-
     # Add passwordless xl for sudo group
     echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
     echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
@@ -24,7 +26,6 @@ passwordless_sudo_xl()
     if [ ! -z "$USERNAME" ];then
         echo "\n# XL Alias\nalias xl='sudo xl'" >> /home/$USERNAME/.bashrc
     fi
-
 }
 
 xen_interfaces()
@@ -138,142 +139,73 @@ xen_build_install()
 
 }
 
-setup_xen()
+
+
+
+
+
+# ---------------- Revised methods (not yet tested but cleaner)
+
+add_vfio_kernel_packages()
 {
-
-    # Run build & install process
-    xen_build_install
-
-    # Configurations
-    xen_cleanup
-    insserv_xen_configuration
-    patch_xen_grub
-    xen_interfaces
-    passwordless_sudo_xl
-
-    # UNFINISHED
-    # patch_xendomains
-
+    echo "adding vfio kernel packages"
+    # CONFIG_VFIO_IOMMU_TYPE1=y
+    # CONFIG_VFIO=y
+    # CONFIG_VFIO_PCI=y
+    # CONFIG_VFIO_PCI_VGA=y
 }
 
-package_updates()
+add_virtio_kernel_packages()
 {
-
-    # Handle updates recursively on failure
-    if [ ! -z "$PACKAGES" ];then
-        aptitude install -y $PACKAGES
-        aptitude install -y $PACKAGES
-
-        # This approach fails for unknown reasons, best option is to simply execute twice hoping that the first-attempt having a failed connection resolves itself on the second run.
-        # # Check with arbitrary software package in the list (assuming one failure halts the entire process)
-        # if command -v bison >/dev/null 2>&1;then
-        #     package_updates
-        # fi
-    fi
-
+    echo "adding virtio kernel packages"
+    # CONFIG_VIRTIO_MMIO=y
+    # CONFIG_VIRTIO_PCI=y
+    # CONFIG_VIRTIO_NET=y
+    # CONFIG_VIRTIO_BALLOON=y
+    # CONFIG_VIRTIO_BLK=y
 }
 
-package_management_process()
+prepare_reboot_procedure()
 {
-
-    echo "Installing all Packages."
-
-    # Clean Package Manager
-    aptitude clean
-    aptitude update
-
-    # Install Updates
-    aptitude upgrade -y
-    aptitude safe-upgrade -y
-
-    # Install Packages
-    package_updates
-
-    # Add Automatic Updates
-    if $AUTOMATIC_UPDATES && [ ! -f /etc/cron.weekly/aptitude ];then
-        setup_automatic_updates
-    fi
-
-}
-
-gui_packages()
-{
-
-    echo "Adding GUI Packages."
-
-    # Append Gnome Packages
-    PACKAGES="$PACKAGES gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 pulseaudio xorg-dev ia32-libs-gtk binfmt-support libc6-dev libc6-dev-i386 libcurl3 xdg-user-dirs-gtk xdg-utils network-manager libnss3-1d"
-
-    # Append GUI Software
-    PACKAGES="$PACKAGES gparted guake eog gnash vlc gtk-recordmydesktop chromium"
-
-    # Append Xen GUI Packages
-    PACKAGES="$PACKAGES libsdl-dev gvncviewer"
-
-}
-
-system_packages()
-{
-
-    echo "Adding System Packages."
-
-    # Basic System Packages
-    PACKAGES="$PACKAGES screen tmux sudo ssh vim parted ntp p7zip-full build-essential libncurses-dev kernel-package fakeroot git mercurial"
-
-    # Xen Packages
-    PACKAGES="$PACKAGES bridge-utils build-essential libncurses-dev python-dev uuid uuid-dev libglib2.0-dev libyajl-dev bcc gcc-multilib iasl libpci-dev mercurial flex bison libaio-dev"
-
-}
-
-
-stage_one_config_and_kernel()
-{
-
-    # Prepare System Packages
-    system_packages
-
-    # OPTIONAL Prepare GUI Packages
-    if ! $HEADLESS;then
-        gui_packages
-    fi
-
-    # Package Management Process
-    package_management_process
-
-    # System Configuration
-    system_configuration
-
-    # GUI Configuration
-    if ! $HEADLESS;then
-        gui_configuration
-    fi
-
-    # Install Kernel
-    kernel_installation
-
+    echo "preparing for reboot procedure..."
+    # Before building & installing xen we will want to execute a method to handle
+    # rebooting in debian (using /etc/rc.local)
     # Continue after Reboot (try /etc/rc.local replacement)
-    sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
-
-    # Reboot System
-    reboot
-
+    # sed -i "s!^exit 0!$SCRIPT 2\nexit 0!" /etc/rc.local
+    # Remove on-Reboot Process
+    # sed -i "\!$SCRIPT!d" '/etc/rc.local'
 }
 
-stage_two_xen()
+add_xen_packages()
 {
+    echo "adding xen packages..."
 
-    # Remove on-Reboot Process
-    sed -i "\!$SCRIPT!d" '/etc/rc.local'
+    # These should already be in our list
+    PACKAGES="$PACKAGES build-essential"
+    PACKAGES="$PACKAGES libncurses-dev"
+    PACKAGES="$PACKAGES mercurial"
+    PACKAGES="$PACKAGES git"
 
-    echo "Testing Script Execution on Reboot"
+    # These are new
+    PACKAGES="$PACKAGES bridge-utils"
+    PACKAGES="$PACKAGES python-dev"
+    PACKAGES="$PACKAGES uuid"
+    PACKAGES="$PACKAGES uuid-dev"
+    PACKAGES="$PACKAGES libglib2.0-dev"
+    PACKAGES="$PACKAGES libyajl-dev"
+    PACKAGES="$PACKAGES bcc"
+    PACKAGES="$PACKAGES iasl"
+    PACKAGES="$PACKAGES libpci-dev"
+    PACKAGES="$PACKAGES flex"
+    PACKAGES="$PACKAGES bison"
+    PACKAGES="$PACKAGES libaio-dev"
 
-    # Fresh Kernel so run aptitude cleansing
-    # package_management_process
+    # This is an x64 package for x32 compatibility
+    PACKAGES="$PACKAGES gcc-multilib"
 
-    # Run Xen Install
-    # setup_xen
-
-    # Reboot System
-    # reboot
-
+    if [ -n "$HEADLESS" ] && ! $HEADLESS;then
+        echo "adding xen gui packages..."
+        PACKAGES="$PACKAGES libsdl-dev"
+        PACKAGES="$PACKAGES gvncviewer"
+    fi
 }
