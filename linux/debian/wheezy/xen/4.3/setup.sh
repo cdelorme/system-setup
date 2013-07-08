@@ -28,23 +28,6 @@ passwordless_sudo_xl()
     fi
 }
 
-xen_interfaces()
-{
-
-    # Backup Interfaces
-    if [ -f /etc/network/interfaces ];then
-        mv /etc/network/interfaces /etc/network/interfaces.bak
-    fi
-
-    # Setup network interfaces for Xen
-    if $DUAL_LAN;then
-        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface eth1 inet manual\niface xenbr0 inet dhcp\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet manual\n\tbridge_ports eth1\n\tbridge_maxwait 0" > /etc/network/interfaces
-    else
-        echo "auto lo xenbr0 xenbr1\niface lo inet loopback\niface eth0 inet manual\niface xenbr0 inet dhcp\n\tbridge_ports eth0\n\tbridge_maxwait 0\niface xenbr1 inet manual\n\tbridge_maxwait 0" > /etc/network/interfaces
-    fi
-
-}
-
 patch_xen_grub()
 {
 
@@ -144,10 +127,12 @@ xen_build_install()
 
 
 
-# ---------------- Revised methods (not yet tested but cleaner)
+# ----------------
 
-
-
+xen_configuration()
+{
+    echo "configuring xen components..."
+}
 
 prepare_reboot_procedure()
 {
@@ -164,25 +149,8 @@ prepare_reboot_procedure()
 
 # ---------------- Revised methods (not yet tested but cleaner)
 
-prepare_xen_kernel()
-{
-    echo "preparing xen kernel configuration..."
-    add_kernel_modules
-    add_vfio_kernel_modules
-    add_virtio_kernel_modules
-}
 
-setup_xen_firewall()
-{
-    echo "adding xen firewall rules..."
-    FILEWALL_RULES="$FILEWALL_RULES\n\n# Forwarding Rules (for Dual LAN Xen)"
-    FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o xenbr1 -j REJECT"
-    if [ -n "$DUAL_LAN" ] && $DUAL_LAN;then
-        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o eth1 -j REJECT"
-        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o eth0 -j REJECT"
-        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o xenbr0 -j REJECT"
-    fi
-}
+
 
 add_vfio_kernel_modules()
 {
@@ -205,6 +173,65 @@ add_virtio_kernel_modules()
         KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_BALLOON=y"
         KERNEL_MODULES="$KERNEL_MODULES\nCONFIG_VIRTIO_BLK=y"
     fi
+}
+
+add_kernel_modules()
+{
+    echo "adding xen kernel modules"
+
+}
+
+prepare_xen_kernel()
+{
+    echo "preparing xen kernel configuration..."
+    add_kernel_modules
+    add_vfio_kernel_modules
+    add_virtio_kernel_modules
+}
+
+
+
+
+
+setup_xen_firewall()
+{
+    echo "adding xen firewall rules..."
+    FILEWALL_RULES="$FILEWALL_RULES\n\n# Forwarding Rules (for Dual LAN Xen)"
+    FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o xenbr1 -j REJECT"
+    if [ -n "$DUAL_LAN" ] && $DUAL_LAN;then
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth0 -o eth1 -j REJECT"
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o eth0 -j REJECT"
+        FILEWALL_RULES="$FILEWALL_RULES\n-A FORWARD -i eth1 -o xenbr0 -j REJECT"
+    fi
+}
+
+setup_xen_network()
+{
+    echo "adding bridges to network interfaces..."
+    echo "auto lo xenbr0 xenbr1" >> /etc/network/interfaces
+    echo "iface lo inet loopback"
+    echo "iface eth0 inet manual"
+    echo "\tbridge_ports eth0"
+    echo "\tbridge_maxwait 0"
+    echo "iface xenbr0 inet manual"
+    if [ -n "$DUAL_LAN" ] && $DUAL_LAN;then
+        echo "configuring for dual interfaces..."
+        echo "iface eth0 inet manual"
+        echo "iface xenbr1 inet dhcp"
+        echo "\tbridge_ports eth1"
+        echo "\tbridge_maxwait 0"
+    else
+        echo "iface xenbr1 inet dhcp"
+        echo "\tbridge_ports xenbr0"
+        echo "\tbridge_maxwait 0"
+    fi
+}
+
+xen_preparation()
+{
+    echo "preparing system for xen..."
+    setup_xen_network
+    setup_xen_firewall
 }
 
 add_xen_packages()
