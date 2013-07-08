@@ -2,25 +2,6 @@
 # Configuration File
 # Set the variables below to your liking and initiate the script to process
 
-# Username for customization (default: user)
-USERNAME=user
-PASSWORD=pass1
-# Username must be supplied to setup gui components
-# If no user exists a password must be supplied to create the user
-
-# Development Directory (default: /home/src)
-DEV_DIR=/home/src
-# Choose a location with at least 6GB of space so we can compile a kernel and xen there
-
-# Add trim support to `/etc/lvm/lvm.conf` and cron-job fstrim weekly (default: true)
-TRIM=true
-
-# Custom SSH Port (default: 22)
-SSH_PORT=22
-
-# Headless eg No Gui (default: false)
-HEADLESS=false
-
 # Dual Interfaces for Internet Output Separation
 DUAL_LAN=true
 
@@ -31,10 +12,11 @@ XEN_CONF=" dom0_mem=4096M dom0_max_vcpus=2"
 # PCIBACK=" xen-pciback.hide=(00:1d.0)(03:00.0)(03:00.1)(06:00.0)(07:00.0)(0b:00.0)(0e:00.0)(0f:00.0)"
 # Above is an example and may vary by BDF according to lspci output
 
-# Automatic Updates, create a shell script to run weekly (default: true)
-AUTOMATIC_UPDATES=true
 
-# Configure Git globals (default: true)
-CONFIGURE_GIT=true
-GIT_EMAIL=""
-GIT_NAME=""
+# -------------------------------- New Flags
+
+# Enable Virtio Kernel Extensions (default: true)
+ENABLE_VIRTIO=true
+
+# Enable VFIO Kernel Extensions (default: true)
+ENABLE_VFIO=true
