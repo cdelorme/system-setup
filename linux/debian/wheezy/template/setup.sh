@@ -28,7 +28,8 @@ kernel_build()
     echo "building kernel..."
     if [ -d $FILES/kernel ] && ls $FILES/kernel/$KERNEL_PACKAGE_SUFFIX >/dev/null 2>&1;then
         echo "moving prepared kernel"
-        cp $FILES/kernel/$KERNEL_PACKAGE_SUFFIX $DEV_DIR
+        mkdir -p $DEV_DIR/kernel
+        cp $FILES/kernel/$KERNEL_PACKAGE_SUFFIX $DEV_DIR $DEV_DIR/kernel/
     else
         echo "downloading kernel..."
 
@@ -41,9 +42,7 @@ kernel_build()
         tar -xf linux*
         cd linux*
 
-
         echo "preparing kernel module configuration..."
-        # Copy latest configuration file
         for CONFIG in /boot/config-*;do
             cp $CONFIG .config
         done
