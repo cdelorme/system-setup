@@ -209,7 +209,6 @@ user_configuration()
 
 add_template_packages()
 {
-
     echo "adding software packages..."
 
     # Basic System Packages
@@ -230,16 +229,13 @@ add_template_packages()
         PACKAGES="$PACKAGES exfat-utils"
     fi
 
-    # ADD CONDITIONAL CHECK RELATED TO KERNEL NECESSITY
-
-# RUNNING_IN_XEN
-# Or?
-    # For Kernel Construction
-    PACKAGES="$PACKAGES build-essential"
-    PACKAGES="$PACKAGES libncurses-dev"
-    PACKAGES="$PACKAGES kernel-package"
-    PACKAGES="$PACKAGES fakeroot"
-
+    if [ -n "$RUNNING_IN_XEN" ] && $RUNNING_IN_XEN || [ "$STATE" = "xen" ];then
+        echo "adding kernel packages..."
+        PACKAGES="$PACKAGES build-essential"
+        PACKAGES="$PACKAGES libncurses-dev"
+        PACKAGES="$PACKAGES kernel-package"
+        PACKAGES="$PACKAGES fakeroot"
+    fi
 
     if [ -n "$HEADLESS" ] && ! $HEADLESS;then
         echo "adding minimalist gui packages..."
@@ -276,22 +272,3 @@ add_template_packages()
     fi
 }
 
-
-
-
-# -------------------------------- Callable Methods
-
-prepare_template_packages()
-{
-    echo "Run all the package modifiers"
-}
-
-prepare_template_environment()
-{
-    echo "Configure anything environment related"
-}
-
-post_template_config()
-{
-    echo "Handle everything after the install is done"
-}
