@@ -79,17 +79,16 @@ install_xen_server()
         set_log_file "xen.reboot"
         xen_reboot_procedure
 
-        # Reboot
         echo "Rebooting"
         reboot
     else
-        echo "Handling xen setup post-reboot"
-
-        # Load Related Libraries
+        echo "loading xen libraries..."
         . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/xen/$XEN_VERSION/setup.sh
+        xen_process
+        xen_script_cleanup
 
-        # Call remaining operations
-
+        echo "rebooting into xen..."
+        reboot
     fi
 }
 
