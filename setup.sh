@@ -39,16 +39,9 @@ set_log_file()
 
         # Set log location according to supplied argument
         if [ -n "$1" ];then
-            exec 1> "$KEEP_LOGS_AT/$1" 2>&1
+            exec 1> "$KEEP_LOGS_AT/$1.log" 2> "$KEEP_LOGS_AT/$1.log"
         fi
     fi
-}
-
-universal_completion()
-{
-    echo "Install Packages"
-    echo "Build Kernel"
-    echo "Install Kernel"
 }
 
 
@@ -56,7 +49,6 @@ universal_completion()
 
 install_xen_server()
 {
-    # Set Logging
     set_log_file "xen"
     echo "Setting up Xen Server"
     if [ -z "$XEN_REBOOT" ];then
@@ -66,7 +58,21 @@ install_xen_server()
         . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/template/setup.sh
         . $SCRIPT_PATH/linux/$DISTRIBUTION/$DISTRIBUTION_VERSION/xen/$XEN_VERSION/setup.sh
 
-        # Execute template setup operations
+        # Add & Install Packages
+        set_log_file "xen.packages"
+        add_template_packages
+        add_xen_packages
+        install_packages
+
+        # Run system-specific configuration
+        set_log_file "xen.config"
+        template_configuraton
+        xen_configuraton
+
+        # Universal ending?
+        # setup_firewall
+        # build_kernel
+        # install_kernel
 
     else
         echo "Handling xen setup post-reboot"
@@ -81,11 +87,13 @@ install_xen_server()
 
 install_comm_server()
 {
+    set_log_file "comm"
     echo "Setting up Communicaton Server"
 }
 
 install_web_server()
 {
+    set_log_file "web"
     echo "Setting up Web Server"
 }
 
