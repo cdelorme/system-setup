@@ -49,6 +49,9 @@ HAS_SUDO_PRIVS=true
 
 # -------------------------------- Fonts & Software (depends on HEADLESS=false)
 
+# Install optional software (default: true)
+OPTIONAL_SOFTWARE=true
+
 # Install truetype fonts to machine (default: true)
 INSTALL_FONTS=true
 
