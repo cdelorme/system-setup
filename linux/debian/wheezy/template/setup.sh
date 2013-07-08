@@ -234,11 +234,74 @@ user_configuration()
 
 
 
+add_template_packages()
+{
+
+    echo "adding software packages..."
+
+    # Basic System Packages
+    PACKAGES="$PACKAGES screen"
+    PACKAGES="$PACKAGES tmux"
+    PACKAGES="$PACKAGES ssh"
+    PACKAGES="$PACKAGES sudo"
+    PACKAGES="$PACKAGES vim"
+    PACKAGES="$PACKAGES parted"
+    PACKAGES="$PACKAGES ntp"
+    PACKAGES="$PACKAGES git"
+    PACKAGES="$PACKAGES mercurial"
+
+    if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
+        echo "adding optional software..."
+        PACKAGES="$PACKAGES p7zip-full"
+        PACKAGES="$PACKAGES exfat-fuse"
+        PACKAGES="$PACKAGES exfat-utils"
+    fi
+
+    # ADD CONDITIONAL CHECK RELATED TO KERNEL NECESSITY
+
+# RUNNING_IN_XEN
+# Or?
+    # For Kernel Construction
+    PACKAGES="$PACKAGES build-essential"
+    PACKAGES="$PACKAGES libncurses-dev"
+    PACKAGES="$PACKAGES kernel-package"
+    PACKAGES="$PACKAGES fakeroot"
 
 
+    if [ -n "$HEADLESS" ] && ! $HEADLESS;then
+        echo "adding minimalist gui packages..."
+        PACKAGES="$PACKAGES gnome-session"
+        PACKAGES="$PACKAGES gnome-terminal"
+        PACKAGES="$PACKAGES gnome-disk-utility"
+        PACKAGES="$PACKAGES gnome-screenshot"
+        PACKAGES="$PACKAGES gnome-screensaver"
+        PACKAGES="$PACKAGES desktop-base"
+        PACKAGES="$PACKAGES gksu"
+        PACKAGES="$PACKAGES gdm3"
+        PACKAGES="$PACKAGES pulseaudio"
+        PACKAGES="$PACKAGES xorg-dev"
+        PACKAGES="$PACKAGES ia32-libs-gtk"
+        PACKAGES="$PACKAGES binfmt-support"
+        PACKAGES="$PACKAGES libc6-dev"
+        PACKAGES="$PACKAGES libc6-dev-i386"
+        PACKAGES="$PACKAGES libcurl3"
+        PACKAGES="$PACKAGES xdg-user-dirs-gtk"
+        PACKAGES="$PACKAGES xdg-utils"
+        PACKAGES="$PACKAGES network-manager"
+        PACKAGES="$PACKAGES libnss3-1d"
 
-
-
+        if [ -n "$OPTIONAL_SOFTWARE" ] && $OPTIONAL_SOFTWARE;then
+            echo "adding optional gui software..."
+            PACKAGES="$PACKAGES gparted"
+            PACKAGES="$PACKAGES guake"
+            PACKAGES="$PACKAGES eog"
+            PACKAGES="$PACKAGES gnash"
+            PACKAGES="$PACKAGES vlc"
+            PACKAGES="$PACKAGES gtk-recordmydesktop"
+            PACKAGES="$PACKAGES chromium"
+        fi
+    fi
+}
 
 
 
