@@ -147,7 +147,7 @@ xen_build_install()
 
 # ---------------- Revised methods (not yet tested but cleaner)
 
-custom_firewall_rules()
+setup_xen_firewall()
 {
     echo "adding xen firewall rules..."
     # # Forwarding Rules (for Dual LAN Xen)

@@ -96,7 +96,7 @@ build_kernel()
 
 # }
 
-setup_firewall()
+setup_template_firewall()
 {
     if [ -n "$SETUP_FIREWALL" ] && $SETUP_FIREWALL;then
         echo "setting up firewall..."

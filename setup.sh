@@ -68,8 +68,8 @@ install_xen_server()
         set_log_file "xen.config"
         template_configuraton
         xen_configuraton
-        # setup_xen_firewall
-        # setup_template_firewall
+        setup_xen_firewall
+        setup_template_firewall
 
         # Build Kernel
         set_log_file "xen.kernel"
