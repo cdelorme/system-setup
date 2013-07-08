@@ -461,25 +461,9 @@ system_packages()
 
 }
 
-prepare_logs()
-{
-
-    # Log Data
-    echo "Setting up log space."
-
-    # Delete old logs
-    rm -rf $PWD/logs
-
-    # Re-create dir
-    mkdir $PWD/logs
-
-}
 
 stage_one_config_and_kernel()
 {
-
-    # Prepare Logs
-    prepare_logs
 
     # Direct logs for packages
     exec 1> $PWD/logs/packages.log 2> $PWD/logs/packages.error.log
