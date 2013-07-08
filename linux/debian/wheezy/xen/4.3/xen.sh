@@ -369,17 +369,6 @@ system_configuration()
 
 }
 
-setup_automatic_updates()
-{
-
-    echo "Creating Automatic Updates."
-
-    # Create file `/etc/cron.weekly/aptitude` with executable flag and contents:
-    echo "#!/bin/sh\n# Weekly Software Update Processing\naptitude clean\naptitude update\naptitude upgrade -y || aptitude upgrade -y\naptitude safe-upgrade -y || aptitude safe-upgrade -y" > /etc/cron.weekly/aptitude
-    chmod +x /etc/cron.weekly/aptitude
-
-}
-
 package_updates()
 {
 
@@ -471,7 +460,6 @@ stage_one_config_and_kernel()
     if ! $HEADLESS;then
         gui_configuration
     fi
-
 
     # Install Kernel
     kernel_installation
