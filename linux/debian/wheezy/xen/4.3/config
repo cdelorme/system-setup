@@ -1,20 +1,13 @@
-#!/bin/sh
-# Configuration File
-# Set the variables below to your liking and initiate the script to process
+# Configuration Data for Xen
+# ----------------------------
+
+# -------------------------------- Environment Configuration Options
 
 # Dual Interfaces for Internet Output Separation
 DUAL_LAN=true
 
-# Xen configuration settings in grub (default: dom0_mem=4096M dom0_max_vcpus=2)
-XEN_CONF=" dom0_mem=4096M dom0_max_vcpus=2"
 
-# Xen pciback.hide process requires a list of `lspci` BDF
-# PCIBACK=" xen-pciback.hide=(00:1d.0)(03:00.0)(03:00.1)(06:00.0)(07:00.0)(0b:00.0)(0e:00.0)(0f:00.0)"
-# Above is an example and may vary by BDF according to lspci output
-
-
-
-# -------------------------------- New Flags
+# -------------------------------- Kernel Options
 
 # Enable Virtio Kernel Extensions (default: true)
 ENABLE_VIRTIO=true
@@ -25,5 +18,15 @@ ENABLE_VFIO=true
 # Debian Xen suffix to install (default: *.deb)
 XEN_PACKAGE_SUFFIX="*.deb"
 
+
+# -------------------------------- Xen Configuration Options
+
 # Disable xen save/restore features to address low HDD (default: true)
 DISABLE_SAVE_RESTORE=true
+
+# Xen configuration settings in grub (default: dom0_mem=4096M dom0_max_vcpus=2)
+XEN_CONF=" dom0_mem=4096M dom0_max_vcpus=2"
+
+# Xen pciback.hide process requires a list of `lspci` BDF
+# PCIBACK=" xen-pciback.hide=(00:1d.0)(03:00.0)(03:00.1)(06:00.0)(07:00.0)(0b:00.0)(0e:00.0)(0f:00.0)"
+# Above is an example and may vary by BDF according to lspci output
