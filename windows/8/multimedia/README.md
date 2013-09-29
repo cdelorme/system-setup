@@ -3,14 +3,19 @@
 
 I use this system on a Xen server.
 
-Its intended purpose is for Multimedia and Development, which includes watching movies, playing video games, and very basic development activities.
+It is primarily a multimedia computer setup for watching movies and playing video games.
 
 
 ---
 
-Because this system is intended for use on a Xen server, it has been tailored for VGA Passthrough.
+This setup was intended to run on Xen with VGA Passthrough.  VGA Passthrough is not entirely stable with consumer cards, and as a result the setup process has been broken up into sections.
+
+- A section prior to driver installation.
+- System backup occurs here.
+- Driver installation including GPLPV (xen specific drivers).
+- Post driver software installation.
 
 **This means many of the steps I document are precautionary to prevent BSoD problems within the virtual environment.**
 
-If you too are setting up VGA Passthrough, be sure to follow the documentation closely, and you may want to peak at Xen to be sure.
+If you too are setting up VGA Passthrough, be sure to follow the documentation closely.
 

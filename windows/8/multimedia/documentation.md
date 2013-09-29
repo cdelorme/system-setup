@@ -39,7 +39,7 @@ _A xen configuration file should be included in the list of files in this reposi
 I generally have over a dozen USB devices connected to this machine at any given time.
 
 
-## Staging
+## Staging (For Xen)
 
 In order to ensure my system is functional and easily restored I go through a staging process.
 
@@ -76,46 +76,19 @@ I also install two fonts I am very fond of:
 
 _It is ill advised that you download the EPSON Kyoukashoutai font from the reference link, as its format was converted to ASCII at some stage and its font name became gibberish when attempting to use it from drop downs or otherwise.  You will want to modify the font name in a font editor first (I did)._
 
-I prepare the file system for changes by updating anything to do with the Libraries, and adding directories to `C:/` such as `C:/dev/software` and `C:/dev/projects` folders.  These allow me to coordinate installation of development software (python/java) and project files.
-
-Ideally I will download all of my software right away, including the software with graphics dependencies, but I will only install the ones I can at the moment, in order.
-
-**Starting with development software:**
-
-- [MinGW](http://www.mingw.org/)
-- [Go language](http://golang.org/)
-- [Python](http://www.python.org/)
-- [Tcl/TKinter](http://www.tcl.tk/)
-    - or [here](http://www.activestate.com/activetcl/downloads)
-- [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-- [Android SDK](http://developer.android.com/sdk/index.html)
-- [Apache ANT](http://ant.apache.org/)
-- [Ouya Development Kit](https://devs.ouya.tv/developers)
-
-I then make sure that I have added all development software folders to my PATH system variable.
-
-_Development References:_
-
-- [Follow instructions for building and compiling from command line](http://developer.android.com/tools/building/building-cmdline.html)
-
 **Moving onto Productivity Software:**
 
 - [Sublime Text 2](http://www.sublimetext.com/2)
 - [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
-- [Firefox](http://www.mozilla.org/en-US/firefox/new/)
-- [Firefox Aurora](http://www.mozilla.org/en-US/firefox/aurora/)
-- [Opera](http://www.opera.com/)
+- [Mumble (Client)](http://sourceforge.net/projects/mumble/)
 - [7zip](http://www.7-zip.org/)
 - [SumatraPDF](http://blog.kowalczyk.info/software/sumatrapdf/free-pdf-reader.html)
-- [Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
+- [Flash & Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
 - [CCleaner](http://www.piriform.com/ccleaner)
-- [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html)
 - [Daemon Tools](http://www.daemon-tools.cc/downloads)
-- [File Zilla](https://filezilla-project.org/)
-- sothink swf decompiler
-- Visual Studio 2012
+- SoThink SWF Decompiler
 
-I usually spend some time launching each application, and configuring it to ensure it is functional.  That concludes the pre-drivers stage.
+Generally I will test launch each application to ensure it is functional and configure it.
 
 **It would be wise to reboot the entire physical machine prior to moving onto the Drivers stage.**
 
@@ -133,10 +106,9 @@ In general they improve performance, but if the device state of the graphics car
 
 **List of Drivers:***
 
-- [GPLPV](http://www.meadowcourt.org/downloads/)
+- [Signed GPLPV](http://wiki.univention.de/index.php?title=Installing-signed-GPLPV-drivers)
 - [AMD Drivers](http://support.amd.com/us/gpudownload/windows/Pages/radeonaiw_win8-64.aspx)
-- [ASRock Z77 Extreme9](http://www.asrock.com/mb/Intel/Z77%20Extreme9/?cat=Download)
-    - Grab the Motherboard, USB 2.0 & 3.0, and any other related drivers
+- [ASRock Z77 Extreme9 inf & USB 3.0](http://www.asrock.com/mb/Intel/Z77%20Extreme9/?cat=Download)
 
 **Do the installations one at a time, and if any of them request a reboot be sure to shutdown instead and reboot the physical machine before proceeding.**
 
@@ -145,34 +117,27 @@ The next stage is all the software that is dependent on these drivers or the res
 
 ## Post-Drivers
 
-After the drivers are installed, here is a list of new devices I may have connected:
+Connect and install all USB Devices:
 
-- Logitech K810 Bluetooth Keyboard
--
+- [Logitech K810 Bluetooth Keyboard](http://www.logitech.com/en-us/support/bluetooth-illuminated-keyboard-k810?section=downloads&bit=&osid=23)
+- [Microsoft XBox 360 Wireless Driver](http://www.microsoft.com/hardware/en-us/d/xbox-360-wireless-controller-for-windows)
 
-
-I will generally shut down the virtual machine at this stage and boost its partition size to 160GB of space, this is to make room for all the additional software I am about to install.
-
-Here is the list of software that I will want to install to accommodate these devices:
+Install Video Dependent Software:
 
 - [K-Lite Codec Packs](http://codecguide.com/download_kl.htm)
-- [Logitech K810 Set Point Software](http://www.logitech.com/en-us/support/bluetooth-illuminated-keyboard-k810?crid=404)
-
-I configure my Logitech K810 keyboard to use the Function keys by default instead of the enhanced media keys (hotkeys like F2 to rename a file are significantly harder without this).
-
-Finally here is any software that I will want on the machine for multimedia:
-
 - [iTunes](http://www.apple.com/itunes/)
 - [Faststone Image Viewer](http://www.faststone.org/FSViewerDetail.htm)
-- [Inkscape](http://inkscape.org/)
 - [Fraps](http://www.fraps.com/)
-- [Blender3D](http://www.blender.org/)
 - [Windows Movie Maker](http://windows.microsoft.com/en-us/windows-live/movie-maker#t1=overview)
 - [Cave Story](http://www.cavestory.org/downloads_game.php)
 - [Steam](http://store.steampowered.com/)
-    - The Last Remnant
+- [FFXIV](http://www.finalfantasyxiv.com/playersdownload/na/)
+- [FFXIV Theme](http://www.finalfantasyxiv.com/alliance/na/dl/)
+- [Any Video Converter](http://www.any-video-converter.com/products/for_video_free/)
+- [Silverlight (For Netflix)](http://www.microsoft.com/getsilverlight/Get-Started/Install/Default.aspx)
 - FF7
 - FF8
+
 
 ---
 
