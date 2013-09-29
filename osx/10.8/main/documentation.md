@@ -291,6 +291,26 @@ Now we are all set to install some desirable software:
     brew install git-flow
     brew install cppcheck
     brew install bash-completion
+    brew install mercurial
+    brew install vim
+    brew install python
+    brew install go
+
+
+---
+
+**PATH modifications:**
+
+Override defaults to brew components by adding to `~/.profile`:
+
+    export PATH=/usr/local/bin:$PATH
+
+
+**Install bpython with pip:**
+
+_When you install python pip is installed._
+
+    pip install bpython
 
 
 **SSH Key Generation:**
