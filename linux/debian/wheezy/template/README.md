@@ -8,11 +8,10 @@ Therefore, it only makes sense that in an automated environment we use a templat
 It would be best to read the documentation and features list before running the automated script.
 
 
----
-
 ### Configuration Options
 
 The configuration options listed are for scripted execution and should be adjusted according to necessity.
 
--
-
+- Dot Files Repo Path
+- Extra Tools
+- Parallels Mods (Grub)
