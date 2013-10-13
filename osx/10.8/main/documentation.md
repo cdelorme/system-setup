@@ -295,6 +295,8 @@ Now we are all set to install some desirable software:
     brew install vim
     brew install python
     brew install go
+    brew install sshfs
+    brew install osxfuse
 
 
 ---
