@@ -1,6 +1,6 @@
 
-# IPFire Proxy Cache Router Firewall
-#### Updated 9-29-2013
+# IPFire Proxy Cache Router Firewall Documentation
+#### Updated 10-14-2013
 
 **Actual Configuration Details Are Private**
 
