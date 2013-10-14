@@ -60,7 +60,7 @@ I generally install these packages on every machine:
 
 Optional Tools:
 
-    aptitude install -y kernel-package build-essential p7zip-full exfat-fuse exfat-tools keychain monit
+    aptitude install -y kernel-package build-essential debhelper fakeroot p7zip-full exfat-fuse exfat-tools keychain monit
 
 
 **Automatic Updates:**
