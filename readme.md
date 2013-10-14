@@ -52,8 +52,3 @@ Two key objectives at the moment:
 2. Custom Debian installer
 
 
-### COPYRIGHT
-
-Scripts and Documentation released under GPLv3+ license.  Anything inside the files directory is likely not my property, and therefore omitted from this licensing.
-
-At time of writing chunks of the documentation here cannot be found elsewhere on the web, but anytime I am citing or using someone elses work I will provide reference links in the documentation.  Contents in the files directory with an accessible home page will be cited in the documentation as well.
