@@ -1,6 +1,6 @@
 
 # Web Server Template Documentation
-#### Updated 10-13-2013
+#### Updated 10-15-2013
 
 This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
 
@@ -30,7 +30,7 @@ Finally, the purpose of bind9 may be for an internal or "intranet" based develop
 
 **All instructions are written under the assumption that you have root privielges.**
 
-_I have not personally run thorough tests on the SSL instructions contained here-in, so it may be wise to wait for an update regarding SSL base setup.  I can say that if you are building any site with a login, you will want to add an SSL certificate, even if it is self-signed (just provide instructions for users to install it for safe logins)._
+_I have not thoroughly tested the snakeoil key generation instructions, but the default keys should work and do exist in the directories specific.  I will update the documentation according to any issues I encounter when I get a chance to test each step myself._
 
 _While I use the bind9 configuration described below, setup has always been a bit of a pain and I have not thoroughly tested and debugged all the "gotcha" scenarios.  You may consider waiting for an update to that section before following my instructions, or if you encounter problems either add an issue to the issue tracker and wait for me to follow-up._
 
