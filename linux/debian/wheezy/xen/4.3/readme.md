@@ -1,27 +1,7 @@
 
-# Xen 4.3 ReadMe
+# Xen 4.3 Server ReadMe
+#### Updated 10-15-2013
 
-I use Xen extensively as a primary control system.  This allows me to treat my single computer as several independently functioning machines.
+The latest release came out, and has led to many improvements.  Talk on the xen-users mailing list has covered a number of new potentially successful VGA passthrough options, and the system has migrated to upstream qemu as the default.
 
-Besides a segregation of duty I also get a significantly cleaner environment.
-
-The primary objectives of this system are for it to be a clean and exceptionally functional platform with some degree of security precautions.
-
----
-
-The documented procedure is quite long, having been known to take upwards of two days to perform.
-
-If you would like to simplify the process, the script will take you from a fresh install of Debian Wheezy to a fully configured and ready to execute Xen server.
-
-Here are the instructions for execution:
-
-    aptitude install git
-    mkdir -p /home/src
-    cd /home/src
-    git clone https://github.com/CDeLorme/system-setup.git
-    cd system-setup/linux/debian/wheezy/xen/4.3/
-
-You will want to modify the `xen-config` file first, but afterwards simply execute `./xen.sh` and you should be off to the races (if over ssh do so from screen or tmux in case of disconnection).
-
-The xen-config file is mostly self-documenting, but if anything is questionable bring it to my attention in the github issue tracker and I will clarify it.
-
+My goal is to create a highly streamlined document this time, that can be cut and pasted into a shell script and executed for automated setup.
