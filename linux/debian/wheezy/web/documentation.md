@@ -69,7 +69,7 @@ Register the key & add their repository:
 
     aptitude clean
     aptitude update
-    aptitude install -y nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick mariadb-server mongodb msmtp-mta python-pip sphinxsearch bind9
+    aptitude install -y nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb msmtp-mta python-pip sphinxsearch bind9
 
 
 **Installing nodejs:**
@@ -346,7 +346,7 @@ This user will be responsible for most of the web activity going on, so we want 
 
 We can start by giving them a real `/home` path:
 
-    usermod -m -d /home/www-data
+    usermod -m -d /home/www-data www-data
 
 _Check that the contents of `/etc/skel` did not create or add any unwanted files._
 
@@ -397,15 +397,24 @@ By default PHP allows 2 Megabytes at most, which is tiny by todays standards, so
 Remember, you can enforce upload sizes in other ways, this simply makes it require less tweaking in the service itself.
 
 
-**Add Mongodb support for php:**
+**Add pecl Packages:**
 
-We have to install mongo using pecl (php-pear):
+We can only install mongodb and gmagick extensions for php using pecl, the pear package system.  To do so, let's run these commands:
 
+    pecl install gmagick
     pecl install mongo
 
-Next we want to add the extension to php by adding it to our `/etc/php5/fpm/php.ini` directly, or to an appropriate mods folder loaded by that ini:
+Next we need to tell php to load these modules.  We can do so the "proper" way by creating `/etc/php5/mods-available/gmagick.ini` and `/etc/php5/mods-available/mongodb.ini` with their extentions like so:
 
-    extension=mongo.so
+    echo "extension=gmagick.so" > /etc/php5/mods-available/gmagick.ini
+    echo "extension=mongo.so" > /etc/php5/mods-available/mongodb.ini
+
+Finally we can symlink these into `/etc/php5/conf.d`, and reboot php-fpm for the changes to take affect:
+
+    cd /etc/php5/conf.d
+    ln -s ../mods-available/gmagick.ini gmagick.ini
+    ln -s ../mods-available/mongodb.ini mongodb.ini
+    service php5-fpm restart
 
 
 ##### Optimization
@@ -450,9 +459,9 @@ Ideally we would run something like [Seige](http://www.joedog.org/siege-home/), 
 Here are the settings I stick with:
 
     pm.max_children = 25
-    pm.start_servers = 4
+    pm.start_servers = 2
     pm.min_spare_servers = 2
-    pm.max_spare_servers = 10
+    pm.max_spare_servers = 5
     pm.max_requests = 500
 
 This tends to be plenty for development and testing, but obviously I would do the ground-work above if I wanted to make sure it was tailored to the service I was building.
@@ -490,11 +499,36 @@ Create `php.conf` with:
     location ~ \.php$ {
         try_files $uri =404;
         include fastcgi_params;
-        #fastcgi_pass 127.0.0.1:9000
         fastcgi_pass unix:/var/run/php5-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
+
+Next we can create `cache.conf`, but there are two approaches.  The best performance with the most headaches is to add one line `expires max;`, which we would then have to override for every file we don't want to be forever cached.  The best approach I have found is to be specific about the files we want their browser to cache, and to break it up according to specific types:
+
+    location ~* \.(ico|gif|jpe?g|png)$ {
+        expires max;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    }
+
+    location ~* \.(css|js)$ {
+        expires 5m;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    }
+
+_You may consider also adding `access_log off;` and `log_not_found off;` to the static files._
+
+Create a `hidden.conf` file with:
+
+    location ~ /\. {
+        access_log off;
+        log_not_found off;
+        deny all;
+    }
+
+This prevents users from seeing dot files and directories, such as `.git` folders.
 
 
 ##### Optimizng NGinx
@@ -518,11 +552,14 @@ Inside the events brackets let's check for or add:
 
 These are two features that enhance multi-core handling, but may have the adverse affect if your worker count is above the number of available cores.
 
-Next in between the http brackets let's add:
+Make sure these key settings exist:
 
     sendfile on;
+    tcp_nopush on;
 
-This allows the server to transfer data without switching contexts, which can improve performance.
+The first allows context switching and can greatly boost CPU performance, the second ensures that no HTTP headers are split into chunks and sent separately.
+
+Locate `keepalive_timeout` and make sure it reads `keepalive_timeout 15;` to reduce the timeout duration to 15 seconds.
 
 Finally we want to check that the line `include /etc/nginx/conf.d/*.conf;` exists within the http brackets, so we can visit that directory to add enhancements:
 
@@ -551,32 +588,6 @@ Create an `uploads.conf` with:
 
 NGinx file uploads are by default limited to 1m, despite what php is set to.  If you plan to support file uploads you will want to choose a size and change it in both nginx and php.
 
-Next we can create `cache.conf`, but there are two approaches.  The best performance with the most headaches is to add one line `expires max;`, which we would then have to override for every file we don't want to be forever cached.  The best approach I have found is to be specific about the files we want their browser to cache, and to break it up according to specific types:
-
-    location ~* \.(ico|gif|jpe?g|png)$ {
-        expires max;
-        add_header Pragma public;
-        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    }
-
-    location ~* \.(css|js)$ {
-        expires 5m;
-        add_header Pragma public;
-        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    }
-
-_You may consider also adding `access_log off;` and `log_not_found off;` to the static files._
-
-Create a `hidden.conf` file with:
-
-    location ~ /\. {
-        access_log off;
-        log_not_found off;
-        deny all;
-    }
-
-This prevents users from seeing dot files and directories, such as `.git` folders.
-
 Create `pma.conf` with:
 
     # PHP My Admin SSH Forwarded Service
@@ -602,9 +613,12 @@ _The pma.conf script secures phpmyadmin access to localhost only, and can be acc
 
 _You will have to download a copy of phpmyadmin and place it at `/srv/www/pma` for the pma config above to work properly.  More details will be explained in the virtual hosts section._
 
-Create a file `tcp.conf` with:
+For just a quick moment, to add pma.conf properly, we need to move to `/srv/www` and grab a copy of phpmyadmin so it can be accessed from `/srv/www/pma`:
 
-    tcp_nopush on;
+    cd /srv/www
+    wget "http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.0.8/phpMyAdmin-4.0.8-all-languages.zip?r=http%3A%2F%2Fwww.phpmyadmin.net%2Fhome_page%2Findex.php&ts=1381830040&use_mirror=superb-dca2" -O pma.zip
+    unzip pma.zip
+    mv php* pma
 
 This prevents the http headers from being sent in chunks.
 
@@ -646,6 +660,7 @@ Let's also create `gzip.conf` with:
 
     # Increase minimum length for gzip to avoid wasting compression cycles:
     gzip_min_length 50;
+
 
 **Adding SSL:**
 
@@ -713,7 +728,7 @@ Here is a very basic example of a `domain.com` website, which we will place into
 
         root /srv/www/domain.com/public_html;
         index index.html index.php;
-        rewrite on;
+        rewrite_log on;
 
         # Include Configs
         include /etc/nginx/scripts.d/*.conf;
@@ -761,13 +776,13 @@ Next we can define an SSL server block, which looks like this:
         ssl_certificate /etc/nginx/ssl/domain.com/domain.com.crt;
         ssl_certificate_key /etc/nginx/ssl/domain.com/domain.com.key;
 
-        server_name domain.com www.domain.com
+        server_name domain.com www.domain.com;
         access_log /srv/www/domain.com/logs/access.log;
         error_log /srv/www/domain.com/logs/error.log;
 
         root /srv/www/domain.com/public_html;
         index index.html index.php;
-        rewrite on;
+        rewrite_log on;
 
         # Tell FastCGI this is a secure line
         fastcgi_param HTTPS on;
@@ -791,8 +806,6 @@ Enlarged buffers solved the problem, no clue as to the exact details why, but ot
 **Example of a completely fleshed out file:**
 
 Ideally we can place all of those server sections into the single named file, and we'll get something like the following:
-
-
 
     server {
         listen       80;
@@ -819,7 +832,7 @@ Ideally we can place all of those server sections into the single named file, an
 
         root /srv/www/domain.com/public_html;
         index index.html index.php;
-        rewrite on;
+        rewrite_log on;
 
         # Include Configs
         include /etc/nginx/scripts.d/*.conf;
@@ -832,13 +845,13 @@ Ideally we can place all of those server sections into the single named file, an
         ssl_certificate /etc/nginx/ssl/domain.com/domain.com.crt;
         ssl_certificate_key /etc/nginx/ssl/domain.com/domain.com.key;
 
-        server_name domain.com
+        server_name domain.com;
         access_log /srv/www/domain.com/logs/access.log;
         error_log /srv/www/domain.com/logs/error.log;
 
         root /srv/www/domain.com/public_html;
         index index.html index.php;
-        rewrite on;
+        rewrite_log on;
 
         # Tell FastCGI this is a secure line
         fastcgi_param HTTPS on;

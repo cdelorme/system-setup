@@ -56,11 +56,7 @@ Start by logging in as root to run through these steps.
 
 I generally install these packages on every machine:
 
-    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial curl bash-completion
-
-Recommended Tools:
-
-    aptitude install -y kernel-package build-essential debhelper fakeroot lzop unzip p7zip-full exfat-fuse exfat-tools keychain monit pastebinit curl markdown
+    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip p7zip-full keychain exfat-fuse exfat-tools monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot lzop fonts-takao
 
 
 **Automatic Updates:**
@@ -87,8 +83,7 @@ Be sure it is executable:
 If you have a bunch of ext4 file systems storing content, even on lvm, it might be wise to create a defrag cron-job to keep the data orderly.  Create a file at `/etc/cron.weekly/e4defrag` with lines similar to:
 
     #!/bin/sh
-
-    # Defrag all devices (if able)
+    e4defrag /boot
     for DEVICE in /dev/mapper/*;
     do
         e4defrag $DEVICE
@@ -119,7 +114,7 @@ To start we locate `UMASK 022` inside `/etc/logins.def` and change it to `UMASK 
 
 Next we want to globally enforce this using `/etc/pam.d/common-session` by adding the following line at the bottom:
 
-    session optional pam_umask.so umask=007
+    session optional pam_umask.so umask=002
 
 _This will take effect immediately and will not require a reboot._
 
@@ -213,7 +208,7 @@ Finally, for production servers especially, since port 22 is a well known port t
 
 Once that has been set you will need to use `ssh -p ####` to access your server, and anyone attempting to reach Port 22 will be denied.  Obfuscation is a very effective security precaution, and at the very least will reduce your logged denied login attempts.
 
-Be sure to `sudo service ssh restart` for the changes to take affect.
+Be sure to `service ssh restart` for the changes to take affect.
 
 
 **IPTables:**
@@ -262,18 +257,15 @@ _According to the man pages, the restore operation will automatically (by defaul
 
 **Enable Pulse Audio:**
 
-Modify the file at `/etc/default/pulseaudio` to contain:
+You may have to modify pulse audio to prevent warning messages, to do so modify the line in `/etc/default/pulseaudio`:
 
     PULSEAUDIO_SYSTEM_START=1
 
-_This will fix warning messages about multi-user support._
 
+**Add JPN Locale Support:**
 
-**(Optional) Add JPN Locale Support:**
+To support japanese characters in the file system I add the locale:
 
-I have several files with japanese characters so I add the locale to support the file names.
-
-    aptitude install -y fonts-takao
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
 
@@ -613,7 +605,7 @@ Here is what my `~/.vimrc` looks like:
 
 I create a new user with this command (to ensure bash shell):
 
-    useradd -m -s /bin/bash -p username
+    useradd -m -s /bin/bash username
     passwd username
 
 Supply a password so that you may login as this user going forward.  The `-s` flag lets us  set the bash shell, otherwise it will default to the original `/bin/sh`.
@@ -630,15 +622,11 @@ I will usually add my user account to a series of groups:
 
 Minimalist Gnome3 Packages:
 
-    sudo aptitude install -y gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support xdg-user-dirs-gtk xdg-utils network-manager
+    aptitude install -y gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support xdg-user-dirs-gtk xdg-utils network-manager eog gparted guake gnash vlc gtk-recordmydesktop chromium
 
-Optional GUI Software:
+Development Tools:
 
-    sudo aptitude install -y eog gparted guake gnash vlc gtk-recordmydesktop chromium
-
-Optional Development Tools:
-
-    sudo aptitude install -y glib-devel glibc-devel gnome-libs-devel gstream-devel gtk3-devel guichan-devel libX11-devel libmcrypt-devel qt3-devel qt-devel pythonqt-devel python-devel python3-devel pygame-devel perl-devel nodejs-devel ncurses-devel pygobject2-devel pygobject3-devel gobject-introspection-devel guichan bpython
+    aptitude install -y glib-devel glibc-devel gnome-libs-devel gstream-devel gtk3-devel guichan-devel libX11-devel libmcrypt-devel qt3-devel qt-devel pythonqt-devel python-devel python3-devel pygame-devel perl-devel nodejs-devel ncurses-devel pygobject2-devel pygobject3-devel gobject-introspection-devel guichan bpython
 
 _These development tools may add a significantly to the size of the install._
 
@@ -718,7 +706,7 @@ I generally keep a local `~/bin` folder and load it into the global PATH from my
 
 **Enable GDM Login as Root:**
 
-Totally optional, but doing so is a simple matter of adjusting pam:
+I'd like to have the option to login to the GUI as root, but by default pam is set not to allow this.  To resolve this simply run the following command:
 
     sed -i "s/user != root//" /etc/pam.d/gdm3
 
@@ -753,4 +741,4 @@ First, open up `/etc/default/grub` and find the line with `#GRUB_GFXMODE=640x480
 
 Next open up `/etc/grub.d/00_header`, and find the line with `set gfxmode=${GRUB_GFXMODE}` and add `set gfxpayload=keep` below it before `load_video`.
 
-Now run `sudo update-grub` and reboot your system.  Your terminal will now be sized better for working directly instead of over SSH if desired.  _Be careful_, as a larger resolution can render the text unreadable.
+Now run `update-grub` and reboot your system.  Your terminal will now be sized better for working directly instead of over SSH if desired.  _Be careful_, as a larger resolution can render the text unreadable.
