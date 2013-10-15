@@ -56,11 +56,11 @@ Start by logging in as root to run through these steps.
 
 I generally install these packages on every machine:
 
-    aptitude install -y sudo ssh tmux screen vim parted ntp git mercurial curl bash-completion
+    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial curl bash-completion
 
-Optional Tools:
+Recommended Tools:
 
-    aptitude install -y kernel-package build-essential debhelper fakeroot p7zip-full exfat-fuse exfat-tools keychain monit
+    aptitude install -y kernel-package build-essential debhelper fakeroot lzop unzip p7zip-full exfat-fuse exfat-tools keychain monit pastebinit curl markdown
 
 
 **Automatic Updates:**
@@ -80,6 +80,21 @@ I create a file `/etc/cron.weekly/aptitude` containing:
 Be sure it is executable:
 
     chmod +x /etc/cron.weekly/aptitude
+
+
+**Defragmentation:**
+
+If you have a bunch of ext4 file systems storing content, even on lvm, it might be wise to create a defrag cron-job to keep the data orderly.  Create a file at `/etc/cron.weekly/e4defrag` with lines similar to:
+
+    #!/bin/sh
+
+    # Defrag all devices (if able)
+    for DEVICE in /dev/mapper/*;
+    do
+        e4defrag $DEVICE
+    done
+
+_The primary benefit is not one of performance, but of disk consumption.  As data spreads it can be harder to organize, which could be a negative as far as resizing partitions or LVM for that matter._
 
 
 **SSD Optimizations:**
@@ -243,6 +258,24 @@ Here is a script you can place into `/etc/network/if-up.d`, be sure to make it e
     iptables-restore < /etc/firewall.conf
 
 _According to the man pages, the restore operation will automatically (by default) flush the existing rules when loading a new file._
+
+
+**Enable Pulse Audio:**
+
+Modify the file at `/etc/default/pulseaudio` to contain:
+
+    PULSEAUDIO_SYSTEM_START=1
+
+_This will fix warning messages about multi-user support._
+
+
+**(Optional) Add JPN Locale Support:**
+
+I have several files with japanese characters so I add the locale to support the file names.
+
+    aptitude install -y fonts-takao
+    echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen
 
 
 ### Etc Skel & User Configuration
