@@ -228,7 +228,7 @@ Insert these rules after SSH rules inside `/etc/fireall.conf`:
 
 **Server Website Logs:**
 
-Create a new file in `/etc/logrotate.d/` with these contents:
+Create a new file in `/etc/logrotate.d/websites` with these contents:
 
     /srv/www/*/logs/*.log {
        daily

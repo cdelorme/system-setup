@@ -283,7 +283,7 @@ Obviously for security reasons you will want to make sure that any passwordless 
 
 To create a strong SSH key:
 
-    ssh-keygen -t rsa -b 4096 -c Email
+    ssh-keygen -t rsa -b 4096 -C Email
 
 Follow the prompts for naming, and optionally add a password.
 
