@@ -55,8 +55,10 @@ In any event, I spent almost an entire year figuring out how to get VGA Passthro
 
 This was both an excellent experience, and after nine months a great success.
 
-I have since [fully documented](http://wiki.xen.org/wiki/Comprehensive_Xen_Debian_Wheezy_PCI_Passthrough_Tutorial) my original configuration, but I continue to update it here.
-
-I have kept a slightly outdated copy of my [xen 4.2 documentation](xen-4.2.md), if you happen to be looking for notes on an older release.
-
 Xen is an incredibly powerful tool, but equally complex.  I hope my documentation can ease new users into it, despite not necessarily being "best practice" for business applications.
+
+I have two sections for Xen, my current primary is the 4.3 release.  However if you feel obliged to use an older version, I have [fully documented](http://wiki.xen.org/wiki/Comprehensive_Xen_Debian_Wheezy_PCI_Passthrough_Tutorial) my Xen 4.2 configuration, and have a somewhat more [updated copy here]().  Further I released a [full video walkthrough on youtube](http://www.youtube.com/playlist?list=PLC70DC33D993CEB44).
+
+Use of my 4.2 documentation is at your own risk however, as I have not updated it with any patch-sets since the initial 4.3 release came out.
+
+**My 4.2 documentation is much more new-user friendly, as it was written with that intention in mind, so if you find the 4.3 documentation to be lacking then check the 4.2 as it may be clearer.**
