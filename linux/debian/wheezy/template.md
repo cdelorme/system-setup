@@ -300,8 +300,6 @@ _Note that doing this may require you to set an addition `-o ControlMaster=no` o
 
 **Git Configuration:**
 
-    git config --global user.name "Casey DeLorme"
-    git config --global user.email "CDeLorme@gmail.com"
     git config --global core.editor "vim"
     git config --global help.autocorrect -1
     git config --global color.ui true
@@ -320,9 +318,6 @@ I use aliases to expedite the git command chain, which despite the small differe
 
 This should create a `~/.gitconfig` similar to:
 
-    [user]
-        name = Casey DeLorme
-        email = CDeLorme@gmail.com
     [core]
         editor = vim
     [help]
@@ -342,74 +337,19 @@ This should create a `~/.gitconfig` similar to:
     [remote "origin"]
         push = HEAD
 
-I further enhance my git experience with a series of files.
+I also like to enhance my overall terminal experience by adding a bunch of functionality.
 
-First I add a prompt enhancer to `~/.git-prompt` containing:
+First let's create `~/.bash_logout` specifically to clear my environment on exit so subsequent logins don't see the previous commands and appear "fresh":
 
     #!/bin/bash
-    #~/.git-prompt
-    # Colorful default with non-breaking bare-repository git PS1 support
-    if [[ $- == *i* ]] ; then
-        c_red=`tput setaf 1`
-        c_green=`tput setaf 2`
-        c_blue=`tput setaf 4`
-        c_purple=`tput setaf 5`
-        c_cyan=`tput setaf 6`
-        c_sgr0=`tput sgr0`
+    # Autoclear Screen if command exists
+    [[ -x /usr/bin/clear_console ]] && clear_console -q
 
-        parse_git_branch ()
-        {
-            if git rev-parse --git-dir >/dev/null 2>&1
-            then
-                gitver=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
-                numfil=$(git status | grep "#   " | wc -l)
-                echo -e git:$gitver:$numfil
+Next we'll download [git completion](https://raw.github.com/git/git/master/contrib/completion/git-completion.bash), to make git even easier to use:
 
-            elif hg status -q >/dev/null 2>&1
-            then
-                hgver=$(hg branch 2>/dev/null)
-                numfil=$(hg status | wc -l)
-                echo -e hg:$hgver:$numfil
-            else
-                  return 0
-            fi
-        }
+    wget "https://raw.github.com/git/git/master/contrib/completion/git-completion.bash" -O .git-completion
 
-        branch_color ()
-        {
-                color="${c_red}"
-                if git rev-parse --git-dir >/dev/null 2>&1
-                then
-                        if git status | grep "nothing to commit" 2>&1 > /dev/null
-                        then
-                            color=${c_green}
-                        fi
-                elif hg status -q >/dev/null 2>&1
-                then
-                        if expr $(hg status | wc -l) == 0 2>&1 > /dev/null
-                        then
-                            color=${c_green}
-                        fi
-                else
-                        return 0
-                fi
-                echo -ne $color
-        }
-
-        colorify ()
-        {
-            if ! git status &> /dev/null;
-            then
-                echo -ne "${c_blue}${0} ($(date +%R:%S))${c_sgr0} ${c_purple}$(whoami)${c_sgr0}@${c_green}$(hostname)${c_sgr0} ${c_blue}$(dirs)${c_sgr0}"
-            else
-                echo -ne "$(whoami)@$(hostname) ${c_red}$(dirs)${c_sgr0} [$(branch_color)$(parse_git_branch)${c_sgr0}]"
-            fi
-        }
-
-        PS1='[$(colorify)]$ '
-    fi
-
-Next I create a `~/.githelpers` file for pretty log output containing:
+In the above git config I aliased a command to a `~/.githelpers`, which can be found all over the internet, but basically gives you a beautified and simple pipeline of git activity.  The contents include:
 
     #!/bin/bash
 
@@ -451,63 +391,164 @@ Next I create a `~/.githelpers` file for pretty log output containing:
             less -FXRS
     }
 
-I also grab a copy of the git-completion shell script (you can find this online).
+Next let's customize our prompt and add git and mercurial support by creating a custom `~/.promptrc`:
 
+    #!/bin/bash
+    #~/.promptrc
 
-**User .bashrc:**
+    # Create a dynamic prompt that adjusts if in a git repo
+    c_bold=`tput bold`
+    c_red=`tput setaf 1`
+    c_green=`tput setaf 2`
+    c_blue=`tput setaf 4`
+    c_purple=`tput setaf 5`
+    c_cyan=`tput setaf 6`
+    c_sgr0=`tput sgr0`
 
-I generally replace the contents of my `~/.bashrc/` with:
+    # Support for Git & Mercurial
+    parse_repo_branch ()
+    {
+        if git rev-parse --git-dir >/dev/null 2>&1
+        then
+            gitver=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
+            numfil=$(git status | grep "#   " | wc -l)
+            echo -e git:$gitver:$numfil
+        elif hg status -q >/dev/null 2>&1
+        then
+            hgver=$(hg branch 2>/dev/null)
+            numfil=$(hg status | wc -l)
+            echo -e hg:$hgver:$numfil
+        else
+              return 0
+        fi
+    }
 
-    # .bashrc for interactive shells post login
+    # Colorize the branch based on its state
+    branch_color ()
+    {
+            color="${c_red}"
+            if git rev-parse --git-dir >/dev/null 2>&1
+            then
+                    if git status | grep "nothing to commit" 2>&1 > /dev/null
+                    then
+                        color=${c_green}
+                    fi
+            elif hg status -q >/dev/null 2>&1
+            then
+                    if expr $(hg status | wc -l) == 0 2>&1 > /dev/null
+                    then
+                        color=${c_green}
+                    fi
+            else
+                    return 0
+            fi
+            echo -ne $color
+    }
 
-    # Don't continue if not interactive
+    # Check for git and supply a colorized detailed prompt
+    colorify ()
+    {
+        if ! git status &> /dev/null;
+        then
+            echo -ne "${c_blue}${0} ($(date +%R:%S)) ${c_purple}$(whoami)${c_sgr0}@${c_green}$(hostname) ${c_bold}${c_blue}$(dirs)${c_sgr0}"
+        else
+            echo -ne "$(whoami)@$(hostname) ${c_bold}${c_red}$(dirs)${c_sgr0} [$(branch_color)$(parse_repo_branch)${c_sgr0}]"
+        fi
+    }
+
+    # By wrapping in single quotes we allow the command execution to be parsed only when requested
+    PS1='\n[$(colorify)\n$ '
+
+Finally to tie all of these things together and add some infrastructure (some optional for gui), we can create a `~/.bashrc`:
+
+    #!/bin/bash
+
+    # Discontinue if shell is not interactive
     [ -z "$PS1" ] && return
 
-    # Shell options (resize & history)
-    shopt -s checkwinsize
+    # Set default editor
+    export EDITOR=vim
+
+    # Create a bin folder for the user if one does not exist
+    if [ ! -d ~/bin ];
+    then
+        mkdir -p ~/bin &> /dev/null
+    fi
+
+    # Always add local bin path for user-overrides
+    export PATH=~/bin:$PATH
+
+    # Auto-Completion
+    if [[ -r /usr/share/bash-completion/bash_completion ]];
+    then
+        . /usr/share/bash-completion/bash_completion
+        set show-all-if-ambiguous on
+        set show-all-if-unmodified on
+
+        # Add for sudo users
+        complete -cf sudo &> /dev/null
+    fi
+
+    # If the command is not found, look for packages that contain it
+    [[ -f /usr/share/doc/pkgfile/command-not-found.bash ]] && . /usr/share/doc/pkgfile/command-not-found.bash
+
+    # Set History File
+    export HISTFILE=~/.history
+
+    # Append History
     shopt -s histappend
 
-    # Don't add lines to history that begin with a space
+    # Ignore lines in history that started with a space
     HISTCONTROL=ignoreboth
 
-    # Enable Bash Completion
-    if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-    elif [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-    fi
+    # Attempt Directory Autocompletion (For typo-prone)
+    shopt -s dirspell
 
-    # If not ~/bin exists, create it
-    if [ ! -d "~/bin" ];then
-        mkdir -p "~/bin"
-    fi
+    # Expand typed variables, instead of correcting
+    shopt -s direxpand
 
-    # If sublime text is installed and no subl exists create it
-    if [ ! -f "~/bin/subl" ] && [ -f "~/Applications/sublime_text/sublime_text" ];then
-        ln -s "~/Applications/sublime_text/sublime_text" "~/bin/subl"
-    fi
-
-    # If no autostart dir exists create it
-    if [ ! -d "~/.config/autostart" ];then
-        mkdir -p "~/.config/autostart"
-    fi
-
-    # If guake not exists on startup add it
-    if [ ! -f "~/.config/autostart/guake.desktop" ] && [ -f "~/.local/share/applications/guake.desktop" ];then
-        ln -s "~/.local/share/applications/guake.desktop" "~/config/autostart/guake.desktop"
-    fi
-
-    # Add color to ls
+    # Alias ls
     alias ls='ls -ahF --color=auto'
 
-    # Load Git Additions
-    . ~/.git-completion
-    . ~/.git-prompt
+    # Carry aliases to sudo env
+    alias sudo='sudo '
 
-Load your ssh keys using keychain so that automated processes can run without password entry until the next reboot:
+    # Auto-detect changes in window size and adjust
+    shopt -s checkwinsize
 
+    # If the system has a gnome shell, let's
+    if [ -n "$DISPLAY" ];
+    then
+
+        # Create Autostart Folder if it does not already exist
+        if [ ! -d ~/.config/autostart ];
+        then
+            mkdir -p ~/.config/autostart &> /dev/null
+        fi
+
+        # Check for Sublime Text & create subl command if not already present
+        if [ ! -f ~/bin/subl ] && [ -f ~/Applications/sublime_text/sublime_text ];
+        then
+            ln -s ~/Applications/sublime_text/sublime_text ~/bin/subl
+        fi
+
+        # If guake exists, make sure it is loaded at login
+        if [ ! -h ~/.config/autostart/guake.desktop ] && [ -f ~/.local/share/applications/guake.desktop ];
+        then
+            ln -s ~/.local/share/applications/guake.desktop ~/.config/autostart/guake.desktop
+        fi
+
+    fi
+
+    # Autoload SSH Access
     keychain ~/.ssh/id_rsa
     . ~/.keychain/$HOSTNAME-sh
+
+    # Load Git Completion
+    . ~/.git-completion
+
+    # Load Custom Prompt
+    . ~/.promptrc
 
 
 **Vim Configuration:**
@@ -596,19 +637,20 @@ Here is what my `~/.vimrc` looks like:
     set runtimepath^=~/.vim/bundle/ctrlp.vim
     :helptags ~/.vim/doc
 
+This gives me a very basic auto-completion, and a variety of useful tools that help my productivity.
+
 
 **User Creation:**
 
-I create a new user with this command (to ensure bash shell):
+This is the last task I perform, generally after I have placed all of my dot files and related configuration into `/etc/skel`, this way future users on that system automatically have all those useful tools available to them.
 
-    useradd -m -k -s /bin/bash username
+I create a new user with this command (ensuring bash shell, otherwise debian defaults to `/bin/sh`):
+
+    useradd -m -s /bin/bash username
     passwd username
 
-Supply a password so that you may login as this user going forward.  The `-s` flag lets us  set the bash shell, otherwise it will default to the original `/bin/sh`.
+You will then wish to run `passwd username` to assign that account a password (or else they may be unable to login).
 
-I will usually add my user account to a series of groups:
+If this user will have admin privileges add them to the sudo group:
 
     usermod -aG sudo username
-    usermod -aG video username
-    usermod -aG audio username
-    usermod -aG cdrom username
