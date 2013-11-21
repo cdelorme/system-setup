@@ -7,47 +7,38 @@ I use these template instructions to prepare a virtual machine template which ca
 Having a documented default or "base" install can greatly reduce room for error when setting up new machines, as well as expedite the setup process.
 
 
-### Known Concerns
-
-With templates some concerns arise.  These generally tend to be re-use of configuration data, so it is imparative that you change the configuration, especially when applying it multiple times within a network.
-
-Here is a list of other known problems I have encountered:
-
-Debian will remember network devices by mac address, and you will need to wipe out addresses stored inside `/etc/udev/rules.d/70-persistent-net.rules` if you intend to **clone** a templated installation across the same network.
-
-**If using a virtual machine platform** such as Parallels desktop or VMWare, you may want to avoid snapshots for cloned machines, as they can consume significantly more space than the actual base system does.  Ideally create one template machine with the snapshots, and wipe them out after cloning a new instance.
-
-
 ### Hardware Configuration
 
-Applications vary wildly, but this machine will run sufficiently on 1GB of memory, possibly less if you omit the GUI installation, more if you intend to run large memory hungrey applications.
+Applications vary wildly, but this machine will run sufficiently on 512MB of RAM, but I tend to use 1GB or more.
 
 
 #### Ideal Partitioning & Installation
 
-I tend to rely on logical volumes to separate all key partitions.  This is for security and control, for example I limit /var/log and /tmp partitions to sizes between 500MB-1GB.  _This is a preventative step and does not actually address the real cause of the problem, but it can take off some of the stress of solving a problem when your system stops functioning due to no drive space._  An independent home volume allows for easy expansion as necessary, giving you additional flexibility.  Technically you cannot expand root while the system is running, but there are several detailed guides on doing so in various platforms (even redhat).
+I use Logical Volumes for my partitioning, and I always create partitions for error-prone areas like the logs.  This is purely a preventative step such that I never end up with a machine that I cannot even debug due to having no available drive space.
 
-Due to the complexity involved in resizing root it would be ideal to supply a high threshhold according to what you intend to have running.  For a full GUI environment somewhere between 8-12GB tends to work nicely.
+Logical Volumes provide you with a great deal of additional flexibility, and are compatible with pretty much every linux distribution.  Dynamically expanding and shrinking volumes, and paths that do not change based on the order the drive is connected in.  They can span multiple disks, or even handle a portion of RAID if needed.  If you have to reinstall you can do so without wiping your home directory.  Also you have a quick and easy way to backup each partition.
 
-I try to keep my template to 20GB of space, which should give you enough room for an 8GB root and plenty spare for the remaining partitions.  A standard install with Gnome3 will work with 6GB so 8GB gives you some flexing room for packages such as development tools or multimedia.
+However, keep in mind that the root partition cannot be resized on the fly (or at the very least cannot _easily_ be resized on the fly), so it is best to allot the amount you will need for that up front, plus a margin-of-error (eg. if you expect to need 8GB assign 12GB).  I can say that a minimalist GUI and complete OS tend to take less than 6GB of space on root, but that will vary by packages installed, and can quickly escalate.
+
+I try to keep my templates limited to 20GB of space, which should give you plenty of room to work with for starters, and is easier to backup and restore at that size.
 
 Here is a break-down of my partitioning scheme:
 
-- 256MB PC-Grub/EFI Partition
-- 256MB ext4 /boot
+- 512MB PC-Grub/EFI Partition
+- 512MB ext4 /boot
 - Remainder to Volume Group
     - VG Name "debian"
         - 2GB swap
         - 8GB root /
         - 512MB log /var/log
         - 512MB tmp /tmp
-        - Remainder home /home (8.5GB)
+        - Remainder home /home (8GB)
 
-I also only ever install `system utilities` from the package options.
+I also only ever install `system utilities` from the package options, this is primarily because when running the install off of the disk things work much slower.  If you want to install other packages you can use debconf post-install.
 
-I leave Gnome3 for later, as I don't always use it in all templates, and when I do I prefer a minimalist install to save nearly a GB of space consumed by default software that I would not be using.
+I don't always use a desktop environment so I save things like gnome3 for later.  I also don't use every application that the gnome3 base packages come with, and prefer a minimalist installation to save space.
 
-I also omit user creation besides root for the begining.  This gives me greater flexibility in creating the user later, after `sudo` and other utilities are readily available.
+Because I modify the dot files heavily I also tend to avoid creating any other users besides root.  This allows me to add utilities and create dot files in `/etc/skel` before creating a user, at which point they automatically get all the new files which saves me some typing.
 
 
 ### Post Installation Steps
@@ -272,14 +263,10 @@ To support japanese characters in the file system I add the locale:
 
 ### Etc Skel & User Configuration
 
-_Changes made to `~/*` should be placed into `/etc/skel`, which will be distributed to all users._
+_Ideally, besides being in `~/`, the files created here can be placed into `/etc/skel`, where they will be distributed to all new users._
 
 
 **Setting up SSH:**
-
-If you intend to run a server headless and need to pull down contents from private repositories, this is the best way to accomplish that.  Even with software such as the `keychain` package you will have to login and enter a password at boot time everytime.
-
-Obviously for security reasons you will want to make sure that any passwordless keys are not given write privileges to remote contents.
 
 To create a strong SSH key:
 
@@ -287,7 +274,15 @@ To create a strong SSH key:
 
 Follow the prompts for naming, and optionally add a password.
 
-To handle SSH rate limiting in the previous firewall rules we may want to re-use established SSH connections.  This can be done by adding the following to your `~/.ssh/config`:
+By default your key will ask you for your password everytime you use it.  To avoid this you can configure `keychain`, which will allow you to easily load the key into an ssh-agent.  _I do this in my `~/.bashrc` dot file._
+
+If your machine will be running scripts that need ssh access to remote resources you may consider creating a passwordless ssh key.
+
+The only real security flaw with a passwordless ssh key is if someone gains unauthorized access to that machine.  As such it is best practice to provide read-only access to that ssh key from those resources.
+
+_Note that it is equally insecure to add a password to your SSH key and load it from a file that is read only for your user, because if someone gains unauthorized access they can still acheive the exact same degree of control._
+
+To optimize ssh, and avoid rate-limiting problems with iptables, you can re-use an established ssh connection from the same machine.  Simply add these lines to `~/.ssh/config`:
 
     Host *
         ControlMaster auto
@@ -311,6 +306,7 @@ _Note that doing this may require you to set an addition `-o ControlMaster=no` o
     git config --global help.autocorrect -1
     git config --global color.ui true
     git config --global push.default matching
+    git config --global pull.default matching
     git config --global remote.origin.push HEAD
     git config --global alias.a add
     git config --global alias.s status
@@ -616,129 +612,3 @@ I will usually add my user account to a series of groups:
     usermod -aG video username
     usermod -aG audio username
     usermod -aG cdrom username
-
-
-## Gui Configuration
-
-Minimalist Gnome3 Packages:
-
-    aptitude install -y gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support xdg-user-dirs-gtk xdg-utils network-manager eog gparted guake gnash vlc gtk-recordmydesktop chromium
-
-Development Tools:
-
-    aptitude install -y glib-devel glibc-devel gnome-libs-devel gstream-devel gtk3-devel guichan-devel libX11-devel libmcrypt-devel qt3-devel qt-devel pythonqt-devel python-devel python3-devel pygame-devel perl-devel nodejs-devel ncurses-devel pygobject2-devel pygobject3-devel gobject-introspection-devel guichan bpython
-
-_These development tools may add a significantly to the size of the install._
-
-
-**Adjust Boot Services:**
-
-With the GUI installed we now have bluetooth and network-manager services we don't need, and GUI at run-level 2 which we want to turn off:
-
-    update-rc.d network-manager disable 2
-    update-rc.d network-manager disable 3
-    update-rc.d network-manager disable 4
-    update-rc.d network-manager disable 5
-    update-rc.d bluetooth disable 2
-    update-rc.d bluetooth disable 3
-    update-rc.d bluetooth disable 4
-    update-rc.d bluetooth disable 5
-    update-rc.d gdm3 disable 2
-
-This stops the network-manager from interfering with our interfaces network devices, and since we don't have bluetooth devices we eliminate a running daemon.
-
-We can use `telinit 3` to start the GUI, or `startx` if preferred, allowing us to reduce consumed resources at boot time since we don't always need the GUI.
-
-
-**Patch Guake:**
-
-Guake has a known bug that has yet to be fixed where it prevents execution at login due to `notification.show()` commands not able to be processed.
-
-    sed -i 's/notification.show()/try:\n                notification.show()\n            except Exception:\n                pass/' /usr/bin/guake
-    rm /etc/xdg/autostart/guake.desktop
-
-I create a new .desktop file in `~/.local/share/applications/guake.desktop` containing:
-
-    [Desktop Entry]
-    Name=Guake Terminal
-    Comment=Use the command line in a Quake-like terminal
-    TryExec=guake
-    Exec=guake
-    Icon=/usr/share/pixmaps/guake/guake.png
-    Type=Application
-    Categories=GNOME;GTK;Utility;TerminalEmulator;
-
-Then I can easily setuo local autostart in `~/.config/autostart` and symlink the new .desktop:
-
-    mkdir -p ~/.config/autostart
-    ln -s ~/.local/share/applications/guake.desktop ~/.config/autostart/guake.desktop
-
-
-**Setup Sublime Text:**
-
-_I am using Sublime Text 2, but Sublime Text 3 may soon be replacing it, so these instructions are subject to change._
-
-Installing a copy per-user is probably the best way to separate the application, but you can decide whether to put it someplace more global.
-
-Grab the latest version off their website:
-
-    wget -O ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2
-    tar xf sublime.tar.bz2
-    rm sublime.tar.bz2
-    mkdir ~/applications
-    mv Sublime* ~/applications/sublime_text/
-
-You can create a .desktop file in `~/.local/share/applications/subl.desktop` with:
-
-    [Desktop Entry]
-    Name=Sublime Text
-    Comment=The World's best text editor!
-    TryExec=subl
-    Exec=subl
-    Icon=~/applications/sublime_text/Icon/256x256/sublime_text.png
-    Type=Application
-    Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
-
-I generally keep a local `~/bin` folder and load it into the global PATH from my .bashrc, which allows me to then add a symlink to sublime text:
-
-    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
-
-
-**Enable GDM Login as Root:**
-
-I'd like to have the option to login to the GUI as root, but by default pam is set not to allow this.  To resolve this simply run the following command:
-
-    sed -i "s/user != root//" /etc/pam.d/gdm3
-
-
-#### Parallels Desktop Mods
-
-To install parallels tools you will need to mount the iso with execution options:
-
-    mount -o exec /dev/cdrom /media/cdrom
-    /media/cdrom/install
-
-The install script must be executed with root permissions.
-
-Post-installation you may encounter a video problem if the `/etc/initd/prl-x11` script does not contain the correct insserv headers, but you can easily add them to the top and re-run the script before rebooting:
-
-    # Add LSB insserv Compatibility
-    ### BEGIN INIT INFO
-    # Provides:          prl-x11
-    # Required-Start:    $remote_fs
-    # Required-Stop:     $remote_fs
-    # Default-Start:     2 3 4 5
-    # Default-Stop:      0 1 6
-    # Short-Description: x11 guest driver extension
-    # Description:       prl-x11 is a parallels service that configures X11
-    #                    for guest virtual machines.
-    ### END INIT INFO
-
-
-**Grub Configuration:**
-
-First, open up `/etc/default/grub` and find the line with `#GRUB_GFXMODE=640x480` and change it to `GRUB_GFXMODE=1024x768` or a resolution of your choice.
-
-Next open up `/etc/grub.d/00_header`, and find the line with `set gfxmode=${GRUB_GFXMODE}` and add `set gfxpayload=keep` below it before `load_video`.
-
-Now run `update-grub` and reboot your system.  Your terminal will now be sized better for working directly instead of over SSH if desired.  _Be careful_, as a larger resolution can render the text unreadable.
