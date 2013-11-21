@@ -605,7 +605,7 @@ Here is what my `~/.vimrc` looks like:
 
 I create a new user with this command (to ensure bash shell):
 
-    useradd -m -s /bin/bash username
+    useradd -m -k -s /bin/bash username
     passwd username
 
 Supply a password so that you may login as this user going forward.  The `-s` flag lets us  set the bash shell, otherwise it will default to the original `/bin/sh`.
