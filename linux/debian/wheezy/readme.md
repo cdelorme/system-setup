@@ -10,8 +10,14 @@ Here is the list of documentation I am actively maintaining:
 - [Web](web.md)
 - [Communications](comm.md)
 - [Xen](xen.md)
-- [IPFire](ipfire.md)
 
 
 ---
 
+## Template
+
+## Web
+
+## Comm
+
+## Xen
