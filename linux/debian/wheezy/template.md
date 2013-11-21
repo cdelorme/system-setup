@@ -1,6 +1,6 @@
 
 # Debian Wheezy Template Documentation
-#### Updated 10-15-2013
+#### Updated 11-20-2013
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 

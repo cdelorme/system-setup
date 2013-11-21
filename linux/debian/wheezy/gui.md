@@ -85,7 +85,47 @@ Grab the latest version off their website:
     mkdir ~/applications
     mv Sublime* ~/applications/sublime_text/
 
-You can create a .desktop file in `~/.local/share/applications/subl.desktop` with:
+With the formerly configured `~/bin` folder I create a symlink to `subl`:
+
+    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
+
+_An alternative would be to create a shell script file that runs `sublime_text &` to put the process in the background after launching._
+
+I use these Sublime Text plugins:
+
+- [Package Control](https://sublime.wbond.net/)
+- [Markdown Preview](https://github.com/revolunet/sublimetext-markdown-preview)
+- [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
+
+I configure sublime text with:
+
+    {
+        "auto_complete_commit_on_tab": true,
+        "caret_style": "phase",
+        "color_scheme": "Packages/Color Scheme - Default/Sunburst.tmTheme",
+        "font_face": "ForMateKonaVe",
+        "font_size": 16.0,
+        "highlight_line": true,
+        "highlight_modified_tabs": true,
+        "ignored_packages":
+        "match_brackets_angle": true,
+        "scroll_past_end": true,
+        "scroll_speed": 2.0,
+        "translate_tabs_to_spaces": true,
+        "trim_trailing_white_space_on_save": true
+    }
+
+I add also modify the hotkeys for SublimeCodeIntel go-to-definition and Markdown Preview to build to browser:
+
+    [
+        { "keys": ["ctrl+tab"], "command": "next_view" },
+        { "keys": ["ctrl+shift+tab"], "command": "prev_view" }
+        { "keys": ["alt+m"], "command": "markdown_preview", "args":
+            { "target": "browser", "parser": "markdown" }
+        },
+    ]
+
+I create a desktop launcher using `~/.local/share/applications/subl.desktop` containing:
 
     [Desktop Entry]
     Name=Sublime Text
@@ -96,13 +136,11 @@ You can create a .desktop file in `~/.local/share/applications/subl.desktop` wit
     Type=Application
     Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
 
-I generally keep a local `~/bin` folder and load it into the global PATH from my .bashrc, which allows me to then add a symlink to sublime text:
-
-    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
-
 
 **Enable GDM Login as Root:**
 
-I'd like to have the option to login to the GUI as root, but by default pam is set not to allow this.  To resolve this simply run the following command:
+This is entirely optional, but I like having it in the event that I have to debug.
+
+By default debian's pam is configured to disallow root gui login, but we can resolve this simply with:
 
     sed -i "s/user != root//" /etc/pam.d/gdm3
