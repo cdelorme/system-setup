@@ -1,9 +1,17 @@
 
-# IPFire Proxy Cache Router Firewall ReadMe
-#### Updated 10-14-2013
+# ipfire
+#### Updated 11-20-2013
 
-I use a VM to handle internal networking, which routes traffic, acts as a proxy server, cache, firewall, and wireless access point.
+I use IPFire as a Proxy Cache Router Firewall WAP machine, and I do so from a virtualized environment, supplied with a mPCI wireless card.
 
-This allows for an entirely self-contained network.
+It does all of these roles excellently, with great driver support.
 
-The configuration steps are personal and will not be included here.
+It is a debian based distribution, unlike most others which are BSD based.
+
+I used to use [pfsense](http://www.pfsense.org/), but they (to my knowledge) still have terrible wireless support, which is important to me.
+
+Using ipfire in this context I can create an entirely self-contained network of both virtual and real machines, without any additional devices.
+
+A good portion of the configuration is personal preference, so what I choose to supply here will primarily be for my own reference.
+
+Also, almost none of it is done through command line, because it has a web interface and that is the only approach I am familiar with as far as ipfire service configuration goes.
