@@ -20,7 +20,11 @@ The only major change from the template installation is to increase the LVM grou
 
 **Install New Packages**
 
-    aptitude install -y bcc bin86 gawk bridge-utils libcurl3 libcurl4-openssl-dev transfig tgif zlib1g-dev python-dev python-twisted libvncserver-dev pciutils-dev libbz2-dev e2fslibs-dev uuid-dev bison flex libyajl-dev xz-utils libxml2-dev iasl libx11-dev libsdl-dev libjpeg62-dev ocaml ocaml-findlib gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
+    aptitude install -y bcc bin86 gawk bridge-utils zlib1g-dev libbz2-dev xz-utils e2fslibs-dev pciutils uuid-dev libcurl3 libcurl4-openssl-dev  python-dev python-twisted bison flex libyajl-dev iasl ocaml ocaml-findlib transfig tgif libvncserver-dev libxml2-dev libx11-dev libsdl-dev libjpeg62-dev gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
+
+**Untested/Unlisted (possibly 4.4 unstable) Packages:**
+
+    libpng12-dev libjpeg8 libaio-dev libpixman-1-dev
 
 
 ## Building a Custom Kernel
@@ -195,7 +199,7 @@ Run these from a script, or transcribe them into bash:
         fi
     done
     wget "http://xenbits.xen.org/gitweb/?p=xen.git;a=blob_plain;f=tools/libxl/bash-completion;hb=HEAD" -O /etc/bash_completion.d/xl
-    echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/sbin/xl, NOPASSWD: /usr/sbin/xl" >> /etc/sudoers
+    echo "\n# Allow sudo group passwordless xl execution\n%sudo ALL=(ALL:ALL) ALL, !/usr/local/sbin/xl, NOPASSWD: /usr/local/sbin/xl" >> /etc/sudoers
     echo "\n# XL Alias\nalias xl='sudo xl'" >> /etc/bash.bashrc
 
 That'll resync our libraries with xen, remove symlinks from boot to boot, and the debug xen-syms file (not required if not debugging).
@@ -223,7 +227,7 @@ Finally, we want to create our dual-LAN network configuration (copy these into `
         bridge_maxwait 0
     iface eth1 inet manual
     iface xenbr1 inet static
-       bridge_ports eth1
+        bridge_ports eth1
         bridge_maxwait 0
         address 10.0.0.2
         gateway 10.0.0.1
