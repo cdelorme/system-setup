@@ -118,11 +118,12 @@ I configure sublime text with:
 I add also modify the hotkeys for SublimeCodeIntel go-to-definition and Markdown Preview to build to browser:
 
     [
+        { "keys": ["ctrl+enter"], "command": "goto_python_definition"},
         { "keys": ["ctrl+tab"], "command": "next_view" },
-        { "keys": ["ctrl+shift+tab"], "command": "prev_view" }
+        { "keys": ["ctrl+shift+tab"], "command": "prev_view" },
         { "keys": ["alt+m"], "command": "markdown_preview", "args":
             { "target": "browser", "parser": "markdown" }
-        },
+        }
     ]
 
 I create a desktop launcher using `~/.local/share/applications/subl.desktop` containing:
