@@ -68,3 +68,29 @@ Which brings us to the second, slightly superior option.  This method can be don
 
 From the mounted directory, we want to create `/boot/efi/EFI/boot/` and copy the `grubx64.efi` to `bootx64.efi` inside the boot folder.  From the fat32 drive the path would be `/EFI/boot/bootx64.efi`.  The system will apparently pickup on that name first, and it will execute it without waiting or looking at the startup.nsh script.
 
+
+## Renaming Disks
+
+VirtualBox for whatever reason does not condone renaming disks.  One reason is probably tied to the snapshot names, so if your box has snapshots this may or may not work well.
+
+There are two solutions.  The first (and more practical) is to remove the disk from the VM, then use `VBoxManage` to closemedium so it is not stored in VirtualBox's data system.  Then you can rename the file and re-add it.
+
+Alternatively you may find a need to clone it and then swap the old for the new.  From command line you can create a clone, and then swap it out:
+
+    VBoxManage clonehd /path/to/old.vdi /path/to/new.vdi --format VDI --remember
+
+_Note that deleting the old disks may also need you to run the VBoxManage closemedia command as well to remove orphaned drives._
+
+_Also note that snapshot names may be a problem to change, and a changed drive name may also create trouble._
+
+
+## Compressing Disks
+
+You cannot compress a snapshot, but you can compress the main disk of any system.
+
+The command to do so:
+
+    VBoxManage modifyhd --compact /path/to/disk
+
+_Alternaitvely you can get the UUID of the disk and use that in place of the path._
+
