@@ -1,56 +1,55 @@
 
-# Virtual Box
+#### Virtual Box
 
-While I do love xen, the innovations with iommu have begun to emerge on other platforms, and it seems likely that further progress will be made on those systems before xen sees them.
+I still love xen for workstation or server environments, but I have begun to question the use of other type-2 hypervisors for some workstation needs.
 
-Two such improvements are EFI BIOS and PCI passthrough, both of which are now supported in VirtualBox, and to a lesser extent even Parallels.  However, parallels only supports EFI and for Windows or OS X, it doesn't supply efivars to linux.
+Recently iommu support has begun to spring up under other platforms, including kvm and virtualbox.  However, due to the sheer popularity of these platforms and the common theme of xen being deprecated (which is probably true for desktop users) the advent of iommu enhancements on the server platform is likely to grow stagnent.
 
-Parallels has also been lacking in linux support in general as of late, which led me to try out VirtualBox.  What I am finding is that VirtualBox is significantly more up to date, and focuses on the power user audience, so I have begun the transition and will probably be using their tools going forward.
+In my opinion VirtualBox has recently taken the stage by storm.  It now supports EFI BIOS and PCI Passthrough, and it is cross platform compatible.  Further, its support for linux guest extensions is far and away above any of the competing systems.
 
-My most recent advent was getting Arch installed so I could try it out as a possible debian alternative for desktop use.
+**Parallels and VMWare suck at supporting linux guests.**  _Parallels offers EFI without any efivars, so it is a meaningless gesture, and probably only acceptable for Windows VMs._
+
+Any modern linux kernel will not work with parallels or vmware `tools`.  They are always way out of touch with any bleeding edge distros.
+
+Part of the point of virtualization to me is being able to test features before loading them onto a real system, and if the systems that provide these new features don't work because they are "too new", then that eliminates one huge benefit for me.
+
+I recently experienced an install of arch and debian in VirtualBox that was **mostly** phenominal, and have since dropped parallels as my OSX preferred virtualization package.
 
 
-## OS X
+##### OS X
 
-VirtualBox now supports OS X guests.
+VirtualBox now supports OSX **guests**.
 
 This gives it a very distinct advantage over almost ALL of its competition, especially being a cross platform FREE service.
 
-Xen has an EFI bootloader, though documentation of OS X installation is scarce, and the same holds true of KVM.
+Xen has an EFI bootloader, though documentation of OS X installation is scarce, and the same holds true of kvm and xen.
 
-Parallels has support, if you're running a licensed server copy of OS X, which is utter bullshit.  OS X, like every other OS, should be virtualization compatible without "stupid" limitations.
+Parallels has support, if you're running a licensed server copy of OSX, which is utter bullshit.  OSX, like every other OS, should be virtualization compatible without "stupid" limitations, however until the demand grows popular enough nobody will make it happen.
 
 
-## VGA Passthrough
+##### VGA Passthrough
 
 VirtualBox now has limited support for IOMMU, and graphics passthrough:
 
 - [Ubuntu Laptop GPU Passthrough](http://askubuntu.com/questions/202926/how-to-use-nvidia-geforce-m310-on-ubuntu-12-10-running-as-guest-in-virtualbox)
 
-If this works even with an additional 10% loss in performance, it would still be a better place than where I am with Xen.
+If this works even with an additional 10% loss in performance, it may still be a better place than where I am with xen today provided it does not experience the same performance degredation and reboot requirements.
 
 
-## Fuck it Mentality
+##### VBox Networking is still Terrible
 
-If shit hits the fan and I still can't get VGA Passthrough working in linux with Xen I can always try VirtualBox.
+Unfortunately I cannot say VirtualBox is without flaws.  Configuring networks on VirtualBox is way more complex than it should ever need to be.
 
-Even better, I could use Arch as my primary desktop OS and run IPFire, my Web & Comm server's in VirtualBox and not even worry about VGA Passthrough.
+It defaults to NAT networks, which somehow have a "block all ports" firewall built into the virtual NAT, which prevents you from accessing the machine or sharing the machine externally.
 
-Granted I'd still have ot get my graphics drivers working on Arch, and I would also be (basically) abandoning over a years worth of effort, but probably not forever.
+You can use host-only virtual networks to access, and a bridge network to provide internet and external access.  However, that is two networks to accomplish what should be acheivable with only one.  There is no port forwarding options on the host-only, or is there internet access.
 
-
-## VBox Stupid Networking
-
-One big pet-peev I have is that VirtualBox has a really dumb set of network options.  They have nearly twice as many options, with half as much functionality.  Their custom NAT breaks local access and ping's (for no valid reason), and their host-only adapter does not bridge to the actual network.
-
-Parallels at least provides pre-configured options, the downside is I cannot (easily) set the NAT DHCP addresses, but the upside is I don't need two adapters to maintain both internet access and static local connectivity.
-
-In any event, the configuration I am now using involves their default NAT, and then a `hostonlyif` which has its own network address, but DHCP turned off.  I can then assign the static IP from the guest that I can use in my hosts files for mapping and for ssh.
+The bridged network option works great, unless you need the IP Address to be reliable, such as when testing web development using the hosts file on the host machine.
 
 
-## EFI Booting
+##### EFI Booting
 
-VirtualBox does have EFI support, but it's currently in testing.
+VirtualBox does have EFI support, but it's currently in testing.  That said, it works spectacularly well so far.
 
 Apparently their EFI menu uses "Volatile" NVRam (yes, that is "volatile non-volatile ram").  This means that the first installation will add your boot option, and it will work with reboots up until you shutdown.  When you shutdown it wipes its memory.
 
@@ -69,7 +68,7 @@ Which brings us to the second, slightly superior option.  This method can be don
 From the mounted directory, we want to create `/boot/efi/EFI/boot/` and copy the `grubx64.efi` to `bootx64.efi` inside the boot folder.  From the fat32 drive the path would be `/EFI/boot/bootx64.efi`.  The system will apparently pickup on that name first, and it will execute it without waiting or looking at the startup.nsh script.
 
 
-## Renaming Disks
+##### Renaming Disks
 
 VirtualBox for whatever reason does not condone renaming disks.  One reason is probably tied to the snapshot names, so if your box has snapshots this may or may not work well.
 
@@ -84,7 +83,7 @@ _Note that deleting the old disks may also need you to run the VBoxManage closem
 _Also note that snapshot names may be a problem to change, and a changed drive name may also create trouble._
 
 
-## Compressing Disks
+##### Compressing Disks
 
 You cannot compress a snapshot, but you can compress the main disk of any system.
 
@@ -94,3 +93,29 @@ The command to do so:
 
 _Alternaitvely you can get the UUID of the disk and use that in place of the path._
 
+
+##### Guest Additions
+
+For video, shared folders, and a few other enhancements you can install VirtualBox Guest Additions onto any guest machine.
+
+While you can do so using the CDRom they provide, an alternative is to use packages provided by your distribution.
+
+**arch**
+
+As a prime example, arch has a really updated kernel that the VBox CD may not be coded for, so you would probably rather run this command:
+
+    pacman -S virtualbox-guest-utils
+
+Then create `/etc/modules-load.d/virtualbox.conf` with:
+
+    vboxguest
+    vboxsf
+    vboxvideo
+
+You may need to rebuild the initramfs (`mkinitcpio -p linux`).  Also, anytime the kernel (linux) package is updated you will probably want to remove and reinstall the virtualbox guest additions and rebuild the initramfs (mkinitcpio).
+
+**debian**
+
+You can simply use the `aptitude` command to install the `` utilities.  It should handle everything else.  Or you can try the mounted image supplied with the latest virtualbox, which may or may not be fully configured for your distro.
+
+_Guest additions depends on `build-essential` and `module-assistant` packages._

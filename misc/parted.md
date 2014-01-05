@@ -1,16 +1,16 @@
 
-# Partition Alignment with Parted
+#### Partition Alignment with Parted
 
 This is important, because it's a problem I have faced many times in the past and ignored.
 
 Today I will overcome my ignorance and learn how it works.
 
-## General Best Practice
+##### General Best Practice
 
 An ubuntu article states that advanced format disks (eg. modern hardware) using a space of 2048 (multiple of 8) for sector sizes with an initial offset of 1 MiB is best practice.
 
 
-## A More Comprehensive Answer
+##### A More Comprehensive Answer
 
 You can check disk information in `/sys/block/` and get actual details for performing manual calculations (again for advanced disks the outcome is pretty standard).
 
@@ -35,7 +35,7 @@ Simply set the start point to the last end point.
 To save yourself time calculating the prior disks size, simply check the end value after setting `unit MiB`.
 
 
-## My Test Case
+##### My Test Case
 
 My current test case is Parallels Desktop, where the hardware is virtualized, so it's not a great example of real situations, but a very common one I believe for modern computing.
 
@@ -55,7 +55,7 @@ I followed these commands up with the finishing touches:
 - `set 3 lvm on`
 
 
-## References
+##### References
 
 - [HP Article](http://h10025.www1.hp.com/ewfrf/wc/document?cc=uk&lc=en&dlc=en&docname=c03479326)
 - [Independent Tutorial](http://rainbow.chard.org/2013/01/30/how-to-align-partitions-for-best-performance-using-parted/)

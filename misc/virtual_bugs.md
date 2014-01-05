@@ -1,5 +1,5 @@
 
-# Virtual Bugs
+#### Virtual Bugs
 
 Virtual Machines have their own set of issues, and I will cover those that I have encountered here (and solutions where applicable).
 
@@ -11,8 +11,12 @@ There are two major concerns with templates:
 - Network Adapters and udev in virtual machines
 
 
+##### snapshots
+
 Snapshots in a virtual environment consume a significant amount of space.  While they are easily the most convenient tools, you may be better served created multiple independent templates.  Systems like Parallels Desktop cannot compress the drives once you have created a snapshot either.
 
+
+##### udev and network adapters
 
 The second problem is the network adapters.  The mac addresses will change when you clone a machine (as they should), and udev may try to automatically identify your devices and map them to names like `eth0` and `eth1`.
 
