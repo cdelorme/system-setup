@@ -36,7 +36,7 @@ Here is a break-down of my partitioning scheme:
 
 I also only ever install `system utilities` from the package options, this is primarily because when running the install off of the disk things work much slower.  If you want to install other packages you can use debconf post-install.
 
-I don't always use a desktop environment so I save things like gnome3 for later.  I also don't use every application that the gnome3 base packages come with, and prefer a minimalist installation to save space.
+I don't always use a desktop environment so I save those things for later.  I also don't use every application that the gnome3 base packages come with, and prefer a minimalist installation to save space.
 
 Because I modify the dot files heavily I also tend to avoid creating any other users besides root.  This allows me to add utilities and create dot files in `/etc/skel` before creating a user, at which point they automatically get all the new files which saves me some typing.
 
@@ -45,9 +45,37 @@ Because I modify the dot files heavily I also tend to avoid creating any other u
 
 Start by logging in as root to run through these steps.
 
+As a precursor to the other packages we should install `netselect-apt` to update our aptitude sources to the closest and fastest mirror.  We can do so via:
+
+    aptitude install -y netselect-apt
+    mv /etc/apt/sources.list /etc/apt/sources.list.original
+    netselect-apt -s -o /etc/apt/sources.list
+    aptitude clean
+    aptitude update
+
+I dislike having extra auto-completion conflicting software, and debian comes with `vi` or `vim-tiny` by default.  So I generally remove it before installing the full vim:
+
+    dpkg -r vim-common vim-tiny
+
 I generally install these packages on every machine:
 
-    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip p7zip-full keychain exfat-fuse exfat-tools monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot lzop fonts-takao
+    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip p7zip-full keychain exfat-fuse exfat-tools monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot lzop fonts-takao netselect-apt
+
+
+**Package Mirrors:**
+
+We want to use the `netselect-apt` package to automate finding the best mirrors to work with going forward.  Place these lines in `/etc/cron.monthly/netselect`:
+
+    # #!/bin/bash
+
+    # Update package mirrors
+    netselect-apt -s -n
+    aptitude clean
+    aptitude update
+
+Then make it executable:
+
+    chmod +x /etc/cron.monthly/netselect
 
 
 **Automatic Updates:**
@@ -59,7 +87,8 @@ If you are concerned for breaks you can always have it execute a dry-run and ema
 I create a file `/etc/cron.weekly/aptitude` containing:
 
     #!/bin/sh
-    # Weekly Software Updates (No Logging or Notification, be warned)
+
+    # update packages weekly
     aptitude clean
     aptitude update
     aptitude upgrade -y
@@ -74,32 +103,47 @@ Be sure it is executable:
 If you have a bunch of ext4 file systems storing content, even on lvm, it might be wise to create a defrag cron-job to keep the data orderly.  Create a file at `/etc/cron.weekly/e4defrag` with lines similar to:
 
     #!/bin/sh
-    e4defrag /boot
-    for DEVICE in /dev/mapper/*;
+
+    # defragment ext4 devices
+    for DEVICE in $(mount | grep ext4 | awk '{print $1}')
     do
-        e4defrag $DEVICE
+        e4defrag "${DEVICE}"
     done
 
+
 _The primary benefit is not one of performance, but of disk consumption.  As data spreads it can be harder to organize, which could be a negative as far as resizing partitions or LVM for that matter._
+
+As before we wish to make this executable:
+
+    chmod +x /etc/cron.weekly/e4defrag
 
 
 **SSD Optimizations:**
 
-If this system is running ontop of a SSD, you may consider a couple of additions for TRIM support.
+If this system is running ontop of a SSD, you may consider a couple of additions for TRIM support.  First, instead of enabling the `discard` option in fstab, you will want to run the `fstrim` command on a regular basis, so as to reduce the amount of IO and extend the life of the drive.  Create a file in `/etc/cron.weekly/fstrim` with these lines:
 
-First, a cron job to handle fstrim in batches which can dramatically improve the life of the disk:
+    #!/bin/bash
 
-    echo "#!/bin/sh\nfor mount in / /boot /home /var/log /tmp; do\n\tfstrim $mount\ndone" > /etc/cron.weekly/fstab
-    chmod +x /etc/cron.weekly/fstab
+    # Handle regular trim cleanup (much less IO problems than setting discard flag in fstab)
+    for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
+    do
+        fstrim "${DEVICE}"
+    done
 
-You can also set the `issue_discards = 1` inside `/etc/lvm/lvm.conf` to enable LVM trims:
+
+
+Then make it executable:
+
+    chmod +x /etc/cron.weekly/fstrim
+
+For LVM partitions, you will want to tell the logical volume manager, through its own configuration, that it can issue discards, by setting `issue_discards = 1` inside `/etc/lvm/lvm.conf`:
 
     sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
 
 
 **UMask for Group Write Permissions:**
 
-Modern platforms create a private user group per user, which eliminates a bulk of former security concerns.  I choose to modify the default UMASK on files for group privileges, which ensures that files created going forward will be properly shared with group members.  This is especially helpful for automation, where controlling created file permissions would add extra steps and sometimes not be feasible.
+Modern platforms create a private user group per user, which eliminates a bulk of former security concerns with providing group privileges on ones files.  I have chosen to modify the default for standard users (root should still retain a mask of `022`) that will allow access for any shared groups by default, which can be exceptionally helpful to reduce conflicts with automation on a multi-user system.
 
 To start we locate `UMASK 022` inside `/etc/logins.def` and change it to `UMASK 002`, which will give 775 permissions (more than one space may separate the code from UMASK).
 
@@ -108,6 +152,29 @@ Next we want to globally enforce this using `/etc/pam.d/common-session` by addin
     session optional pam_umask.so umask=002
 
 _This will take effect immediately and will not require a reboot._
+
+
+**Switching from sysvinit with systemd:**
+
+This section, as you may have guessed, is incomplete.  By default debian uses the sysvinit boot process, and the reasons include:
+
+- it is stable
+- it is posix compatible
+- it can be easily edited, as it only consists of shell scripts
+- it only does one job, and that is to fire up services by run-level
+
+The systemd boot process changes the game by offering:
+
+- automatic parallelized processes by dependency
+- simplified ini files that make creating and editing easier, but provide less functionality
+- uses binaries that make editing the process significnatly more difficult
+- provides service monitoring and will restart crashed services
+
+The last one there, to me, is the most valuable.  I want to have a boot process tool whose job it is to "manage" boot processes, not just kick them off.  If the processes _it_ starts crash, I want _it_ to be responsible for noticing and restarting them.
+
+That said, I have had first hand experience in fedora and arch of systemd, and found it to be one of many things that led to instability.  In particular the push towards binary "anything" is the wrong move, and it created far too many problems on my systems.  Combined with the binary log services, the heavy-weight GUI, Gnome3, and the ever-annoying network manager, everything was tightly coupled, leaving no room for choice.
+
+_If I were to install systemd it would primarily be for the monitoring of services which would eliminate the need for monit (or any similar system), but I probably won't switch so long as it becomes tied to too many other binary services._
 
 
 **Configuring Monit:**
@@ -150,6 +217,9 @@ You can then use SSH tunneling to access the page from `http://127.0.0.1:####`:
 
 _Monit can do a whole lot more than this so if you are interested check out their documentation._
 
+---
+
+
 
 **Establish a FQDN Hostname:**
 
@@ -160,7 +230,7 @@ Start by updating the hostname with this command (to automate this we would need
 
 _I often assign a static IP but that cannot be automated.  I do this to prevent conflicts and make it easier to know my target for SSH access or other activities._
 
-For a fully qualified domain name we want to add two bits to `/etc/hosts`:
+If you did **not** set a domain name during installation, you can do so now manually.  For a fully qualified domain name we want to add two bits to `/etc/hosts`:
 
     127.0.1.1 hostname.domain.dev hostname
 
@@ -246,27 +316,43 @@ Here is a script you can place into `/etc/network/if-up.d`, be sure to make it e
 _According to the man pages, the restore operation will automatically (by default) flush the existing rules when loading a new file._
 
 
-**Enable Pulse Audio:**
-
-You may have to modify pulse audio to prevent warning messages, to do so modify the line in `/etc/default/pulseaudio`:
-
-    PULSEAUDIO_SYSTEM_START=1
-
-
 **Add JPN Locale Support:**
 
-To support japanese characters in the file system I add the locale:
+If you want to have japanese character support, and did not select the secondary locale during install, you can do so now by modifying the `/etc/locale.gen` file and re-running the locale-gen command:
 
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
 
 
+
+**User Creation:**
+
+_If you want to automate configuring the terminal, potentially saving a bit of time, then you should run through the instructions below this step first._
+
+This is the last task I perform, generally after I have placed all of my dot files and related configuration into `/etc/skel`, this way future users on that system automatically have all those useful tools available to them.
+
+I create a new user with this command (ensuring bash shell, otherwise debian defaults to `/bin/sh`):
+
+    useradd -m -s /bin/bash username
+    passwd username
+
+You will then wish to run `passwd username` to assign that account a password (or else they may be unable to login).
+
+If this user will have admin privileges add them to the sudo group:
+
+    usermod -aG sudo username
+
+
 ### Etc Skel & User Configuration
+
+**If you want to skip the next several pages of configuration, you can just download and execute my [dot-files](https://github.com/cdelorme/dot-files) repo.**
 
 _Ideally, besides being in `~/`, the files created here can be placed into `/etc/skel`, where they will be distributed to all new users._
 
 
 **Setting up SSH:**
+
+You should generally only create keys for user accounts, root accounts should not be involved in security beyond the local system, this prevents any extra ties to the outside from becoming potential risks.
 
 To create a strong SSH key:
 
@@ -282,12 +368,17 @@ The only real security flaw with a passwordless ssh key is if someone gains unau
 
 _Note that it is equally insecure to add a password to your SSH key and load it from a file that is read only for your user, because if someone gains unauthorized access they can still acheive the exact same degree of control._
 
+If you want to add this key to your github account, you can use the curl command to do so from the command line without any GUI at all:
+
+    curl -i -u "username:password" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"name this key\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}' https://api.github.com/user/keys
+
 To optimize ssh, and avoid rate-limiting problems with iptables, you can re-use an established ssh connection from the same machine.  Simply add these lines to `~/.ssh/config`:
 
     Host *
         ControlMaster auto
         ControlPath ~/.ssh/%r@%h:%p
         CompressionLevel 9
+        ControlPersist 2h
 
 _Note that doing this may require you to set an addition `-o ControlMaster=no` option when tunneling services, or adding specific details for tunneling to the same config file:_
 
@@ -342,8 +433,10 @@ I also like to enhance my overall terminal experience by adding a bunch of funct
 First let's create `~/.bash_logout` specifically to clear my environment on exit so subsequent logins don't see the previous commands and appear "fresh":
 
     #!/bin/bash
-    # Autoclear Screen if command exists
-    [[ -x /usr/bin/clear_console ]] && clear_console -q
+
+    # clear on exit
+    [ -x "/usr/bin/clear" ] && /usr/bin/clear
+    [ -x "/usr/bin/clear_console" ] && clear_console -q
 
 Next we'll download [git completion](https://raw.github.com/git/git/master/contrib/completion/git-completion.bash), to make git even easier to use:
 
@@ -499,7 +592,7 @@ Finally to tie all of these things together and add some infrastructure (some op
     shopt -s histappend
 
     # Ignore lines in history that started with a space
-    HISTCONTROL=ignoreboth
+    export HISTCONTROL=ignoreboth
 
     # Attempt Directory Autocompletion (For typo-prone)
     shopt -s dirspell
@@ -509,9 +602,6 @@ Finally to tie all of these things together and add some infrastructure (some op
 
     # Alias ls
     alias ls='ls -ahF --color=auto'
-
-    # Carry aliases to sudo env
-    alias sudo='sudo '
 
     # Auto-detect changes in window size and adjust
     shopt -s checkwinsize
@@ -541,8 +631,11 @@ Finally to tie all of these things together and add some infrastructure (some op
     fi
 
     # Autoload SSH Access
-    keychain ~/.ssh/id_rsa
-    . ~/.keychain/$HOSTNAME-sh
+    if [ -z "$SSH_AGENT_PID" ];
+    then
+        keychain ~/.ssh/id_rsa
+        . ~/.keychain/$HOSTNAME-sh
+    fi;
 
     # Load Git Completion
     . ~/.git-completion
@@ -638,19 +731,3 @@ Here is what my `~/.vimrc` looks like:
     :helptags ~/.vim/doc
 
 This gives me a very basic auto-completion, and a variety of useful tools that help my productivity.
-
-
-**User Creation:**
-
-This is the last task I perform, generally after I have placed all of my dot files and related configuration into `/etc/skel`, this way future users on that system automatically have all those useful tools available to them.
-
-I create a new user with this command (ensuring bash shell, otherwise debian defaults to `/bin/sh`):
-
-    useradd -m -s /bin/bash username
-    passwd username
-
-You will then wish to run `passwd username` to assign that account a password (or else they may be unable to login).
-
-If this user will have admin privileges add them to the sudo group:
-
-    usermod -aG sudo username
