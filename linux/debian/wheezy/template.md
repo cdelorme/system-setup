@@ -1,6 +1,6 @@
 
 # Debian Wheezy Template Documentation
-#### Updated 11-20-2013
+#### Updated 1-9-2014
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 
@@ -45,6 +45,12 @@ Because I modify the dot files heavily I also tend to avoid creating any other u
 
 Start by logging in as root to run through these steps.
 
+For best functionality with no chance of missing features in recommended packages create `/etc/apt/apt.conf.d/99syntaptics` with this line:
+
+    APT::Install-Recommends "true";
+
+_You can still omit recommended packages by using `aptitude -R` when running install, which is ideal even for a minimalist system to ensure you don't end up with missing features._
+
 As a precursor to the other packages we should install `netselect-apt` to update our aptitude sources to the closest and fastest mirror.  We can do so via:
 
     aptitude install -y netselect-apt
@@ -59,7 +65,7 @@ I dislike having extra auto-completion conflicting software, and debian comes wi
 
 I generally install these packages on every machine:
 
-    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip p7zip-full keychain exfat-fuse exfat-tools monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot lzop fonts-takao netselect-apt
+    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip unrar lzop zip p7zip-full keychain exfat-fuse exfat-utils monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot fonts-takao netselect-apt miscfiles uuid-runtime weechat-curses
 
 
 **Package Mirrors:**
@@ -130,8 +136,6 @@ If this system is running ontop of a SSD, you may consider a couple of additions
         fstrim "${DEVICE}"
     done
 
-
-
 Then make it executable:
 
     chmod +x /etc/cron.weekly/fstrim
@@ -163,27 +167,39 @@ This section, as you may have guessed, is incomplete.  By default debian uses th
 - it can be easily edited, as it only consists of shell scripts
 - it only does one job, and that is to fire up services by run-level
 
-The systemd boot process changes the game by offering:
+The stability and easy editing are what matter to me most, while the unix philosophy tends to be an added benefit of good design.
+
+The downsides are that:
+
+- it is moderately slow to parallelize
+- it only starts services, it does not keep them running or handle failure
+- all configuration takes place in (quite often) overly complex bash scripts
+
+On the otherhand, the systemd boot process changes the game by offering:
 
 - automatic parallelized processes by dependency
 - simplified ini files that make creating and editing easier, but provide less functionality
 - uses binaries that make editing the process significnatly more difficult
 - provides service monitoring and will restart crashed services
 
-The last one there, to me, is the most valuable.  I want to have a boot process tool whose job it is to "manage" boot processes, not just kick them off.  If the processes _it_ starts crash, I want _it_ to be responsible for noticing and restarting them.
+I do like the abstraction systemd offers to simplify scripting (eg. eliminating the bash scripts), but it also appears that if a service still uses a bash daemon most tools will simply launch the old bash script and not the actual service, which renders a large portion of systemd benefits moot.  The parallelized processing and process monitoring are what I find most valuable, however, the tradeoffs prevent me from making the leap on any system on which I desire stability.
 
-That said, I have had first hand experience in fedora and arch of systemd, and found it to be one of many things that led to instability.  In particular the push towards binary "anything" is the wrong move, and it created far too many problems on my systems.  Combined with the binary log services, the heavy-weight GUI, Gnome3, and the ever-annoying network manager, everything was tightly coupled, leaving no room for choice.
+I have used systemd on fedora and arch distros, and its stability was mostly terrible.  The boot speeds were exceptional.  I did not realize it was even monitoring services for failure to restart them.  Configuring its ini files is incredibly easy.  However, I experienced all sorts of crashes that stem from systemd's various tentacles.
 
-_If I were to install systemd it would primarily be for the monitoring of services which would eliminate the need for monit (or any similar system), but I probably won't switch so long as it becomes tied to too many other binary services._
+To explain further, systemd is being tied to the latest gnome interface and binary logging tools.  Debugging errors just got way harder (not easier).  Meanwhile gnome continues to push extremely tight integration with all of its services, such as its network manager which has never once been a pleasing experience to use.
+
+I intend to attempt systemd on my non-server system, using a different graphical user interface.  If I can manage to retain traditional logging and it remains stable I will likely add it to the steps in this file.
+
+_Keep in mind that by installing systemd I could also omit monit tools and configuration, though I do not know whether systemd offers any kind of api or web interface to determine service statuses from external sources like monit/munin do._
 
 
 **Configuring Monit:**
 
 At a bare minimum monit allows us to ensure that if the system is overloaded or a key utility such as ssh hangs or dies that it gets rebooted.  It is a very reliable tool and good to have installed for general purpose use.
 
-Here are some example configurations for ssh and system you can throw into `/etc/monit/conf.d`:
+Here are some basic configurations you can create in `/etc/monit/monitrc.d`, which can be symlinked for activation to `/etc/monit/conf.d`:
 
-SSH:
+SSH (`/etc/monit/monitrc.d/ssh`):
 
     check process sshd with pidfile /var/run/sshd.pid
         start program = "/etc/init.d/ssh start"
@@ -192,7 +208,7 @@ SSH:
         if totalmem > 200.00 MB for 5 cycles then restart
         if 3 restarts within 8 cycles then timeout
 
-System:
+System (`/etc/monit/monitrc.d/system`):
 
     check system localhost
         if loadavg (1min) > 10 then alert
@@ -205,20 +221,26 @@ System:
         if loadavg (5min) > 15 for 5 cycles then exec "/sbin/reboot"
         if memory usage > 97% for 3 cycles then exec "/sbin/reboot"
 
-You can also add a secured "tunnel-only" accessible web interface to check the server status via another config file:
+If you want a (secure) web accessible interface you can create this (`/etc/monit/monitrc.d/ssh`):
 
     # Establish Web Server on a custom port and restrict access to localhost
     set httpd port ####
         allow 127.0.0.1
 
-You can then use SSH tunneling to access the page from `http://127.0.0.1:####`:
+Be sure to replace the `####` with a port number, and you will then be able to access it locally, and through secured SSH service tunneling at `http://127.0.0.1:####`.  An example command for ssh tunneling:
 
     ssh -f -N username@remote_ip -L ####:localhost:####
 
+Finally, we want to symlink these configuration files to `/etc/monit/conf.d`.  To keep things clean I recommand relative paths:
+
+    cd /etc/monit/conf.d
+    ln -s ../monitrc.d/ssh ssh
+    ln -s ../monitrc.d/system system
+    ln -s ../monitrc.d/web web
+
 _Monit can do a whole lot more than this so if you are interested check out their documentation._
 
----
-
+After linking these files you can **test** your monit configuration with `monit -t`.  If you get no errors you should restart the service with `service monit restart`.
 
 
 **Establish a FQDN Hostname:**
@@ -306,14 +328,18 @@ I generally create a basic iptables file with affective policies and ssh rate li
 
 _Note that the `ssh` value translates to the default port 22, and will not change based on the active/actual SSH port.  If you have changed the port number you will have to adjust the iptables value._
 
-Next we want to make sure that it gets loaded when the network comes up.  Running `iptables-restore` will do the trick, and it automatically flushes all the existing rules.  _Despite many articles claiming the use of `/etc/network/if-pre-up.d` as the correct directory, I have found the actual directory to us is `/etc/network/if-up.d`._
+Next we want to make sure that it gets loaded when the network comes up.  Running `iptables-restore` will do the trick, and it automatically flushes all the existing rules.  _Despite many articles claiming the use of `/etc/network/if-pre-up.d` as the correct directory, I have found that it does not load unless you use the `/etc/network/if-up.d`  directory._
 
-Here is a script you can place into `/etc/network/if-up.d`, be sure to make it executable:
+Place these lines inside of `/etc/network/if-up.d/iptables`:
 
     #!/bin/bash
     iptables-restore < /etc/firewall.conf
 
 _According to the man pages, the restore operation will automatically (by default) flush the existing rules when loading a new file._
+
+Be sure to make that file executable:
+
+    chmod +x /etc/network/if-up.d/iptables
 
 
 **Add JPN Locale Support:**
@@ -322,7 +348,6 @@ If you want to have japanese character support, and did not select the secondary
 
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
-
 
 
 **User Creation:**
@@ -652,6 +677,7 @@ I use the following plugins:
 - [Surround](https://github.com/tpope/vim-surround)
 - [EasyMotion](https://github.com/Lokaltog/vim-easymotion)
 - [SparkUp](https://github.com/tristen/vim-sparkup)
+- [Emmet](https://github.com/mattn/emmet-vim/)
 
 I use the [vividchalk](https://github.com/tpope/vim-vividchalk) color scheme.
 
