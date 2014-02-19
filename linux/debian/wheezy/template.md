@@ -1,6 +1,6 @@
 
 # Debian Wheezy Template Documentation
-#### Updated 1-9-2014
+#### Updated 2-19-2014
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 
@@ -45,32 +45,149 @@ Because I modify the dot files heavily I also tend to avoid creating any other u
 
 Start by logging in as root to run through these steps.
 
-For best functionality with no chance of missing features in recommended packages create `/etc/apt/apt.conf.d/99syntaptics` with this line:
+#### Packages
 
-    APT::Install-Recommends "true";
+I install lots of packages to form the basic foundation of a multi-functional platform.  In some cases not all of these packages are necessary, but in most cases they are helpful to have.  Worth noting that I use `aptitude` because it is a single sensible command interface, and for these packages I add the `-r` flag to install any recommended packages.  If you want to go full minimalist then omit this flag and pick and choose the packages to install.  However I recommend this to avoid any possibly problems later on.
 
-_You can still omit recommended packages by using `aptitude -R` when running install, which is ideal even for a minimalist system to ensure you don't end up with missing features._
+The first task I perform is I install the `netselect-apt` package, which allows us to detect the best mirrors available and set our sources to them.
 
-As a precursor to the other packages we should install `netselect-apt` to update our aptitude sources to the closest and fastest mirror.  We can do so via:
+By default debian comes with `vim-tiny` which creates a `vi` symlink that I've found at times does **not** get replaced when the complete `vim` package is installed.  To avoid problems with accidentally launching the tiny version I remove `vim-common` and `vim-tiny` packages.
 
-    aptitude install -y netselect-apt
-    mv /etc/apt/sources.list /etc/apt/sources.list.original
-    netselect-apt -s -o /etc/apt/sources.list
+Moving onto our big install list; I've sectioned all the packages into groups that make some sense as far as their purpose on the machine, which may help you decide whether to install them yourself.
+
+**Firmware:**
+
+- firmware-linux
+- firmware-linux-free
+- firmware-linux-nonfree
+
+You may or may not find any of these to be of help, but if you want to ensure that no hardware you connect is unsupported this is a good first step.  If you never plan to swap parts or connect new hardware, feel free to omit these.
+
+**Hardware Utilities:**
+
+- usbutils
+- uuid-runtime
+- debconf-utils
+- cpufrequtils
+
+I install these packages as support tools for various hardware and software that interacts with hardware.  I recommend all of them.
+
+**Compression Utilities:**
+
+- bzip2
+- lzop
+- p7zip-full
+- zip
+- unzip
+- unrar
+- xz-utils
+- unace
+- rzip
+- unalz
+- zoo
+- arj
+
+I have listed these packages in the order I find them to be useful.  You are welcome to omit some or all of them if you do not expect to encounter compressed files.
+
+**Network Utilities:**
+
+- netselect-apt
+- ssh
+- curl
+- ntp
+- rsync
+- whois
+
+As earlier instructed, we should already have `netselect-apt` installed to reduce the load of installing all the remaining packages.  I highly recommend `ssh`, `ntp`, and `curl` as they are all incredibly valuable to have on your system, while `rsync` is a bonus, and `whois` may or may not be of any use to you depending on your intended use of the machine.
+
+**Development Support Utilities:**
+
+- git
+- git-flow
+- mercurial
+- debhelper
+- libncurses5-dev
+- kernel-package
+- build-essential
+- fakeroot
+
+The `git` and `mercurial` packages are for popular version control software.  If you use `svn` you can throw that in too.  The last four will install all the necessary tools to build and compile source code, such as a custom kernel, or any software you cannot find in a debian package.
+
+**Text Processing Utilities:**
+
+- vim
+
+The `vim` package is my preferred terminal editor, but there are others such as `nano` and `emacs`.  Your choice will depend on your preferences, and I'd imagine that depends on whichever you have more experience with.
+
+**File System Utilities:**
+
+- e2fsprogs
+- parted
+- sshfs
+- fuse-utils
+- gvfs-fuse
+- exfat-fuse
+- exfat-utils
+- fusesmb
+- os-prober
+
+I use `parted` regularly, and `e2fsprogs` as well.  The `sshfs` package makes it much easier to secure direct local access to a set of remote files, and all of the fuse packages are excellent if you need to access special file systems such as example samba and exfat.  The `os-prober` package may help if you are troubleshooting drives or partitions.  If you don't plan to be accessing other file systems, then you don't need all of them, but I use them myself, and often.
+
+**Terminal Support Utilities:**
+
+- sudo
+- bash-completion
+- command-not-found
+- tmux
+- screen
+- bc
+- less
+- keychain
+- pastebinit
+- anacron
+
+I would be at a loss without tools like `tmux` and `screen`.  I find that `bash-completion` and `command-not-found` are fabulous tools to improve my productivity and help me locate things I missed.  The `sudo` command is basically required if you plan to use the system as a non-root user and still maintain easy privilege access.  The `bc` and `less` commands should already be installed and help with text processing and basic calculations.  The `anacron` package is for an asynchronous crontab, great for desktops which do not have a 24/7 uptime (for example, a virtual machine).  The `keychain` package is super helpful to load your ssh key at boot time so you don't have to constantly enter the password for it as you use the system (accessibility vs security).  Finally `pastebinit` is a website specific utility that allows you to easily push output to a public website to share with others, such as troubleshooting or even accessing it from another system.  I recommend all of these tools.
+
+**Misc Utilities:**
+
+- miscfiles
+- monit
+- markdown
+
+The `miscfiles` package is non-executable files that contain loads of data that other software may find helpful, so I recommend it.  I use `markdown` for literally everything, so I install it.  The `monit` package allows me to specifically monitor important services and keep them from locking up or crashing permanently.
+
+After installing the packages we still have a couple of steps to take care of before we are ready to move forward.  The `command-not-found` package requires a one-time run of `update-command-not-found` to update a local index of packages.
+
+
+##### Commands
+
+_Here are the all the commands I run to cover the entire packages section of documentation:_
+
+    aptitude install -r -y netselect-apt
+    netselect-apt -s -n
     aptitude clean
     aptitude update
-
-I dislike having extra auto-completion conflicting software, and debian comes with `vi` or `vim-tiny` by default.  So I generally remove it before installing the full vim:
-
     dpkg -r vim-common vim-tiny
+    aptitude reinstall -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    aptitude install -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    update-command-not-found
 
-I generally install these packages on every machine:
 
-    aptitude install -y sudo ssh tmux screen vim parted ntp git git-flow mercurial bash-completion unzip unrar lzop zip p7zip-full keychain exfat-fuse exfat-utils monit pastebinit curl markdown kernel-package build-essential debhelper libncurses5-dev fakeroot fonts-takao netselect-apt miscfiles uuid-runtime weechat-curses
+#### Cron Jobs
+
+I schedule a series of custom cronjobs to handle various tasks within the system that keep it up the date and running smoothly.  Generally I only add these to the primary cron folders, but that means they may not execute if the system is not running 24/7, so be sure to adjust your implementation accordingly.
+
+I create a file in `/etc/cron.monthly/` that re-runs `netselect-apt` to ensure we still have the best mirrors available.
+
+I create three files in `/etc/cron.weekly/`, including one to update our packages, one to defragment any ext4 partitions, and one to execute `fstrim` on any ext4 partitions (useful for solid state drives).
 
 
-**Package Mirrors:**
 
-We want to use the `netselect-apt` package to automate finding the best mirrors to work with going forward.  Place these lines in `/etc/cron.monthly/netselect`:
+##### Commands & Files
+
+_Starting with the files and their contents:_
+
+**`/etc/cron.monthly/netselect-apt`:**
 
     # #!/bin/bash
 
@@ -79,18 +196,7 @@ We want to use the `netselect-apt` package to automate finding the best mirrors 
     aptitude clean
     aptitude update
 
-Then make it executable:
-
-    chmod +x /etc/cron.monthly/netselect
-
-
-**Automatic Updates:**
-
-Potentially a security problem, but not really a bad script to create, is a cron job to handle updating packages on the system.
-
-If you are concerned for breaks you can always have it execute a dry-run and email you so you know when updates become available.
-
-I create a file `/etc/cron.weekly/aptitude` containing:
+**`/etc/cron.weekly/aptitude`:**
 
     #!/bin/sh
 
@@ -98,15 +204,9 @@ I create a file `/etc/cron.weekly/aptitude` containing:
     aptitude clean
     aptitude update
     aptitude upgrade -y
+    update-command-not-found
 
-Be sure it is executable:
-
-    chmod +x /etc/cron.weekly/aptitude
-
-
-**Defragmentation:**
-
-If you have a bunch of ext4 file systems storing content, even on lvm, it might be wise to create a defrag cron-job to keep the data orderly.  Create a file at `/etc/cron.weekly/e4defrag` with lines similar to:
+**`/etc/cron.weekly/e4defrag`:**
 
     #!/bin/sh
 
@@ -116,17 +216,7 @@ If you have a bunch of ext4 file systems storing content, even on lvm, it might 
         e4defrag "${DEVICE}"
     done
 
-
-_The primary benefit is not one of performance, but of disk consumption.  As data spreads it can be harder to organize, which could be a negative as far as resizing partitions or LVM for that matter._
-
-As before we wish to make this executable:
-
-    chmod +x /etc/cron.weekly/e4defrag
-
-
-**SSD Optimizations:**
-
-If this system is running ontop of a SSD, you may consider a couple of additions for TRIM support.  First, instead of enabling the `discard` option in fstab, you will want to run the `fstrim` command on a regular basis, so as to reduce the amount of IO and extend the life of the drive.  Create a file in `/etc/cron.weekly/fstrim` with these lines:
+**`/etc/cron.weekly/fstrim`:**
 
     #!/bin/bash
 
@@ -136,70 +226,47 @@ If this system is running ontop of a SSD, you may consider a couple of additions
         fstrim "${DEVICE}"
     done
 
-Then make it executable:
+_Now I make sure all of them are executable:_
 
+    chmod +x /etc/cron.monthly/netselect-apt
+    chmod +x /etc/cron.weekly/aptitude
+    chmod +x /etc/cron.weekly/e4defrag
     chmod +x /etc/cron.weekly/fstrim
 
-For LVM partitions, you will want to tell the logical volume manager, through its own configuration, that it can issue discards, by setting `issue_discards = 1` inside `/etc/lvm/lvm.conf`:
+
+
+#### Optimizations & Permissions
+
+This optimization is for LVM with Solid State Drives.  In the `/etc/lvm/lvm.conf` file find the `issue_discards` flag, and set it to `1` to turn it on.
+
+Next I prefer setting the default umask to `002` to allow group read and write by default.  This used to be a problem because users did not have personal groups, but that has long since been addressed and every user is in their own group by default, making it hard to "accidentally" share files.
+
+To make these change we have to modify two files.  First we want to add `session optional pam_umask.so umask=002` to `/etc/pam.d/common-session`.  Second we want to set `UMASK 002` inside `/etc/login.defs`.
+
+
+##### Commands
+
+_The commands to make these optimizations:_
 
     sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+    sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
+    echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 
 
-**UMask for Group Write Permissions:**
+#### Monit Configuration
 
-Modern platforms create a private user group per user, which eliminates a bulk of former security concerns with providing group privileges on ones files.  I have chosen to modify the default for standard users (root should still retain a mask of `022`) that will allow access for any shared groups by default, which can be exceptionally helpful to reduce conflicts with automation on a multi-user system.
+At a bare minimum monit allows us to ensure that if the system is overloaded or important services such as ssh hangs or dies that it gets rebooted.  It is a very reliable tool and good to have installed for general purpose use.
 
-To start we locate `UMASK 022` inside `/etc/logins.def` and change it to `UMASK 002`, which will give 775 permissions (more than one space may separate the code from UMASK).
+Configurations should be placed into `/etc/monit/monitrc.d/`, and symlinked to `/etc/monit/conf.d/`.
 
-Next we want to globally enforce this using `/etc/pam.d/common-session` by adding the following line at the bottom:
-
-    session optional pam_umask.so umask=002
-
-_This will take effect immediately and will not require a reboot._
+I create one for `ssh`, one for `system`, and one for `web` accessibility by default.  The configuration you choose may vary greatly, and I recommend [reading their documentation](https://mmonit.com/monit/documentation/monit.html) before simply copying my own suggested contents.
 
 
-**Switching from sysvinit with systemd:**
+##### Commands & Files
 
-This section, as you may have guessed, is incomplete.  By default debian uses the sysvinit boot process, and the reasons include:
+_Let's start by creating these files:_
 
-- it is stable
-- it is posix compatible
-- it can be easily edited, as it only consists of shell scripts
-- it only does one job, and that is to fire up services by run-level
-
-The stability and easy editing are what matter to me most, while the unix philosophy tends to be an added benefit of good design.
-
-The downsides are that:
-
-- it is moderately slow to parallelize
-- it only starts services, it does not keep them running or handle failure
-- all configuration takes place in (quite often) overly complex bash scripts
-
-On the otherhand, the systemd boot process changes the game by offering:
-
-- automatic parallelized processes by dependency
-- simplified ini files that make creating and editing easier, but provide less functionality
-- uses binaries that make editing the process significnatly more difficult
-- provides service monitoring and will restart crashed services
-
-I do like the abstraction systemd offers to simplify scripting (eg. eliminating the bash scripts), but it also appears that if a service still uses a bash daemon most tools will simply launch the old bash script and not the actual service, which renders a large portion of systemd benefits moot.  The parallelized processing and process monitoring are what I find most valuable, however, the tradeoffs prevent me from making the leap on any system on which I desire stability.
-
-I have used systemd on fedora and arch distros, and its stability was mostly terrible.  The boot speeds were exceptional.  I did not realize it was even monitoring services for failure to restart them.  Configuring its ini files is incredibly easy.  However, I experienced all sorts of crashes that stem from systemd's various tentacles.
-
-To explain further, systemd is being tied to the latest gnome interface and binary logging tools.  Debugging errors just got way harder (not easier).  Meanwhile gnome continues to push extremely tight integration with all of its services, such as its network manager which has never once been a pleasing experience to use.
-
-I intend to attempt systemd on my non-server system, using a different graphical user interface.  If I can manage to retain traditional logging and it remains stable I will likely add it to the steps in this file.
-
-_Keep in mind that by installing systemd I could also omit monit tools and configuration, though I do not know whether systemd offers any kind of api or web interface to determine service statuses from external sources like monit/munin do._
-
-
-**Configuring Monit:**
-
-At a bare minimum monit allows us to ensure that if the system is overloaded or a key utility such as ssh hangs or dies that it gets rebooted.  It is a very reliable tool and good to have installed for general purpose use.
-
-Here are some basic configurations you can create in `/etc/monit/monitrc.d`, which can be symlinked for activation to `/etc/monit/conf.d`:
-
-SSH (`/etc/monit/monitrc.d/ssh`):
+**`/etc/monit/monitrc.d/ssh`:**
 
     check process sshd with pidfile /var/run/sshd.pid
         start program = "/etc/init.d/ssh start"
@@ -208,7 +275,8 @@ SSH (`/etc/monit/monitrc.d/ssh`):
         if totalmem > 200.00 MB for 5 cycles then restart
         if 3 restarts within 8 cycles then timeout
 
-System (`/etc/monit/monitrc.d/system`):
+
+**`/etc/monit/monitrc.d/system`:**
 
     check system localhost
         if loadavg (1min) > 10 then alert
@@ -221,82 +289,120 @@ System (`/etc/monit/monitrc.d/system`):
         if loadavg (5min) > 15 for 5 cycles then exec "/sbin/reboot"
         if memory usage > 97% for 3 cycles then exec "/sbin/reboot"
 
-If you want a (secure) web accessible interface you can create this (`/etc/monit/monitrc.d/ssh`):
+**`/etc/monit/monitrc.d/web`:**
 
     # Establish Web Server on a custom port and restrict access to localhost
     set httpd port ####
         allow 127.0.0.1
 
-Be sure to replace the `####` with a port number, and you will then be able to access it locally, and through secured SSH service tunneling at `http://127.0.0.1:####`.  An example command for ssh tunneling:
+_Be sure to substitute the port number of your choice with `####` in the above configuration.  Then you can securely access it using ssh tunneling: `ssh -f -N username@remote_ip -L ####:localhost:####`_
 
-    ssh -f -N username@remote_ip -L ####:localhost:####
-
-Finally, we want to symlink these configuration files to `/etc/monit/conf.d`.  To keep things clean I recommand relative paths:
+_Finally, we run these commands to add symlinks
 
     cd /etc/monit/conf.d
     ln -s ../monitrc.d/ssh ssh
     ln -s ../monitrc.d/system system
     ln -s ../monitrc.d/web web
 
-_Monit can do a whole lot more than this so if you are interested check out their documentation._
+_You can then test, and restart monit:_
 
-After linking these files you can **test** your monit configuration with `monit -t`.  If you get no errors you should restart the service with `service monit restart`.
+    monit -t
+    service monit restart
 
 
-**Establish a FQDN Hostname:**
+#### Domain Name
 
-Start by updating the hostname with this command (to automate this we would need a config option per system):
+If you did not do so during the installation, you can setup a fully established domain name by adding the machine name to the file `/etc/hostname`, then running `hostname -F /etc/hostname`.
+
+To add the domain name you can edit `/etc/hosts` and add a record for `127.0.1.1` with your hostname, and fully qualified domain name.
+
+
+##### Commands
+
+_To add a hostname and FQDN, here are the commands:_
 
     echo "hostname" > /etc/hostname
     hostname -F /etc/hostname
 
-_I often assign a static IP but that cannot be automated.  I do this to prevent conflicts and make it easier to know my target for SSH access or other activities._
-
-If you did **not** set a domain name during installation, you can do so now manually.  For a fully qualified domain name we want to add two bits to `/etc/hosts`:
+_Edit the `/etc/hosts` file manually, and add or replace this line:_
 
     127.0.1.1 hostname.domain.dev hostname
 
-Now if we type `hostname -f` we will get the whole domain name.
+_Now if we type `hostname -f` we will get the whole domain name._
 
 
-**Securing SSH:**
+#### Static IP
 
-Obfuscating the SSH port is always a good plan on a public facing server:
+On most of my desktop systems inside a local network I assign a static IP.  I do this to make SSH access simpler, and to reduce routing traffic.
 
-    sed -i "s/Port 22/Port $SSH_PORT/" /etc/ssh/sshd_config
-
-We can start with disabling root ssh access by opening `/etc/ssh/sshd_config` and finding the line below and making sure it is set to no:
-
-    PermitRootLogin no
-
-_If you are logged in as root over ssh it might be wise to skip ahead and create a user with sudo privileges beforehand._
-
-If you want to simplify SSH access you can add your remote or work machines public key contents to `~/.ssh/authorized_keys`, or perhaps to `/etc/skel` to be supplied to any users created henceforth.
-
-There are two additional steps you can take to further secure the server.
-
-You can prevent the account from being logged into with a password by locking it with passwd:
-
-    passwd -l username
-
-_Note that this will prevent you from using the sudo command, as any attempt to supply your password will now fail.  For most scenarios this may be acceptable, but if you are an authorized administrator this will not be very helpful as you will have to `su root` to perform any maintenance._
-
-You can also tell SSH to only allow certificate authentication, and not to accept passwords by opening `/etc/ssh/sshd_config` and finding this line and making sure it is uncommented with no after it:
-
-    PasswordAuthentication no
-
-Finally, for production servers especially, since port 22 is a well known port to attack, you should obfuscate it by changing the port number to something arbitrary and above the normal range, which can also be done in `/etc/ssh/sshd_config`:
-
-    Port ####
-
-Once that has been set you will need to use `ssh -p ####` to access your server, and anyone attempting to reach Port 22 will be denied.  Obfuscation is a very effective security precaution, and at the very least will reduce your logged denied login attempts.
-
-Be sure to `service ssh restart` for the changes to take affect.
+These instructions are primarily for wired connections and may require significant changes to be useful for wireless connections.
 
 
-**IPTables:**
+##### Commands
 
-I generally create a basic iptables file with affective policies and ssh rate limiting, placing the contents into `/etc/firewall.conf`:
+_Edit the `/etc/network/interfaces` file by replacing or adding these lines:_
+
+    allow-hotplug eth0
+    iface eth0 inet static
+        address 10.0.5.8
+        netmask 255.255.255.0
+
+_Your network device name, and address are dependent on your system and intranet._
+
+
+#### SSH Configuration
+
+The first step I take to securing SSH is to obfuscate the port by changing it to a different number in `/etc/ssh/sshd_config`.
+
+Next it would be wise to add any keys to `~/.ssh/authorized_keys` under a user account (generally not under the root account), and prevent access via passwords.  To do this set `PasswordAuthentication no` inside `/etc/ssh/sshd_config`.  If you use [github](https://github.com/), you can use `curl` or `wget` to grab your accounts trusted public keys from terminal.
+
+If you don't use `sudo` often, you can further lock down accounts by preventing password logins and authentication in general via `passwd -l username`.  This can have unexpected consequences, but is another way to limit password authentication.
+
+Finally, preventing root login is usually a good move, set `PermitRootLogin no` in `/etc/ssh/sshd_config`.
+
+**Be sure to reboot or restart the ssh service for these changes to take affect.**
+
+You should also generate an SSH key for your user account.  _Passwordless keys are as insecure as automatically loading your key, so for greater security it is advisable to use a key with a password, and not to automatically load it._  However, I often use the `keychain` package to automatically load my keys into the ssh-agent if I am not concerned about the security of the account or need it for automation of some sort.
+
+You can also add a generated key to your github account via their api using curl.
+
+
+    curl -i -u "username:password" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"name this key\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}' https://api.github.com/user/keys
+
+_Don't forget a space in front to prevent it from showing in your `history` (since it has username & password)._
+
+
+##### Commands
+
+_These commands will secure your ssh service:_
+
+    sed -i "s/Port\s*[0-9].*/Port ####/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
+    service ssh restart
+
+_Be sure to replace `####` with a port number of your choosing.  This number will also be important for a later step._
+
+_These commands will grab your trusted keys off the net, and add your newly generated public key to your account (**swap your username and password, and be sure to clear your `history` after**)._
+
+    curl -o ~/.ssh/authorized_keys "https://github.com/username.keys"
+    curl -i -u "username:password" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"name this key\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}' https://api.github.com/user/keys
+
+_To generate an ssh key, here is the command (prompts will be required after):_
+
+    ssh-keygen -t rsa -b 4096
+
+
+#### Firewall via IPTables
+
+The `iptables` package makes for an excellent firewall.  However, its configuration can be quite confusing.  I recommend reading up on it if you want a solid understanding.
+
+I usually create a set of rules in `/etc/firewall.conf`, though some services would have you place it into `/etc/iptables/iptables.rules` and auto-load it by default.  However, I do not use the iptables daemon, instead I connect them to my `network up` sequence by creating a file in `/etc/network/if-up.d/` to reload the iptable rules.
+
+
+##### Commands & Files
+
+_Let's start by creating our IPTables file in `/etc/firewall.conf`:_
 
     *filter
 
@@ -326,434 +432,48 @@ I generally create a basic iptables file with affective policies and ssh rate li
 
     COMMIT
 
-_Note that the `ssh` value translates to the default port 22, and will not change based on the active/actual SSH port.  If you have changed the port number you will have to adjust the iptables value._
+_Remember that the `ssh` port number varies and the string evaluates to port 22 (the default)._
 
-Next we want to make sure that it gets loaded when the network comes up.  Running `iptables-restore` will do the trick, and it automatically flushes all the existing rules.  _Despite many articles claiming the use of `/etc/network/if-pre-up.d` as the correct directory, I have found that it does not load unless you use the `/etc/network/if-up.d`  directory._
-
-Place these lines inside of `/etc/network/if-up.d/iptables`:
+_Next let's create our file `/etc/network/if-up.d/iptables` with loading code:_
 
     #!/bin/bash
     iptables-restore < /etc/firewall.conf
 
-_According to the man pages, the restore operation will automatically (by default) flush the existing rules when loading a new file._
+_Finally, we need to make the iptables script executable:_
 
-Be sure to make that file executable:
-
-    chmod +x /etc/network/if-up.d/iptables
+    chmod +x /etc/firewall.conf
 
 
-**Add JPN Locale Support:**
+#### Locale Support
 
-If you want to have japanese character support, and did not select the secondary locale during install, you can do so now by modifying the `/etc/locale.gen` file and re-running the locale-gen command:
+If you happen to dabble in other languages besides english (as I'm sure do many), then you can add another locale and generate related files.
+
+The interactive way to do this is to use `dpkg-reconfigure locales`.  This will let you pick the options from an ncurses gui.
+
+If you want to make it happen manually instead you can modify the `/etc/locale.gen` file, by removing comments next to the locale of your choice, then running `locale-gen`.
+
+
+##### Commands
+
+_I usually add japanese locale for language support:_
 
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
 
 
-**User Creation:**
+#### Creating a User
 
-_If you want to automate configuring the terminal, potentially saving a bit of time, then you should run through the instructions below this step first._
+**Before creating a new user I highly recommend preparing your system for new users with my [dot-files repository](https://github.com/cdelorme/dot-files), which contains a number of prompt enhancements, vim plugins and configuration, and numerous user-configuration defaults that improve overall performance.**
 
-This is the last task I perform, generally after I have placed all of my dot files and related configuration into `/etc/skel`, this way future users on that system automatically have all those useful tools available to them.
+Provided all the configuration files you desire are in the `/etc/skel/` path, you can proceed with creating a new user.  I do so using the `useradd` command, but if you prefer an interactive approach then the `adduser` perl script should do nicely.
 
-I create a new user with this command (ensuring bash shell, otherwise debian defaults to `/bin/sh`):
+After adding a user you will want to set their password with `passwd username`.  Also, don't forget to add your user to appropriate groups, such as the `sudo` group.
+
+
+##### Commands
+
+_Here is how I create my new users:_
 
     useradd -m -s /bin/bash username
     passwd username
-
-You will then wish to run `passwd username` to assign that account a password (or else they may be unable to login).
-
-If this user will have admin privileges add them to the sudo group:
-
     usermod -aG sudo username
-
-
-### Etc Skel & User Configuration
-
-**If you want to skip the next several pages of configuration, you can just download and execute my [dot-files](https://github.com/cdelorme/dot-files) repo.**
-
-_Ideally, besides being in `~/`, the files created here can be placed into `/etc/skel`, where they will be distributed to all new users._
-
-
-**Setting up SSH:**
-
-You should generally only create keys for user accounts, root accounts should not be involved in security beyond the local system, this prevents any extra ties to the outside from becoming potential risks.
-
-To create a strong SSH key:
-
-    ssh-keygen -t rsa -b 4096 -C Email
-
-Follow the prompts for naming, and optionally add a password.
-
-By default your key will ask you for your password everytime you use it.  To avoid this you can configure `keychain`, which will allow you to easily load the key into an ssh-agent.  _I do this in my `~/.bashrc` dot file._
-
-If your machine will be running scripts that need ssh access to remote resources you may consider creating a passwordless ssh key.
-
-The only real security flaw with a passwordless ssh key is if someone gains unauthorized access to that machine.  As such it is best practice to provide read-only access to that ssh key from those resources.
-
-_Note that it is equally insecure to add a password to your SSH key and load it from a file that is read only for your user, because if someone gains unauthorized access they can still acheive the exact same degree of control._
-
-If you want to add this key to your github account, you can use the curl command to do so from the command line without any GUI at all:
-
-    curl -i -u "username:password" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"name this key\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}' https://api.github.com/user/keys
-
-To optimize ssh, and avoid rate-limiting problems with iptables, you can re-use an established ssh connection from the same machine.  Simply add these lines to `~/.ssh/config`:
-
-    Host *
-        ControlMaster auto
-        ControlPath ~/.ssh/%r@%h:%p
-        CompressionLevel 9
-        ControlPersist 2h
-
-_Note that doing this may require you to set an addition `-o ControlMaster=no` option when tunneling services, or adding specific details for tunneling to the same config file:_
-
-    Host monit
-        ControlMaster no
-        HostName remote_ip
-        User username
-        LocalForward remote_port 127.0.0.1:local_port
-
-
-**Git Configuration:**
-
-    git config --global core.editor "vim"
-    git config --global help.autocorrect -1
-    git config --global color.ui true
-    git config --global push.default matching
-    git config --global pull.default matching
-    git config --global remote.origin.push HEAD
-    git config --global alias.a add
-    git config --global alias.s status
-    git config --global alias.st stash
-    git config --global alias.sa "stash apply"
-    git config --global alias.c commit
-    git config --global alias.l '!. ~/.githelpers && pretty_git_log'
-    git config --global alias.pp '!git pull && git push'
-
-I use aliases to expedite the git command chain, which despite the small difference can have a significant impact.  Either way if you don't use them having them won't hurt.
-
-This should create a `~/.gitconfig` similar to:
-
-    [core]
-        editor = vim
-    [help]
-        autocorrect = 1
-    [color]
-        ui = true
-    [alias]
-        a = add
-        s = status
-        c = commit
-        st = stash
-        sa = stash apply
-        l = !. ~/.githelpers && pretty_git_log
-        pp = !git pull && git push
-    [push]
-        default = matching
-    [remote "origin"]
-        push = HEAD
-
-I also like to enhance my overall terminal experience by adding a bunch of functionality.
-
-First let's create `~/.bash_logout` specifically to clear my environment on exit so subsequent logins don't see the previous commands and appear "fresh":
-
-    #!/bin/bash
-
-    # clear on exit
-    [ -x "/usr/bin/clear" ] && /usr/bin/clear
-    [ -x "/usr/bin/clear_console" ] && clear_console -q
-
-Next we'll download [git completion](https://raw.github.com/git/git/master/contrib/completion/git-completion.bash), to make git even easier to use:
-
-    wget "https://raw.github.com/git/git/master/contrib/completion/git-completion.bash" -O .git-completion
-
-In the above git config I aliased a command to a `~/.githelpers`, which can be found all over the internet, but basically gives you a beautified and simple pipeline of git activity.  The contents include:
-
-    #!/bin/bash
-
-    # Log output:
-    #
-    # * 51c333e    (12 days)    <Gary Bernhardt>   add vim-eunuch
-    #
-    # The time massaging regexes start with ^[^<]* because that ensures that they
-    # only operate before the first "<". That "<" will be the beginning of the
-    # author name, ensuring that we don't destroy anything in the commit message
-    # that looks like time.
-    #
-    # The log format uses } characters between each field, and `column` is later
-    # used to split on them. A } in the commit subject or any other field will
-    # break this.
-
-    HASH="%C(yellow)%h%Creset"
-    RELATIVE_TIME="%Cgreen(%ar)%Creset"
-    AUTHOR="%C(bold blue)<%an>%Creset"
-    REFS="%C(red)%d%Creset"
-    SUBJECT="%s"
-
-    FORMAT="$HASH}$RELATIVE_TIME}$AUTHOR}$REFS $SUBJECT"
-
-    show_git_head() {
-        pretty_git_log -1
-        git show -p --pretty="tformat:"
-    }
-
-    pretty_git_log() {
-        git log --graph --abbrev-commit --date=relative --pretty="tformat:${FORMAT}" $* |
-            # Repalce (2 years ago) with (2 years)
-            #sed -Ee 's/(^[^<]*) ago)/\1)/' |
-            # Replace (2 years, 5 months) with (2 years)
-            #sed -Ee 's/(^[^<]*), [[:digit:]]+ .*months?)/\1)/' |
-            # Line columns up based on } delimiter
-            column -s '}' -t |
-            # Page only if we need to
-            less -FXRS
-    }
-
-Next let's customize our prompt and add git and mercurial support by creating a custom `~/.promptrc`:
-
-    #!/bin/bash
-    #~/.promptrc
-
-    # Create a dynamic prompt that adjusts if in a git repo
-    c_bold=`tput bold`
-    c_red=`tput setaf 1`
-    c_green=`tput setaf 2`
-    c_blue=`tput setaf 4`
-    c_purple=`tput setaf 5`
-    c_cyan=`tput setaf 6`
-    c_sgr0=`tput sgr0`
-
-    # Support for Git & Mercurial
-    parse_repo_branch ()
-    {
-        if git rev-parse --git-dir >/dev/null 2>&1
-        then
-            gitver=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
-            numfil=$(git status | grep "#   " | wc -l)
-            echo -e git:$gitver:$numfil
-        elif hg status -q >/dev/null 2>&1
-        then
-            hgver=$(hg branch 2>/dev/null)
-            numfil=$(hg status | wc -l)
-            echo -e hg:$hgver:$numfil
-        else
-              return 0
-        fi
-    }
-
-    # Colorize the branch based on its state
-    branch_color ()
-    {
-            color="${c_red}"
-            if git rev-parse --git-dir >/dev/null 2>&1
-            then
-                    if git status | grep "nothing to commit" 2>&1 > /dev/null
-                    then
-                        color=${c_green}
-                    fi
-            elif hg status -q >/dev/null 2>&1
-            then
-                    if expr $(hg status | wc -l) == 0 2>&1 > /dev/null
-                    then
-                        color=${c_green}
-                    fi
-            else
-                    return 0
-            fi
-            echo -ne $color
-    }
-
-    # Check for git and supply a colorized detailed prompt
-    colorify ()
-    {
-        if ! git status &> /dev/null;
-        then
-            echo -ne "${c_blue}${0} ($(date +%R:%S)) ${c_purple}$(whoami)${c_sgr0}@${c_green}$(hostname) ${c_bold}${c_blue}$(dirs)${c_sgr0}"
-        else
-            echo -ne "$(whoami)@$(hostname) ${c_bold}${c_red}$(dirs)${c_sgr0} [$(branch_color)$(parse_repo_branch)${c_sgr0}]"
-        fi
-    }
-
-    # By wrapping in single quotes we allow the command execution to be parsed only when requested
-    PS1='\n[$(colorify)\n$ '
-
-Finally to tie all of these things together and add some infrastructure (some optional for gui), we can create a `~/.bashrc`:
-
-    #!/bin/bash
-
-    # Discontinue if shell is not interactive
-    [ -z "$PS1" ] && return
-
-    # Set default editor
-    export EDITOR=vim
-
-    # Create a bin folder for the user if one does not exist
-    if [ ! -d ~/bin ];
-    then
-        mkdir -p ~/bin &> /dev/null
-    fi
-
-    # Always add local bin path for user-overrides
-    export PATH=~/bin:$PATH
-
-    # Auto-Completion
-    if [[ -r /usr/share/bash-completion/bash_completion ]];
-    then
-        . /usr/share/bash-completion/bash_completion
-        set show-all-if-ambiguous on
-        set show-all-if-unmodified on
-
-        # Add for sudo users
-        complete -cf sudo &> /dev/null
-    fi
-
-    # If the command is not found, look for packages that contain it
-    [[ -f /usr/share/doc/pkgfile/command-not-found.bash ]] && . /usr/share/doc/pkgfile/command-not-found.bash
-
-    # Set History File
-    export HISTFILE=~/.history
-
-    # Append History
-    shopt -s histappend
-
-    # Ignore lines in history that started with a space
-    export HISTCONTROL=ignoreboth
-
-    # Attempt Directory Autocompletion (For typo-prone)
-    shopt -s dirspell
-
-    # Expand typed variables, instead of correcting
-    shopt -s direxpand
-
-    # Alias ls
-    alias ls='ls -ahF --color=auto'
-
-    # Auto-detect changes in window size and adjust
-    shopt -s checkwinsize
-
-    # If the system has a gnome shell, let's
-    if [ -n "$DISPLAY" ];
-    then
-
-        # Create Autostart Folder if it does not already exist
-        if [ ! -d ~/.config/autostart ];
-        then
-            mkdir -p ~/.config/autostart &> /dev/null
-        fi
-
-        # Check for Sublime Text & create subl command if not already present
-        if [ ! -f ~/bin/subl ] && [ -f ~/Applications/sublime_text/sublime_text ];
-        then
-            ln -s ~/Applications/sublime_text/sublime_text ~/bin/subl
-        fi
-
-        # If guake exists, make sure it is loaded at login
-        if [ ! -h ~/.config/autostart/guake.desktop ] && [ -f ~/.local/share/applications/guake.desktop ];
-        then
-            ln -s ~/.local/share/applications/guake.desktop ~/.config/autostart/guake.desktop
-        fi
-
-    fi
-
-    # Autoload SSH Access
-    if [ -z "$SSH_AGENT_PID" ];
-    then
-        keychain ~/.ssh/id_rsa
-        . ~/.keychain/$HOSTNAME-sh
-    fi;
-
-    # Load Git Completion
-    . ~/.git-completion
-
-    # Load Custom Prompt
-    . ~/.promptrc
-
-
-**Vim Configuration:**
-
-I use the following plugins:
-
-- [ctrlp](https://github.com/kien/ctrlp.vim)
-- [Surround](https://github.com/tpope/vim-surround)
-- [EasyMotion](https://github.com/Lokaltog/vim-easymotion)
-- [SparkUp](https://github.com/tristen/vim-sparkup)
-- [Emmet](https://github.com/mattn/emmet-vim/)
-
-I use the [vividchalk](https://github.com/tpope/vim-vividchalk) color scheme.
-
-Here is what my `~/.vimrc` looks like:
-
-    " Define Default State
-    set nocompatible
-    set hidden
-    set nowrap
-    set shiftwidth=4
-    set tabstop=4
-    set shiftround
-    set autoindent
-    set copyindent
-    set smartindent
-    set expandtab
-    set smarttab
-    set number
-    set showmatch
-    set ignorecase
-    set smartcase
-    set hlsearch
-    set incsearch
-    set backspace=indent,eol,start
-    set nobackup
-    set noswapfile
-    set foldlevelstart=20
-
-    " Define Color Scheme
-    set background=dark
-    colorscheme vividchalk
-
-    " Remap Convenient Keys
-    :map <F1> <Esc>
-    :imap <F1> <Esc>
-    nnoremap ; :
-    let mapleader=","
-    set pastetoggle=<F2>
-
-    " Quickly edit/reload the vimrc file
-    nmap <silent> <leader>ev :e $MYVIMRC<CR>
-    nmap <silent> <leader>sv :so $MYVIMRC<CR>
-
-    " No Noise
-    set noeb vb t_vb=
-
-    " Syntax and File Type Config
-    :filetype on
-    :syntax on
-    :filetype indent on
-    filetype plugin on
-    set foldmethod=syntax
-
-    " File Recognition
-    au BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=markdown
-    au BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}.{des3,des,bf,bfa,aes,idea,cast,rc2,rc4,rc5,desx} set filetype=markdown
-
-    " Added Syntax
-    highlight BadWhitespace ctermbg=red guibg=red
-    highlight BadWhitespace ctermbg=red guibg=red
-    au BufRead,BufNewFile *.py match BadWhitespace /*\t\*/
-    au BufRead,BufNewFile *.py match BadWhitespace /\s\+$/
-
-    " Tab autocompletion
-    function! Tab_Or_Complete()
-        if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
-            return "\<C-N>"
-        else
-            return "\<Tab>"
-        endif
-    endfunction
-    :inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
-    :set dictionary="/usr/dict/words"
-
-    " Load Plugins
-    set runtimepath^=~/.vim/bundle/ctrlp.vim
-    :helptags ~/.vim/doc
-
-This gives me a very basic auto-completion, and a variety of useful tools that help my productivity.
