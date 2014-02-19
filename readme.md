@@ -16,3 +16,6 @@ Ideally the documentation chains from one configuration to the next, and so in m
 My documentation is my own, but you are welcome to fork and modify these configurations.  Just be sure you understand what my scripts are doing before executing them to avoid problems.
 
 Due to limited flexibility of the software or command line tools available in OS X and Windows, I may document how I configure them only for reference, as automation is not feasibly acheivable.
+
+
+## All scripts and documentation are licensed under GPLv3.
