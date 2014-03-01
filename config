@@ -1,0 +1,23 @@
+#!/bin/bash
+
+##
+# config options for setup execution
+##
+
+# new system user
+USER=""
+
+# new system password
+PASSWORD=""
+
+# github user
+GITHUB_USERNAME=""
+
+# github password
+GITHUB_PASSWORD=""
+
+# ssh port
+SSH_PORT=9005
+
+# dot files repo
+DOT_FILES_REPO="https://github.com/cdelorme/dot-files.git"

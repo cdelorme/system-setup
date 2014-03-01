@@ -1,0 +1,140 @@
+#!/bin/bash
+
+##
+# get script info
+##
+
+if [ $(uname) = "Darwin" ]
+then
+    SELF=$(cd $(dirname "$0") && pwd -P)/$(basename "$0")
+else
+    SELF=$(readlink -f "$0")
+fi
+SELF_PATH=$(dirname "$SELF")
+
+
+##
+# define functions
+##
+
+template()
+{
+
+    # handle package installations
+    aptitude install -r -y netselect-apt
+    netselect-apt -s -n
+    aptitude clean
+    aptitude update
+    dpkg -r vim-common vim-tiny
+    aptitude reinstall -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    aptitude install -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    update-command-not-found
+
+    # copy template files
+    shopt -s dotglob
+    cp -r "${SELF_PATH}/data/template/"* /
+    shopt -u dotglob
+
+    ##
+    # update specific copied files
+    ##
+
+    # cronjobs
+    chmod +x /etc/cron.monthly/netselect-apt
+    chmod +x /etc/cron.weekly/aptitude
+    chmod +x /etc/cron.weekly/e4defrag
+    chmod +x /etc/cron.weekly/fstrim
+
+    # monit
+    cd /etc/monit/conf.d
+    ln -s ../monitrc.d/ssh ssh
+    ln -s ../monitrc.d/system system
+    ln -s ../monitrc.d/web web
+    service monit restart
+    cd "$SELF_PATH"
+
+    ##
+    # configure services
+    ##
+
+    # lvm and default umask
+    sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+    sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
+    echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
+
+    # domain config
+    if [ -n "$HOSTNAME" ]
+    then
+        echo "$HOSTNAME" > /etc/hostname
+        hostname -F /etc/hostname
+    fi
+    if [ -n "$" ]
+    then
+        # 127.0.1.1 hostname.domain.dev hostname
+        echo ""
+    fi
+
+    # iptables port and auto-boot
+    sed -i "s/ssh/${SSH_PORT}/" /etc/firewall.conf
+    chmod +x /etc/network/if-up.d/iptables
+
+    # add jp locale
+    echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen
+
+    # create new user
+    if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]
+    then
+        useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$PASSWORD") "$USERNAME"
+        usermod -aG sudo username
+
+        # alternative create-new-user
+        # useradd -m -s /bin/bash "$USERNAME"
+        # echo "$PASSWORD" | passwd username --stdin
+    fi
+
+    # install dot files
+    dot_files_repo
+
+}
+
+dot_files_repo()
+{
+
+    # was a dot-files repo supplied?
+    if [ -n "$DOT_FILES_REPO" ]
+    then
+
+        # attempt to clone outside of the system-setup repo
+        cd ../
+        git clone "$DOT_FILES_REPO" "dot-files"
+
+        ##
+        # expected format is to have an install script
+        # it will supply it with a github username and password (if they exist)
+        # if a password is supplied but no username, the install could fail
+        ##
+        cd "dot-files"
+        ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD"
+
+        # cleanup after itself
+        cd ..
+        rm -rf "dot-files"
+
+        # return to original path
+        cd "$SELF_PATH"
+
+    fi
+
+}
+
+##
+# parse arguments & load config
+##
+. "$SELF_PATH/config"
+
+
+##
+# execute setup according to arguments
+##
+
