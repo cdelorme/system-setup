@@ -15,105 +15,81 @@ My template can run on 512MB of RAM, but for the GUI environment you will need a
 A graphics card will be required, though driver installation varies wildly and won't be covered here.  If you install the packages below and cannot run startx or telinit 3 into the gdm3 GUI, then you may have to look elsewhere for future guides.
 
 
-## Gui Configuration
+## Configuration
 
-Minimalist Gnome3 Packages:
+This document discusses some generic tools and is not tied to any interface in particular.  It is a set of recommendations, not required to run a user interface.
 
-    aptitude install -y gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver desktop-base gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support xdg-user-dirs-gtk xdg-utils network-manager eog gparted guake gnash vlc gtk-recordmydesktop chromium
+Let's start with a set of generic tools and services:
 
-Development Tools:
+    aptitude install -r -y gparted vlc gtk-recordmydesktop chromium ffmpeg lame ttf-freefont ttf-liberation ttf-droid ttf-mscorefonts-installer transmission transmission-cli openshot
 
-    aptitude install -y glib-devel glibc-devel gnome-libs-devel gstream-devel gtk3-devel guichan-devel libX11-devel libmcrypt-devel qt3-devel qt-devel pythonqt-devel python-devel python3-devel pygame-devel perl-devel nodejs-devel ncurses-devel pygobject2-devel pygobject3-devel gobject-introspection-devel guichan bpython
+For development I also recommend these packages:
 
-_These development tools may significantly affect the size of the install, make sure you have the space on your root partition before proceeding._
-
-
-**Adjust Boot Services:**
-
-With the GUI installed we now have bluetooth and network-manager services we don't need, and GUI at run-level 2 which we want to turn off:
-
-    update-rc.d network-manager disable 2
-    update-rc.d network-manager disable 3
-    update-rc.d network-manager disable 4
-    update-rc.d network-manager disable 5
-    update-rc.d bluetooth disable 2
-    update-rc.d bluetooth disable 3
-    update-rc.d bluetooth disable 4
-    update-rc.d bluetooth disable 5
-    update-rc.d gdm3 disable 2
-
-This stops the network-manager from interfering with our interfaces network devices, and since we don't have bluetooth devices we eliminate a running daemon.
-
-We can use `telinit 3` to start the GUI, or `startx` if preferred, allowing us to reduce consumed resources at boot time since we don't always need the GUI.
+    aptitude install -r -y bpython libguichan-dev libX11-dev libmcrypt-dev python-dev python3-dev python-pygame libperl-dev openjdk-6-jre
 
 
-**Patch Guake:**
+## Other Recommended Software
 
-Guake has a known bug that has yet to be fixed where it prevents execution at login due to `notification.show()` commands not able to be processed.
+### Sublime Text
 
-    sed -i 's/notification.show()/try:\n                notification.show()\n            except Exception:\n                pass/' /usr/bin/guake
-    rm /etc/xdg/autostart/guake.desktop
+_These instructions vary slightly depending on whether you are using Sublime Text 2 or Sublime Text 3, though 3 is in beta it offers many improvements over the second version, and is moderately stable._
 
-I create a new .desktop file in `~/.local/share/applications/guake.desktop` containing:
-
-    [Desktop Entry]
-    Name=Guake Terminal
-    Comment=Use the command line in a Quake-like terminal
-    TryExec=guake
-    Exec=guake
-    Icon=/usr/share/pixmaps/guake/guake.png
-    Type=Application
-    Categories=GNOME;GTK;Utility;TerminalEmulator;
-
-Then I can easily setuo local autostart in `~/.config/autostart` and symlink the new .desktop:
-
-    mkdir -p ~/.config/autostart
-    ln -s ~/.local/share/applications/guake.desktop ~/.config/autostart/guake.desktop
-
-
-**Setup Sublime Text:**
-
-_I am using Sublime Text 2, but Sublime Text 3 may soon be replacing it, so these instructions are subject to change._
-
-Installing a copy per-user is probably the best way to separate the application, but you can decide whether to put it someplace more global.
+Let's start by downloading the latest copy off their website.
 
 Grab the latest version off their website:
 
+    # Download Sublime Text 3
+    wget -O ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
+    tar xf sublime.tar.bz2
+    rm sublime.tar.bz2
+
+    # Download Sublime Text 2
     wget -O ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2
     tar xf sublime.tar.bz2
     rm sublime.tar.bz2
+
+You have a choice with sublime, you can install a system local copy, but I recommend a local copy per user to avoid version concerns.  It will create a settings folder per user automatically.
+
+To install globally:
+
+    mkdir /usr/local/applications
+    mv Sublime* /usr/local/applications/sublime_text/
+    ln -s /usr/bin/subl /usr/local/applications/sublime_text/sublime_text
+
+To install locally:
+
     mkdir ~/applications
     mv Sublime* ~/applications/sublime_text/
-
-With the formerly configured `~/bin` folder I create a symlink to `subl`:
-
+    mkdir -p ~/bin
     ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
 
-_An alternative would be to create a shell script file that runs `sublime_text &` to put the process in the background after launching._
+_Copying with the asterisk may fail if there are multiple items that start with the first word._
 
-I use these Sublime Text plugins:
+I recommend these packages for the editor:
 
 - [Package Control](https://sublime.wbond.net/)
 - [Markdown Preview](https://github.com/revolunet/sublimetext-markdown-preview)
 - [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
+- [Origami](https://github.com/SublimeText/Origami)
 
-I configure sublime text with:
+My sublime text configuration appears as:
 
     {
         "auto_complete_commit_on_tab": true,
         "caret_style": "phase",
         "color_scheme": "Packages/Color Scheme - Default/Sunburst.tmTheme",
         "font_face": "ForMateKonaVe",
-        "font_size": 16.0,
+        "font_size": 16.5,
         "highlight_line": true,
         "highlight_modified_tabs": true,
-        "ignored_packages":
         "match_brackets_angle": true,
         "scroll_past_end": true,
         "scroll_speed": 2.0,
         "translate_tabs_to_spaces": true,
         "trim_trailing_white_space_on_save": true
     }
+
+_This does depend on the custom `ForMateKonaVe` font._
 
 I add also modify the hotkeys for SublimeCodeIntel go-to-definition and Markdown Preview to build to browser:
 
@@ -137,11 +113,4 @@ I create a desktop launcher using `~/.local/share/applications/subl.desktop` con
     Type=Application
     Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
 
-
-**Enable GDM Login as Root:**
-
-This is entirely optional, but I like having it in the event that I have to debug.
-
-By default debian's pam is configured to disallow root gui login, but we can resolve this simply with:
-
-    sed -i "s/user != root//" /etc/pam.d/gdm3
+_While this document is centric to debian, I feel it beneficial to share that fedora and ubuntu both work with the above configuration, however Arch does not read the PATH variable for the local `~/bin` folder, and does not expand the tilde into the home directory, requiring static paths._
