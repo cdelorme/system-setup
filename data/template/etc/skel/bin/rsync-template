@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if [ ! -f "rsync" ];
+then
+
+    touch "rsync";
+
+    # Sync Atom VM Files /w rsync (paths must be full, not shortcut)
+    SERVER="address";
+    USERNAME="sg";
+    REMOTE_PATH="";
+    LOCAL_PATH="";
+    SSH_KEY_PATH="";
+
+    # Excludes
+    EXCLUDES=();
+    EXCLUDES=(${EXCLUDES[*]} '.git');
+    EXCLUDES=(${EXCLUDES[*]} '.gitignore');
+    EXCLUDES=(${EXCLUDES[*]} '.settings');
+    EXCLUDES=(${EXCLUDES[*]} 'composer.lock');
+    EXCLUDES=(${EXCLUDES[*]} '*.gitignore');
+    EXCLUDES=(${EXCLUDES[*]} '.buildpath');
+    EXCLUDES=(${EXCLUDES[*]} '.project');
+    EXCLUDES=(${EXCLUDES[*]} '.externalToolBuilders');
+    EXCLUDES=(${EXCLUDES[*]} '.DS_Store');
+
+    rsync -atvz -e "ssh -i $SSH_KEY_PATH" ${LOCAL_PATH} ${USERNAME}@${SERVER}:${REMOTE_PATH} `for i in ${EXCLUDES[@]}; do printf " --exclude ${i}"; done`
+
+    rm "rsync";
+
+fi

@@ -1,0 +1,3 @@
+# Establish Web Server on a custom port and restrict access to localhost
+set httpd port 9000
+    allow 127.0.0.1
