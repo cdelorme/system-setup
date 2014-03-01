@@ -1,13 +1,13 @@
 
 # arch
-#### Updated 11-20-2013
+#### Updated 2-28-2014
 
-I only just began using arch, but can already tell it's exactly what I want in my Linux distro.
+I used arch for six months, and have decided it is not for me.
 
-It's an extremely bare-bones "Do It Yourself" style OS.  It has earned the term "Hard Mode" in linux communities.
+While I love simplicity I feel that their leap to systemd and subsequent lack of up to date documentation has dealt a major blow to the distros stability.
 
-It's difficulty accelerates self-education and empowers users to both learn, and customize every aspect of their experience.
+I had crashes twice a week, kernel panics randomly at boot time, and too many issues installing and configuring any major package.
 
-I expect to be using this platform a great deal more in the future.
+While its difficult accelerated my linux growth through self-education, I am glad to no longer be using it because it was time consuming and aggrivating more often than it was pleasurable.
 
-_I do not believe arch is an alternative to debian, in fact they serve entirely different purposes.  I will still continue to use debian for any form of server infrastructure, but I will likely use arch in all future desktop environments._
+_I believe arch is too unstable to be useful even as a primary desktop environment, and especially as a server.  Despite having bleeding edge packages the instability it introduced made every day on it a headache._
