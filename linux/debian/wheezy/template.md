@@ -189,7 +189,7 @@ _Starting with the files and their contents:_
 
 **`/etc/cron.monthly/netselect-apt`:**
 
-    # #!/bin/bash
+    #!/bin/bash
 
     # Update package mirrors
     netselect-apt -s -n
@@ -366,9 +366,6 @@ You should also generate an SSH key for your user account.  _Passwordless keys a
 
 You can also add a generated key to your github account via their api using curl.
 
-
-    curl -i -u "username:password" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"name this key\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}' https://api.github.com/user/keys
-
 _Don't forget a space in front to prevent it from showing in your `history` (since it has username & password)._
 
 
@@ -441,7 +438,7 @@ _Next let's create our file `/etc/network/if-up.d/iptables` with loading code:_
 
 _Finally, we need to make the iptables script executable:_
 
-    chmod +x /etc/firewall.conf
+    chmod +x /etc/network/if-up.d/iptables
 
 
 #### Locale Support
