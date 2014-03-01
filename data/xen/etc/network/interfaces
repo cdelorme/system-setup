@@ -1,0 +1,15 @@
+auto lo xenbr0 xenbr1
+iface lo inet loopback
+allow-hotplug eth0
+allow-hotplug eth1
+iface eth0 inet manual
+iface eth1 inet manual
+iface xenbr0 inet manual
+    bridge_ports eth0
+    bridge_maxwait 0
+iface eth1 inet manual
+iface xenbr1 inet static
+   bridge_ports eth1
+    bridge_maxwait 0
+    address 10.0.0.2
+    gateway 10.0.0.1
