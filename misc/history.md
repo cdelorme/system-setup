@@ -1,5 +1,5 @@
 
-# Clearing history
+#### Clearing history
 
 Linux terminal keeps a history of commands, which is generally very useful.
 
