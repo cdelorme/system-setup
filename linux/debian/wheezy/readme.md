@@ -1,6 +1,6 @@
 
 # wheezy
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 This is the current stable debian release, and is the one I am using.  Documentation inside here is intended for use in this release and may not work with other versions, or be at all accurate.
 

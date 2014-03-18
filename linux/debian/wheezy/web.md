@@ -1,6 +1,6 @@
 
 # Web Server Template Documentation
-#### Updated 10-15-2013
+#### Updated 2013-10-15
 
 This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
 

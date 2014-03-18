@@ -1,6 +1,6 @@
 
 # arch template documentation
-#### Updated 2-28-2014
+#### Updated 2014-2-28
 
 I spent six months learning how to work with arch, and this document contains a small amount of knowledge I can share.  I highly recommend viewing their own documentation, while somewhat outdated it is a far cry better than what I have written here.
 

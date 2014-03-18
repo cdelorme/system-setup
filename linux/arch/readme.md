@@ -1,6 +1,6 @@
 
 # arch
-#### Updated 2-28-2014
+#### Updated 2014-2-28
 
 I used arch for six months, and have decided it is not for me.
 

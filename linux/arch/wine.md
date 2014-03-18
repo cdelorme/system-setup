@@ -1,6 +1,6 @@
 
 # arch wine documentation
-#### Updated 2-28-2014
+#### Updated 2014-2-28
 
 This is a simplified set of notes on getting Wine up and running in Arch.
 

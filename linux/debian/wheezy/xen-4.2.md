@@ -1,6 +1,6 @@
 
 # Xen 4.2 Server Documentation
-#### Updated 10-15-2013
+#### Updated 2013-10-15
 
 A (slightly dated) copy of this guide can be found on the [xen wiki](http://wiki.xen.org/wiki/Comprehensive_Xen_Debian_Wheezy_PCI_Passthrough_Tutorial).
 

@@ -1,6 +1,6 @@
 
 # System Setup
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 I use virtualization extensively.  For me it solves most of my computer woes while granting me greater flexibility both long and short term.  Learning how to use virtual machines has also dramatically improved my linux `foo`.
 

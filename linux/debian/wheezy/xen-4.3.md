@@ -1,6 +1,6 @@
 
 # Xen 4.3 Server Documentation
-#### Updated 10-15-2013
+#### Updated 2013-10-15
 
 This time around I won't chew your ear off with unnecessary dialog, this guides purpose is a quick run-through of setting up Xen 4.3.  Everything contained here-in should be in code-snippet form, allowing you to create a shell script to execute all desired changes at once.
 

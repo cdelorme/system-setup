@@ -1,6 +1,6 @@
 
 # Comm Server Documentation
-#### Updated 10-14-2013
+#### Updated 2013-10-14
 
 This documentation picks up where the template documentation leaves off.  It expects all tools, but no GUI environment.
 

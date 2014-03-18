@@ -1,6 +1,6 @@
 
 # 19
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 The documentation here is intended for use in fedora 19, the current stable release.
 

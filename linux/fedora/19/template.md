@@ -1,6 +1,6 @@
 
 # Fedora Template
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 Using my experience with Debian I have tried to mimmic the setup as closely as posible.  This is fine as the goal is a template system that can be extended, not a specific configuration for an intended purpose.
 

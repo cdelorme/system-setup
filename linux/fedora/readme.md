@@ -1,6 +1,6 @@
 
 # fedora
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 Fedora is based on RedHat linux, and uses the RPM package system.
 

@@ -1,6 +1,6 @@
 
 # arch (gnome) gui documentation
-#### Updated 11-21-2013
+#### Updated 2013-11-21
 
 This is my attempt to take the template and turn it into a full fledged development environment with various matching tools installed and configured.
 

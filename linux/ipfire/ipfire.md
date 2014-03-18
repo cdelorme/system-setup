@@ -1,6 +1,6 @@
 
 # IPFire Proxy Cache Router Firewall WAP Documentation
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 Things I have noted for future reference:
 

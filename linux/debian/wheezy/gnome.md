@@ -1,6 +1,6 @@
 
 # Debian Wheezy Gnome3 UI
-#### Updated 1-9-2014
+#### Updated 2014-1-9
 
 My former [gui](gui.md) documentation was a mixture of generic and gnome3 specific information.
 

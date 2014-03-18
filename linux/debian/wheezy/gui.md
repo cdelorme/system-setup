@@ -1,6 +1,6 @@
 
 # Debian Wheezy GUI Documentation
-#### Updated 11-20-2013
+#### Updated 2014-2-20
 
 This is my desktop development configuration documentation, and continues where my template documention left off.
 

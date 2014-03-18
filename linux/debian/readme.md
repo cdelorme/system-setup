@@ -1,6 +1,6 @@
 
 # debian
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 This is my favorite linux distribution.  Oddly I don't care for ubuntu or mint, but I love debian.
 

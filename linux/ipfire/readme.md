@@ -1,6 +1,6 @@
 
 # ipfire
-#### Updated 11-20-2013
+#### Updated 2013-11-20
 
 I use IPFire as a Proxy Cache Router Firewall WAP machine, and I do so from a virtualized environment, supplied with a mPCI wireless card.
 
