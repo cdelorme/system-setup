@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 ##
 # get script info
 ##
@@ -12,6 +13,7 @@ else
 fi
 SELF_PATH=$(dirname "$SELF")
 
+
 ##
 # validate running as root user
 ##
@@ -21,8 +23,55 @@ then
     exit 1
 fi
 
+
 ##
-# define functions
+# define supplemental functions
+##
+
+dot_files_repo()
+{
+
+    # was a dot-files repo supplied?
+    if [ -n "$DOT_FILES_REPO" ]
+    then
+
+        # attempt to clone outside of the system-setup repo
+        cd /tmp
+        rm -rf "/tmp/dot-files"
+        git clone "$DOT_FILES_REPO" "dot-files"
+
+        ##
+        # expected format is to have an install script
+        # if available a github username, github password
+        # and system username will be supplied optionally
+        ##
+        cd "dot-files"
+        if [ -n "$GITHUB_USERNAME" ]
+        then
+            if [ -n "$GITHUB_PASSWORD" ]
+            then
+                if [ -n "$PASSWORD" ]
+                then
+                    ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD" "$PASSWORD"
+                else
+                    ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD"
+                fi
+            else
+                ./install "$GITHUB_USERNAME"
+            fi
+        else
+            ./install
+        fi
+
+        # cleanup after itself & return to the original path
+        rm -rf "/tmp/dot-files"
+        cd "$SELF_PATH"
+    fi
+}
+
+
+##
+# define primary functions
 ##
 
 template()
@@ -70,21 +119,14 @@ template()
     sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 
-    # domain config
-    if [ -n "$HOSTNAME" ]
-    then
-        echo "$HOSTNAME" > /etc/hostname
-        hostname -F /etc/hostname
-    fi
-    if [ -n "$" ]
-    then
-        # 127.0.1.1 hostname.domain.dev hostname
-        echo ""
-    fi
-
-    # iptables port and auto-boot
+    # ssh, iptables port, and auto-boot
+    sed -i "s/Port 22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
     sed -i "s/ssh/${SSH_PORT}/" /etc/firewall.conf
     chmod +x /etc/network/if-up.d/iptables
+
+    # reload ssh & setup iptables
+    service ssh restart
+    iptables-restore < /etc/firewall.conf
 
     # add jp locale
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
@@ -96,7 +138,7 @@ template()
         useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$PASSWORD") "$USERNAME"
         usermod -aG sudo username
 
-        # alternative create-new-user
+        # alternative two-line /w pipe create-new-user
         # useradd -m -s /bin/bash "$USERNAME"
         # echo "$PASSWORD" | passwd username --stdin
     fi
@@ -106,39 +148,80 @@ template()
 
 }
 
-dot_files_repo()
+osx()
 {
-
-    # was a dot-files repo supplied?
-    if [ -n "$DOT_FILES_REPO" ]
-    then
-
-        # attempt to clone outside of the system-setup repo
-        cd ../
-        git clone "$DOT_FILES_REPO" "dot-files"
-
-        ##
-        # expected format is to have an install script
-        # it will supply it with a github username and password (if they exist)
-        # if a password is supplied but no username, the install could fail
-        ##
-        cd "dot-files"
-        ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD"
-
-        # cleanup after itself
-        cd ..
-        rm -rf "dot-files"
-
-        # return to original path
-        cd "$SELF_PATH"
-
-    fi
-
+    echo "running osx setup"
 }
+
+gui()
+{
+    echo "installing gui tools"
+}
+
+gnome()
+{
+    echo "installing gnome environment"
+}
+
+openbox()
+{
+    echo "installing openbox environment"
+}
+
+xen()
+{
+    echo "installing xen environment"
+}
+
+web()
+{
+    echo "installing web environment"
+
+    # execute template
+    template
+
+    # install more services
+
+
+    # domain config
+    if [ -n "$HOSTNAME" ]
+    then
+        echo "$HOSTNAME" > /etc/hostname
+        hostname -F /etc/hostname
+    fi
+    if [ -n "$USERNAME" ]
+    then
+        # 127.0.1.1 hostname.domain.dev hostname
+        sed
+        echo "${USERNAME}.local"
+    fi
+}
+
+comm()
+{
+    echo "installing communications environment"
+}
+
+raspbian()
+{
+    echo "installing raspbian environment"
+}
+
 
 ##
 # parse arguments & load config
 ##
+
+# track executed processes
+INSTALLED=()
+
+# optional hostname
+if [ -n "$1" ]
+then
+    HOSTNAME="$1"
+fi
+
+# load config
 . "$SELF_PATH/config"
 
 
@@ -146,3 +229,18 @@ dot_files_repo()
 # execute setup according to arguments
 ##
 
+echo -ne "Installation will commence in 10 seconds, \nplease ctrl+c to cancel before then, \nor wait until it finishes..."
+sleep 10
+
+if [ -n "$0" ] && [ $(type -t $0) = "function" ]
+then
+    $0
+elif [ $(uname) = "Darwin" ]
+then
+    osx
+elif which arch &> /dev/null && [[ $(arch | tr '[:upper:]' '[:lower:]') == *arm* ]]
+then
+    raspbian
+else
+    template
+fi
