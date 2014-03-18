@@ -69,7 +69,7 @@ Register the key & add their repository:
 
     aptitude clean
     aptitude update
-    aptitude install -y nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb msmtp-mta python-pip sphinxsearch bind9
+    aptitude install -y nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb
 
 
 **Installing nodejs:**
