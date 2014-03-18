@@ -16,8 +16,14 @@ GITHUB_USERNAME=""
 # github password
 GITHUB_PASSWORD=""
 
-# ssh port
-SSH_PORT=9005
+# ssh port (default: 22)
+SSH_PORT=22
 
-# dot files repo
+# dot files repo (default: https://github.com/cdelorme/dot-files.git)
 DOT_FILES_REPO="https://github.com/cdelorme/dot-files.git"
+
+# install gui with xen (default: true)
+XEN_GUI=true
+
+# hostname of the system will default to the name of the install script executed
+HOSTNAME=""
