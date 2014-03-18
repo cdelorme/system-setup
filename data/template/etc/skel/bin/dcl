@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# make sure a path was supplied
+if [ -z "$1" ] || [ ! -d "$1" ]
+then
+    echo "please supply a valid path to run this cleaner..."
+    exit 1
+fi
+
+# array of files to cleanup
+BAD_FILES=('.DS_Store' 'thumbs.db' 'desktop.ini')
+
+# loop bad files array
+for FILE_NAME in BAD_FILES
+do
+
+    # find and delete all instances of FILE_NAME
+    find -name $FILE_NAME -exec rm -rf {} \;
+done
