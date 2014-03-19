@@ -14,6 +14,9 @@ Packages in addition to (or alternative to) raspberry pi's listings:
 It is also quite likely that I can re-use most of the instructional steps from the raspberry pi (and inversely patch them with whatever changes I have tested here).
 
 
+compare gmrun to kupfer
+
+
 ---
 
 List of tasks:
