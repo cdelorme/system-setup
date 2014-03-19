@@ -52,13 +52,6 @@ Cool [slim info](http://slim.berlios.de/manual.php), username as halt, reboot, o
 - conky radial lua script (for kickass high-end display multi-core systems!)
 - investigate multiple keyboard layouts (mapped per keyboard id)
 - lightson daemon script to keep the xscreensaver from doing things while certain progs are running
-- look into fixing `whitey` or building my own with a gui for preview images
-- test bluetooth adapter & connect my spare apple bt keyboard (maybe my touchpad too?)
-- push new `linux/raspbian/media.md` file to system-setup project
-- OSX 10.9 **MUST BE FINISHED & RELEASED BEFORE GOING FORWARD**
-- switch system-setup master branch as default on github and bitbucket
-- add all my script data to `setup` file in system-setup (post-pre-release tag with osx)
-- refine openbox for debian desktop documentation and push!
 
 
 ---
