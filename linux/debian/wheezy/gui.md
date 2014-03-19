@@ -115,7 +115,55 @@ I create a desktop launcher using `~/.local/share/applications/subl.desktop` con
 
 _While this document is centric to debian, I feel it beneficial to share that fedora and ubuntu both work with the above configuration, however Arch does not read the PATH variable for the local `~/bin` folder, and does not expand the tilde into the home directory, requiring static paths._
 
+## Google Chrome Dev Channel
+
+I prefer the dev channel of google chrome.  The easy way to install it is to go to your current web browser, search "Google Chrome Dev Channel" and then download the `.deb` and install it with `sudo dpkg -i`.
+
+It should ask to be set as the default browser at first launch.
+
+
+##### Commands
+
+_Register google's apt key:_
+
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+_Create a file at `/etc/apt/sources.list.d/google` with these lines:_
+
+    # Google Chrome repo http://www.google.com/linuxrepositories/
+    deb http://dl.google.com/linux/chrome/deb/ stable main
+    deb http://dl.google.com/linux/talkplugin/deb/ stable main
+    deb http://dl.google.com/linux/earth/deb/ stable main
+    deb http://dl.google.com/linux/musicmanager/deb/ stable main
+
+_Run these commands to update aptitude:_
+
+    sudo aptitude clean
+    sudo aptitude update
+
+_Install these packages:_
+
+    sudo aptitude install -ryq google-chrome-stable google-chrome-unstable google-talkplugin
+
+
+## [Youtube Downloader](https://github.com/rg3/youtube-dl)
+
+This is a really cool command line utility that you can use to download (the highest quality) youtube videos without any GUI utilities.  It includes asynchronous processing and even spits out the percent status.
+
+
+##### Commands
+
+_Run these commands to download and install the `youtube-dl` command:_
+
+    git clone https://github.com/rg3/youtube-dl
+    cd youtube-dl
+    sudo python setup.py install
+    cd ..
+    rm -rf youtube-dl
+
 
 # References
 
 - [wallpapers wa](http://wallpaperswa.com/)
+- [google repo info](https://www.google.com/linuxrepositories/)
+- [google deb sources list](https://sites.google.com/site/mydebiansourceslist/)
