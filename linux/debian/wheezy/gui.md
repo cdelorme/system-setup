@@ -114,3 +114,8 @@ I create a desktop launcher using `~/.local/share/applications/subl.desktop` con
     Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
 
 _While this document is centric to debian, I feel it beneficial to share that fedora and ubuntu both work with the above configuration, however Arch does not read the PATH variable for the local `~/bin` folder, and does not expand the tilde into the home directory, requiring static paths._
+
+
+# References
+
+- [wallpapers wa](http://wallpaperswa.com/)
