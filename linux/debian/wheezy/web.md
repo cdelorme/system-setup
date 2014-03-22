@@ -1,6 +1,6 @@
 
 # Web Server Template Documentation
-#### Updated 2013-10-15
+#### Updated 2014-3-22
 
 This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
 
@@ -85,9 +85,16 @@ Safely download, build and install it off their site:
 
 Ideally you should keep the source files for later in case you want to remove the installed contents.  Alternatively you can use checkinstall in place of make and make install, but you'll have to install that package first.
 
-Node modules can be added on a per project basis using the node package manager `npm`.  For example, this will add mysql or mariadb support, and mongodb support to your project:
 
-    npm install mysql mongodb
+**npm services:**
+
+nodejs comes with the `npm` package manager, and you can install packages on a per-project, or global, basis.  Here are the packages I recommend a global installation for:
+
+    npm install -g csslint jshint csso uglify-js mocha jscoverage yo grunt grunt-contrib-watch markdown forever bower
+
+_You may optionally add `mongo` and `mysql` as needed, but it may be wiser to use a local copy of those per project.  Same goes for bower and grunt packages, if you expect many projects to be using them at the same time._
+
+Also, if your test machine or server has less than a gigabyte of memory you may want to create a swap file.  When npm searches the registry it parses a massive json file which can at times exceed over a gigabyte and crash.  _If the system runs out of memory then you can always use an alternative approach via `sudo dd if=/dev/zero of=/swap bs=1024k count=2048` to build a 2GB swap file, then `sudo mkswap /swap` and `sudo swapon /swap`, to temporarily give yourself more memory.  It is slow but it will work._
 
 
 ### Creating a Development Environment
@@ -528,6 +535,12 @@ Create a `hidden.conf` file with:
         deny all;
     }
 
+Create `servernamehash.conf` with:
+
+    server_names_hash_bucket_size  64;
+
+_This allows your `server_name` values to be very long, such as setting several domains in a single server config._
+
 This prevents users from seeing dot files and directories, such as `.git` folders.
 
 
@@ -559,7 +572,7 @@ Make sure these key settings exist:
 
 The first allows context switching and can greatly boost CPU performance, the second ensures that no HTTP headers are split into chunks and sent separately.
 
-Locate `keepalive_timeout` and make sure it reads `keepalive_timeout 15;` to reduce the timeout duration to 15 seconds.
+Locate `keepalive_timeout` and make sure it reads `keepalive_timeout 15;` to reduce the timeout duration to 15 seconds.  _The `keepalive_timeout` setting reduces headers in multiple requests, such as when a page also asks for images, js, and css files, but otherwise it is not that helpful.  The default is very long and can reduce the number of connections per second.  If it comes down to performance vs requests per second you may consider turning this off._
 
 Finally we want to check that the line `include /etc/nginx/conf.d/*.conf;` exists within the http brackets, so we can visit that directory to add enhancements:
 
@@ -574,12 +587,6 @@ _This adds security by ensuring data types going in and out should be utf-8._
 Create a `tokens.conf` file with:
 
     server_tokens off;
-
-Create a `keepalive.conf` and set:
-
-    keepalive_timeout 15s;
-
-_This feature reduces headers in multiple requests, such as when a page also asks for images, js, and css files, but otherwise it is not that helpful.  The default is very long and can reduce the number of connections per second.  If it comes down to performance vs requests per second you may consider turning this off._
 
 Create an `uploads.conf` with:
 
@@ -895,6 +902,8 @@ If you optimize your queries and properly index your tables and you'll be fine.
 
 #### Configuring Bind9
 
+**I was recently told to try out `unbound` for a DNS server, supposedly it is significantly easier to configure and manage than bind9.  I agree that bind9 was an enormous pain to get working, so I'm looking into unbound currently but do not yet have detailed instructions.  When I finish I will likely remove bind9 instructions from this document.**
+
 For development environments on a local network where more than one person may be connecting it can help to add a DNS Server to your Web Server.  This allows you to distribute the addresses to projects across the local network.
 
 Let's begin by installing the our DNS Server;
@@ -964,3 +973,8 @@ I will end configuring Bind with a [recommended reference](http://brian.serveblo
 Now, if you restart the bind service (`service bind9 restart`) your system should now be broadcasting.  However, this alone means nothing unless someone knows to listen.
 
 There are two ways you can put a development DNS to use.  First is by asking others to add the Development systems IP to their DNS statically.  Second is if you an control the local networks router, you can add the DNS servers it distributes via DHCP.  Just remember that _if_ you go with a Router solution any machines that have a client-assigned static IP must have the DNS added statically as well.  Also, order matters.  If your DNS Server is secondary any existing web domains will go to the external location, not the internal one.  If you are trying to override a real address for internal development, add your DNS server first (this is generally not wise if you ever want to access the real site as changing DNS afterwards can be a pain).
+
+
+# references
+
+- [unbound reference (I have not finished reading)](https://calomel.org/unbound_dns.html)

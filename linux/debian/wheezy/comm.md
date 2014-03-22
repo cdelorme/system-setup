@@ -1,6 +1,6 @@
 
 # Comm Server Documentation
-#### Updated 2013-10-14
+#### Updated 2014-3-22
 
 This documentation picks up where the template documentation leaves off.  It expects all tools, but no GUI environment.
 
@@ -25,7 +25,7 @@ Install the new packages:
 
     aptitude clean
     aptitude update
-    aptitude install -y samba samba-tools mdadm pgld pglcmd weechat-ncurses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0
+    aptitude install -y samba samba-tools smbclient mdadm pgld pglcmd weechat-ncurses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0
 
 _Some packages included here are subject to change with the addition of peergaurdian._
 
@@ -124,7 +124,7 @@ _If you want added data reliability you could technically change the 0 to a 1 in
 
 ## Samba Configuration
 
-My samba configuration looks like this:
+My samba configuration (`/etc/smb/smb.conf`) looks like this:
 
     #======================= Global Settings =======================
 
@@ -164,6 +164,9 @@ My samba configuration looks like this:
         getwd cache = yes
         dns proxy = no
         max connections = 30
+        use sendfile = yes
+        write cache size = 524288
+        aio write size = 16384
 
     #======================= Share Definitions =======================
 
@@ -216,6 +219,11 @@ My samba configuration looks like this:
 I won't go through all the details here, suffice to say there is a lot of stuff I would have to explain and most of this was achieved through trial and error not a comprehensive personal understanding.
 
 The [official documentation](http://www.samba.org/samba/docs/) is actually incredibly detailed and a great resource.
+
+
+## NFS
+
+I tried NFS again (2014-3-22), and just like before found it to be a pain to work with.  I managed to get mounts shared, but no read write access.  I still have not found a way to get a login or permissions configured.
 
 
 ## Weechat Configuration
