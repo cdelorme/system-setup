@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if ! which find &> /dev/null
+then
+    echo "no find command available..."
+    exit 1
+fi
+
+CLEAN="${1}"
+if [ -z "$CLEAN" ]
+then
+    echo "please supply a path to clean..."
+    exit 1
+fi
+
+GARBAGE=( "thumbs.db" ".DS_Store" )
+for TAKEOUT in "${GARBAGE[@]}"
+do
+    find "${CLEAN}" -iname "${TAKEOUT}" -exec rm -rf {} \;
+done
+
+echo "finished taking out the trash..."
