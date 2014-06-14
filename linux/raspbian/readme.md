@@ -170,7 +170,7 @@ _Some of these packages or their dependencies may already be installed from our 
 
 The `lm-sensors` package is used by `conky`, and should be configured after it is installed.  This can be done (as root or with sudopowers) via:
 
-    yes | sensors-detect
+    yes "" | sensors-detect
 
 _If you do use sudo, do as after the pipe.  Note that this should fail on raspberry pi since many of the sensors do not exist and this will cause `lm-sensors` to throw a fit.._
 
@@ -239,8 +239,8 @@ Run these commands to download and install them:
 
     mkdir ~/.fonts
     cd ~/.fonts
-    wget "https://github.com/cdelorme/system-setup/raw/develop/data/osx/Library/Fonts/ForMateKonaVe.ttf"
-    wget "https://github.com/cdelorme/system-setup/raw/develop/data/osx/Library/Fonts/epkyouka.ttf"
+    curl -o ForMateKonaVe.ttf "https://raw.githubusercontent.com/cdelorme/system-setup/develop/data/osx/Library/Fonts/ForMateKonaVe.ttf"
+    curl -o epkyouka.ttf "https://raw.githubusercontent.com/cdelorme/system-setup/develop/data/osx/Library/Fonts/epkyouka.ttf"
     fc-cache -fr
 
 Any additional fonts of your choosing can be placed into that same folder, and you can reload the system font cache in order for the software to see the newly added fonts.
@@ -284,7 +284,7 @@ This is where the difficulty level skyrockets for openbox.  Being as flexible as
 
 First it is important to understand that openbox is configured using xml files.  Second it stores custom configuration in your home directory at `~/.config/openbox`.  We can simplify things at the start by copying the defaults and working from there:
 
-    mkdir ~/.config/openbox
+    mkdir -p ~/.config/openbox
     cd ~/.config/openbox
     cp /var/lib/openbox/* .
     cp /etc/xdg/openbox/* .
