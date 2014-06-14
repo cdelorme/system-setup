@@ -45,6 +45,7 @@ Because I modify the dot files heavily I also tend to avoid creating any other u
 
 Start by logging in as root to run through these steps.
 
+
 #### Packages
 
 I install lots of packages to form the basic foundation of a multi-functional platform.  In some cases not all of these packages are necessary, but in most cases they are helpful to have.  Worth noting that I use `aptitude` because it is a single sensible command interface, and for these packages I add the `-r` flag to install any recommended packages.  If you want to go full minimalist then omit this flag and pick and choose the packages to install.  However I recommend this to avoid any possibly problems later on.
@@ -163,13 +164,13 @@ After installing the packages we still have a couple of steps to take care of be
 
 _Here are the all the commands I run to cover the entire packages section of documentation:_
 
-    aptitude install -r -y netselect-apt
-    netselect-apt -s -n
+    aptitude install -ryq netselect-apt
+    netselect-apt -sn
     aptitude clean
     aptitude update
-    dpkg -r vim-common vim-tiny
-    aptitude reinstall -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
-    aptitude install -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    dpkg -rq vim-common vim-tiny
+    aptitude reinstall -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors
     update-command-not-found
 
 
@@ -182,7 +183,6 @@ I create a file in `/etc/cron.monthly/` that re-runs `netselect-apt` to ensure w
 I create three files in `/etc/cron.weekly/`, including one to update our packages, one to defragment any ext4 partitions, and one to execute `fstrim` on any ext4 partitions (useful for solid state drives).
 
 
-
 ##### Commands & Files
 
 _Starting with the files and their contents:_
@@ -192,7 +192,7 @@ _Starting with the files and their contents:_
     #!/bin/bash
 
     # Update package mirrors
-    netselect-apt -s -n
+    netselect-apt -sn
     aptitude clean
     aptitude update
 
@@ -203,7 +203,7 @@ _Starting with the files and their contents:_
     # update packages weekly
     aptitude clean
     aptitude update
-    aptitude upgrade -y
+    aptitude upgrade -yq
     update-command-not-found
 
 **`/etc/cron.weekly/e4defrag`:**
@@ -232,7 +232,6 @@ _Now I make sure all of them are executable:_
     chmod +x /etc/cron.weekly/aptitude
     chmod +x /etc/cron.weekly/e4defrag
     chmod +x /etc/cron.weekly/fstrim
-
 
 
 #### Optimizations & Permissions
@@ -306,8 +305,7 @@ _Finally, we run these commands to add symlinks
 
 _You can then test, and restart monit:_
 
-    monit -t
-    service monit restart
+    monit -t && service monit restart
 
 
 #### System Timezone
@@ -359,6 +357,7 @@ _Edit the `/etc/network/interfaces` file by replacing or adding these lines:_
     allow-hotplug eth0
     iface eth0 inet static
         address 10.0.5.8
+        gateway 10.0.5.1
         netmask 255.255.255.0
 
 _Your network device name, and address are dependent on your system and intranet._
@@ -470,6 +469,27 @@ _I usually add japanese locale for language support:_
 
     echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
+
+
+#### Using watchdog
+
+The watchdog is a hardware (or sometimes software) timer that runs behind the OS (hardware implementation is not dependent on the OS).  It effectively performs a check-in every 60 seconds, if the system has locked up or frozen and no response is sent the watchdog timer will automatically reboot the system.
+
+This is absolutely fantastic for headless or remote machines (granted a bit unsafe if your concerned for data loss), if in fact they do lock up and you need them to be rebooted in order to login and fix the problem, you can rely on the watchdog timer to take care of this.
+
+To my understanding if the system supports watchdog it will appear at `/dev/watchdog`, as a device.  If you open this device-file and do not provide it with data within 60 seconds, or do not close it properly, the system will reboot.  You can easily test it by typing a simple echo into the file.  To my knowledge, you can cancel the watchdog by echoing a "V" into the device-file.
+
+Finally, you will want to install the `watchdog` package, and tell it to run at boot time.  It's job is to ping the `/dev/watchdog` file with data within every 60 seconds to keep the watchdog from rebooting while the system remains responsive.  You may also need to compile watchdog support into your kernel.
+
+**The `watchdog` package can be used for much more than just a watchdog timer, but also a system monitor, similar to monit but more limited in scope.**
+
+
+##### Commands
+
+_Run these commands to install the watchdog package and tell it to run at boot:_
+
+    aptitude install -ryq watchdog
+    update-rc.d watchdog defaults
 
 
 #### Log Access
