@@ -1,6 +1,6 @@
 
 # Xen 4.3 Server Documentation
-#### Updated 2013-10-15
+#### Updated 2014-6-14
 
 This time around I won't chew your ear off with unnecessary dialog, this guides purpose is a quick run-through of setting up Xen 4.3.  Everything contained here-in should be in code-snippet form, allowing you to create a shell script to execute all desired changes at once.
 
@@ -20,7 +20,7 @@ The only major change from the template installation is to increase the LVM grou
 
 **Install New Packages**
 
-    aptitude install -y bcc bin86 gawk bridge-utils zlib1g-dev libbz2-dev xz-utils e2fslibs-dev pciutils uuid-dev libcurl3 libcurl4-openssl-dev  python-dev python-twisted bison flex libyajl-dev iasl ocaml ocaml-findlib transfig tgif libvncserver-dev libxml2-dev libx11-dev libsdl-dev libjpeg62-dev gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
+    aptitude install -ryq bcc bin86 gawk bridge-utils zlib1g-dev libbz2-dev xz-utils e2fslibs-dev pciutils uuid-dev libcurl3 libcurl4-openssl-dev  python-dev python-twisted bison flex libyajl-dev iasl ocaml ocaml-findlib transfig tgif libvncserver-dev libxml2-dev libx11-dev libsdl-dev libjpeg62-dev gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
 
 **Untested/Unlisted (possibly 4.4 unstable) Packages:**
 
@@ -241,7 +241,6 @@ _After we have fully established our IPFire system we will change xenbr0 to `man
 
 Create the configurations as needed, here are mine:
 
-
 **`/etc/xen/ipfire.conf`:**
 
     name="ipfire"
@@ -269,7 +268,7 @@ Create the configurations as needed, here are mine:
     pci_power_mgmt=1
 
 
-**`/etc/xen/comm/conf`:**
+**`/etc/xen/comm.conf`:**
 
     name="comm"
     builder="hvm"
