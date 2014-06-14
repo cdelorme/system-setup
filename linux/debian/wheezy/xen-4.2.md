@@ -1,6 +1,6 @@
 
 # Xen 4.2 Server Documentation
-#### Updated 2013-10-15
+#### Updated 2014-6-14
 
 A (slightly dated) copy of this guide can be found on the [xen wiki](http://wiki.xen.org/wiki/Comprehensive_Xen_Debian_Wheezy_PCI_Passthrough_Tutorial).
 
@@ -187,7 +187,7 @@ I don't care for having a mail system that notifies me about things on this syst
 
 **Install these new packages:**
 
-    aptitude install -y bcc bin86 gawk bridge-utils libcurl3 libcurl4-openssl-dev transfig tgif zlib1g-dev python-dev python-twisted libvncserver-dev pciutils-dev libbz2-dev e2fslibs-dev uuid-dev bison flex libyajl-dev xz-utils libxml2-dev iasl libx11-dev libsdl-dev libjpeg62-dev ocaml ocaml-findlib gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
+    aptitude install -ryq bcc bin86 gawk bridge-utils libcurl3 libcurl4-openssl-dev transfig tgif zlib1g-dev python-dev python-twisted libvncserver-dev pciutils-dev libbz2-dev e2fslibs-dev uuid-dev bison flex libyajl-dev xz-utils libxml2-dev iasl libx11-dev libsdl-dev libjpeg62-dev ocaml ocaml-findlib gettext texlive-latex-base texlive-latex-recommended texlive-fonts-extra texlive-fonts-recommended
 
 
 ## [Compiling a Custom Linux Kernel](http://www.youtube.com/watch?v=xjcDL9X-2M8)
