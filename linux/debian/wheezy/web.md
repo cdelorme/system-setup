@@ -1,6 +1,6 @@
 
 # Web Server Template Documentation
-#### Updated 2014-3-22
+#### Updated 2014-6-14
 
 This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
 
@@ -69,7 +69,7 @@ Register the key & add their repository:
 
     aptitude clean
     aptitude update
-    aptitude install -y nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb
+    aptitude install -ryq nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb
 
 
 **Installing nodejs:**
@@ -973,6 +973,40 @@ I will end configuring Bind with a [recommended reference](http://brian.serveblo
 Now, if you restart the bind service (`service bind9 restart`) your system should now be broadcasting.  However, this alone means nothing unless someone knows to listen.
 
 There are two ways you can put a development DNS to use.  First is by asking others to add the Development systems IP to their DNS statically.  Second is if you an control the local networks router, you can add the DNS servers it distributes via DHCP.  Just remember that _if_ you go with a Router solution any machines that have a client-assigned static IP must have the DNS added statically as well.  Also, order matters.  If your DNS Server is secondary any existing web domains will go to the external location, not the internal one.  If you are trying to override a real address for internal development, add your DNS server first (this is generally not wise if you ever want to access the real site as changing DNS afterwards can be a pain).
+
+
+### unbound dns notes (_incomplete_)
+
+Wow sweet, modifications to `/etc/resolv.conf` that enable load balanced DNS requests and reduce failover time:
+
+    domain domain.lan
+    search domain.lan domain.lan2 domain.lan3 domain.lan4
+    nameserver 192.168.0.1
+    nameserver 192.168.0.2
+    options ndots:1 timeout:0.3 attempts:1 rotate
+
+- [unbound optimizations](http://unbound.net/documentation/howto_optimise.html)
+
+An example unbound config:
+
+    # outgoing-range: 4096
+    outgoing-range: 32768
+
+    # so-rcvbuf: 0
+    so-rcvbuf: 32m
+
+    # msg-cache-size: 4m
+    msg-cache-size: 256m
+
+    num-queries-per-thread: 4096
+
+    # rrset-cache-size: 4m
+    rrset-cache-size: 256m
+
+    # infra-cache-numhosts: 10000
+    infra-cache-numhosts: 100000
+
+Apparently it supports easy split-horizon configuration, such that you can redirect local traffic to the right place without having to go out of the internal network and back in through the firewall.
 
 
 # references
