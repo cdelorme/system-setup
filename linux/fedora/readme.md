@@ -1,11 +1,15 @@
 
 # fedora
-#### Updated 2013-11-20
+#### Updated 2014-6-14
 
 Fedora is based on RedHat linux, and uses the RPM package system.
 
-I am significantly less familiar with the RHEL based systems, and so I expect to have much less documentation here.
+My experience with Fedora, and RHEL based systems in general, has been very limited due to a lack of necessity.  I will have significantly less documentation to contribute and it may not be updated quite as often.
 
-Granted, my time using Fedora has only been filled with positive experiences, so I can honestly recommend this platform to anyone looking for an all-around good Linux distro.
+That said, my time using Fedora was filled with positive experiences with regards to the interface and how well its packages worked.  It's choice of default tools makes it significantly less intuitive for me to manage.  If they had sensible networking and didn't use systemd I'd probably use it as my primary OS.
 
-I also can say that Fedora boasts some of the most amazing compatibility out of any linux distro, supporting Macbooks, plenty of laptops both old and new, and all the new features found on modern hardware (at least at time of writing).
+Fedora easily boasts the greatest hardware compatibility, with regards to it working on older and newer laptops, even macbooks.  It's installer is excellently written as of 19.
+
+Documentation:
+
+- [19](19.md)
