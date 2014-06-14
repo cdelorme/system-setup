@@ -1,6 +1,6 @@
 
 # raspbian
-#### updated on: 2014-3-17
+#### updated on: 2014-6-14
 
 These instructions will help with setting up an excellent and incredibly lean (resource friendly) raspbian media center.  It includes a complete openbox environment stack and a series of alternative work-flows to address common use cases that are not available in standard ways on linux and are tailored to the raspberry pi experience.
 
