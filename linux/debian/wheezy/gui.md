@@ -1,6 +1,6 @@
 
 # Debian Wheezy GUI Documentation
-#### Updated 2014-2-20
+#### Updated 2014-6-14
 
 This is my desktop development configuration documentation, and continues where my template documention left off.
 
@@ -21,14 +21,34 @@ This document discusses some generic tools and is not tied to any interface in p
 
 Let's start with a set of generic tools and services:
 
-    aptitude install -r -y gparted vlc gtk-recordmydesktop chromium ffmpeg lame ttf-freefont ttf-liberation ttf-droid ttf-mscorefonts-installer transmission transmission-cli openshot
+    aptitude install -ryq gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer weechat weechat-curses gimp gimp-plugin-registry evince
 
 For development I also recommend these packages:
 
-    aptitude install -r -y bpython libguichan-dev libX11-dev libmcrypt-dev python-dev python3-dev python-pygame libperl-dev openjdk-6-jre
+    aptitude install -ryq bpython libguichan-dev libX11-dev libmcrypt-dev python-dev python3-dev python-pygame libperl-dev openjdk-6-jre
+
+
+## user configuration
+
+For full privileges users should belong to these groups:
+
+- fuse (drive mounting)
+- scanner
+- bluetooth
+- netdev (networking conf)
+- audio
+- video
+- adm (logs)
+
+##### commands
+
+_This can be done via a **single** command line:_
+
+    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth username
 
 
 ## Other Recommended Software
+
 
 ### Sublime Text
 
@@ -115,6 +135,7 @@ I create a desktop launcher using `~/.local/share/applications/subl.desktop` con
 
 _While this document is centric to debian, I feel it beneficial to share that fedora and ubuntu both work with the above configuration, however Arch does not read the PATH variable for the local `~/bin` folder, and does not expand the tilde into the home directory, requiring static paths._
 
+
 ## Google Chrome Dev Channel
 
 I prefer the dev channel of google chrome.  The easy way to install it is to go to your current web browser, search "Google Chrome Dev Channel" and then download the `.deb` and install it with `sudo dpkg -i`.
@@ -144,6 +165,10 @@ _Run these commands to update aptitude:_
 _Install these packages:_
 
     sudo aptitude install -ryq google-chrome-stable google-chrome-unstable google-talkplugin
+
+_Set as default browser:_
+
+    update-alternatives --set x-www-browser /usr/bin/google-chrome-unstable
 
 
 ## [Youtube Downloader](https://github.com/rg3/youtube-dl)
