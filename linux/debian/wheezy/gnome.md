@@ -1,6 +1,6 @@
 
 # Debian Wheezy Gnome3 UI
-#### Updated 2014-1-9
+#### Updated 2014-6-14
 
 My former [gui](gui.md) documentation was a mixture of generic and gnome3 specific information.
 
@@ -23,7 +23,7 @@ Gnome3 depends on the graphics processor to handle specific UI tasks, though dri
 
 Minimalist Gnome3 Packages:
 
-    aptitude install -y gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support desktop-base xdg-user-dirs-gtk xdg-utils network-manager eog gnash guake
+    aptitude install -ryq gnome-session gnome-terminal gnome-disk-utility gnome-screenshot gnome-screensaver gksu gdm3 xorg-dev ia32-libs-gtk binfmt-support desktop-base xdg-user-dirs-gtk xdg-utils network-manager eog gnash guake
 
 This will give you all the bare bones of a Gnome3 interface, without nearly a gigabyte of miscelanious software that comes bundled with the default `gnome` package.
 

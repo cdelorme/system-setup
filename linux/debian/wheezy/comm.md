@@ -1,6 +1,6 @@
 
 # Comm Server Documentation
-#### Updated 2014-3-22
+#### Updated 2014-6-14
 
 This documentation picks up where the template documentation leaves off.  It expects all tools, but no GUI environment.
 
@@ -25,9 +25,7 @@ Install the new packages:
 
     aptitude clean
     aptitude update
-
-
-    aptitude install -y samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-cli transmission pgld pglcmd
+    aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-cli transmission pgld pglcmd
 
 _Some packages included here are subject to change with the addition of peergaurdian._
 
