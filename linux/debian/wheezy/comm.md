@@ -25,7 +25,9 @@ Install the new packages:
 
     aptitude clean
     aptitude update
-    aptitude install -y samba samba-tools smbclient mdadm pgld pglcmd weechat-ncurses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0
+
+
+    aptitude install -y samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-cli transmission pgld pglcmd
 
 _Some packages included here are subject to change with the addition of peergaurdian._
 
@@ -45,10 +47,10 @@ We will want to add monit configurations for samba and ipblock.  Ideally we want
 
 Add `/etc/monit/conf.d/samba.conf` with:
 
-    check process smbd with pidfile `/run/samba/smdb.pid`
-        start program = "/etc/init.d/smbd start"
-        stop program = "/etc/init.d/smbd stop"
-        group samba
+    check process smbd with pidfile /run/samba/smdb.pid
+        start program = "/etc/init.d/samba start"
+        stop program = "/etc/init.d/samba stop"
+        group sambashare
         if cpu usage > 80% for 15 cycles then restart
         if mem usage > 80% for 30 cycles then restart
 
@@ -165,8 +167,9 @@ My samba configuration (`/etc/smb/smb.conf`) looks like this:
         dns proxy = no
         max connections = 30
         use sendfile = yes
-        write cache size = 524288
-        aio write size = 16384
+        write cache size = 16384
+        aio write size = 524288
+        aio read size = 524288
 
     #======================= Share Definitions =======================
 
