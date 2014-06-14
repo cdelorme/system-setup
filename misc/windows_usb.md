@@ -15,3 +15,4 @@ This applies to Windows 8, and to some extent Windows 7 (non-efi).
 - run dd command to copy all contents `dd if=/path/to/windows.iso of=/dev/(sda|rdisk)# bs=4m`
 
 Both approaches are very simple to do, but the EFI boot method may not work for Windows 7 installations.
+

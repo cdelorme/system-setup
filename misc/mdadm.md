@@ -48,3 +48,4 @@ To repair errors (best only to run if you know a raid array has errors):
 To go back to idle:
 
     echo idle > /sys/block/md0/md/sync_action
+
