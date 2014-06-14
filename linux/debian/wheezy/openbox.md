@@ -1,6 +1,6 @@
 
 # Debian Wheezy OpenBox UI
-#### Updated 2014-3-18
+#### Updated 2014-6-14
 
 Tentative instructions for creating a [crunchbang-like](http://crunchbang.org/) debian install, with many preference based changes.
 
@@ -8,378 +8,383 @@ Tentative instructions for creating a [crunchbang-like](http://crunchbang.org/) 
 
 Packages in addition to (or alternative to) raspberry pi's listings:
 
-- openbox-themes
-- conky-all (instead of **just** conky)
 
 It is also quite likely that I can re-use most of the instructional steps from the raspberry pi (and inversely patch them with whatever changes I have tested here).
 
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xscreensaver xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance
 
-compare gmrun to kupfer
 
-
----
-
-List of tasks:
-
-
-Remaining Openbox Tasks:
-
-- volume control research
-
-volume reference (in case xfce4 is not enough): https://bbs.archlinux.org/viewtopic.php?id=73020
-another volume reference: http://urukrama.wordpress.com/2007/12/19/managing-sound-volumes-in-openbox/
-seems xfce4 was a mistake, what I need is openbox volume hotkeys AND the volumetray-alsa package: http://softwarebakery.com/maato/volumeicon.html
-
-Remove the items from this list, then get to work with the volumeicon package:
-
-    Get: 1 http://ftp.us.debian.org/debian/ wheezy/main libxfce4util-common all 4.8.2-1 [95.3 kB]
-    Get: 2 http://ftp.us.debian.org/debian/ wheezy/main libxfce4util4 amd64 4.8.2-1 [75.7 kB]
-    Get: 3 http://ftp.us.debian.org/debian/ wheezy/main libxfce4util-bin amd64 4.8.2-1 [50.7 kB]
-    Get: 4 http://ftp.us.debian.org/debian/ wheezy/main xfconf amd64 4.8.1-1 [155 kB]
-    Get: 5 http://ftp.us.debian.org/debian/ wheezy/main libxfconf-0-2 amd64 4.8.1-1 [79.0 kB]
-    Get: 6 http://ftp.us.debian.org/debian/ wheezy/main xfce4-volumed amd64 0.1.13-3 [15.6 kB]
-
-Cool [slim info](http://slim.berlios.de/manual.php), username as halt, reboot, or exit and root password will execute the desired operation!  No extra buttons necessary.
-
-- volume control research (see above notes)
-- openbox theme (custom colors & design)
-    - rc.xml config
-    - menu.xml config
-- pcmanfm configuration & theme to match openbox
-- urxvt configuration & theme to match openbox
-- tint2 configuration & theme to match openbox
-- slim config (if necessary, bg perhaps?)
-- conky slim-bar config for raspberry pi (low-profile lightweight conky config, easier on resources)
-- conky add hotkeys to list & theme to match openbox
-- conky lua enhancement for radius edges of bg script
-- conky radial lua script (for kickass high-end display multi-core systems!)
-- investigate multiple keyboard layouts (mapped per keyboard id)
-- lightson daemon script to keep the xscreensaver from doing things while certain progs are running
-
-
----
-
-investigate pipelight for debian to play netflix?
-
-
-I should probably also add this to my gui.md packages:
-
-- flashplugin-nonfree
-
-
-
-Install all xorg video drivers:
-
-    aptitude install -r xserver-xorg-video-all
-
-
-We will need to add users to all of these groups now:
-
-- fuse
-- scanner
-- bluetooth
-- netdev
-- audio
-- video
-- adm
-
-Apparently this can be done via a **single** command line:
-
-    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth cdelorme
-
-
-
-
-
-# Massive Reverse Engineered Package List
-
-I am still working through all of these, and a lot of them won't "make the cut", but the task itself is pending.
-
-Window System (Required for basically any window manager platform):
-
-- xorg
-
-
-Screen Manager:
-
-- arandr (gui frontend for xrandr which comes with xorg)
-
-
-Window Manager:
-
-- openbox (Window Manager)
-    - obconf (gui to edit entire ob theme)
-    - obmenu (gui alternative to editing menu.xml)
-
-_The gui editors are optional installs, as everything can be done via the configuration scripts._
-
-
-Taskbar:
-
-- tint2 (lightweight taskbar)
-
-
-System Monitor:
-
-- conky (sweet lightweight, and heavily customizable)
-
-
-Application Launcher:
-
-- gmrun (launch from desktop via ctrl+enter then type/auto-complete)
-
-
-Screensaver:
-
-- xscreensaver
-
-
-Laptop Power Management Features:
-
-- xfce4-power-manager
-
-
-Terminal:
-
-- rxvt-unicode (light & powerful)
-    - yeahconsole (to popup the terminal like guake)
-- terminator (heavy-weight alternative)
-
-
-Clipboard Manager:
-
-- clipit (lightweight)
-
-
-Keyboard Switcher (probably desirable?):
-
-- fbxkb (X11 keyboard indicator/switcher)
-
-
-Wallpaper Software:
-
-- feh (lightweight /w full cli, but also a previewer etc)
-- nitrogen (heavy-weight gui desktop switcher)
-
-_With `feh`, as a command line tool, it is possible to easily swap wallpaper on a timer, such as using a anacrontab to randomly pick a background image in a folder.  It should also be easy to add a right click command to set a desktop background when picking images._
-
-
-Theme Switcher:
-
-- lxappearance (theme switcher for gtk+, has problems, theme name is a simple config changes via text)
-
-_Theme selection is also technically offered through obconf, although that may be for openbox, while gtk+ themes are for any other application that may be run on my desktop._
-
-
-
-Notification Daemon:
-
-- xfce4-notifyd (simple, visually appealing)
-
-
-File Search:
-
-- catfish (supports many engines)
-
-
-Sudo Prompt:
-
-- gksu (preferred)
-
-
-
-Login Service:
-
-- slim (super lightweight)
-
-
-Recommended Desktop Utilities:
+Desktop Package:
 
 - desktop-base
 
 
-File Managers:
-
-- pcmanfm (ultimate lightweight, also desktop wallpaper setting power, and desktop icons)
-- thunar (xfce file manager)
-    - thunar-volman
-    - thunar-archive-plugin
-    - thunar-dropbox-plugin
-    - thunar-media-tags-plugin
-
-
-GUI Audio Controls:
-
-- pnmixer (Does not exist in debian packages)
-- xfce4-mixer (May or may not do all the things pnmixer does?)
-- pavucontrol (another?)
-- xfce4-volumed (volume hotkeys?)
-
-
-Image Viewing Software:
-
-- [viewnior](https://github.com/xsisqox/Viewnior) (not packaged for debian)
-
-
-Proprietary DVD Support:
-
-- libdvdcss2 (not packages for debian)
-
-
-Screenshot Utility:
-
-- xfce4-screenshooter
-
-
-Calculator:
-
-- galculator
-
-
-Window Manager Command Tools:
-
-- suckless-tools
-
-
-Shell Scripted GUI Dialog Support:
-
-- zenity
-
-
-Monitor Utility:
-
-- conky-all
-- cpufrequtils
-- htop
-
-
-General theme Packages:
-
-- dmz-cursor-theme
-- gtk2-engines-murrine
-- gnome-icon-theme
-- gnome-icon-theme-extras
-- gtrayicon
-
-
-Graphical Disk Management Utility:
-
-- gparted
-
-
-Keyboard Management:
-
-- xinput
-
-
-VNC Client:
-
-- xtightvncviewer
-
-
-Configuration utilities:
-
-- debconf-utils
-
-
-Optional Package Manager Information Index:
-
-- apt-xapian-index
-
-
-Boot-Time Wallpaper Support Software:
-
-- hsetroot
-
-
-X Clipboard Access:
-
-- xsel
-
-
----
-
-**Add to GUI install (pre openbox/gnome):**
-
-Multimedia tools:
-
-- alsa-base
-- lame
-- ffmpeg
-- pulseaudio
-- vlc
-- flashplugin-nonfree
-
-
-Universally helpful font packages:
-
-- ttf-freefont
-- ttf-liberation
-- ttf-droid
-- ttf-mscorefonts-installer
-- fonts-takao
-
-
-Bittorrent Client:
-
-- transmission-gtk
-- transmission-cli
-
-
-Communication Software (IRC Client):
-
-- weechat-curses
-
-
-Image Software:
-
-- gimp
-- gimp-plugin-registry
-- evince
-
-**Highly recommend compiling [viewnior](http://xsisqox.github.io/Viewnior/) from source.**
-
-
-# Optional (probably moved to gui)
-
-The list below is a series of utilities I either do not want, or would not benefit from having.
-
-
-Optional Window Manager Menu Synchronizer:
-
+Window Manager:
+
+- openbox
+- obconf
+- obmenu
 - menu
 
 
-Optional Wireless & Network Firmware:
+Menu Subsystem:
 
-- firmware-ralink
-- firmware-iwlwifi
-- firmware-ipw2x00
-- firmware-b43-installer
-- firmware-realtek
+- tint2
 
 
-Optional Utilities for Wireless Network Management:
+Monitoring Tools:
 
-- network-manager-gnome
-- network-manager-openvpn-gnome
-- network-manager-pptp-gnome
-- network-manager-vpnc-gnome
-- avahi-utils
-- avahi-daemon
-- libnss-mdns
-- wireless-tools
+- conky-all
 
 
-Optional File System Support Packages:
+Web Browser:
 
-- xfsprogs
-- reiserfsprogs
-- reiser4progs
-- jfsutils
+- chromium
 
 
-Optional GUI Package Manager Utilities (doesn't aptitude have a gui?):
+Terminal Triggered Popups:
 
-- synaptic
-- gdebi
+- zenity
+- zenity-common
+
+
+File Browser:
+
+- pcmanfm
+
+
+Terminal Audio Packages:
+
+- alsa-base
+- alsa-utils
+- pulseaudio
+
+
+Desktop Background Utilities:
+
+- feh
+- hsetroot
+
+
+Lightweight Unicode Terminal:
+
+- rxvt-unicode
+
+
+Graphical Login Manager:
+
+- slim
+
+
+Xorg Packages:
+
+- xorg
+- xserver-xorg-video-all
+- x11-server-utils
+- xinit
+- xinput
+- xscreensaver
+- xtightvncviewer
+- suckless-tools
+
+
+Lightweight Launcher:
+
+- gmrun
+
+
+Graphical Monitor Size & Position Management:
+
+- arandr
+
+
+Clipboard Utilities:
+
+- clipit
+- xsel
+
+
+Graphical Privileged Prompt:
+
+- gksu
+
+
+Theming Packages:
+
+- openbox-themes
+- dmz-cursor-theme
+- gnome-icon-theme
+- gnome-icon-theme-extras
+- lxappearance
+
+
+GUI file search tool:
+
+- catfish
+
+_I think this is totally useful and should have an openbox hotkey._
+
+
+GUI Keyboard Layout Toggle:
+
+- fbxkb
+
+_This package is a gui overlay that shows up in the menu with a flag to coordinate with languages, and is an interface to the xserver keyboard layouts.  It's a very nice lightweight language switcher._
+
+
+## configuring & theming conky
+
+We want four different types of configurations:
+
+- logs
+- skinny
+- command
+- radial
+
+
+The `logs` configuration simply makes log output immediately accessible by printing them onto the background of the system.  It requires that the user has read access to the log files, which can be accomplished by adding them to the `adm` group.  Here is my configuration:
+
+    ADD CONFIG HERE
+
+The `skinny` is a low-profile status menu that sits at the bottom (or top) of the screen, which includes a limited subset of information about the system state.  The idea is to provide just enough information about the system without eating vast amounts of resources.  To achieve this its configuration has a slower heartbeat.  Here is my configuration:
+
+    ADD CONFIG HERE
+
+The `command` config is a higher profile configuration which includes more detailed information and a section for common system hotkeys (mostly custom built).  It has a faster heartbeat, and more detailed information than the `skinny` configuration, including a process list of the top commands eating resources on the system.  Here is my configuration:
+
+    ADD CONFIG HERE
+
+The "final boss" configuration is the `radial` config, which takes full advantage of lua to build a detailed and responsive "drivers view" of the systems cpu and memory consumption.  It is ideal for multi-processor systems, and has a slightly prettier layout than `command`.  Here is my configuration:
+
+    ADD CONFIG HERE
+
+
+Supplemental systems include the following:
+
+- lua transparent bg (helpful for ARM systems like rpi)
+- radial system (used with the radial config)
+
+**It is important to understand that these configurations can be run alongside eachother, as individual conky instances.  This is how both logs and command systems work.**
+
+
+## configuring & theming tint2
+
+
+
+## configuring & theming urxvt
+
+Currently using this (it's pretty but not full-featured or matching my choice theme):
+
+    !-------------------------------------------------------------------------------
+    ! Xft settings
+    !-------------------------------------------------------------------------------
+
+    Xft.dpi:                    96
+    Xft.antialias:              false
+    Xft.rgba:                   rgb
+    Xft.hinting:                true
+    Xft.hintstyle:              hintslight
+
+    !-------------------------------------------------------------------------------
+    ! URxvt settings
+    ! Colours lifted from Solarized (http://ethanschoonover.com/solarized)
+    ! More info at:
+    ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.1.pod
+    !-------------------------------------------------------------------------------
+
+    URxvt.depth:                32
+    URxvt.geometry:             90x30
+    URxvt.transparent:          false
+    URxvt.fading:               0
+    ! URxvt.urgentOnBell:         true
+    ! URxvt.visualBell:           true
+    URxvt.loginShell:           true
+    URxvt.saveLines:            50
+    URxvt.internalBorder:       3
+    URxvt.lineSpace:            0
+
+    ! Fonts
+    URxvt.allow_bold:           false
+    /* URxvt.font:                 -*-terminus-medium-r-normal-*-12-120-72-72-c-60-iso8859-1 */
+    URxvt*font: xft:Monospace:pixelsize=14
+    URxvt*boldFont: xft:Monospace:pixelsize=14
+
+    ! Fix font space
+    URxvt*letterSpace: -1
+
+    ! Scrollbar
+    URxvt.scrollStyle:          rxvt
+    URxvt.scrollBar:            false
+
+    ! Perl extensions
+    URxvt.perl-ext-common:      default,matcher
+    URxvt.matcher.button:       1
+    URxvt.urlLauncher:          firefox
+
+    ! Cursor
+    URxvt.cursorBlink:          true
+    URxvt.cursorColor:          #657b83
+    URxvt.cursorUnderline:      false
+
+    ! Pointer
+    URxvt.pointerBlank:         true
+
+    !!Source http://github.com/altercation/solarized
+
+    *background: #002b36
+    *foreground: #657b83
+    !!*fading: 40
+    *fadeColor: #002b36
+    *cursorColor: #93a1a1
+    *pointerColorBackground: #586e75
+    *pointerColorForeground: #93a1a1
+
+    !! black dark/light
+    *color0: #073642
+    *color8: #002b36
+
+    !! red dark/light
+    *color1: #dc322f
+    *color9: #cb4b16
+
+    !! green dark/light
+    *color2: #859900
+    *color10: #586e75
+
+    !! yellow dark/light
+    *color3: #b58900
+    *color11: #657b83
+
+    !! blue dark/light
+    *color4: #268bd2
+    *color12: #839496
+
+    !! magenta dark/light
+    *color5: #d33682
+    *color13: #6c71c4
+
+    !! cyan dark/light
+    *color6: #2aa198
+    *color14: #93a1a1
+
+    !! white dark/light
+    *color7: #eee8d5
+    *color15: #fdf6e3
+
+
+Found this on the web, may tailor to my liking:
+
+    # these three lines enable clicking on links to open them ;)
+    ## if you want to enable tab support, append ,tabbed to the next line
+    ## then use shift+down arrow to create tabs and shift+{left,right} arrows to switch between them
+    URxvt*perl-ext-common: default,matcher,-option-popup,-selection-popup,-realine
+    URxvt*matcher.button: 1
+    # don't forget to change this to your favorite browser
+    URxvt*urlLauncher: chromium
+
+
+
+## configuring & theming slim
+
+
+
+### using slim
+
+To shutdown the system enter `halt` as the username followed by the root password.  Similarly to reboot the system use `reboot` as the username.
+
+
+
+## configuring & theming openbox
+
+Files of importance:
+
+- rc.xml config
+- menu.xml config
+
+
+## configuring pcmanfm
+
+
+
+## lightson daemon
+
+
+- investigate multiple keyboard layouts (mapped per keyboard id)
+- lightson daemon script to keep the xscreensaver from doing things while certain progs are running
+
+
+
+## multiple keyboard layout configuration
+
+This depends on `xorg` currently, but I have a lot of details to work out still.
+
+
+
+## pipelight
+
+For linux this is the alternative to netflix.  You can run a browser in linux while it connects silverlight plugin through a wine bottle.
+
+_Details pending._
+
+
+
+## viewnior
+
+Because most other software absolutely sucks, I want to get the best possible high performance low profile image viewer available, and viewnior is exactly that.
+
+_Still looking into the build process, as it depends on too many newer things._
+
+
+## gui volume controls with pulse and alsa
+
+- volumeicon-alsa
+
+Add user to the `pulse-access` group, in order to access and modify volume state.
+
+Preferred volume config:
+
+    [StatusIcon]
+    stepsize=3
+    lmb_slider=false
+    mmb_mute=false
+    use_horizontal_slider=true
+    show_sound_level=true
+    onclick=urxvt -e 'alsamixer'
+    theme=Default
+
+    [Hotkeys]
+    up_enabled=true
+    down_enabled=true
+    mute_enabled=true
+    up=XF86AudioRaiseVolume
+    down=XF86AudioLowerVolume
+    mute=XF86AudioMute
+
+    [Alsa]
+    card=default
+
+**The volumeicon package is technically not necessary, as the hotkeys to run the amixer commands can be done entirely from the openbox configuration.**
+
+_I am still working on updating the hotkeys, since `XF86` doesn't really exist on my keyboards._
+
+
+# references
+
+- [volume management](http://urukrama.wordpress.com/2007/12/19/managing-sound-volumes-in-openbox/)
+- [slim manual](http://slim.berlios.de/manual.php)
+- [pipelight](https://launchpad.net/pipelight)
+- [viewnior](https://github.com/xsisqox/Viewnior)
+- [gmrun in openbox](http://naniland.wordpress.com/2011/10/25/alt-f2-on-openbox/)
+- [openbox pulseaudio through amixer adjusted hotkeys](https://wiki.archlinux.org/index.php/openbox#Pulseaudio)
+- [urxvt popup options](https://bbs.archlinux.org/viewtopic.php?id=57202)
+
+
+## Tools to Compare & Investigate
+
+
+A potential `rxvt-unicode` enhancer:
+
+- yeahconsole
+
+It may be possible yet to get urxvt to popup without `yeahconsole`, so I'm going to investigate it further still.  If I fail to acheive my goal I will install and test `yeahconsole`.
+
