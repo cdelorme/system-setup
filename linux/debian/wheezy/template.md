@@ -169,8 +169,8 @@ _Here are the all the commands I run to cover the entire packages section of doc
     aptitude clean
     aptitude update
     dpkg -rq vim-common vim-tiny
-    aptitude reinstall -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
-    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors
+    aptitude reinstall -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf
+    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf
     update-command-not-found
 
 
@@ -187,20 +187,12 @@ I create three files in `/etc/cron.weekly/`, including one to update our package
 
 _Starting with the files and their contents:_
 
-**`/etc/cron.monthly/netselect-apt`:**
-
-    #!/bin/bash
-
-    # Update package mirrors
-    netselect-apt -sn
-    aptitude clean
-    aptitude update
-
-**`/etc/cron.weekly/aptitude`:**
+**`/etc/cron.daily/aptitude`:**
 
     #!/bin/sh
 
-    # update packages weekly
+    # update mirrors & packages daily
+    netselect-apt -sn
     aptitude clean
     aptitude update
     aptitude upgrade -yq
@@ -359,8 +351,11 @@ _Edit the `/etc/network/interfaces` file by replacing or adding these lines:_
         address 10.0.5.8
         gateway 10.0.5.1
         netmask 255.255.255.0
+        dns-nameservers 10.0.5.1
 
 _Your network device name, and address are dependent on your system and intranet._
+
+_The use of `dns-nameservers` requires the `resolvconf` package, and will automatically populate `/etc/resolve.conf` with the supplied value (helpful if you switch between dhcp and static)._
 
 
 #### SSH Configuration
