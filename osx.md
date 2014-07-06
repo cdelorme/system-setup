@@ -1,39 +1,43 @@
 
 # OS X Mavericks (10.9) Documentation
-#### Updated 2014-3-22
+#### Updated 2014-6-24
 
-This document will help to reproduce a fully functional development machine running OSX 10.9 (mavericks).
+For me this document is an aid to help reproduce my OSX Mavericks (10.9) development environment.
+
+For anyone else it's a comprehensive guide to optional configuration for OSX.
 
 
 ## Installation
 
-**Avoid case sensative file systems, as this breaks numerous software, such as the entire Adobe suite.**
+**Do not:**
 
-Do not setup drive encryption (eg. `File Vault`) during installation, instead wait intil you have installed and updated the system before encrypting the contents.  Otherwise you may have to reverse the encryption to account for updates to the system and re-encrypt the whole thing again after updating.
+- use a Case Sensative HFS+, this breaks software like the entire Adobe suite.
+- encrypt your drive (eg. `File Vault`), it may need re-encryption after updates.
 
-The first step after installing should then be checking for updates.
+Which leads us to the first post-install step:
+
+- check for updates.
 
 
 ## Mythical Root User
 
-The root user exists on osx, and its home dir is `/var/root`.  By default the root account on OSX uses the `/bin/sh` shell, which I would recommend switching to bash.
+The root user exists on osx, and its `$HOME` is `/var/root`.  By default the root account on OSX uses the `/bin/sh` shell.
 
-You can also install the same [dot-files](https://github.com/cdelorme/dot-files/) repository as root, provided you have finished installing xCode command line tools, homebrew, and homebrew packages.
-
-
-##### Commands
-
-_To set the root users shell:_
-
-    sudo su
-    chsh -s /bin/bash root
-
-**I do not recommend this as it may affect other parts of your system.  Instead I recommend that if you must act as the root user on OSX that you then run `/bin/bash`.**
+I tested switching it to `/bin/bash` and configuring the environment a bit, but the end result involved some undesirable performance issues.  So I do not recommend tampering with it.
 
 
 ## Automatic Updates
 
-This worries me by title alone, but the latest release now offers automatic updates.  _I have not used this long enough to claim to like it over manually updating_, as I am not sure whether this will result in the same forced reboot situation as Windows has.
+The latest release of OSX features automatic updates!  While this worries me, it is not at the level of "Windows Updates" and will not force a reboot.  However it will pop open a notification if an update requires a reboot.
+
+Having now used it for a few months, it seems to be very reliable.  More importantly it has not interfered with or hindered my productivity.
+
+
+## Updated Firewall
+
+This is something I was not aware of when I first updated, but the latest firewall is extra awkward at responding to updated applications.  Anytime an application replaces itself during an update, your firewall will ask again if you want to allow it.
+
+I have found this feature to be incredibly annoying, to the point of nearly wanting to disable the firewall.  If I allow a software, all versions of that software should be allowed.  I don't expect the firewall should have to store the file signature and bother me everytime it changes, but this is a "feature" of OSX now and I'll have to deal with it.
 
 
 ## System Settings & Configuration
@@ -69,10 +73,6 @@ These are the changes I make to my `System Preferences`, and are listed by the m
 - Security & Privacy
     - General
         - Require Password 1 Minute after Display Sleep
-        - Advanced:
-            - Disable Remote Receiver (_no infrared on newer models_)
-    - File Vault
-        - Turn On Filevault (**optional**)
     - Firewall
         - Turn Firewall On
         - Firewall Options:
@@ -136,9 +136,9 @@ These are the changes I make to my `System Preferences`, and are listed by the m
 - Time Machine
     - Do not show menu bar icon
 
-_Obviously your settings are subject to your own discretion, mine are merely a guide for myself._
+Other minor tweaks include adding at least one extra desktop to Mission Control by default, and from the battery menu I have it "Show Percentage".
 
-I usually add a second desktop by default to work with.  Then, from the battery in the menu bar select "Show Percentage".
+_These are my preferences, obviously your settings are subject to your own discretion._
 
 
 ## Custom Fonts
@@ -155,7 +155,7 @@ Installing fonts can be done by opening them and clicking the install button, or
 
 ## Disable Dashboard
 
-I think the dashboard sucks, but if you use it you are welcome to skip this step.  I have never found it to be useful; Applications load fast enough off SSD's that having an always-open micro-application is not nearly as useful as it may have been several years ago.
+I think the dashboard is a waste of space and resources and elect to disable it.  Applications load fast enough on SSD's that micro-applications are not nearly as useful as they may have been years back.
 
 
 ##### Commands
@@ -213,30 +213,29 @@ _To set your domain name:_
 
 I generally install and use [iTerm2](http://www.iterm2.com/#/section/home), but I also configure the default terminal just in case I need to use it.
 
-I set the default color scheme to `Homebrew`, transparency to 40% with a 5% blur.  Besides that you can set the font family if desired.  I use a custom font (ForMateKonaVe).
+I set the default color scheme to `Homebrew` with my choice of custom font (ForMateKonaVe) size 14.  I also go to the window tab and click the color & background button to set opacity to 40% with a 5% blur.
 
 
-## Install Java
+## App Store
 
-OS X does not install Java by default, so if you want to run Java applications you will need to install it.  [Newer 64bit Jdk installers are now available directly](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html).
-
-
-## Program Installation & Configuration
-
-From the App store I can grab these applications:
+Here are some items I always grab from the App Store:
 
 - [Dash](https://itunes.apple.com/us/app/dash-docs-snippets/id458034879?mt=12)
 - [Unarchiver](https://itunes.apple.com/us/app/the-unarchiver/id425424353?mt=12)
 - [XCode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12)
 
-_Dash is a pay-to-use application, but it is an exceptionally useful tool that gives you instant access to documentation for almost any language you can program in._
+_Dash is a mac only software that costs money, but it is a worth-while purchase.  It gives you a complete comprehensive local copy of documentation for multiple languages.  This is awesome for travel purposes, or even just quick-checks on object types or method arguments.  I highly recommend it._
 
-**Command Line tools no-longer require xCode and cannot be installed from xCode!**  Instead you can do so easily from command line by running `xcode-select --install`.  Unfortunately it takes nearly 2 hours to download and install the latest copy of xCode on a newer model MacBook Pro, so I cannot advocate even installing it if you don't plan on using it.
+I would consider XCode optional.  If you do not plan to be developing for Mac using their specific libraries and Objective-C, then you probably don't need it.  I still install it, but I never use it.  Also it cane take upwards of two hours to download.
 
-Next I gather and install the following applications:
+
+## Software
+
+Here is a list of software I install:
 
 - [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
-- [Sublime Text 3](http://www.sublimetext.com/3)
+- [Google Hangouts Plugin](https://www.google.com/tools/dlpage/hangoutplugin)
+- [Sublime Text](http://www.sublimetext.com/3)
 - [RoboMongo](http://robomongo.org/)
 - [Sequel Pro (aka Pancakes)](http://www.sequelpro.com/)
 - [iTerm2](http://www.iterm2.com/#/section/home)
@@ -244,19 +243,14 @@ Next I gather and install the following applications:
 - [Transmission](http://www.transmissionbt.com/download/)
 - [VLC](http://www.videolan.org/vlc/download-macosx.html)
 - [xQuartz](http://xquartz.macosforge.org/landing/)
-- [MacTubes](http://macapps.sakura.ne.jp/mactubes/index_en.html)
-- [Inkscape](http://inkscape.org/)
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
+- [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 
-Sublime Text is one of the best text editors I have ever used, offering a consistent UI on Windows, Linux, and OS X.  Also the fastest launch times, and excellent plugin support.  It is also one of the first text editors to not suck with anti-aliased text on Windows, ever.  _Sublime text 3 in beta and is also nagware, but it will accept your Sublime Text 2 key until the release comes out._  Unfortunately it encrypts the license key, so I cannot say how to automate this process from command line.
+VirtualBox is a free Virtual Machine software that has better linux guest support and more up-to-date features (like efi booting) that VMWare and Parallels.  It is also cross platform, so you can use the same software on any machine.  These combined benefits make it my preferred (type 2) VM software of choice.
 
-Virtual Box has beaten Parallels and VMWare in terms of best available features and complete linux guest support.  Besides costing you nothing, it offers extremely good performance and is an open source cross-platform tool.
+The xQuartz package is a necessary evil for certain packages we'll install later.
 
-_You will need xQuartz installed to setup Inkscape, as well as other services._  It seems that Homebrew has begun adding a formula for Inkscape, but from my attempts thus far installation has not been successful.  I am hopeful that this will change in the future and eliminate the need for the xQuartz package.
-
-Death to standard FTP, I no longer bother with normal FTP software.  You should only ever bother using SFTP to connect to a server for file sharing, and this can be done from command line or using `sshfs` tools.  The need for specialized FTP software has pretty much disappeared from my lineup entirely.
-
-Adobe flash projector is a means of playing swf files locally on your machine.  It's super tiny and works good, but it's totally dependent on whether you expect to ever deal with swf files.
+In spite of the fact that flash is a dying industry, I often find myself in need of the ability to run an swf file, and the Flash Projector comes in a debug flavor, which makes it super easy to have a tiny executable that can run and test flash files without browser concerns.
 
 
 ## Configuring Installed Software
@@ -271,50 +265,56 @@ I use the HUD mode with `alt + space` as the hotkey to pull it up.  It starts wi
 
 Here is a list of documentation I generally select (there are tons more):
 
-- AngularJS
 - Bash
 - Bootstrap 3
 - C
 - C++
-- Emmet
+- Cmake
 - CSS
+- Emmet
 - GLib
 - Go
-- Jade
 - HTML
 - Java EE7
-- jQuery
 - JavaScript
+- jQuery
 - Man Pages
 - Markdown
 - Mongodb
+- MySQL
 - Nginx
 - Node.js
-- MySQL
+- OpenGL 3
+- OpenGL 4
+- Python 2
 - Python 3
-- PHP
 
 The latest release also offers Cheat Sheets, which I also downloaded a few from:
 
 - Git
+- Git Flow
 - HTML Entities
 - Regular Expressions
 - Sublime Text 3
+- Tmux
 - Vim
 
-_I do not have every docset enabled, I generally uncheck any downloaded sets that are not in the language of the major project(s) I am working on._
+While I install a large number of docsets, I generally only enable the docsets related to the things I am working on.  So as I switch between projects I may tweek what docs are displayed when I search for things.
 
-One of the better parts of Dash lately is its optional integration with nearly **every** good OS X utility, things like Alfred, Sublime Text, xCode, and many more have a way of being connected.
+There are also many integration options for Dash.  For example you can configure it to run directly inside of tools like Sublime Text and XCode.
 
 
 ### The Unarchiver
 
-Modify settings:
+Preferred Settings:
 
-- Always Extract to same folder
-- Affiliation with all files (except iso's etc)
-- Delete compressed file after extraction
-- Second tab set Confidence level to 95% (optional)
+- Select all archive formats for affiliation
+- Select to always extract to the same folder as the archive is
+- Create a new folder if there is more than one top-level item
+- Move the archive to the trash after extraction
+- Under advanced set automatic detection confidence level to 100%
+
+_It is highly unlikely that the archiver won't know an encoding that a user would be able to pick from that giant list._
 
 
 ### iTerm 2
@@ -345,12 +345,12 @@ VirtualBox offers USB 2.0 support, but you have to download and install the [Ext
 
 I also recommend creating a Host-Only network with a predictable IP range (I generally use 10.0.5.1).
 
-_Unlike Parallels Desktop and VMware, VBox networking is a bit more complex.  They do not offer a simple "Internal network address with internet and open ports", because they firewall their NAT.  So you have to assign a NAT adapter, and a Host-Only adapter if you want to be able to predictably access the device and not setup a bunch of port forwards._
+_VirtualBox networking is a bit complex.  There are built-in firewalls around their NAT, so you can't simply access ports, you have to have an internal "unsafe" network adapter, and then an internet access network adapter.  The combination generally tends to be NAT + Host-Only._
 
 
 ### Transmission
 
-I rarely torrent from my Mac, but Transmission is among the best Mac/Linux torrent client I have used.  It has a great slim UI, and a vast level of customizability, as well as offering a cli version on linux (such as for headless torrent servers).  **Finally a decent competator for rtorrent.**
+Transmission is among my favorite software list now.  They provide a client and command line controls, for unix & linux platforms.  So far they have the best customizability, greatest cross platform support (minus windows) and most sensible configuration I've seen for what could operate as a torrent server software.
 
 In the settings under "General" I tell it not to prompt when removing a torrent.  I also tell it to display the speeds in the "Badge" (viewed when alt + tabbing).
 
