@@ -129,7 +129,7 @@ download_dot_files() {
 
 install_root_dot_files() {
 
-    # (config: config_skel_dot_files & ! OSX)
+    # only linux should have dot-files as root (config: config_skel_dot_files)
     if [ $LINUX ]
     then
         if [ $config_skel_dot_files ]
@@ -141,7 +141,7 @@ install_root_dot_files() {
     fi
 
     # cleanup
-    rm -rf /tmp/downloads
+    rm -rf /tmp/downloads /tmp/install.log
 
 }
 
@@ -162,7 +162,7 @@ install_dot_files() {
     fi
 
     # cleanup
-    rm -rf /tmp/downloads
+    rm -rf /tmp/downloads /tmp/install.log
 
 }
 
@@ -258,6 +258,12 @@ template_create_crontabs() {
     echo "aptitude upgrade -yq" >> /etc/cron.daily/system_updates
     echo "update-command-not-found" >> /etc/cron.daily/system_updates
     chmod +x /etc/cron.daily/system_updates
+
+    echo "#!/bin/sh" > /etc/cron.weekly/garbage_cleanup
+    echo "# search and destroy mac/windows garbage files" >> /etc/cron.weekly/garbage_cleanup
+    echo "find -iname \"thumbs.db\" -exec rm -rf {} \\;" >> /etc/cron.weekly/garbage_cleanup
+    echo "find -iname \".ds_store\" -exec rm -rf {} \\;" >> /etc/cron.weekly/garbage_cleanup
+    chmod +x /etc/cron.weekly/garbage_cleanup
 
 }
 
