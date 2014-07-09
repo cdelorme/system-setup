@@ -15,7 +15,7 @@ config_install_dot_files=true
 
 # username & password
 config_system_username="cdelorme"
-config_system_password="CdKlksd#1|"
+config_system_password="pw"
 
 # github username and password
 config_github_username="cdelorme"
@@ -57,7 +57,7 @@ configure_hosts() {
     # set hostname & domainname
     if [ $OSX ]
     then
-        sudo scutil --set HostName "${config_system_hostname}"
+        scutil --set HostName "${config_system_hostname}"
         domainname "${config_system_domainname}"
     else
         echo "${config_system_hostname}" > /etc/hostname
@@ -103,7 +103,7 @@ dot_files_user() {
     fi
 
     # cleanup
-    $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads ~/install"
+    su $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads ~/install"
 
 }
 
@@ -112,20 +112,25 @@ dot_files_user() {
 # osx operations
 ##
 
+install_osx_packages() {
+    echo "incomplete: install_osx_packages"
+}
 
-# none yet
+configure_osx_services() {
+    echo "incomplete: configure_osx_services"
+}
 
 
 ##
 # linux operations
 ##
 
-install_packages() {
+install_linux_packages() {
 
     if [ "$1" = "comm" ] || [ "$1" = "all" ]
     then
         # add trusted package source for peergaurdian
-        gpg --keyserver keyserver.ubuntu.com --recv-keys C0145138 && gpg --export --armor C0145138 | sudo apt-key add -
+        gpg --keyserver keyserver.ubuntu.com --recv-keys C0145138 && gpg --export --armor C0145138 | apt-key add -
         if ! [ -f /etc/apt/sources.list.d/moblock.list ]
         then
             echo "deb http://moblock-deb.sourceforge.net/debian wheezy main" >> /etc/apt/sources.list.d/moblock.list
@@ -154,7 +159,7 @@ install_packages() {
 
 }
 
-configure_services() {
+configure_linux_services() {
 
     # ensure watchdog is enabled
     update-rc.d watchdog defaults
@@ -170,7 +175,7 @@ configure_services() {
     fi
 
     # setup timezone
-    rm -rf /etc/localtime && sudo ln -sf $config_system_timezone /etc/localtime
+    rm -rf /etc/localtime && ln -sf $config_system_timezone /etc/localtime
 
     # secure ssh
     sed -i "s/Port 22/Port ${config_ssh_port}/" /etc/ssh/sshd_config
@@ -179,7 +184,7 @@ configure_services() {
     service ssh restart
 
     # fix potential permission problems with logs
-    sudo chown -R root:adm /var/log/*
+    chown -R root:adm /var/log/*
 
     # setup customized samba settings
     if which smbd &> /dev/null
@@ -458,10 +463,10 @@ dot_files_root() {
 automate_nix() {
 
     # package dependencies
-    install_packages $1
+    install_linux_packages $1
 
     # async operations
-    configure_services $1 &
+    configure_linux_services $1 &
     create_crontabs $1 &
     configure_monit $1 &
     configure_hosts $1 &
@@ -473,9 +478,16 @@ automate_nix() {
 
 automate_osx() {
 
-    echo "osx..."
+    # check for root privileges (script must be run either as root or with sudo)
+
+
     # package dependencies
+    install_osx_packages
+
     # async operations
+    configure_osx_services &
+    configure_hosts &
+    do_dot_files &
 
 }
 
