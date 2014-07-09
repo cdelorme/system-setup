@@ -49,19 +49,12 @@ config_jis_support=true
 # -----------------------------------------------------------------------------
 
 ##
-# osx operations
-##
-
-# none yet
-
-
-##
-# linux operations
+# universal operations
 ##
 
 configure_hosts() {
 
-    # set hostname & domainname (config: config_system_hostname, system_domainname)
+    # set hostname & domainname
     if [ $OSX ]
     then
         sudo scutil --set HostName "${config_system_hostname}"
@@ -74,6 +67,263 @@ configure_hosts() {
 
 }
 
+do_dot_files() {
+
+    # download and install my dot files
+    if [ $config_install_dot_files ]
+    then
+        if ! [ -f /tmp/install ]
+        then
+            wget -O /tmp/install "https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+            chmod +x /tmp/install
+        fi
+        dot_files_root
+        create_user $1
+        dot_files_user
+    fi
+
+}
+
+dot_files_user() {
+
+    # create a copy of the install script in the users home folder to resolve execution conflicts
+    su $config_system_username -s /bin/bash -c "cp /tmp/install ~/install"
+
+    # run dot-files as user
+    if [ -n "$config_github_username" ]
+    then
+        if [ -n "$config_github_password" ]
+        then
+            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
+        else
+            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\""
+        fi
+    else
+        su $config_system_username -s /bin/bash -c "~/install -a"
+    fi
+
+    # cleanup
+    $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads ~/install"
+
+}
+
+
+##
+# osx operations
+##
+
+
+# none yet
+
+
+##
+# linux operations
+##
+
+install_packages() {
+
+    if [ "$1" = "comm" ] || [ "$1" = "all" ]
+    then
+        # add trusted package source for peergaurdian
+        gpg --keyserver keyserver.ubuntu.com --recv-keys C0145138 && gpg --export --armor C0145138 | sudo apt-key add -
+        if ! [ -f /etc/apt/sources.list.d/moblock.list ]
+        then
+            echo "deb http://moblock-deb.sourceforge.net/debian wheezy main" >> /etc/apt/sources.list.d/moblock.list
+            echo "deb-src http://moblock-deb.sourceforge.net/debian wheezy main" >> /etc/apt/sources.list.d/moblock.list
+        fi
+    fi
+
+    if ! which netselect-apt &> /dev/null
+    then
+        aptitude install -ryq netselect-apt
+        netselect-apt -sn
+        aptitude clean
+        aptitude update
+        dpkg -rq vim-common vim-tiny
+        aptitude reinstall -ryq usbutils bzip2 unzip xz-utils netselect-apt whois fakeroot e2fsprogs os-prober bash-completion bc less anacron avahi-daemon libnss-mdns wireless-tools
+        aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog g++
+        update-command-not-found
+    fi
+
+    if [ "$1" = "comm" ] || [ "$1" = "all" ]
+    then
+        aptitude clean
+        aptitude update
+        aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses transmission-cli pglcmd &> /dev/null
+    fi
+
+}
+
+configure_services() {
+
+    # ensure watchdog is enabled
+    update-rc.d watchdog defaults
+
+    # enable lvm trim support
+    sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+
+    # set modern umask to 002 for default matching group privileges
+    sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
+    if [ $(grep -c "umask=002" /etc/pam.d/common-session) -eq 0 ]
+    then
+        echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
+    fi
+
+    # setup timezone
+    rm -rf /etc/localtime && sudo ln -sf $config_system_timezone /etc/localtime
+
+    # secure ssh
+    sed -i "s/Port 22/Port ${config_ssh_port}/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
+    service ssh restart
+
+    # fix potential permission problems with logs
+    sudo chown -R root:adm /var/log/*
+
+    # setup customized samba settings
+    if which smbd &> /dev/null
+    then
+        echo "#======================= Global Settings =======================" > /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "[global]" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "# Naming" >> /etc/smb/smb.conf
+        echo "    workgroup = WORKGROUP" >> /etc/smb/smb.conf
+        echo "    server string = %h server" >> /etc/smb/smb.conf
+        echo "    netbios name = comm" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "# Eliminate Printing" >> /etc/smb/smb.conf
+        echo "    load printers = no" >> /etc/smb/smb.conf
+        echo "    printing = bsd" >> /etc/smb/smb.conf
+        echo "    printcap name = /dev/null" >> /etc/smb/smb.conf
+        echo "    disable spoolss = yes" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "# Security" >> /etc/smb/smb.conf
+        echo "    invalid users = nobody guest root" >> /etc/smb/smb.conf
+        echo "    encrypt passwords = true" >> /etc/smb/smb.conf
+        echo "    passdb backend = tdbsam" >> /etc/smb/smb.conf
+        echo "    obey pam restrictions = yes" >> /etc/smb/smb.conf
+        echo "    unix password sync = yes" >> /etc/smb/smb.conf
+        echo "    passwd program = /usr/bin/passwd %u" >> /etc/smb/smb.conf
+        echo "    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* ." >> /etc/smb/smb.conf
+        echo "    pam password change = yes" >> /etc/smb/smb.conf
+        echo "    panic action = /usr/share/samba/panic-action %d" >> /etc/smb/smb.conf
+        echo "    syslog = 6" >> /etc/smb/smb.conf
+        echo "    log file = /var/log/samba/log.%m" >> /etc/smb/smb.conf
+        echo "    max log size = 1000" >> /etc/smb/smb.conf
+        echo "    disable netbios = yes" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "# Optimizations" >> /etc/smb/smb.conf
+        echo "    bind interfaces only = yes" >> /etc/smb/smb.conf
+        echo "    interfaces = eth0" >> /etc/smb/smb.conf
+        echo "    socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536 SO_KEEPALIVE" >> /etc/smb/smb.conf
+        echo "    deadtime = 15" >> /etc/smb/smb.conf
+        echo "    getwd cache = yes" >> /etc/smb/smb.conf
+        echo "    dns proxy = no" >> /etc/smb/smb.conf
+        echo "    max connections = 30" >> /etc/smb/smb.conf
+        echo "    use sendfile = yes" >> /etc/smb/smb.conf
+        echo "    write cache size = 16384" >> /etc/smb/smb.conf
+        echo "    aio write size = 524288" >> /etc/smb/smb.conf
+        echo "    aio read size = 524288" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+        echo "#======================= Share Definitions =======================" >> /etc/smb/smb.conf
+        echo "" >> /etc/smb/smb.conf
+    fi
+
+    # peer guardian configuration
+
+    # transmission configuration
+
+}
+
+create_crontabs() {
+
+    if ! [ -f /etc/cron.weekly/disk_maintenance ]
+    then
+        echo "#!/bin/bash" > /etc/cron.weekly/disk_maintenance
+        echo "# reduced io stress with weekly fstrim" >> /etc/cron.weekly/disk_maintenance
+        echo "for DEVICE in \$(mount | grep ext4 | grep -v mapper | awk '{print \$1}')" >> /etc/cron.weekly/disk_maintenance
+        echo "do" >> /etc/cron.weekly/disk_maintenance
+        echo "    fstrim \"\${DEVICE}\"" >> /etc/cron.weekly/disk_maintenance
+        echo "done" >> /etc/cron.weekly/disk_maintenance
+        echo "# defragment ext4 devices" >> /etc/cron.weekly/disk_maintenance
+        echo "for DEVICE in \$(mount | grep ext4 | awk '{print \$1}')" >> /etc/cron.weekly/disk_maintenance
+        echo "do" >> /etc/cron.weekly/disk_maintenance
+        echo "    e4defrag \"\${DEVICE}\"" >> /etc/cron.weekly/disk_maintenance
+        echo "done" >> /etc/cron.weekly/disk_maintenance
+        echo "# search and destroy mac/windows garbage files" >> /etc/cron.weekly/disk_maintenance
+        echo "find -iname \"thumbs.db\" -exec rm -rf {} \\;" >> /etc/cron.weekly/disk_maintenance
+        echo "find -iname \".ds_store\" -exec rm -rf {} \\;" >> /etc/cron.weekly/disk_maintenance
+        chmod +x /etc/cron.weekly/disk_maintenance
+    fi
+
+    if ! [ -f /etc/cron.daily/system_updates ]
+    then
+        echo "#!/bin/sh" > /etc/cron.daily/system_updates
+        echo "# update mirrors & packages daily" >> /etc/cron.daily/system_updates
+        echo "netselect-apt -sn" >> /etc/cron.daily/system_updates
+        echo "aptitude clean" >> /etc/cron.daily/system_updates
+        echo "aptitude update" >> /etc/cron.daily/system_updates
+        echo "aptitude upgrade -yq" >> /etc/cron.daily/system_updates
+        echo "update-command-not-found" >> /etc/cron.daily/system_updates
+        chmod +x /etc/cron.daily/system_updates
+    fi
+
+}
+
+configure_monit() {
+
+    if ! [ -f /etc/monit/monitrc.d/system ]
+    then
+        echo "check system localhost" > /etc/monit/monitrc.d/system
+        echo "    if loadavg (1min) > 10 then alert" >> /etc/monit/monitrc.d/system
+        echo "    if loadavg (5min) > 8 then alert" >> /etc/monit/monitrc.d/system
+        echo "    if memory usage > 80% then alert" >> /etc/monit/monitrc.d/system
+        echo "    if cpu usage (user) > 70% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+        echo "    if cpu usage (system) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+        echo "    if cpu usage (wait) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+        echo "    if loadavg (1min) > 20 for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+        echo "    if loadavg (5min) > 15 for 5 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+        echo "    if memory usage > 97% for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+        ln -sf /etc/monit/monitrc.d/system /etc/monit/conf.d/system
+    fi
+
+    if ! [ -f /etc/monit/monitrc.d/ssh ] && which sshd &> /dev/null
+    then
+        echo "check process sshd with pidfile /var/run/sshd.pid" > /etc/monit/monitrc.d/ssh
+        echo "    start program = \"/etc/init.d/ssh start\"" >> /etc/monit/monitrc.d/ssh
+        echo "    stop program  = \"/etc/init.d/ssh stop\"" >> /etc/monit/monitrc.d/ssh
+        echo "    if cpu > 80% for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
+        echo "    if totalmem > 200.00 MB for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
+        echo "    if 3 restarts within 8 cycles then timeout" >> /etc/monit/monitrc.d/ssh
+        ln -sf /etc/monit/monitrc.d/ssh /etc/monit/conf.d/ssh
+    fi
+
+    if ! [ -f /etc/monit/monitrc.d/web ] && [ $config_monit_web ]
+    then
+        echo "# create localhost-only web server" > /etc/monit/monitrc.d/web
+        echo "set httpd port ${config_monit_web_port}" >> /etc/monit/monitrc.d/web
+        echo "    allow 127.0.0.1" >> /etc/monit/monitrc.d/web
+        ln -sf /etc/monit/monitrc.d/web /etc/monit/conf.d/web
+    fi
+
+    if ! [ -f /etc/monit/monitrc.d/samba ] && which smbd &> /dev/null
+    then
+        echo "check process smbd with pidfile /run/samba/smdb.pid" >> /etc/monit/monitrc.d/samba
+        echo "    start program = \"/etc/init.d/samba start\"" >> /etc/monit/monitrc.d/samba
+        echo "    stop program = \"/etc/init.d/samba stop\"" >> /etc/monit/monitrc.d/samba
+        echo "    group sambashare" >> /etc/monit/monitrc.d/samba
+        echo "    if cpu usage > 80% for 15 cycles then restart" >> /etc/monit/monitrc.d/samba
+        echo "    if mem usage > 80% for 30 cycles then restart" >> /etc/monit/monitrc.d/samba
+        ln -s  /etc/monit/monitrc.d/samba  /etc/monit/conf.d/samba
+    fi
+
+    # test && reboot monit
+    monit -t && service monit restart
+
+}
+
 firewall_rules() {
 
     # open rules file
@@ -82,7 +332,7 @@ firewall_rules() {
     # set default policies
     echo "-P INPUT DROP" >> /etc/firewall.conf
     echo "-P OUTPUT ACCEPT" >> /etc/firewall.conf
-    echo "-P FORWARD ACCEPT" >> /etc/firewall.conf
+    echo "-P FORWARD DROP" >> /etc/firewall.conf
 
     # allow local traffic
     echo "# Allow traffic for INPUT, OUTPUT on loopback" >> /etc/firewall.conf
@@ -93,18 +343,37 @@ firewall_rules() {
     echo "# Allow Pings" >> /etc/firewall.conf
     echo "-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT" >> /etc/firewall.conf
 
+    ##
     # conditionally apply more rules
-    # comm_firewall_rules
-    # gui_firewall_rules
+    ##
 
-    # ssh /w rate-limiting (config: config_ssh_port)
+    # additional ports for comm server services
+    if [ "$1" = "comm" ] || [ "$1" = "all" ]
+    then
+
+        # samba configuration
+        echo "# samba traffic" >> /etc/firewall.conf
+        echo "-A INPUT -p udp -s 10.0.1.0/24 -m multiport --dports 137,138 -j ACCEPT" >> /etc/firewall.conf
+        echo "-A INPUT -p tcp -s 10.0.1.0/24 -m multiport --dports 139,445 -j ACCEPT" >> /etc/firewall.conf
+
+        # transmission rules
+
+    fi
+
+    # additional ports for gui services (possibly none?)
+    if [ "$1" = "gui" ] || [ "$1" = "all" ]
+    then
+        echo "incomplete: gui_firewall_rules"
+    fi
+
+    # ssh /w rate-limiting
     echo "# Allow SSH with rate limiting" >> /etc/firewall.conf
     echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --set --name DEFAULT --rsource" >> /etc/firewall.conf
     echo "-N LOG_AND_DROP" >> /etc/firewall.conf
     echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
     echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
     echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -j ACCEPT" >> /etc/firewall.conf
-    echo "-A LOG_AND_DROP -j LOG --log-prefix "iptables deny: " --log-level 7" >> /etc/firewall.conf
+    echo "-A LOG_AND_DROP -j LOG --log-prefix \"iptables deny: \" --log-level 7" >> /etc/firewall.conf
     echo "-A LOG_AND_DROP -j DROP" >> /etc/firewall.conf
 
     # continue to allow established connections
@@ -119,24 +388,53 @@ firewall_rules() {
     echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables
     chmod +x /etc/network/if-up.d/iptables
 
+    # reloading iptables will not happen until reboot so as to not interfere with script execution
+
 }
 
-download_dot_files() {
+configure_jis_locale() {
 
-    # download and install my dot files (config: config_install_dot_files)
-    if [ $config_install_dot_files ]
+    if [ $config_jis_support ]
     then
-        wget -O /tmp/install "https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
-        chmod +x /tmp/install
-        install_root_dot_files
-        install_dot_files
+
+        # only enable once
+        if [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
+        then
+            sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
+        fi
+        locale-gen
+
+        # configure additional jis services?
+
     fi
 
 }
 
-install_root_dot_files() {
+create_user() {
 
-    # only linux should have dot-files as root (config: config_skel_dot_files)
+    if [ $LINUX ]
+    then
+
+        if ! id ${config_system_username} &> /dev/null
+        then
+            # create user
+            useradd -m -s /bin/bash -p $(mkpasswd -m md5 "${config_system_password}") ${config_system_username}
+        fi
+
+        # apply groups to user
+        usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse ${config_system_username}
+
+    fi
+
+    # additional user configuration
+    # if comm, weechat conf
+    # if gui, custom fonts, jis locale, sublime text
+
+}
+
+dot_files_root() {
+
+    # only linux should have dot-files as root
     if [ $LINUX ]
     then
         if [ $config_skel_dot_files ]
@@ -152,217 +450,33 @@ install_root_dot_files() {
 
 }
 
-install_dot_files() {
-
-    # create a copy of the install script in the users home folder to resolve execution conflicts
-    su $config_system_username -s /bin/bash -c "cp /tmp/install ~/install"
-
-    # run dot-files as user (config: config_system_username, config_github_username, config_github_password)
-    if [ -n "$config_github_username" ]
-    then
-        if [ -n "$config_github_password" ]
-        then
-            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
-        else
-            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\""
-        fi
-    else
-        su $config_system_username -s /bin/bash -c "~/install -a"
-    fi
-
-    # cleanup
-    $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads"
-
-}
-
-create_template_user() {
-
-    # (config: config_system_username, config_system_password)
-    useradd -m -s /bin/bash -p $(mkpasswd -m md5 "${config_system_password}") ${config_system_username}
-    usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse ${config_system_username}
-
-}
-
-configure_jis_locale() {
-
-    if [ $config_jis_support ]
-    then
-        # this prevents double-enabling
-        if [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
-        then
-            sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
-        fi
-        locale-gen
-    fi
-
-}
-
-
-##
-# template setup functions
-##
-
-template_install_packages() {
-
-    aptitude install -ryq netselect-apt
-    netselect-apt -sn
-    aptitude clean
-    aptitude update
-    dpkg -rq vim-common vim-tiny
-    aptitude reinstall -ryq usbutils bzip2 unzip xz-utils netselect-apt whois fakeroot e2fsprogs os-prober bash-completion bc less anacron avahi-daemon libnss-mdns wireless-tools
-    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog g++
-    update-command-not-found
-
-}
-
-template_configure_services() {
-
-    # ensure watchdog is enabled
-    update-rc.d watchdog defaults
-
-    # enable lvm trim support
-    sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
-
-    # set modern umask to 002 for default matching group privileges
-    sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
-    echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
-
-    # setup timezone (config: config_system_timezone)
-    rm -rf /etc/localtime && sudo ln -sf $config_system_timezone /etc/localtime
-
-    # secure ssh (config: config_ssh_port)
-    sed -i "s/Port 22/Port ${config_ssh_port}/" /etc/ssh/sshd_config
-    sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
-    sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
-    service ssh restart
-
-    # fix potential permission problems with logs
-    sudo chown -R root:adm /var/log/*
-
-}
-
-template_create_crontabs() {
-
-    echo "#!/bin/sh" > /etc/cron.weekly/e4defrag
-    echo "# defragment ext4 devices" >> /etc/cron.weekly/e4defrag
-    echo "for DEVICE in \$(mount | grep ext4 | awk '{print \$1}')" >> /etc/cron.weekly/e4defrag
-    echo "do" >> /etc/cron.weekly/e4defrag
-    echo "    e4defrag \"\${DEVICE}\"" >> /etc/cron.weekly/e4defrag
-    echo "done" >> /etc/cron.weekly/e4defrag
-    chmod +x /etc/cron.weekly/e4defrag
-
-    echo "#!/bin/bash" > /etc/cron.weekly/fstrim
-    echo "# reduced io stress with weekly fstrim" >> /etc/cron.weekly/fstrim
-    echo "for DEVICE in \$(mount | grep ext4 | grep -v mapper | awk '{print \$1}')" >> /etc/cron.weekly/fstrim
-    echo "do" >> /etc/cron.weekly/fstrim
-    echo "    fstrim \"\${DEVICE}\"" >> /etc/cron.weekly/fstrim
-    echo "done" >> /etc/cron.weekly/fstrim
-    chmod +x /etc/cron.weekly/fstrim
-
-    echo "#!/bin/sh" > /etc/cron.daily/system_updates
-    echo "# update mirrors & packages daily" >> /etc/cron.daily/system_updates
-    echo "netselect-apt -sn" >> /etc/cron.daily/system_updates
-    echo "aptitude clean" >> /etc/cron.daily/system_updates
-    echo "aptitude update" >> /etc/cron.daily/system_updates
-    echo "aptitude upgrade -yq" >> /etc/cron.daily/system_updates
-    echo "update-command-not-found" >> /etc/cron.daily/system_updates
-    chmod +x /etc/cron.daily/system_updates
-
-    echo "#!/bin/sh" > /etc/cron.weekly/garbage_cleanup
-    echo "# search and destroy mac/windows garbage files" >> /etc/cron.weekly/garbage_cleanup
-    echo "find -iname \"thumbs.db\" -exec rm -rf {} \\;" >> /etc/cron.weekly/garbage_cleanup
-    echo "find -iname \".ds_store\" -exec rm -rf {} \\;" >> /etc/cron.weekly/garbage_cleanup
-    chmod +x /etc/cron.weekly/garbage_cleanup
-
-}
-
-template_configure_monit() {
-
-    echo "check process sshd with pidfile /var/run/sshd.pid" > /etc/monit/monitrc.d/ssh
-    echo "    start program = \"/etc/init.d/ssh start\"" >> /etc/monit/monitrc.d/ssh
-    echo "    stop program  = \"/etc/init.d/ssh stop\"" >> /etc/monit/monitrc.d/ssh
-    echo "    if cpu > 80% for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
-    echo "    if totalmem > 200.00 MB for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
-    echo "    if 3 restarts within 8 cycles then timeout" >> /etc/monit/monitrc.d/ssh
-    ln -s /etc/monit/monitrc.d/ssh /etc/monit/conf.d/ssh
-
-    echo "check system localhost" > /etc/monit/monitrc.d/system
-    echo "    if loadavg (1min) > 10 then alert" >> /etc/monit/monitrc.d/system
-    echo "    if loadavg (5min) > 8 then alert" >> /etc/monit/monitrc.d/system
-    echo "    if memory usage > 80% then alert" >> /etc/monit/monitrc.d/system
-    echo "    if cpu usage (user) > 70% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
-    echo "    if cpu usage (system) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
-    echo "    if cpu usage (wait) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
-    echo "    if loadavg (1min) > 20 for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
-    echo "    if loadavg (5min) > 15 for 5 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
-    echo "    if memory usage > 97% for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
-    ln -s /etc/monit/monitrc.d/system /etc/monit/conf.d/system
-
-    # access monit via web (config: config_monit_web, config_monit_web_port)
-    echo "# create web server on 9005" > /etc/monit/monitrc.d/web
-    echo "set httpd port 9005" >> /etc/monit/monitrc.d/web
-    echo "    allow 127.0.0.1" >> /etc/monit/monitrc.d/web
-    ln -s /etc/monit/monitrc.d/web /etc/monit/conf.d/web
-
-    # test && reboot monit
-    monit -t && service monit restart
-
-}
-
-
-##
-# comm operations
-##
-
-comm_firewall_rules() {
-    echo "incomplete: comm_firewall_rules"
-}
-
-
-##
-# gui operations
-##
-
-gui_firewall_rules() {
-    echo "incomplete: gui_firewall_rules"
-}
-
 
 ##
 # main systems
 ##
 
-template_run() {
+automate_nix() {
 
-    template_install_packages
+    # package dependencies
+    install_packages $1
 
-    # run these async
-    template_configure_services &
-    template_create_crontabs &
-    template_configure_monit &
-    configure_hosts &
-    firewall_rules &
-    configure_jis_locale &
-
-    create_template_user
-    download_dot_files
+    # async operations
+    configure_services $1 &
+    create_crontabs $1 &
+    configure_monit $1 &
+    configure_hosts $1 &
+    firewall_rules $1 &
+    configure_jis_locale $1 &
+    do_dot_files $1 &
 
 }
 
-comm_run() {
-    echo "comm..."
-}
+automate_osx() {
 
-gui_run() {
-    echo "gui..."
-}
-
-full_run() {
-    echo "full..."
-}
-
-osx_run() {
     echo "osx..."
+    # package dependencies
+    # async operations
+
 }
 
 
@@ -384,10 +498,26 @@ fi
 # begin tee'd log redirection
 exec &> >(tee "$0.log")
 
+# switch to /tmp for permission related concerns
+if [ -d /tmp ]
+then
+    cd /tmp
+fi
+
+# prepare dl command as a backup to acquire any missing data files
+if which curl &> /dev/null
+then
+    dlcmd="curl -L -o "
+elif which wget &> /dev/null
+then
+    dlcmd="wget -O "
+fi
+
 
 ##
 # check args && run operations
 ##
+
 case "$1" in
         -h|--help)
                 echo "$0 - custom automated system configuration script"
@@ -405,22 +535,21 @@ case "$1" in
                 exit 0
                 ;;
         template)
-            template_run
+            automate_nix
             ;;
         comm)
-            comm_run
+            automate_nix comm
             ;;
         gui)
-            gui_run
+            automate_nix gui
             ;;
         full)
-            full_run
+            automate_nix all
             ;;
         osx)
-            osx_run
+            automate_osx
             ;;
         *)
             $0 -h
             ;;
 esac
-
