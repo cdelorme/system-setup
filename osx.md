@@ -405,6 +405,8 @@ Here is my comprehensive list of recommended homebrew packages, including all de
 - scons
 - bzr
 - awscli
+- fop
+- nspr
 - xz
 - gettext
 - libevent
@@ -431,6 +433,7 @@ Here is my comprehensive list of recommended homebrew packages, including all de
 - lame
 - libogg
 - sdl2
+- unixodbc
 - mpfr2
 - isl011
 - tmux
@@ -470,6 +473,7 @@ Here is my comprehensive list of recommended homebrew packages, including all de
 - tidy
 - glibmm
 - youtube-dl
+- wxmac
 - gd
 - little-cms2
 - libicns
@@ -485,6 +489,8 @@ Here is my comprehensive list of recommended homebrew packages, including all de
 - libwmf
 - ghostscript
 - openjpeg
+- erlang
+- spidermonkey
 - libgphoto2
 - cairo
 - gdk-pixbuf
@@ -497,6 +503,7 @@ Here is my comprehensive list of recommended homebrew packages, including all de
 - cairomm
 - atkmm
 - poppler
+- couchdb
 - py2cairo
 - py3cairo
 - at-spi2-atk
@@ -575,6 +582,8 @@ _This is my complete set of packages, and all the options I use to install them:
     brew install scons
     brew install bzr
     brew install awscli
+    brew install fop
+    brew install nspr
 
     # universals no dependencies
     brew install --universal xz
@@ -603,6 +612,7 @@ _This is my complete set of packages, and all the options I use to install them:
     brew install --universal lame
     brew install --universal libogg
     brew install --universal sdl2
+    brew install unixodbc --universal
 
     # dependency chain level 1
     brew install mpfr2
@@ -648,6 +658,7 @@ _This is my complete set of packages, and all the options I use to install them:
     brew install --HEAD homebrew/dupes/tidy
     brew install glibmm
     brew install --with-rtmpdump youtube-dl
+    brew install wxmac
 
     # universal, dependency chain level 2
     brew install --universal --with-freetype --with-libtiff gd
@@ -667,6 +678,8 @@ _This is my complete set of packages, and all the options I use to install them:
     brew install libwmf
     brew install ghostscript
     brew install openjpeg
+    brew install erlang
+    brew install spidermonkey
 
     # universal, dependency chain level 3
     brew install --universal --with-libexif libgphoto2
@@ -684,6 +697,7 @@ _This is my complete set of packages, and all the options I use to install them:
     brew install cairomm
     brew install atkmm
     brew install --with-glib --with-lcms2 poppler
+    brew install couchdb
 
     # universal, dependency chain level 4
     brew install --universal py2cairo
