@@ -1,246 +1,411 @@
 #!/bin/bash
+# root permissions expected
+
+# -----------------------------------------------------------------------------
+##
+# set configuration data
+##
+
+# set hostname & domain name
+config_system_hostname="dev"
+config_system_domainname="domain.dev"
+
+# [install my dot-files](https://github.com/cdelorme/dot-files)
+config_install_dot_files=true
+
+# username & password
+config_system_username="cdelorme"
+config_system_password="CdKlksd#1|"
+
+# github username and password
+config_github_username="cdelorme"
+config_github_password=""
 
 
 ##
-# get script info
+# linux only
 ##
 
-if [ $(uname) = "Darwin" ]
-then
-    SELF=$(cd $(dirname "$0") && pwd -P)/$(basename "$0")
-else
-    SELF=$(readlink -f "$0")
-fi
-SELF_PATH=$(dirname "$SELF")
+# install to /etc/skel
+config_skel_dot_files=true
 
+# adjust default ssh port
+config_ssh_port=9004
 
-##
-# validate running as root user
-##
-if [ $(id -u) -ne 0 ]
-then
-    echo "this script must be run with privileges (eg. as root or with sudo)"
-    exit 1
-fi
+# set timezone (default is EST)
+config_system_timezone=/usr/share/zoneinfo/US/Eastern
+
+# monit web access
+config_monit_web=true
+config_monit_web_port=9005
+
+# enable japanese UTF8 support
+config_jis_support=true
 
 
 ##
-# define supplemental functions
+# end of config data, do not modify contents below
+##
+# -----------------------------------------------------------------------------
+
+##
+# linux operations
 ##
 
-dot_files_repo()
-{
+configure_hosts() {
 
-    # was a dot-files repo supplied?
-    if [ -n "$DOT_FILES_REPO" ]
+    # set hostname & domainname (config: config_system_hostname, system_domainname)
+    if [ $OSX ]
     then
-
-        # attempt to clone outside of the system-setup repo
-        cd /tmp
-        rm -rf "/tmp/dot-files"
-        git clone "$DOT_FILES_REPO" "dot-files"
-
-        ##
-        # expected format is to have an install script
-        # if available a github username, github password
-        # and system username will be supplied optionally
-        ##
-        cd "dot-files"
-        if [ -n "$GITHUB_USERNAME" ]
-        then
-            if [ -n "$GITHUB_PASSWORD" ]
-            then
-                if [ -n "$PASSWORD" ]
-                then
-                    ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD" "$PASSWORD"
-                else
-                    ./install "$GITHUB_USERNAME" "$GITHUB_PASSWORD"
-                fi
-            else
-                ./install "$GITHUB_USERNAME"
-            fi
-        else
-            ./install
-        fi
-
-        # cleanup after itself & return to the original path
-        rm -rf "/tmp/dot-files"
-        cd "$SELF_PATH"
+        sudo scutil --set HostName "${config_system_hostname}"
+        domainname "${config_system_domainname}"
+    else
+        echo "${config_system_hostname}" > /etc/hostname
+        hostname -F /etc/hostname
+        sed -i "s/127.0.1.1.*/127.0.1.1 ${config_system_hostname}.${config_system_domainname} ${config_system_hostname}/" /etc/hosts
     fi
+
+}
+
+firewall_rules() {
+
+    # open rules file
+    echo "*filter" > /etc/firewall.conf
+
+    # set default policies
+    echo "-P INPUT DROP" >> /etc/firewall.conf
+    echo "-P OUTPUT ACCEPT" >> /etc/firewall.conf
+    echo "-P FORWARD ACCEPT" >> /etc/firewall.conf
+
+    # allow local traffic
+    echo "# Allow traffic for INPUT, OUTPUT on loopback" >> /etc/firewall.conf
+    echo "-A INPUT -i lo -j ACCEPT" >> /etc/firewall.conf
+    echo "-A OUTPUT -o lo -j ACCEPT" >> /etc/firewall.conf
+
+    # enable pings
+    echo "# Allow Pings" >> /etc/firewall.conf
+    echo "-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT" >> /etc/firewall.conf
+
+    # conditionally apply more rules
+    # comm_firewall_rules
+    # gui_firewall_rules
+
+    # ssh /w rate-limiting (config: config_ssh_port)
+    echo "# Allow SSH with rate limiting" >> /etc/firewall.conf
+    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --set --name DEFAULT --rsource" >> /etc/firewall.conf
+    echo "-N LOG_AND_DROP" >> /etc/firewall.conf
+    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
+    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
+    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -j ACCEPT" >> /etc/firewall.conf
+    echo "-A LOG_AND_DROP -j LOG --log-prefix "iptables deny: " --log-level 7" >> /etc/firewall.conf
+    echo "-A LOG_AND_DROP -j DROP" >> /etc/firewall.conf
+
+    # continue to allow established connections
+    echo "# Continue to allow established connections" >> /etc/firewall.conf
+    echo "-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT" >> /etc/firewall.conf
+
+    # close the configuration file
+    echo "COMMIT" >> /etc/firewall.conf
+
+    # create iptables loader
+    echo "#!/bin/bash" > /etc/network/if-up.d/iptables
+    echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables
+    chmod +x /etc/network/if-up.d/iptables
+
+}
+
+download_dot_files() {
+
+    # download and install my dot files (config: config_install_dot_files)
+    if [ $config_install_dot_files ]
+    then
+        wget -O /tmp/install "https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+        chmod +x /tmp/install
+        install_root_dot_files
+        install_dot_files
+    fi
+
+}
+
+install_root_dot_files() {
+
+    # (config: config_skel_dot_files & ! OSX)
+    if [ $LINUX ]
+    then
+        if [ $config_skel_dot_files ]
+        then
+            /tmp/install -a -s
+        else
+            /tmp/install -a
+        fi
+    fi
+
+    # cleanup
+    rm -rf /tmp/downloads
+
+}
+
+install_dot_files() {
+
+    # run dot-files as user (config: config_system_username, config_github_username, config_github_password)
+
+    if [ -n "$config_github_username" ]
+    then
+        if [ -n "$config_github_password" ]
+        then
+            su $config_system_username -s /bin/bash -c "/tmp/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
+        else
+            su $config_system_username -s /bin/bash -c "/tmp/install -a -u \"${config_github_username}\""
+        fi
+    else
+        su $config_system_username -s /bin/bash -c "/tmp/install -a"
+    fi
+
+    # cleanup
+    rm -rf /tmp/downloads
+
+}
+
+create_template_user() {
+
+    # (config: config_system_username, config_system_password)
+    useradd -m -s /bin/bash -p $(mkpasswd -m md5 "${config_system_password}") ${config_system_username}
+    usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse ${config_system_username}
+
+}
+
+configure_jis_locale() {
+
+    if [ $config_jis_support ]
+    then
+        # this prevents double-enabling
+        if [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
+        then
+            sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
+        fi
+        locale-gen
+    fi
+
 }
 
 
 ##
-# define primary functions
+# template setup functions
 ##
 
-template()
-{
+template_install_packages() {
 
-    # handle package installations
-    aptitude install -r -y netselect-apt
-    netselect-apt -s -n
+    aptitude install -ryq netselect-apt
+    netselect-apt -sn
     aptitude clean
     aptitude update
-    dpkg -r vim-common vim-tiny
-    aptitude reinstall -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
-    aptitude install -r -y firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown
+    dpkg -rq vim-common vim-tiny
+    aptitude reinstall -ryq usbutils bzip2 unzip xz-utils netselect-apt whois fakeroot e2fsprogs os-prober bash-completion bc less anacron avahi-daemon libnss-mdns wireless-tools
+    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog
     update-command-not-found
 
-    # copy template files
-    shopt -s dotglob
-    cp -r "${SELF_PATH}/data/template/"* /
-    shopt -u dotglob
+}
 
-    ##
-    # update specific copied files
-    ##
+template_configure_services() {
 
-    # cronjobs
-    chmod +x /etc/cron.monthly/netselect-apt
-    chmod +x /etc/cron.weekly/aptitude
-    chmod +x /etc/cron.weekly/e4defrag
-    chmod +x /etc/cron.weekly/fstrim
+    # ensure watchdog is enabled
+    update-rc.d watchdog defaults
 
-    # monit
-    cd /etc/monit/conf.d
-    ln -s ../monitrc.d/ssh ssh
-    ln -s ../monitrc.d/system system
-    ln -s ../monitrc.d/web web
-    service monit restart
-    cd "$SELF_PATH"
-
-    ##
-    # configure services
-    ##
-
-    # lvm and default umask
+    # enable lvm trim support
     sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+
+    # set modern umask to 002 for default matching group privileges
     sed -i 's/UMASK\s*022/UMASK        002/' /etc/login.defs
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 
-    # ssh, iptables port, and auto-boot
-    sed -i "s/Port 22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
-    sed -i "s/ssh/${SSH_PORT}/" /etc/firewall.conf
-    chmod +x /etc/network/if-up.d/iptables
+    # setup timezone (config: config_system_timezone)
+    rm -rf /etc/localtime && sudo ln -sf $config_system_timezone /etc/localtime
 
-    # reload ssh & setup iptables
+    # secure ssh (config: config_ssh_port)
+    sed -i "s/Port 22/Port ${config_ssh_port}/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
+    sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
     service ssh restart
-    iptables-restore < /etc/firewall.conf
 
-    # add jp locale
-    echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
-    locale-gen
-
-    # create new user
-    if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]
-    then
-        useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$PASSWORD") "$USERNAME"
-        usermod -aG sudo username
-
-        # alternative two-line /w pipe create-new-user
-        # useradd -m -s /bin/bash "$USERNAME"
-        # echo "$PASSWORD" | passwd username --stdin
-    fi
-
-    # install dot files
-    dot_files_repo
+    # fix potential permission problems with logs
+    sudo chown -R root:adm /var/log/*
 
 }
 
-osx()
-{
-    echo "running osx setup"
+template_create_crontabs() {
+
+    echo "#!/bin/sh" > /etc/cron.weekly/e4defrag
+    echo "# defragment ext4 devices" >> /etc/cron.weekly/e4defrag
+    echo "for DEVICE in \$(mount | grep ext4 | awk '{print \$1}')" >> /etc/cron.weekly/e4defrag
+    echo "do" >> /etc/cron.weekly/e4defrag
+    echo "    e4defrag \"\${DEVICE}\"" >> /etc/cron.weekly/e4defrag
+    echo "done" >> /etc/cron.weekly/e4defrag
+    chmod +x /etc/cron.weekly/e4defrag
+
+    echo "#!/bin/bash" > /etc/cron.weekly/fstrim
+    echo "# reduced io stress with weekly fstrim" >> /etc/cron.weekly/fstrim
+    echo "for DEVICE in \$(mount | grep ext4 | grep -v mapper | awk '{print \$1}')" >> /etc/cron.weekly/fstrim
+    echo "do" >> /etc/cron.weekly/fstrim
+    echo "    fstrim \"\${DEVICE}\"" >> /etc/cron.weekly/fstrim
+    echo "done" >> /etc/cron.weekly/fstrim
+    chmod +x /etc/cron.weekly/fstrim
+
+    echo "#!/bin/sh" > /etc/cron.daily/system_updates
+    echo "# update mirrors & packages daily" >> /etc/cron.daily/system_updates
+    echo "netselect-apt -sn" >> /etc/cron.daily/system_updates
+    echo "aptitude clean" >> /etc/cron.daily/system_updates
+    echo "aptitude update" >> /etc/cron.daily/system_updates
+    echo "aptitude upgrade -yq" >> /etc/cron.daily/system_updates
+    echo "update-command-not-found" >> /etc/cron.daily/system_updates
+    chmod +x /etc/cron.daily/system_updates
+
 }
 
-gui()
-{
-    echo "installing gui tools"
-}
+template_configure_monit() {
 
-gnome()
-{
-    echo "installing gnome environment"
-}
+    echo "check process sshd with pidfile /var/run/sshd.pid" > /etc/monit/monitrc.d/ssh
+    echo "    start program = \"/etc/init.d/ssh start\"" >> /etc/monit/monitrc.d/ssh
+    echo "    stop program  = \"/etc/init.d/ssh stop\"" >> /etc/monit/monitrc.d/ssh
+    echo "    if cpu > 80% for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
+    echo "    if totalmem > 200.00 MB for 5 cycles then restart" >> /etc/monit/monitrc.d/ssh
+    echo "    if 3 restarts within 8 cycles then timeout" >> /etc/monit/monitrc.d/ssh
+    ln -s /etc/monit/monitrc.d/ssh /etc/monit/conf.d/ssh
 
-openbox()
-{
-    echo "installing openbox environment"
-}
+    echo "check system localhost" > /etc/monit/monitrc.d/system
+    echo "    if loadavg (1min) > 10 then alert" >> /etc/monit/monitrc.d/system
+    echo "    if loadavg (5min) > 8 then alert" >> /etc/monit/monitrc.d/system
+    echo "    if memory usage > 80% then alert" >> /etc/monit/monitrc.d/system
+    echo "    if cpu usage (user) > 70% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+    echo "    if cpu usage (system) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+    echo "    if cpu usage (wait) > 50% for 2 cycles then alert" >> /etc/monit/monitrc.d/system
+    echo "    if loadavg (1min) > 20 for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+    echo "    if loadavg (5min) > 15 for 5 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+    echo "    if memory usage > 97% for 3 cycles then exec \"/sbin/reboot\"" >> /etc/monit/monitrc.d/system
+    ln -s /etc/monit/monitrc.d/system /etc/monit/conf.d/system
 
-xen()
-{
-    echo "installing xen environment"
-}
+    # access monit via web (config: config_monit_web, config_monit_web_port)
+    echo "# create web server on 9005" > /etc/monit/monitrc.d/web
+    echo "set httpd port 9005" >> /etc/monit/monitrc.d/web
+    echo "    allow 127.0.0.1" >> /etc/monit/monitrc.d/web
+    ln -s /etc/monit/monitrc.d/web /etc/monit/conf.d/web
 
-web()
-{
-    echo "installing web environment"
+    # test && reboot monit
+    monit -t && service monit restart
 
-    # execute template
-    template
-
-    # install more services
-
-
-    # domain config
-    if [ -n "$HOSTNAME" ]
-    then
-        echo "$HOSTNAME" > /etc/hostname
-        hostname -F /etc/hostname
-    fi
-    if [ -n "$USERNAME" ]
-    then
-        # 127.0.1.1 hostname.domain.dev hostname
-        sed
-        echo "${USERNAME}.local"
-    fi
-}
-
-comm()
-{
-    echo "installing communications environment"
-}
-
-raspbian()
-{
-    echo "installing raspbian environment"
 }
 
 
 ##
-# parse arguments & load config
+# comm operations
 ##
 
-# track executed processes
-INSTALLED=()
-
-# optional hostname
-if [ -n "$1" ]
-then
-    HOSTNAME="$1"
-fi
-
-# load config
-. "$SELF_PATH/config"
+comm_firewall_rules() {
+    echo "incomplete: comm_firewall_rules"
+}
 
 
 ##
-# execute setup according to arguments
+# gui operations
 ##
 
-echo -ne "Installation will commence in 10 seconds, \nplease ctrl+c to cancel before then, \nor wait until it finishes..."
-sleep 10
+gui_firewall_rules() {
+    echo "incomplete: gui_firewall_rules"
+}
 
-if [ -n "$0" ] && [ $(type -t $0) = "function" ]
+
+##
+# main systems
+##
+
+template_run() {
+
+    template_install_packages
+
+    # run these async
+    template_configure_services &
+    template_create_crontabs &
+    template_configure_monit &
+    configure_hosts &
+    firewall_rules &
+    configure_jis_locale &
+
+    create_template_user
+    download_dot_files
+
+}
+
+comm_run() {
+    echo "comm..."
+}
+
+gui_run() {
+    echo "gui..."
+}
+
+full_run() {
+    echo "full..."
+}
+
+osx_run() {
+    echo "osx..."
+}
+
+
+##
+# acquire system information
+##
+
+# check for osx, or assume linux
+if [ $(uname) = "Darwin" ]
 then
-    $0
-elif [ $(uname) = "Darwin" ]
-then
-    osx
-elif which arch &> /dev/null && [[ $(arch | tr '[:upper:]' '[:lower:]') == *arm* ]]
-then
-    raspbian
+    OSX=true
 else
-    template
+    LINUX=true
 fi
+
+# currently only works with debian compatible distros and osx
+# future iterations may add support for other distros
+
+# begin tee'd log redirection
+exec &> >(tee "$0.log")
+
+
+##
+# check args && run operations
+##
+case "$1" in
+        -h|--help)
+                echo "$0 - custom automated system configuration script"
+                echo " "
+                echo "usage example: $0 [option]"
+                echo " "
+                echo "options:"
+                echo "  template                   a linux template"
+                echo "  comm                       template + communications & file server"
+                echo "  gui                        template + openbox gui & basic UI software"
+                echo "  full                       template + comm + gui"
+                echo "  osx                        run custom osx configurations (some interaction required)"
+                echo " "
+                echo "please open the script and modify the configuration defaults before execution."
+                exit 0
+                ;;
+        template)
+            template_run
+            ;;
+        comm)
+            comm_run
+            ;;
+        gui)
+            gui_run
+            ;;
+        full)
+            full_run
+            ;;
+        osx)
+            osx_run
+            ;;
+        *)
+            $0 -h
+            ;;
+esac
+
