@@ -49,6 +49,13 @@ config_jis_support=true
 # -----------------------------------------------------------------------------
 
 ##
+# osx operations
+##
+
+# none yet
+
+
+##
 # linux operations
 ##
 
@@ -147,22 +154,24 @@ install_root_dot_files() {
 
 install_dot_files() {
 
-    # run dot-files as user (config: config_system_username, config_github_username, config_github_password)
+    # create a copy of the install script in the users home folder to resolve execution conflicts
+    su $config_system_username -s /bin/bash -c "cp /tmp/install ~/install"
 
+    # run dot-files as user (config: config_system_username, config_github_username, config_github_password)
     if [ -n "$config_github_username" ]
     then
         if [ -n "$config_github_password" ]
         then
-            su $config_system_username -s /bin/bash -c "/tmp/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
+            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
         else
-            su $config_system_username -s /bin/bash -c "/tmp/install -a -u \"${config_github_username}\""
+            su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\""
         fi
     else
-        su $config_system_username -s /bin/bash -c "/tmp/install -a"
+        su $config_system_username -s /bin/bash -c "~/install -a"
     fi
 
     # cleanup
-    rm -rf /tmp/downloads /tmp/install.log
+    $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads"
 
 }
 
@@ -201,7 +210,7 @@ template_install_packages() {
     aptitude update
     dpkg -rq vim-common vim-tiny
     aptitude reinstall -ryq usbutils bzip2 unzip xz-utils netselect-apt whois fakeroot e2fsprogs os-prober bash-completion bc less anacron avahi-daemon libnss-mdns wireless-tools
-    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog
+    aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog g++
     update-command-not-found
 
 }
