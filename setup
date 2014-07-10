@@ -92,6 +92,9 @@ dot_files_user() {
     # run dot-files as user
     if [ -n "$config_github_username" ]
     then
+
+        # add flag for user password to generate an ssl certificate
+
         if [ -n "$config_github_password" ]
         then
             su $config_system_username -s /bin/bash -c "~/install -a -u \"${config_github_username}\" -p \"${config_github_password}\""
@@ -127,17 +130,6 @@ configure_osx_services() {
 
 install_linux_packages() {
 
-    if [ "$1" = "comm" ] || [ "$1" = "all" ]
-    then
-        # add trusted package source for peergaurdian
-        gpg --keyserver keyserver.ubuntu.com --recv-keys C0145138 && gpg --export --armor C0145138 | apt-key add -
-        if ! [ -f /etc/apt/sources.list.d/moblock.list ]
-        then
-            echo "deb http://moblock-deb.sourceforge.net/debian wheezy main" >> /etc/apt/sources.list.d/moblock.list
-            echo "deb-src http://moblock-deb.sourceforge.net/debian wheezy main" >> /etc/apt/sources.list.d/moblock.list
-        fi
-    fi
-
     if ! which netselect-apt &> /dev/null
     then
         aptitude install -ryq netselect-apt
@@ -147,14 +139,32 @@ install_linux_packages() {
         dpkg -rq vim-common vim-tiny
         aptitude reinstall -ryq usbutils bzip2 unzip xz-utils netselect-apt whois fakeroot e2fsprogs os-prober bash-completion bc less anacron avahi-daemon libnss-mdns wireless-tools
         aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog g++
-        update-command-not-found
     fi
 
     if [ "$1" = "comm" ] || [ "$1" = "all" ]
     then
-        aptitude clean
-        aptitude update
-        aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses transmission-cli pglcmd &> /dev/null
+
+        # settings for mdadm package
+        echo "mdadm   mdadm/autostart boolean true" | debconf-set-selections
+        echo "mdadm   mdadm/autocheck boolean true" | debconf-set-selections
+        echo "mdadm   mdadm/mail_to   string  root" | debconf-set-selections
+        echo "mdadm   mdadm/initrdstart   string  all" | debconf-set-selections
+        echo "mdadm   mdadm/initrdstart_notinconf boolean false" | debconf-set-selections
+        echo "mdadm   mdadm/start_daemon  boolean true" | debconf-set-selections
+
+        # install communications server packages
+        aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses transmission-daemon
+    fi
+
+    if [ "$1" = "gui" ] || [ "$1" = "all" ]
+    then
+        echo "incomplete: install_linux_packages gui"
+    fi
+
+    # update our command-not-found cache
+    if which update-command-not-found &> /dev/null
+    then
+        update-command-not-found
     fi
 
 }
@@ -189,54 +199,52 @@ configure_linux_services() {
     # setup customized samba settings
     if which smbd &> /dev/null
     then
-        echo "#======================= Global Settings =======================" > /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "[global]" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "# Naming" >> /etc/smb/smb.conf
-        echo "    workgroup = WORKGROUP" >> /etc/smb/smb.conf
-        echo "    server string = %h server" >> /etc/smb/smb.conf
-        echo "    netbios name = comm" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "# Eliminate Printing" >> /etc/smb/smb.conf
-        echo "    load printers = no" >> /etc/smb/smb.conf
-        echo "    printing = bsd" >> /etc/smb/smb.conf
-        echo "    printcap name = /dev/null" >> /etc/smb/smb.conf
-        echo "    disable spoolss = yes" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "# Security" >> /etc/smb/smb.conf
-        echo "    invalid users = nobody guest root" >> /etc/smb/smb.conf
-        echo "    encrypt passwords = true" >> /etc/smb/smb.conf
-        echo "    passdb backend = tdbsam" >> /etc/smb/smb.conf
-        echo "    obey pam restrictions = yes" >> /etc/smb/smb.conf
-        echo "    unix password sync = yes" >> /etc/smb/smb.conf
-        echo "    passwd program = /usr/bin/passwd %u" >> /etc/smb/smb.conf
-        echo "    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* ." >> /etc/smb/smb.conf
-        echo "    pam password change = yes" >> /etc/smb/smb.conf
-        echo "    panic action = /usr/share/samba/panic-action %d" >> /etc/smb/smb.conf
-        echo "    syslog = 6" >> /etc/smb/smb.conf
-        echo "    log file = /var/log/samba/log.%m" >> /etc/smb/smb.conf
-        echo "    max log size = 1000" >> /etc/smb/smb.conf
-        echo "    disable netbios = yes" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "# Optimizations" >> /etc/smb/smb.conf
-        echo "    bind interfaces only = yes" >> /etc/smb/smb.conf
-        echo "    interfaces = eth0" >> /etc/smb/smb.conf
-        echo "    socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536 SO_KEEPALIVE" >> /etc/smb/smb.conf
-        echo "    deadtime = 15" >> /etc/smb/smb.conf
-        echo "    getwd cache = yes" >> /etc/smb/smb.conf
-        echo "    dns proxy = no" >> /etc/smb/smb.conf
-        echo "    max connections = 30" >> /etc/smb/smb.conf
-        echo "    use sendfile = yes" >> /etc/smb/smb.conf
-        echo "    write cache size = 16384" >> /etc/smb/smb.conf
-        echo "    aio write size = 524288" >> /etc/smb/smb.conf
-        echo "    aio read size = 524288" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
-        echo "#======================= Share Definitions =======================" >> /etc/smb/smb.conf
-        echo "" >> /etc/smb/smb.conf
+        echo "#======================= Global Settings =======================" > /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "[global]" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "# Naming" >> /etc/samba/smb.conf
+        echo "    workgroup = WORKGROUP" >> /etc/samba/smb.conf
+        echo "    server string = %h server" >> /etc/samba/smb.conf
+        echo "    netbios name = comm" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "# Eliminate Printing" >> /etc/samba/smb.conf
+        echo "    load printers = no" >> /etc/samba/smb.conf
+        echo "    printing = bsd" >> /etc/samba/smb.conf
+        echo "    printcap name = /dev/null" >> /etc/samba/smb.conf
+        echo "    disable spoolss = yes" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "# Security" >> /etc/samba/smb.conf
+        echo "    invalid users = nobody guest root" >> /etc/samba/smb.conf
+        echo "    encrypt passwords = true" >> /etc/samba/smb.conf
+        echo "    passdb backend = tdbsam" >> /etc/samba/smb.conf
+        echo "    obey pam restrictions = yes" >> /etc/samba/smb.conf
+        echo "    unix password sync = yes" >> /etc/samba/smb.conf
+        echo "    passwd program = /usr/bin/passwd %u" >> /etc/samba/smb.conf
+        echo "    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* ." >> /etc/samba/smb.conf
+        echo "    pam password change = yes" >> /etc/samba/smb.conf
+        echo "    panic action = /usr/share/samba/panic-action %d" >> /etc/samba/smb.conf
+        echo "    syslog = 6" >> /etc/samba/smb.conf
+        echo "    log file = /var/log/samba/log.%m" >> /etc/samba/smb.conf
+        echo "    max log size = 1000" >> /etc/samba/smb.conf
+        echo "    disable netbios = yes" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "# Optimizations" >> /etc/samba/smb.conf
+        echo "    bind interfaces only = yes" >> /etc/samba/smb.conf
+        echo "    interfaces = eth0" >> /etc/samba/smb.conf
+        echo "    socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536 SO_KEEPALIVE" >> /etc/samba/smb.conf
+        echo "    deadtime = 15" >> /etc/samba/smb.conf
+        echo "    getwd cache = yes" >> /etc/samba/smb.conf
+        echo "    dns proxy = no" >> /etc/samba/smb.conf
+        echo "    max connections = 30" >> /etc/samba/smb.conf
+        echo "    use sendfile = yes" >> /etc/samba/smb.conf
+        echo "    write cache size = 16384" >> /etc/samba/smb.conf
+        echo "    aio write size = 524288" >> /etc/samba/smb.conf
+        echo "    aio read size = 524288" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
+        echo "#======================= Share Definitions =======================" >> /etc/samba/smb.conf
+        echo "" >> /etc/samba/smb.conf
     fi
-
-    # peer guardian configuration
 
     # transmission configuration
 
