@@ -42,6 +42,15 @@ config_monit_web_port=9005
 # enable japanese UTF8 support
 config_jis_support=true
 
+# transmission config settings
+config_bt_max_down=3000
+config_bt_max_up=80
+config_bt_watch_path="/tmp"
+config_bt_incomplete_path="/tmp"
+config_bt_complete_path="/tmp"
+config_bt_web_accessible=true
+config_bt_web_port=9010
+
 
 ##
 # end of config data, do not modify contents below
@@ -246,7 +255,60 @@ configure_linux_services() {
         echo "" >> /etc/samba/smb.conf
     fi
 
-    # transmission configuration
+    if which transmission-daemon &> /dev/null
+    then
+
+        # temporarily turn off daemon to update settings
+        service transmission-daemon stop
+
+        # update all matched
+        sed -i 's/"encryption":.*/"encryption": 2,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"idle-seeding-limit":.*/"idle-seeding-limit": 60,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"idle-seeding-limit-enabled":.*/"idle-seeding-limit-enabled": true,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"ratio-limit-enabled":.*/"ratio-limit-enabled": true,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"umask":.*/"umask": 2,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"speed-limit-down-enabled":.*/"speed-limit-down-enabled": true,/' /etc/transmission-daemon/settings.json
+        sed -i 's/"speed-limit-up-enabled":.*/"speed-limit-up-enabled": true,/' /etc/transmission-daemon/settings.json
+        sed -i "s/\"speed-limit-down\":.*/\"speed-limit-down\": ${config_bt_max_down},/" /etc/transmission-daemon/settings.json
+        sed -i "s/\"speed-limit-up\":.*/\"speed-limit-up\": ${config_bt_max_up},/" /etc/transmission-daemon/settings.json
+        sed -i 's/"incomplete-dir-enabled":.*/"incomplete-dir-enabled": true,/' /etc/transmission-daemon/settings.json
+        sed -i "s;\"incomplete-dir\":.*;\"incomplete-dir\": \"${config_bt_incomplete_path}\",;" /etc/transmission-daemon/settings.json
+        sed -i "s;\"download-dir\":.*;\"download-dir\": \"${config_bt_complete_path}\",;" /etc/transmission-daemon/settings.json
+
+        # make web accessible
+        if [ $config_bt_web_accessible ]
+        then
+            sed -i "s/\"rpc-port\":.*/\"rpc-port\": ${config_bt_web_port},/" /etc/transmission-daemon/settings.json
+            sed -i 's;"rpc-url":.*;"rpc-url": "/bt/",;' /etc/transmission-daemon/settings.json
+            sed -i "s;\"rpc-username\":.*;\"rpc-username\": \"${config_system_username}\",;" /etc/transmission-daemon/settings.json
+            sed -i "s;\"rpc-password\":.*;\"rpc-password\": \"${config_system_password}\",;" /etc/transmission-daemon/settings.json
+            sed -i 's;"rpc-whitelist":.*;"rpc-whitelist": "*",;' /etc/transmission-daemon/settings.json
+        fi
+
+        # conditionally replace or append
+        if [ $(grep -c "watch-dir-enabled" /etc/transmission-daemon/settings.json) -eq 1 ]
+        then
+            sed -i 's/"watch-dir-enabled":.*/"watch-dir-enabled": true,/' /etc/transmission-daemon/settings.json
+        else
+            sed -i 's/"umask":.*/"umask": 2,\n    "watch-dir-enabled": true,/' /etc/transmission-daemon/settings.json
+        fi
+        if [ $(grep -c "watch-dir" /etc/transmission-daemon/settings.json) -eq 1 ]
+        then
+            sed -i "s;\"watch-dir\":.*;\"watch-dir\": \"${config_torrent_watch_path}\",;" /etc/transmission-daemon/settings.json
+        else
+            sed -i "s;\"umask\":.*;\"umask\": 2,\n    \"watch-dir\": \"${config_torrent_watch_path}\",;" /etc/transmission-daemon/settings.json
+        fi
+        if [ $(grep -c "lazy-bitfield-enabled" /etc/transmission-daemon/settings.json) -eq 1 ]
+        then
+            sed -i 's/"lazy-bitfield-enabled":.*/"lazy-bitfield-enabled": true,/' /etc/transmission-daemon/settings.json
+        else
+            sed -i 's/"umask":.*/"umask": 2,\n    "lazy-bitfield-enabled": true,/' /etc/transmission-daemon/settings.json
+        fi
+
+        # restart daemon
+        service transmission-daemon start
+
+    fi
 
 }
 
@@ -323,13 +385,23 @@ configure_monit() {
 
     if ! [ -f /etc/monit/monitrc.d/samba ] && which smbd &> /dev/null
     then
-        echo "check process smbd with pidfile /run/samba/smdb.pid" >> /etc/monit/monitrc.d/samba
+        echo "check process samba match smbd" >> /etc/monit/monitrc.d/samba
         echo "    start program = \"/etc/init.d/samba start\"" >> /etc/monit/monitrc.d/samba
         echo "    stop program = \"/etc/init.d/samba stop\"" >> /etc/monit/monitrc.d/samba
         echo "    group sambashare" >> /etc/monit/monitrc.d/samba
         echo "    if cpu usage > 80% for 15 cycles then restart" >> /etc/monit/monitrc.d/samba
         echo "    if mem usage > 80% for 30 cycles then restart" >> /etc/monit/monitrc.d/samba
         ln -s  /etc/monit/monitrc.d/samba  /etc/monit/conf.d/samba
+    fi
+
+    if ! [ -f /etc/monit/monitrc.d/transmission-daemon ] && which transmission-daemon &> /dev/null
+    then
+        echo "check process transmission-daemon match transmission-daemon" >> /etc/monit/monitrc.d/transmission-daemon
+        echo "    start program = \"/etc/init.d/transmission-daemon start\"" >> /etc/monit/monitrc.d/transmission-daemon
+        echo "    stop program = \"/etc/init.d/transmission-daemon stop\"" >> /etc/monit/monitrc.d/transmission-daemon
+        echo "    if cpu usage > 80% for 15 cycles then restart" >> /etc/monit/monitrc.d/transmission-daemon
+        echo "    if mem usage > 80% for 30 cycles then restart" >> /etc/monit/monitrc.d/transmission-daemon
+        ln -s  /etc/monit/monitrc.d/transmission-daemon  /etc/monit/conf.d/transmission-daemon
     fi
 
     # test && reboot monit
@@ -366,10 +438,23 @@ firewall_rules() {
 
         # samba configuration
         echo "# samba traffic" >> /etc/firewall.conf
-        echo "-A INPUT -p udp -s 10.0.1.0/24 -m multiport --dports 137,138 -j ACCEPT" >> /etc/firewall.conf
-        echo "-A INPUT -p tcp -s 10.0.1.0/24 -m multiport --dports 139,445 -j ACCEPT" >> /etc/firewall.conf
+        echo "-A INPUT -p udp -m multiport --dports 137,138 -j ACCEPT" >> /etc/firewall.conf
+        echo "-A INPUT -p tcp -m multiport --dports 139,445 -j ACCEPT" >> /etc/firewall.conf
 
         # transmission rules
+        if which transmission-daemon &> /dev/null
+        then
+
+            echo "# tranmission peer traffic" >> /etc/firewall.conf
+            echo "-A INPUT -p udp -m udp --dport 51413 -j ACCEPT" >> /etc/firewall.conf
+
+            if [ $config_bt_web_accessible ]
+            then
+                echo "# transmission web interface" >> /etc/firewall.conf
+                echo "-A INPUT -p tcp -m tcp --dport 9010 -j ACCEPT" >> /etc/firewall.conf
+            fi
+
+        fi
 
     fi
 
