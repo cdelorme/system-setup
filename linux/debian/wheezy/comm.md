@@ -1,60 +1,57 @@
 
 # Comm Server Documentation
-#### Updated 2014-6-14
+#### Updated 2014-7-13
 
-This documentation picks up where the template documentation leaves off.  It expects all tools, but no GUI environment.
-
-**This documentation is no-where near a finished state, and following it blindly would be a very bad idea.  Incoming changes such as the ip filtration tool switching from iplist/ipblock to peerguardian, as well as a potentially new torrent server software will be some of the largest incoming changes.  These will affect the installed packages and monit configuration, as well as their respective documentation.  Also my samba configuration is not well documented which I hope to improve on going forward.**
+This documentation picks up where the template documentation leaves off, and is intended to work as a headless system.
 
 
 ## Install Packages
 
-We'll start right away with getting the packages we will be using installed.
-
-Add a new key for peerguardian:
-
-    gpg --keyserver keyserver.ubuntu.com --recv-keys C0145138
-    gpg --export --armor C0145138 | sudo apt-key add -
-
-Then add these to `/etc/apt/sources.list`:
-
-    deb http://moblock-deb.sourceforge.net/debian wheezy main
-    deb-src http://moblock-deb.sourceforge.net/debian wheezy main
-
-Install the new packages:
+Here are the packages:
 
     aptitude clean
     aptitude update
-    aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-cli transmission pgld pglcmd
-
-_Some packages included here are subject to change with the addition of peergaurdian._
+    aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-daemon
 
 
 ## System Configuration
 
 We want to add a couple of new rules to our IPTables to allow Samba connections:
 
-    # Samba Traffic
+    # Samba Traffic (limited to internal network)
     -A INPUT -p udp -s 10.0.1.0/24 -m multiport --dports 137,138 -j ACCEPT
     -A INPUT -p tcp -s 10.0.1.0/24 -m multiport --dports 139,445 -j ACCEPT
+
+    # tranmission peer traffic
+    -A INPUT -p udp -dport 51413 -j ACCEPT
+
+    # secured transmission web interface
+    -A INPUT -p tcp -s 10.0.1.0/24 -dport 9010 -j ACCEPT
+
+_It is highly recommended to use the intranet network address to ensure your services remain accessible only within a secure zone._
 
 
 **Monit Additions:**
 
 We will want to add monit configurations for samba and ipblock.  Ideally we want samba not to lockup, and to restart if it crashes, and we simply want ipblock to be running at boot time.
 
-Add `/etc/monit/conf.d/samba.conf` with:
+Add `/etc/monit/conf.d/samba` with:
 
-    check process smbd with pidfile /run/samba/smdb.pid
+    check process samba match smdb
         start program = "/etc/init.d/samba start"
         stop program = "/etc/init.d/samba stop"
         group sambashare
         if cpu usage > 80% for 15 cycles then restart
         if mem usage > 80% for 30 cycles then restart
 
-**Plans to replace ipblock with peergaurdian, and the lack of a pid for ipblock has left me without a monit solution.  I will update this as soon as I get peergaurdian setup.**
+Add `/etc/monit/conf.d/transmission-daemon` with:
 
-_If you have a torrent service or global weechat instance you may also create configurations for them._
+    check process transmission-daemon match transmission-daemon
+        start program = "/etc/init.d/transmission-daemon start"
+        stop program = "/etc/init.d/transmission-daemon stop"
+        group sambashare
+        if cpu usage > 80% for 15 cycles then restart
+        if mem usage > 80% for 30 cycles then restart
 
 
 ## Configuring RAID
@@ -70,11 +67,9 @@ RAID 0 provides doubled write speeds and provides full drive space by splitting 
 
 RAID 1 is the better approach because it has a higher likelyhood of delivering on the higher read speeds, at the cost of halfed disk space.
 
-I used to like RAID 5, but parity bit calculation with software RAID and LVM (on Xen or otherwise) cuts the actual disk performance by a significant margin, enough that the cost of an extra disk to create RAID 10 is reasonable.
+RAID 5 gives you parity to repair data on disk loss without devoting 50% of your storage to parity, and while useful is not great for high performance.
 
-RAID 10 with four disks will give you 2 disks of space, but gives you full parity, as well as four read heads and two write heads, with the actual gains being only slightly below theoretical gains.  Additionally as you add disk pairs to a RAID 10 performance jumps even further, making it easily one of the best choices if you can afford the disks.
-
-**A RAID 10 with 8+ 7200 RPM disks can compete with speeds seen on modern SSD's (for bulk content, and probably not SATA III).**
+My personal favorite is RAID 10; requiring a minimum of 4 disks required it performs both mirroring and spanning.  In practice this gives you up to 4 read-heads and 2 write-heads, all of which can operate in parallel.  The best part is you can continue to increase its performance by adding disks in sets of 2 (4+2, 6x read, 3x write).  8 Disk RAID 10's have been known to outperform SATAII SSD's, which is rather exceptional.
 
 
 **Creating a RAID10 MDADM Array:**
@@ -229,46 +224,99 @@ I tried NFS again (2014-3-22), and just like before found it to be a pain to wor
 
 ## Weechat Configuration
 
-Next I configured weechat with my registered account.  I ran these commands:
+Next using a registered account on freenode, let's configure weechat:
 
-    /set irc.server.freenode.command "/msg NickServ identify password"
     /set irc.server.freenode.nicks "username, username_"
+    /set irc.server.freenode.password "password"
     /set irc.server.freenode.autoconnect on
     /set weechat.history.max_buffer_lines_number 0
     /save
     /quit
 
-This will give you infinite history, and connect your registered freenode account when it starts.
+With these changes you should now have infinite history.  You will be automatically connected to freenode at boot, and it will verify your identity with NickServ.
+
+_This content will be moved to a separate file soon._
 
 
 ## Torrent Configuration
 
-**This section is very incomplete and subject to several changes, including a switch to peerguardian command line and a better torrent service.**
+With transmission-daemon, we will automatically start up a torrent server with our system.
 
-Currently I have tested most headless torrent server software and found them to be rather incomplete or lacking in ease of configuration or access.  One of the best being rtorrent, which has an obscure mixture of dbus configuration options, with the added negative of inconsistent functionality and an apache-only web interface.  Not to mention the last update came nearly a year ago.
+The configuration file can be found in `/etc/transmission-daemon/settings.json`, and is in JSON format.  Here are my recommended settings:
 
-I intend to build my own going forward, but in preparation you will want to install the `iplist` package to prevent tracking using the ipblock feature it includes.
+    {
+        "alt-speed-down": 50,
+        "alt-speed-enabled": false,
+        "alt-speed-time-begin": 540,
+        "alt-speed-time-day": 127,
+        "alt-speed-time-enabled": false,
+        "alt-speed-time-end": 1020,
+        "alt-speed-up": 50,
+        "bind-address-ipv4": "0.0.0.0",
+        "bind-address-ipv6": "::",
+        "blocklist-enabled": false,
+        "blocklist-url": "http://www.example.com/blocklist",
+        "cache-size-mb": 4,
+        "dht-enabled": true,
+        "download-dir": "/tmp",
+        "download-limit": 100,
+        "download-limit-enabled": 0,
+        "download-queue-enabled": true,
+        "download-queue-size": 5,
+        "encryption": 2,
+        "idle-seeding-limit": 60,
+        "idle-seeding-limit-enabled": true,
+        "incomplete-dir": "/tmp",
+        "incomplete-dir-enabled": true,
+        "lazy-bitfield-enabled": true,
+        "lpd-enabled": false,
+        "max-peers-global": 200,
+        "message-level": 2,
+        "peer-congestion-algorithm": "",
+        "peer-limit-global": 240,
+        "peer-limit-per-torrent": 60,
+        "peer-port": 51413,
+        "peer-port-random-high": 65535,
+        "peer-port-random-low": 49152,
+        "peer-port-random-on-start": false,
+        "peer-socket-tos": "default",
+        "pex-enabled": true,
+        "port-forwarding-enabled": false,
+        "preallocation": 1,
+        "prefetch-enabled": 1,
+        "queue-stalled-enabled": true,
+        "queue-stalled-minutes": 30,
+        "ratio-limit": 2,
+        "ratio-limit-enabled": true,
+        "rename-partial-files": true,
+        "rpc-authentication-required": true,
+        "rpc-bind-address": "0.0.0.0",
+        "rpc-enabled": true,
+        "rpc-password": "anything-turns-into-hash-on-first-run",
+        "rpc-port": 9010,
+        "rpc-url": "/bt/",
+        "rpc-username": "username",
+        "rpc-whitelist": "*",
+        "rpc-whitelist-enabled": true,
+        "scrape-paused-torrents-enabled": true,
+        "script-torrent-done-enabled": false,
+        "script-torrent-done-filename": "",
+        "seed-queue-enabled": false,
+        "seed-queue-size": 10,
+        "speed-limit-down": 3000,
+        "speed-limit-down-enabled": true,
+        "speed-limit-up": 80,
+        "speed-limit-up-enabled": true,
+        "start-added-torrents": true,
+        "trash-original-torrent-files": false,
+        "umask": 2,
+        "upload-limit": 100,
+        "upload-limit-enabled": 0,
+        "upload-slots-per-torrent": 14,
+        "utp-enabled": true,
+        "watch-dir-enabled": true
+    }
 
-Start by grabbing the [latest version](http://sourceforge.net/projects/iplist/files/).  Building it is tough, so try to get the premade .deb file:
+I chose to remove the whitelist by setting it to a wildcard, you may choose to do otherwise.  However, the port it runs on can be controlled by iptables, which is my preference for this particular service.
 
-    wget "http://downloads.sourceforge.net/project/iplist/iplist/0.29/iplist_0.29-1~squeeze_amd64.deb?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fiplist%2Ffiles%2Fiplist%2F0.29%2F&ts=1381773636&use_mirror=softlayer-dal" -O iplist.deb
-    dpkg -i iplist.deb
-
-If you get an error that is pretty normal, just run `aptitude update && aptitude upgrade` and it should automatically resolve missing dependencies.
-
-If you cat the `/etc/ipblock.lists` file, there are prefixes attached to the url's that are used to reference the lists the blocker will use.
-
-In the `/etc/ipblock.conf` file there is a BLOCK_LIST variable set to a string with space delimited references to the prefixes.
-
-Here is my chosen block list:
-
-    level1.gz ads-trackers-and-bad-pr0n.gz edu.gz Microsoft.gz spyware.gz spider.gz bogon.gz badpeers.gz
-
-Finally, to make sure to starts on boot, you may have to add it to insserv manually via:
-
-    insserv ipblock
-
-
-## References
-
-- [2011 Ubuntu Torrent Server](http://www.the-little-things.net/blog/2011/09/11/linux-headless-ubuntu-torrent-home-server/)
+_If changes are made to the settings.json file while transmission-daemon is running it will overwrite it when restarted.  You have to follow special instructions to reload the config, and it is probably easier to stop the service before editing the file the first time._
