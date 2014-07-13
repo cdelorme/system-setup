@@ -11,7 +11,7 @@ Packages in addition to (or alternative to) raspberry pi's listings:
 
 It is also quite likely that I can re-use most of the instructional steps from the raspberry pi (and inversely patch them with whatever changes I have tested here).
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xscreensaver xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance
 
 
 Desktop Package:
@@ -83,7 +83,6 @@ Xorg Packages:
 - x11-server-utils
 - xinit
 - xinput
-- xscreensaver
 - xtightvncviewer
 - suckless-tools
 
@@ -134,37 +133,6 @@ _This package is a gui overlay that shows up in the menu with a flag to coordina
 
 ## configuring & theming conky
 
-We want four different types of configurations:
-
-- logs
-- skinny
-- command
-- radial
-
-
-The `logs` configuration simply makes log output immediately accessible by printing them onto the background of the system.  It requires that the user has read access to the log files, which can be accomplished by adding them to the `adm` group.  Here is my configuration:
-
-    ADD CONFIG HERE
-
-The `skinny` is a low-profile status menu that sits at the bottom (or top) of the screen, which includes a limited subset of information about the system state.  The idea is to provide just enough information about the system without eating vast amounts of resources.  To achieve this its configuration has a slower heartbeat.  Here is my configuration:
-
-    ADD CONFIG HERE
-
-The `command` config is a higher profile configuration which includes more detailed information and a section for common system hotkeys (mostly custom built).  It has a faster heartbeat, and more detailed information than the `skinny` configuration, including a process list of the top commands eating resources on the system.  Here is my configuration:
-
-    ADD CONFIG HERE
-
-The "final boss" configuration is the `radial` config, which takes full advantage of lua to build a detailed and responsive "drivers view" of the systems cpu and memory consumption.  It is ideal for multi-processor systems, and has a slightly prettier layout than `command`.  Here is my configuration:
-
-    ADD CONFIG HERE
-
-
-Supplemental systems include the following:
-
-- lua transparent bg (helpful for ARM systems like rpi)
-- radial system (used with the radial config)
-
-**It is important to understand that these configurations can be run alongside eachother, as individual conky instances.  This is how both logs and command systems work.**
 
 
 ## configuring & theming tint2
@@ -303,14 +271,6 @@ Files of importance:
 
 
 ## configuring pcmanfm
-
-
-
-## lightson daemon
-
-
-- investigate multiple keyboard layouts (mapped per keyboard id)
-- lightson daemon script to keep the xscreensaver from doing things while certain progs are running
 
 
 
