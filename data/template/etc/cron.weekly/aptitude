@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# update packages weekly
-aptitude clean
-aptitude update
-aptitude upgrade -y
-update-command-not-found

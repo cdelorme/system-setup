@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# defragment ext4 devices
-for DEVICE in $(mount | grep ext4 | awk '{print $1}')
-do
-    e4defrag "${DEVICE}"
-done

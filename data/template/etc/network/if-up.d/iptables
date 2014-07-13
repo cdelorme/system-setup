@@ -1,2 +1,0 @@
-#!/bin/bash
-iptables-restore < /etc/firewall.conf

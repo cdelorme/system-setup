@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Update package mirrors
-netselect-apt -s -n
-aptitude clean
-aptitude update

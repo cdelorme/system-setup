@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Handle regular trim cleanup (much less IO problems than setting discard flag in fstab)
-for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
-do
-    fstrim "${DEVICE}"
-done
