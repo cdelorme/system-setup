@@ -1,8 +1,10 @@
 
 # Debian Wheezy GUI Documentation
-#### Updated 2014-6-14
+#### Updated 2014-7-13
 
-This is my desktop development configuration documentation, and continues where my template documention left off.
+These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
+
+It assumes that work picks up where the template documentation left off.
 
 
 ## Hardware
