@@ -555,6 +555,10 @@ dot_files_root() {
 
 automate_nix() {
 
+    echo "linux: ${1} configuration will proceed in 3 seconds"
+    echo "press ctrl+c before then to cancel"
+    sleep 3
+
     # package dependencies
     install_linux_packages $1
 
@@ -571,8 +575,13 @@ automate_nix() {
 
 automate_osx() {
 
-    # check for root privileges (script must be run either as root or with sudo)
-
+    # still researching osx config options
+    # we will need root privileges for certain commands
+    # however we do not want to run the script as root
+    # we could run sudo once to do an echo which would start the prompt
+    # but that would only last a few minutes
+    # if our install process takes a while it may not complete the required actions
+    # which means they would have to answer the prompt again later
 
     # package dependencies
     install_osx_packages
