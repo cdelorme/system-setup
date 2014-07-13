@@ -1,6 +1,6 @@
 
 # Debian Wheezy OpenBox UI
-#### Updated 2014-6-14
+#### Updated 2014-7-13
 
 Tentative instructions for creating a [crunchbang-like](http://crunchbang.org/) debian install, with many preference based changes.
 
@@ -282,26 +282,24 @@ This depends on `xorg` currently, but I have a lot of details to work out still.
 
 ## pipelight
 
-For linux this is the alternative to netflix.  You can run a browser in linux while it connects silverlight plugin through a wine bottle.
+For linux this is the alternative to silverlight.  You can run a browser in linux while it connects silverlight plugin through a wine bottle.
 
 _Details pending._
 
 
 
-## viewnior
+## [viewnoir](https://github.com/xsisqox/Viewnior)
 
-Because most other software absolutely sucks, I want to get the best possible high performance low profile image viewer available, and viewnior is exactly that.
+Most other viewing or previewing software is extremely bad in either speed or simplicity.
 
-_Still looking into the build process, as it depends on too many newer things._
+Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan on installing it when Debian Jessie is released as the new stable.
 
 
 ## gui volume controls with pulse and alsa
 
-- volumeicon-alsa
+This uses the `volumeicon-alsa` package, and requires the user to be in the `pulse-access` group in order to modify the volume state.
 
-Add user to the `pulse-access` group, in order to access and modify volume state.
-
-Preferred volume config:
+Preferred volume config (`~/.???`):
 
     [StatusIcon]
     stepsize=3
@@ -341,10 +339,8 @@ _I am still working on updating the hotkeys, since `XF86` doesn't really exist o
 
 ## Tools to Compare & Investigate
 
-
 A potential `rxvt-unicode` enhancer:
 
 - yeahconsole
 
 It may be possible yet to get urxvt to popup without `yeahconsole`, so I'm going to investigate it further still.  If I fail to acheive my goal I will install and test `yeahconsole`.
-
