@@ -432,13 +432,9 @@ _Set as default browser:_
 
 
 
+### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
 
-
-
-
-
-
-
+Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
 
 
 ## still investigating
@@ -468,118 +464,6 @@ I have not yet tested this.
 Most other viewing or previewing software is extremely bad in either speed or simplicity.
 
 Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan on installing it when Debian Jessie is released as the new stable.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-### [sublime text](http://www.sublimetext.com/)
-
-Sublime Text is easily the best text editor I've used, featuring extremely speedy launch times, excellent plugin support, nearly identical UI cross platform, and font aliasing on windows.  It is well worth the sale price, but they currently offer it for use free of charge.
-
-The first step is downloading it off their website; **we want the tarball and not the ubuntu `.deb` file.**
-
-Simply extract the contents, and move the folder to where-ever you wish the software to live.
-
-If you want to make your copy shared, install it to `/usr/local/`, otherwise you may consider creating a user folder like `~/applications/`.  _I prefer a local copy._
-
-Next we want to install [package control](https://sublime.wbond.net/installation) for sublime text, which will give us the ability to effortlessly install any package and update it going forward.
-
-I recommend these packages for the editor:
-
-- [Package Control](https://sublime.wbond.net/)
-- [Markdown Preview](https://github.com/revolunet/sublimetext-markdown-preview)
-- [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
-- [Origami](https://github.com/SublimeText/Origami)
-- [EncodingHelper](https://github.com/SublimeText/EncodingHelper)
-
-All sublime text configuration files are raw text, and can be easily modified.  Additionally they are mostly portable between platforms.
-
-
-##### commands
-
-_Grab the latest version off their website, and install it locally (asterisk `cp` mail fail if multiple items start with the same characters):_
-
-    # Download Sublime Text 3
-    curl -o ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
-    tar xf sublime.tar.bz2
-    rm sublime.tar.bz2
-    mkdir ~/applications
-    mv Sublime* ~/applications/sublime_text/
-    mkdir -p ~/bin
-    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
-
-_Install package control, run this inside sublime text console:_
-
-    import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
-
-_User configuration `/` (assumes `ForMateKonaVe` font is installed):_
-
-    {
-        "auto_complete_commit_on_tab": true,
-        "caret_style": "phase",
-        "color_scheme": "Packages/Color Scheme - Default/Sunburst.tmTheme",
-        "font_face": "ForMateKonaVe",
-        "font_size": 14,
-        "highlight_line": true,
-        "highlight_modified_tabs": true,
-        "match_brackets_angle": true,
-        "scroll_past_end": true,
-        "scroll_speed": 2.0,
-        "translate_tabs_to_spaces": true,
-        "trim_trailing_white_space_on_save": true
-    }
-
-_Custom hotkeys `/`:_
-
-    [
-        { "keys": ["ctrl+enter"], "command": "goto_python_definition"},
-        { "keys": ["ctrl+tab"], "command": "next_view" },
-        { "keys": ["ctrl+shift+tab"], "command": "prev_view" },
-        { "keys": ["alt+m"], "command": "markdown_preview", "args":
-            { "target": "browser", "parser": "markdown" }
-        }
-    ]
-
-_Optional desktop launcher `~/.local/share/applications/subl.desktop`:_
-
-    [Desktop Entry]
-    Name=Sublime Text
-    Comment=The World's best text editor!
-    TryExec=subl
-    Exec=subl
-    Icon=~/applications/sublime_text/Icon/256x256/sublime_text.png
-    Type=Application
-    Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
-
-
-
 
 
 # References
