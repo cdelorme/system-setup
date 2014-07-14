@@ -508,9 +508,9 @@ configure_jis_locale() {
 
             # grab custom fonts & refresh cache
             su $config_system_username -s /bin/bash -c "mkdir -p ~/.fonts"
-            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/ForMateKonaVe.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/ForMateKonaVe.ttf"
-            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/epkyouka.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/epkyouka.ttf"
-            fc-cache -fr
+            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/ForMateKonaVe.ttf https://raw.githubusercontent.com/cdelorme/system-setup/master/data/fonts/ForMateKonaVe.ttf"
+            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/epkyouka.ttf https://raw.githubusercontent.com/cdelorme/system-setup/master/data/fonts/epkyouka.ttf"
+            su $config_system_username -s /bin/bash -c "fc-cache -fr"
         fi
     fi
 
