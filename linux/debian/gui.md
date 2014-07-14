@@ -127,6 +127,22 @@ _Run to install all packages:
 
 ### installing custom fonts
 
+This part is entirely optional, but I have some favorite fonts that I usually install:
+
+- [ForMateKonaVe](https://github.com/cdelorme/system-setup/raw/develop/data/fonts/ForMateKonaVe.ttf)
+- [epkyouka](https://github.com/cdelorme/system-setup/raw/develop/data/fonts/epkyouka.ttf)
+
+Custom fonts can be installed globally into `/usr/share/fonts/`, or per-user at `~/.fonts/`; simply copy the font files into those folders.
+
+After copying the files you will need to refresh the font cache using the `fc-cache` utility.
+
+
+##### commands
+
+_Run this to rebuild font cache:_
+
+    fc-cache -fr
+
 
 ### configuring & theming slim
 
