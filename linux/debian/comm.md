@@ -217,20 +217,9 @@ I won't go through all the details here, suffice to say there is a lot of stuff 
 The [official documentation](http://www.samba.org/samba/docs/) is actually incredibly detailed and a great resource.
 
 
-## weechat configuration
+## [weechat configuration](https://github.com/cdelorme/system-setup/tree/master/shared_config/weechat.md)
 
-Next using a registered account on freenode, let's configure weechat:
-
-    /set irc.server.freenode.nicks "username, username_"
-    /set irc.server.freenode.password "password"
-    /set irc.server.freenode.autoconnect on
-    /set weechat.history.max_buffer_lines_number 0
-    /save
-    /quit
-
-With these changes you should now have infinite history.  You will be automatically connected to freenode at boot, and it will verify your identity with NickServ.
-
-_This content will be moved to a separate file soon._
+Since weechat configuration is mostly the same cross platform I've moved instructions to their own file.  Please click the link.
 
 
 ## torrent configuration
