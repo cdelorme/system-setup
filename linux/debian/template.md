@@ -1,18 +1,18 @@
 
-# Debian Wheezy Template Documentation
-#### Updated 2014-2-19
+# template system documentation
+#### Updated 2014-7-13
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 
 Having a documented default or "base" install can greatly reduce room for error when setting up new machines, as well as expedite the setup process.
 
 
-### Hardware Configuration
+### hardware configuration
 
 Applications vary wildly, but this machine will run sufficiently on 512MB of RAM, but I tend to use 1GB or more.
 
 
-#### Ideal Partitioning & Installation
+#### ideal partitioning & installation
 
 I use Logical Volumes for my partitioning, and I always create partitions for error-prone areas like the logs.  This is purely a preventative step such that I never end up with a machine that I cannot even debug due to having no available drive space.
 
@@ -41,12 +41,12 @@ I don't always use a desktop environment so I save those things for later.  I al
 Because I modify the dot files heavily I also tend to avoid creating any other users besides root.  This allows me to add utilities and create dot files in `/etc/skel` before creating a user, at which point they automatically get all the new files which saves me some typing.
 
 
-### Post Installation Steps
+### post installation steps
 
 Start by logging in as root to run through these steps.
 
 
-#### Packages
+#### install packages
 
 I install lots of packages to form the basic foundation of a multi-functional platform.  In some cases not all of these packages are necessary, but in most cases they are helpful to have.  Worth noting that I use `aptitude` because it is a single sensible command interface, and for these packages I add the `-r` flag to install any recommended packages.  If you want to go full minimalist then omit this flag and pick and choose the packages to install.  However I recommend this to avoid any possibly problems later on.
 
@@ -160,7 +160,7 @@ The `miscfiles` package is non-executable files that contain loads of data that 
 After installing the packages we still have a couple of steps to take care of before we are ready to move forward.  The `command-not-found` package requires a one-time run of `update-command-not-found` to update a local index of packages.
 
 
-##### Commands
+##### commands
 
 _Here are the all the commands I run to cover the entire packages section of documentation:_
 
@@ -174,7 +174,7 @@ _Here are the all the commands I run to cover the entire packages section of doc
     update-command-not-found
 
 
-#### Cron Jobs
+#### cron jobs
 
 I schedule a series of custom cronjobs to handle various tasks within the system that keep it up the date and running smoothly.  Generally I only add these to the primary cron folders, but that means they may not execute if the system is not running 24/7, so be sure to adjust your implementation accordingly.
 
@@ -183,7 +183,7 @@ I create a file in `/etc/cron.monthly/` that re-runs `netselect-apt` to ensure w
 I create three files in `/etc/cron.weekly/`, including one to update our packages, one to defragment any ext4 partitions, and one to execute `fstrim` on any ext4 partitions (useful for solid state drives).
 
 
-##### Commands & Files
+##### commands & files
 
 _Starting with the files and their contents:_
 
@@ -226,7 +226,7 @@ _Now I make sure all of them are executable:_
     chmod +x /etc/cron.weekly/fstrim
 
 
-#### Optimizations & Permissions
+#### optimizations & permissions
 
 This optimization is for LVM with Solid State Drives.  In the `/etc/lvm/lvm.conf` file find the `issue_discards` flag, and set it to `1` to turn it on.
 
@@ -235,7 +235,7 @@ Next I prefer setting the default umask to `002` to allow group read and write b
 To make these change we have to modify two files.  First we want to add `session optional pam_umask.so umask=002` to `/etc/pam.d/common-session`.  Second we want to set `UMASK 002` inside `/etc/login.defs`.
 
 
-##### Commands
+##### commands
 
 _The commands to make these optimizations:_
 
@@ -244,7 +244,7 @@ _The commands to make these optimizations:_
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 
 
-#### Monit Configuration
+#### monit configuration
 
 At a bare minimum monit allows us to ensure that if the system is overloaded or important services such as ssh hangs or dies that it gets rebooted.  It is a very reliable tool and good to have installed for general purpose use.
 
@@ -253,7 +253,7 @@ Configurations should be placed into `/etc/monit/monitrc.d/`, and symlinked to `
 I create one for `ssh`, one for `system`, and one for `web` accessibility by default.  The configuration you choose may vary greatly, and I recommend [reading their documentation](https://mmonit.com/monit/documentation/monit.html) before simply copying my own suggested contents.
 
 
-##### Commands & Files
+##### commands & files
 
 _Let's start by creating these files:_
 
@@ -300,28 +300,28 @@ _You can then test, and restart monit:_
     monit -t && service monit restart
 
 
-#### System Timezone
+#### system timezone
 
 If you run `date` and the system spits out a time from a different timezone it is very likely that you will have to fix it by replacing the file at `/etc/localtime` with a file containing your own timezone signature.
 
 You can find the list of timezones in `/usr/share/zoneinfo`.
 
 
-##### Commands
+##### commands
 
 _To set the US Eastern timezone run this command:_
 
     sudo ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime
 
 
-#### Domain Name
+#### domain name
 
 If you did not do so during the installation, you can setup a fully established domain name by adding the machine name to the file `/etc/hostname`, then running `hostname -F /etc/hostname`.
 
 To add the domain name you can edit `/etc/hosts` and add a record for `127.0.1.1` with your hostname, and fully qualified domain name.
 
 
-##### Commands
+##### commands
 
 _To add a hostname and FQDN, here are the commands:_
 
@@ -335,14 +335,14 @@ _Edit the `/etc/hosts` file manually, and add or replace this line:_
 _Now if we type `hostname -f` we will get the whole domain name._
 
 
-#### Static IP
+#### static ip address
 
 On most of my desktop systems inside a local network I assign a static IP.  I do this to make SSH access simpler, and to reduce routing traffic.
 
 These instructions are primarily for wired connections and may require significant changes to be useful for wireless connections.
 
 
-##### Commands
+##### commands
 
 _Edit the `/etc/network/interfaces` file by replacing or adding these lines:_
 
@@ -358,7 +358,7 @@ _Your network device name, and address are dependent on your system and intranet
 _The use of `dns-nameservers` requires the `resolvconf` package, and will automatically populate `/etc/resolve.conf` with the supplied value (helpful if you switch between dhcp and static)._
 
 
-#### SSH Configuration
+#### ssh configuration
 
 The first step I take to securing SSH is to obfuscate the port by changing it to a different number in `/etc/ssh/sshd_config`.
 
@@ -377,7 +377,7 @@ You can also add a generated key to your github account via their api using curl
 _Don't forget a space in front to prevent it from showing in your `history` (since it has username & password)._
 
 
-##### Commands
+##### commands
 
 _These commands will secure your ssh service:_
 
@@ -398,14 +398,14 @@ _To generate an ssh key, here is the command (prompts will be required after):_
     ssh-keygen -t rsa -b 4096
 
 
-#### Firewall via IPTables
+#### iptables (firewall) configuration
 
 The `iptables` package makes for an excellent firewall.  However, its configuration can be quite confusing.  I recommend reading up on it if you want a solid understanding.
 
 I usually create a set of rules in `/etc/firewall.conf`, though some services would have you place it into `/etc/iptables/iptables.rules` and auto-load it by default.  However, I do not use the iptables daemon, instead I connect them to my `network up` sequence by creating a file in `/etc/network/if-up.d/` to reload the iptable rules.
 
 
-##### Commands & Files
+##### commands & files
 
 _Let's start by creating our IPTables file in `/etc/firewall.conf`:_
 
@@ -449,7 +449,7 @@ _Finally, we need to make the iptables script executable:_
     chmod +x /etc/network/if-up.d/iptables
 
 
-#### Locale Support
+#### locale support
 
 If you happen to dabble in other languages besides english (as I'm sure do many), then you can add another locale and generate related files.
 
@@ -458,7 +458,7 @@ The interactive way to do this is to use `dpkg-reconfigure locales`.  This will 
 If you want to make it happen manually instead you can modify the `/etc/locale.gen` file, by removing comments next to the locale of your choice, then running `locale-gen`.
 
 
-##### Commands
+##### commands
 
 _I usually add japanese locale for language support:_
 
@@ -466,7 +466,7 @@ _I usually add japanese locale for language support:_
     locale-gen
 
 
-#### Using watchdog
+#### using watchdog
 
 The watchdog is a hardware (or sometimes software) timer that runs behind the OS (hardware implementation is not dependent on the OS).  It effectively performs a check-in every 60 seconds, if the system has locked up or frozen and no response is sent the watchdog timer will automatically reboot the system.
 
@@ -479,7 +479,7 @@ Finally, you will want to install the `watchdog` package, and tell it to run at 
 **The `watchdog` package can be used for much more than just a watchdog timer, but also a system monitor, similar to monit but more limited in scope.**
 
 
-##### Commands
+##### commands
 
 _Run these commands to install the watchdog package and tell it to run at boot:_
 
@@ -487,7 +487,7 @@ _Run these commands to install the watchdog package and tell it to run at boot:_
     update-rc.d watchdog defaults
 
 
-#### Log Access
+#### log access
 
 The default user group for log files found in `/var/log` is `adm`.  However, some of the files do not have that as the default permissions, and if you need to give your user read access to your logs you may consider making some changes.
 
@@ -514,7 +514,7 @@ Still not sure about the files & folders in this list:
 **My guess is if we need to adjust the permissions we can add new `logrotate` files with the appropriate lines, but many of these log files may be generated by software, which means you may have to find the software creating the log file and change its behavior or configuration.**
 
 
-##### Commands
+##### commands
 
 _Add a/your user to the log group:_
 
@@ -525,7 +525,7 @@ _Even after applying patches to the logrotate files, to fix the current permissi
     sudo chown -R root:adm /var/log/*
 
 
-#### Creating a User
+#### creating a user
 
 **Before creating a new user I highly recommend preparing your system for new users with my [dot-files repository](https://github.com/cdelorme/dot-files), which contains a number of prompt enhancements, vim plugins and configuration, and numerous user-configuration defaults that improve overall performance.**
 
@@ -534,7 +534,7 @@ Provided all the configuration files you desire are in the `/etc/skel/` path, yo
 After adding a user you will want to set their password with `passwd username`.  Also, don't forget to add your user to appropriate groups, such as the `sudo` group.
 
 
-##### Commands
+##### commands
 
 _Here is how I create my new users:_
 

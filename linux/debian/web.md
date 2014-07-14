@@ -1,6 +1,6 @@
 
-# Web Server Template Documentation
-#### Updated 2014-6-14
+# web server documentation
+#### updated 2014-7-13
 
 This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
 
@@ -35,7 +35,7 @@ _I have not thoroughly tested the snakeoil key generation instructions, but the 
 _While I use the bind9 configuration described below, setup has always been a bit of a pain and I have not thoroughly tested and debugged all the "gotcha" scenarios.  You may consider waiting for an update to that section before following my instructions, or if you encounter problems either add an issue to the issue tracker and wait for me to follow-up._
 
 
-### Adding new Services
+### adding new services
 
 This section covers installing any new services and modifications that may be required.
 
@@ -97,7 +97,7 @@ _You may optionally add `mongo` and `mysql` as needed, but it may be wiser to us
 Also, if your test machine or server has less than a gigabyte of memory you may want to create a swap file.  When npm searches the registry it parses a massive json file which can at times exceed over a gigabyte and crash.  _If the system runs out of memory then you can always use an alternative approach via `sudo dd if=/dev/zero of=/swap bs=1024k count=2048` to build a 2GB swap file, then `sudo mkswap /swap` and `sudo swapon /swap`, to temporarily give yourself more memory.  It is slow but it will work._
 
 
-### Creating a Development Environment
+### creating a development environment
 
 I start by creating three new groups then adding my user to them:
 
@@ -219,7 +219,7 @@ Here is an example shell script for rsync:
     fi
 
 
-### System Modifications
+### system modifications
 
 **IPTables Additions:**
 
@@ -258,7 +258,7 @@ Create a new file in `/etc/logrotate.d/websites` with these contents:
 This will ensure that our log files inside the /srv/www development area will be rotated instead of filling up.
 
 
-### Configuring Monit
+### configuring monit
 
 We will want to add several new configurations to monit.
 
@@ -306,7 +306,7 @@ MariaDB Monitor `/etc/monid/conf.d/mariadb.conf`:
 These additions will ensure that these new services continue to run at all times.
 
 
-#### Configuring the Mail Server
+#### configuring the mail server
 
 I'll be honest, I absolutely loath mail servers.  They have never been easy to configure and setup, which is why there are dozens of them out there instead of just a few really good ones.
 
@@ -347,7 +347,7 @@ _You can create multiple accounts and are not limited to just one, this allows y
 By default installing msmtp will add a symlink to `/usr/sbin/sendmail` for the local mail protocol, meaning you should not need to change anything else.  However, you can also symlink `/usr/sbin/msmtp` to `/usr/bin/msmtp` if you want to be able to access it on normal user accounts.
 
 
-#### Configuring the www-data user
+#### configuring the www-data user
 
 This user will be responsible for most of the web activity going on, so we want to make sure they are setup properly.
 
@@ -371,7 +371,7 @@ To create a strong SSH key:
 Let it choose the default location for `~/.ssh/id_rsa` private and a public key.  You may then optionally enter a password, or nothing and hit enter to create it as a **passwordless** key.
 
 
-#### Configuring PHP-FPM
+#### configuring php-fpm
 
 We want to modify `/etc/php5/fpm/php.ini` to set your [timezone](http://php.net/manual/en/timezones.php):
 
@@ -424,7 +424,7 @@ Finally we can symlink these into `/etc/php5/conf.d`, and reboot php-fpm for the
     service php5-fpm restart
 
 
-##### Optimization
+##### optimization
 
 Optimization can be tricky, and ideally you should optimize late instead of make it the focus of your build.  It **should** be according to the services you are delivering, but there are technically two approaches.
 
@@ -479,7 +479,7 @@ Finally, after all of the above changes, we can try rebooting php-fpm, if it wor
     service php5-fpm restart
 
 
-#### Configuring NGinx
+#### configuring nginx
 
 Let's move into `/etc/nginx`, remove the default template configurations and add some folders:
 
@@ -544,7 +544,7 @@ _This allows your `server_name` values to be very long, such as setting several 
 This prevents users from seeing dot files and directories, such as `.git` folders.
 
 
-##### Optimizng NGinx
+##### optimizng nginx
 
 We'll start with changes to `/etc/nginx/nginx.conf`.
 
@@ -716,7 +716,7 @@ We want to copy those into `/etc/nginx/ssl/` for our use.
 **I will cover how to use these ssl keys in the virtual hosts section.**
 
 
-##### Creating Virtual Hosts
+##### creating virtual hosts
 
 While this name is more of an apache origin, the intended purpose is to catch requests to multiple addresses and route them accordingly.  The nginx term for "virtual hosts" is a "server block", and just like apache you can have as many as you like.
 
@@ -891,7 +891,7 @@ After either change we reboot nginx:
 _If you want to do things properly you might want to run `nginx -t` to test the configuration before rebooting._
 
 
-#### Configuring MariaDB
+#### configuring mariadb
 
 AFAIK tuning MariaDB is the same as MySQL through the `my.cnf` file.
 
@@ -900,7 +900,7 @@ I generally leave this alone, if there are performance problems they can almost 
 If you optimize your queries and properly index your tables and you'll be fine.
 
 
-#### Configuring Bind9
+#### configuring bind9
 
 **I was recently told to try out `unbound` for a DNS server, supposedly it is significantly easier to configure and manage than bind9.  I agree that bind9 was an enormous pain to get working, so I'm looking into unbound currently but do not yet have detailed instructions.  When I finish I will likely remove bind9 instructions from this document.**
 

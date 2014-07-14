@@ -1,11 +1,11 @@
 
-# Comm Server Documentation
-#### Updated 2014-7-13
+# comm server documentation
+#### updated 2014-7-13
 
 This documentation picks up where the template documentation leaves off, and is intended to work as a headless system.
 
 
-## Install Packages
+## install packages
 
 Here are the packages:
 
@@ -14,7 +14,7 @@ Here are the packages:
     aptitude install -ryq samba samba-tools smbclient mdadm weechat-curses g++ libnetfilter-queue-dev zlib1g-dev libpcre3-dev libnetfilter-queue1 libnfnetlink0 transmission-daemon
 
 
-## System Configuration
+## system configuration
 
 We want to add a couple of new rules to our IPTables to allow Samba connections:
 
@@ -54,7 +54,7 @@ Add `/etc/monit/conf.d/transmission-daemon` with:
         if mem usage > 80% for 30 cycles then restart
 
 
-## Configuring RAID
+## configuring raid
 
 I chose software raid, mdadm, as it provides the greatest flexibility, without relying on hardware which may or may not be available on the market in a few years.  It is compatible cross platform, and easily recoverable, and the performance difference with multicore systems is negligable.
 
@@ -117,7 +117,7 @@ Finally I add records to `/etc/fstab` to mount them at boot time:
 _If you want added data reliability you could technically change the 0 to a 1 in the last column to perform a chkdsk at boot time, but this can cut into the boot times and is better left as a cronjob._
 
 
-## Samba Configuration
+## samba configuration
 
 My samba configuration (`/etc/smb/smb.conf`) looks like this:
 
@@ -217,12 +217,7 @@ I won't go through all the details here, suffice to say there is a lot of stuff 
 The [official documentation](http://www.samba.org/samba/docs/) is actually incredibly detailed and a great resource.
 
 
-## NFS
-
-I tried NFS again (2014-3-22), and just like before found it to be a pain to work with.  I managed to get mounts shared, but no read write access.  I still have not found a way to get a login or permissions configured.
-
-
-## Weechat Configuration
+## weechat configuration
 
 Next using a registered account on freenode, let's configure weechat:
 
@@ -238,7 +233,7 @@ With these changes you should now have infinite history.  You will be automatica
 _This content will be moved to a separate file soon._
 
 
-## Torrent Configuration
+## torrent configuration
 
 With transmission-daemon, we will automatically start up a torrent server with our system.
 
