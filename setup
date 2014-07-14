@@ -507,9 +507,9 @@ configure_jis_locale() {
         then
 
             # grab custom fonts & refresh cache
-            su -u $system_username -c "mkdir -p ~/.fonts"
-            su -u $system_username -c "curl -o ~/.fonts/ForMateKonaVe.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/ForMateKonaVe.ttf"
-            su -u $system_username -c "curl -o ~/.fonts/epkyouka.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/epkyouka.ttf"
+            su $config_system_username -s /bin/bash -c "mkdir -p ~/.fonts"
+            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/ForMateKonaVe.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/ForMateKonaVe.ttf"
+            su $config_system_username -s /bin/bash -c "curl -o ~/.fonts/epkyouka.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/epkyouka.ttf"
             fc-cache -fr
         fi
     fi
@@ -533,16 +533,16 @@ create_user() {
     fi
 
     # additional user configuration
-    if [ "$1" = "comm" ] || [ "$1" = "all" ]
-    then
-        echo "weechat config for user"
+    # if [ "$1" = "comm" ] || [ "$1" = "all" ]
+    # then
+    #     echo "weechat config for user"
         # can run `weechat-curses &` and wait for it to stop to create config files
         # then we can run sed commands against them
-    fi
-    if [ "$1" = "gui" ] || [ "$1" = "all" ]
-    then
-        echo "local sublime text for user..."
-    fi
+    # fi
+    # if [ "$1" = "gui" ] || [ "$1" = "all" ]
+    # then
+    #     echo "local sublime text for user..."
+    # fi
 
 }
 
