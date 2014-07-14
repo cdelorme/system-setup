@@ -535,7 +535,9 @@ create_user() {
     # additional user configuration
     if [ "$1" = "comm" ] || [ "$1" = "all" ]
     then
-        echo "weehcat config for user"
+        echo "weechat config for user"
+        # can run `weechat-curses &` and wait for it to stop to create config files
+        # then we can run sed commands against them
     fi
     if [ "$1" = "gui" ] || [ "$1" = "all" ]
     then
