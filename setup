@@ -450,23 +450,17 @@ firewall_rules() {
         if which transmission-daemon &> /dev/null
         then
 
-            echo "# tranmission peer traffic" >> /etc/firewall.conf
+            echo "# tranmission peer traffic (default port 51413)" >> /etc/firewall.conf
             echo "-A INPUT -p udp -m udp --dport 51413 -j ACCEPT" >> /etc/firewall.conf
 
             if [ $config_bt_web_accessible ]
             then
                 echo "# transmission web interface" >> /etc/firewall.conf
-                echo "-A INPUT -p tcp -m tcp --dport 9010 -j ACCEPT" >> /etc/firewall.conf
+                echo "-A INPUT -p tcp -m tcp --dport ${config_bt_web_port} -j ACCEPT" >> /etc/firewall.conf
             fi
 
         fi
 
-    fi
-
-    # additional ports for gui services (possibly none?)
-    if [ "$1" = "gui" ] || [ "$1" = "all" ]
-    then
-        echo "incomplete: gui_firewall_rules"
     fi
 
     # ssh /w rate-limiting
@@ -505,10 +499,19 @@ configure_jis_locale() {
         then
             sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
         fi
+
+        # rebuild system locale files
         locale-gen
 
-        # configure additional jis services?
+        if [ "$1" = "gui" ] || [ "$1" = "all" ]
+        then
 
+            # grab custom fonts & refresh cache
+            su -u $system_username -c "mkdir -p ~/.fonts"
+            su -u $system_username -c "curl -o ~/.fonts/ForMateKonaVe.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/ForMateKonaVe.ttf"
+            su -u $system_username -c "curl -o ~/.fonts/epkyouka.ttf https://github.com/cdelorme/system-setup/raw/master/data/fonts/epkyouka.ttf"
+            fc-cache -fr
+        fi
     fi
 
 }
@@ -530,8 +533,14 @@ create_user() {
     fi
 
     # additional user configuration
-    # if comm, weechat conf
-    # if gui, custom fonts, jis locale, sublime text
+    if [ "$1" = "comm" ] || [ "$1" = "all" ]
+    then
+        echo "weehcat config for user"
+    fi
+    if [ "$1" = "gui" ] || [ "$1" = "all" ]
+    then
+        echo "local sublime text for user..."
+    fi
 
 }
 
@@ -647,7 +656,7 @@ case "$1" in
                 echo "  template                   a linux template"
                 echo "  comm                       template + communications & file server"
                 echo "  gui                        template + openbox gui & basic UI software"
-                echo "  full                       template + comm + gui"
+                echo "  all                        template + comm + gui"
                 echo "  osx                        run custom osx configurations (some interaction required)"
                 echo " "
                 echo "please open the script and modify the configuration defaults before execution."
@@ -662,7 +671,7 @@ case "$1" in
         gui)
             automate_nix gui
             ;;
-        full)
+        all)
             automate_nix all
             ;;
         osx)
