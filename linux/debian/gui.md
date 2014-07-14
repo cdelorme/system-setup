@@ -125,6 +125,8 @@ _Run to install all packages:
 ## system configuration
 
 
+### installing custom fonts
+
 
 ### configuring & theming slim
 
