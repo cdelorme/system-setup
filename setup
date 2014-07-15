@@ -21,6 +21,10 @@ config_system_password="pw"
 config_github_username="cdelorme"
 config_github_password=""
 
+# irc configuration
+config_irc_username="${config_system_username}"
+config_irc_password="pw"
+
 
 ##
 # linux only
@@ -89,6 +93,7 @@ do_dot_files() {
         dot_files_root
         create_user $1
         dot_files_user
+        configure_user $1
     fi
 
 }
@@ -315,6 +320,22 @@ configure_linux_services() {
 
     fi
 
+    # patch pulseaudio bug
+    if [ -f /etc/default/pulseaudio ]
+    then
+        sed -i "s/PULSEAUDIO_SYSTEM_START=0/PULSEAUDIO_SYSTEM_START=1/" /etc/default/pulseaudio
+        if which pulseaudio &> /dev/null
+        then
+            service pulseaudio restart
+        fi
+    fi
+
+    # disable slim at startup
+    if which slim &> /dev/null
+    then
+        update-rc.d slim disable
+    fi
+
 }
 
 create_crontabs() {
@@ -532,17 +553,41 @@ create_user() {
 
     fi
 
+}
+
+configure_user() {
+
+
     # additional user configuration
-    # if [ "$1" = "comm" ] || [ "$1" = "all" ]
-    # then
-    #     echo "weechat config for user"
-        # can run `weechat-curses &` and wait for it to stop to create config files
-        # then we can run sed commands against them
-    # fi
+    if which openbox &> /dev/null
+    then
+
+        # .xinitrc for startx
+        su $config_system_username -s /bin/bash -c 'echo "exec openbox-session" > ~/.xinitrc'
+
+        # configure openbox boot-time operations
+
+
+    fi
+    if which weechat-curses &> /dev/null
+    then
+
+        # generate dependent weechat files files
+        su $config_system_username -s /bin/bash -c 'weechat-curses &> /dev/null & pid=$!
+            while ! ([ -f ~/.weechat/irc.conf ] && [ -f ~/.weechat/weechat.conf ]); do :; done;
+            kill -9 $pid'
+
+        # set configuration values
+        su $config_system_username -s /bin/bash -c "sed -i 's/max_buffer_lines_number.*/max_buffer_lines_number = 0/' ~/.weechat/weechat.conf"
+        su $config_system_username -s /bin/bash -c "sed -i 's/freenode\.autoconnect.*/freenode\.autoconnect = on/' ~/.weechat/irc.conf"
+        su $config_system_username -s /bin/bash -c "sed -i 's/freenode\.nicks.*/freenode\.nicks = \"${config_irc_username}, ${config_irc_username}_\"/' ~/.weechat/irc.conf"
+        su $config_system_username -s /bin/bash -c "sed -i 's/freenode\.password.*/freenode\.password = \"${config_irc_password}\"/' ~/.weechat/irc.conf"
+    fi
     # if [ "$1" = "gui" ] || [ "$1" = "all" ]
     # then
     #     echo "local sublime text for user..."
     # fi
+
 
 }
 
