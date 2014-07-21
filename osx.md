@@ -7,7 +7,7 @@ For me this document is an aid to help reproduce my OSX Mavericks (10.9) develop
 For anyone else it's a comprehensive guide to optional configuration for OSX.
 
 
-## Installation
+## installation
 
 **Do not:**
 
@@ -19,28 +19,28 @@ Which leads us to the first post-install step:
 - check for updates.
 
 
-## Mythical Root User
+## mythical root user
 
 The root user exists on osx, and its `$HOME` is `/var/root`.  By default the root account on OSX uses the `/bin/sh` shell.
 
 I tested switching it to `/bin/bash` and configuring the environment a bit, but the end result involved some undesirable performance issues.  So I do not recommend tampering with it.
 
 
-## Automatic Updates
+## automatic updates
 
 The latest release of OSX features automatic updates!  While this worries me, it is not at the level of "Windows Updates" and will not force a reboot.  However it will pop open a notification if an update requires a reboot.
 
 Having now used it for a few months, it seems to be very reliable.  More importantly it has not interfered with or hindered my productivity.
 
 
-## Updated Firewall
+## updated firewall
 
 This is something I was not aware of when I first updated, but the latest firewall is extra awkward at responding to updated applications.  Anytime an application replaces itself during an update, your firewall will ask again if you want to allow it.
 
 I have found this feature to be incredibly annoying, to the point of nearly wanting to disable the firewall.  If I allow a software, all versions of that software should be allowed.  I don't expect the firewall should have to store the file signature and bother me everytime it changes, but this is a "feature" of OSX now and I'll have to deal with it.
 
 
-## System Settings & Configuration
+## system preferences
 
 These are the changes I make to my `System Preferences`, and are listed by the main section, then each sub-option:
 
@@ -141,24 +141,24 @@ Other minor tweaks include adding at least one extra desktop to Mission Control 
 _These are my preferences, obviously your settings are subject to your own discretion._
 
 
-## Custom Fonts
+## custom fonts
 
 - [ForMateKonaVe](http://d.hatena.ne.jp/hetima/20061102/1162435711)
 - [EPSON Kyoukashoutai](http://www.wazu.jp/gallery/Fonts_Japanese.html)
 
 The EPSON font has been uploaded with skewed ASCII conversion, so while the font will work, its name is nearly impossible to type.  I recommend running it through a font editor simply to adjust the name to something sensible.
 
-_The links for these fonts are externally hosted and may no-longer be valid.  A copy of these will be included in a later copy of this repository._
+_The links for these fonts are externally hosted and may no-longer be valid, and I have decided to include a copy of each in this repository._
 
 Installing fonts can be done by opening them and clicking the install button, or you can install them locally into `~/Library/Fonts/`, or globally `/Library/Fonts`.
 
 
-## Disable Dashboard
+## disable dashboard
 
 I think the dashboard is a waste of space and resources and elect to disable it.  Applications load fast enough on SSD's that micro-applications are not nearly as useful as they may have been years back.
 
 
-##### Commands
+##### commands
 
 _To stop the dashboard from starting by default:_
 
@@ -166,7 +166,7 @@ _To stop the dashboard from starting by default:_
     killall Dock
 
 
-## Finder Settings
+## finder settings
 
 Open the finder settings menu with command + j.  _The desktop has a separate menu, so be sure you have selected a finder window before using the hotkey._
 
@@ -177,7 +177,7 @@ This release has provided a checkbox to **display the `~/Library` folder**, whic
 **Be sure you select "Use as Defaults" at the bottom or it won't take globally.**  Afterwards you'll want to remove saved view settings (the `.DS_Store` hidden files) recursively and globally to ensure the new settings take and are not overwritten locally per directory.
 
 
-##### Commands
+##### commands
 
 _Run this to remove saved view settings and reload finder:_
 
@@ -189,14 +189,14 @@ _To fix the hidden `~/Library` via terminal, run this:_
     chflags nohidden ~/Library
 
 
-## Set Hostname & Domain Name
+## set hostname & domain name
 
 You will want to set the machines host name, by default it will be your full name, which is often obnoxiously long for a network name.  You can set your hostname in `System Settings` under `Sharing`.  It can also be done via command line, but may not take affect globally until a reboot.
 
 You can set your domain name via command line as well.
 
 
-##### Command
+##### commands
 
 _Run this command to set your hostname via terminal:_
 
@@ -209,14 +209,14 @@ _To set your domain name:_
     domainname example.loc
 
 
-## Change Terminal Settings
+## configure terminal
 
 I generally install and use [iTerm2](http://www.iterm2.com/#/section/home), but I also configure the default terminal just in case I need to use it.
 
 I set the default color scheme to `Homebrew` with my choice of custom font (ForMateKonaVe) size 14.  I also go to the window tab and click the color & background button to set opacity to 40% with a 5% blur.
 
 
-## App Store
+## app store
 
 Here are some items I always grab from the App Store:
 
@@ -229,7 +229,7 @@ _Dash is a mac only software that costs money, but it is a worth-while purchase.
 I would consider XCode optional.  If you do not plan to be developing for Mac using their specific libraries and Objective-C, then you probably don't need it.  I still install it, but I never use it.  Also it cane take upwards of two hours to download.
 
 
-## Software
+## software
 
 Here is a list of software I install:
 
@@ -253,9 +253,9 @@ The xQuartz package is a necessary evil for certain packages we'll install later
 In spite of the fact that flash is a dying industry, I often find myself in need of the ability to run an swf file, and the Flash Projector comes in a debug flavor, which makes it super easy to have a tiny executable that can run and test flash files without browser concerns.
 
 
-## Configuring Installed Software
+## sonfiguring installed software
 
-### Dash
+### dash
 
 Let's start with some basic configuration options.
 
@@ -295,7 +295,7 @@ The latest release also offers Cheat Sheets, which I also downloaded a few from:
 - Git Flow
 - HTML Entities
 - Regular Expressions
-- Sublime Text 3
+- Sublime Text
 - Tmux
 - Vim
 
@@ -304,7 +304,7 @@ While I install a large number of docsets, I generally only enable the docsets r
 There are also many integration options for Dash.  For example you can configure it to run directly inside of tools like Sublime Text and XCode.
 
 
-### The Unarchiver
+### the unarchiver
 
 Preferred Settings:
 
@@ -317,7 +317,7 @@ Preferred Settings:
 _It is highly unlikely that the archiver won't know an encoding that a user would be able to pick from that giant list._
 
 
-### iTerm 2
+### iterm2
 
 Open the configuration and go to "Profiles" > "Text", then change the font settings (for regular font):
 
@@ -339,7 +339,7 @@ Finally, import the [`Solarized High Contrast Dark`](https://github.com/mariozai
 _Color schemes in iterm are loaded into a plist file and so doing so from command line is not as easy.  Someday I will document how to, if I ever figure it out myself._
 
 
-### VirtualBox
+### virtualbox
 
 VirtualBox offers USB 2.0 support, but you have to download and install the [Extension Pack](https://www.virtualbox.org/wiki/Downloads).
 
@@ -348,7 +348,7 @@ I also recommend creating a Host-Only network with a predictable IP range (I gen
 _VirtualBox networking is a bit complex.  There are built-in firewalls around their NAT, so you can't simply access ports, you have to have an internal "unsafe" network adapter, and then an internet access network adapter.  The combination generally tends to be NAT + Host-Only._
 
 
-### Transmission
+### transmission
 
 Transmission is among my favorite software list now.  They provide a client and command line controls, for unix & linux platforms.  So far they have the best customizability, greatest cross platform support (minus windows) and most sensible configuration I've seen for what could operate as a torrent server software.
 
@@ -361,7 +361,7 @@ I setup a schedule under the "Bandwidth" tab to accomodate my access times.
 Finally under the "Peers" tab I tell it to prefer encrypted peers **and** ignore unencrypted peers.  _This is a weak stop-gap against torrent scanners._
 
 
-## [Homebrew](http://brew.sh/)
+## [homebrew](http://brew.sh/)
 
 This process has changed since OSX 10.8 and there are many steps past installing it to cover.
 
@@ -525,7 +525,7 @@ _Note that on your first execution of the `sshfs` command (or mount type) you wi
 _During my last tests there was an `inkscape` package in brew that did not yet work, and the pygobject3 package is also broken due to an issue with python3 copy of gi-repository not existing._
 
 
-##### Commands
+##### commands
 
 _Let's start by adding this line (with your own token) to your dot-files such as `~/.profile` or `~/.bashrc` or `~/.bash_profile` to bypass github API traffic limits:_
 
@@ -745,14 +745,14 @@ _Finally, here is a set of cleanup tasks to run, if you look at the output for t
     sudo youtube-dl -U
 
 
-## Dot Files
+## dot-files
 
 **Next I recommend using my [dot-files repository](https://github.com/cdelorme/dot-files/) to enhance your prompt, vim configuration, and set a bunch of useful configuration defaults.**
 
 Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
 
 
-## Configuring golang
+## configuring golang
 
 I recommend installing [goconvey](https://github.com/smartystreets/goconvey) and [gin](https://github.com/codegangsta/gin).
 
@@ -761,7 +761,7 @@ The first is a test enhancer that will make it easier to read debug output.
 The second allows you to run a project while watching for file changes and automatically rebuilding and running it.  This is very useful for web development, but not as much for run-time application development or command development.
 
 
-##### Commands
+##### commands
 
 _Run these lines to install the recommended go packages:_
 
@@ -769,7 +769,7 @@ _Run these lines to install the recommended go packages:_
     go get github.com/codegangsta/gin
 
 
-### Installing `pip` & python packages
+### installing `pip` & python packages
 
 The python package manager should be installed if you intend to use python (and you probably will without realizing it).
 
@@ -778,7 +778,7 @@ If you develop in python you will want `pip` to add the `pep8` package for synta
 Additionally we want to install the virtual environment wrapper, such that we can have more finely tuned controls per application or environment as for what python version is to be used and packages are installed.
 
 
-##### Commands
+##### commands
 
 _If you did not use brew to install python, or for whatever reason brew did not install `pip`, then you will want to run this first:_
 
@@ -797,7 +797,7 @@ _Then you can run this to install and update related packages:_
 _You can omit the 3.3 and use just pip if you program in the 2.x version of python._
 
 
-### nodejs Globals
+### nodejs globals
 
 For nodejs development, I recommend installing some tools globally.  Here is my recommended list:
 
@@ -814,7 +814,7 @@ For nodejs development, I recommend installing some tools globally.  Here is my 
 - uglify-js
 
 
-##### Commands
+##### commands
 
 _To install nodejs globals:_
 
@@ -823,12 +823,12 @@ _To install nodejs globals:_
 _You may optionally add `mongo` and `mysql` as needed, but it may be wiser to use a local copy of those per project.  Same goes for bower and grunt packages, if you expect many projects to be using them at the same time._
 
 
-### Creating a crontab
+### creating a crontab
 
 Ideally you should setup a script to automatically update your homebrew and npm packages.  One good option for this is your "crontab".
 
 
-##### Commands
+##### commands
 
 _You can put the script in `/usr/local/bin/autobrewnpm` and you can add these lines:_
 
@@ -847,7 +847,7 @@ _You can run `crontab -e` to open your crontab (likely new/empty), and add this 
 _This script should now execute everyday at 2AM._
 
 
-### Path Modifications
+### path modifications
 
 Many of the packages you install with homebrew will already exist on the machine.  When you run a command it checks the paths in the order they appear in the PATH variable and stops as soon as it finds the command.  To use the new versions of same-named commands you have to change the `PATH` global variable to include the local bin first.  Be sure to add this to your `~/.bashrc`:
 
@@ -856,14 +856,14 @@ Many of the packages you install with homebrew will already exist on the machine
 _This is one of the many modifications that is handled by my dot-files automatically._
 
 
-### SSH Key Generation
+### ssh key generation
 
 It is recommended that you generate an ssh key, which can be used for ssh tunneling, numerous encryption services, and version control software.
 
 **OS X should automatically remember and reload any keys you have added at reboot.**
 
 
-##### Commands
+##### commands
 
 _Create SSH key and add to ssh-agent:_
 
@@ -874,7 +874,7 @@ _You will have to follow prompts when creating the key, and your email is an opt
 
 
 
-### Git Configuration
+### git configuration
 
 I usually set a number of defaults in my `~/.gitconfig`:
 
@@ -893,7 +893,7 @@ I generally create a `~/git/` folder to store my projects.
 I highly recommend [Ralph Bean's Awesome Git Flow Tutorial](http://threebean.org/presentations/gitflow/#/step-1) and the [Git Bash Completion](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) script (included with my `dot-files`).
 
 
-##### Commands
+##### commands
 
 _Run these and optionally fill in the blanks:_
 
@@ -912,12 +912,12 @@ _Run these and optionally fill in the blanks:_
     git config --global alias.pp '!git pull && git push'
 
 
-### Activate bash-completion
+### activate bash-completion
 
 Even after installing it with homebrew, you may have to add a symlink for it to be loaded.  Additionally you may need to load it from command line by running that symlink.
 
 
-##### Commands
+##### commands
 
 _Run this to create the symlink:_
 
@@ -937,49 +937,52 @@ _This is another configuration that I include in my dot-files repository._
 Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
 
 
-## Markdown Quicklook
+## markdown quicklook
 
 I install this so I can easily preview markdown files, the [repository is here](https://github.com/toland/qlmarkdown), but you can [download a prebuilt file here](http://jamesmoss.co.uk/blog/support-for-markdown-in-osx-quicklook/) and toss them into `/Library/QuickLook`.
 
 With this package you can use the space-bar like with images and pdf files, and it will display HTML rendered preview of a markdown file.
 
 
-## Reorganize Dock
+## reorganize dock
 
 I remove any other software from my dock except the following list:
 
-- Finder
-- iTerm2
-- Transmission
-- Sublime Text 3
-- Chrome
-- Safari
-- iTunes
-- iBooks
-- App Store
-- System Preferences
-- _Divider_
-- Downloads
-- Trash
+- finder
+- chrome
+- safari
+- sublime text
+- iterm2
+- virtualbox
+- transmission
+- robomongo
+- sql pro
+- itunes
+- ibooks
+- app store
+- system preferences
+- _divider_
+- downloads
+- trash
 
 I do use more software than is in this list, but I almost never use the dock to access it, I use spotlight because it is faster.  **This list is really here for drag-and-drop applications.**
 
 
-## Sync Accounts
+## sync accounts
 
 I no longer bother synchronizing my accounts, but if you choose to do so you can hook your gmail up to your `Mail`, `Contacts` and `Calendar` software on the system.
 
 I do syncrhonize my google chrome, but because I use google chrome I do not need any of the other software configured.
 
 
-## File Vault
+## file vault
 
 I no longer bother encrypting my drive.  It has a small performance hit, and **may still be a good idea for mission critical business laptops**, but the hard drive is now soldered into the machine.  The new machines have soldered their drives in, so it's significantly less likely they will be able to hook it up to another machine running OS X.  It also has no CD drive.  This leaves only USB bootable media to access the drive contents, and to my recollection linux can't read journaled HFS+ drives.
 
 As mentioned in my previous documentation, if you intend to encrypt your drive, wait until you have finished installing all system updates because patches to the encryption code will require you to decrypt, update, then re-encrypt; a process which can take many hours.
 
 
-## Conclusion
+## conclusion
 
 Thus concludes my comprehensive OS X 10.9 setup and configuration process.  If you have configured your machine in the same way it will be ready for most development projects.
 
@@ -988,7 +991,7 @@ Note that despite how many tools I install on the system, I prefer, and often us
 For that reason I recommend visiting my [debian documentation](../linux/debian) and setting up a virtual machine for web development or any code that can be offloaded and is not needed on your host.
 
 
-## References
+## references
 
 - [OS X Fonts](http://support.apple.com/kb/ht2435)
 - [iTerm2 Config](https://code.google.com/p/iterm2/issues/detail?id=1052)
@@ -997,6 +1000,6 @@ For that reason I recommend visiting my [debian documentation](../linux/debian) 
 - [iTerm2 unlimited history](http://stackoverflow.com/questions/12459755/zsh-iterm2-increase-number-of-lines-history)
 
 
-## Future Goals
+## future goals
 
 - I want to figure out how to modify plist files from command line so I can automate the configuration of various software, which can be done with lines similar to `defaults read com.apple.LaunchServices.plist`, but I have not yet experimented with it enough.
