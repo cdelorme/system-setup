@@ -16,31 +16,22 @@ I recommend these packages for the editor:
 - [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
 - [Origami](https://github.com/SublimeText/Origami)
 - [EncodingHelper](https://github.com/SublimeText/EncodingHelper)
+- [GoSublime](https://github.com/DisposaBoy/GoSublime)
+
+It may also be worth checking out the [SublimeText Crypto Package](https://github.com/mediaupstream/SublimeText-Crypto) if you like the idea of encrypting your notes for on-the-fly text document security, it's pretty sweet.
+
+Packages either have to be downloaded from their remote repositories, or the preferred approach is to install them using Package Control.  Package Control will keep your other packages updated as more content is released, hence it is preferred.
 
 All sublime text configuration files are raw text, and can be easily modified.  Additionally they are mostly portable between platforms.
 
 
-## linux
-
-
-##### linux install commands
-
-_Grab the latest version off their website, and install it locally (asterisk `cp` mail fail if multiple items start with the same characters):_
-
-    # Download Sublime Text 3
-    curl -o ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
-    tar xf sublime.tar.bz2
-    rm sublime.tar.bz2
-    mkdir ~/applications
-    mv Sublime* ~/applications/sublime_text/
-    mkdir -p ~/bin
-    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
+##### generic commands
 
 _Install package control, run this inside sublime text console:_
 
     import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
 
-_User configuration `/` (assumes `ForMateKonaVe` font is installed):_
+_User configuration file (assumes `ForMateKonaVe` font is installed):_
 
     {
         "auto_complete_commit_on_tab": true,
@@ -57,7 +48,7 @@ _User configuration `/` (assumes `ForMateKonaVe` font is installed):_
         "trim_trailing_white_space_on_save": true
     }
 
-_Custom hotkeys `/`:_
+_Custom hotkeys `~/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap`:_
 
     [
         { "keys": ["ctrl+enter"], "command": "goto_python_definition"},
@@ -68,6 +59,27 @@ _Custom hotkeys `/`:_
         }
     ]
 
+
+## linux
+
+Linux installation is nice, since it's almost entirely file based.  The exception is packages.  I have yet to find a way to install them "easily" from command line using package control (as opposed to downloading their latest git repositories).
+
+The user configuration file can be placed into `~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings` on linux.
+
+
+##### linux commands
+
+_Grab the latest version off their website, and install it locally (asterisk `cp` mail fail if multiple items start with the same characters):_
+
+    # Download Sublime Text 3
+    curl -o ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
+    tar xf sublime.tar.bz2
+    rm sublime.tar.bz2
+    mkdir ~/applications
+    mv Sublime* ~/applications/sublime_text/
+    mkdir -p ~/bin
+    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
+
 _Optional desktop launcher `~/.local/share/applications/subl.desktop`:_
 
     [Desktop Entry]
@@ -77,10 +89,23 @@ _Optional desktop launcher `~/.local/share/applications/subl.desktop`:_
     Exec=subl
     Icon=~/applications/sublime_text/Icon/256x256/sublime_text.png
     Type=Application
-    Categories=GNOME;GTK;Utility;TerminalEmulator;Office;
+    Categories=Utility;TerminalEmulator;Office;
 
 
 ## mac
+
+The mac version of sublime text acts the same as the rest, but exists inside of a .app package.  The `subl` command can be symlinked from inside that package.
+
+Some packages will depend on tools to be installed from homebrew.  Be sure to review the dependencies of a package on its repository readme.
+
+The user configuration file can be placed into `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User/Preferences.sublime-settings` on osx.
+
+
+##### osx commands
+
+_Symlink the sublime terminal command:_
+
+    sudo ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/bin/subl
 
 
 ## windows
