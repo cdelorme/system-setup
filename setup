@@ -146,7 +146,20 @@ install_linux_packages() {
 
     if [ "$1" = "gui" ] || [ "$1" = "all" ]
     then
-        echo "gui package preparations"
+
+        if ! [ -f /etc/apt/sources.list.d/google.list ]
+        then
+
+            # add google chrome to aptitude sources
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+            echo "# Google Chrome repo http://www.google.com/linuxrepositories/" >> /etc/apt/sources.list.d/google.list
+            echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+            echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+            echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+            echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+        fi
+
+
     fi
 
     if ! which netselect-apt &> /dev/null
@@ -177,7 +190,7 @@ install_linux_packages() {
 
     if [ "$1" = "gui" ] || [ "$1" = "all" ]
     then
-        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole
+        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole google-chrome-stable google-chrome-unstable google-talkplugin
     fi
 
     # update our command-not-found cache
@@ -214,6 +227,9 @@ configure_linux_services() {
 
     # fix potential permission problems with logs
     chown -R root:adm /var/log/*
+
+    # ensure vim is set as default editor
+    update-alternatives --set editor /usr/bin/vim.basic
 
     # setup customized samba settings
     if which smbd &> /dev/null
@@ -334,6 +350,67 @@ configure_linux_services() {
     if which slim &> /dev/null
     then
         update-rc.d slim disable
+    fi
+
+    # configure graphical interface
+    if [ "$1" = "" ] || [ "$1" = "all" ]
+    then
+
+        if which google-chrome-stable &> /dev/null
+
+            # set chrome as the default browser
+            update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+        fi
+
+        if which openbox &> /dev/null && which openbox-session &> /dev/null
+        then
+
+            # set default window & session manager to openbox (fallback in case other guis are installed)
+            update-alternatives --set x-window-manager /usr/bin/openbox
+            update-alternatives --set x-session-manager /usr/bin/openbox-session
+        fi
+
+        # download and install sublime text for system user
+        curl -o /tmp/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
+        tar xf /tmp/sublime.tar.bz2 -C /tmp
+        rm /tmp/sublime.tar.bz2
+        chown -R $config_system_username:$config_system_username /tmp/sublime_text_3
+        su $config_system_username -c "mkdir -p ~/applications"
+        su $config_system_username -c "mv /tmp/sublime_text_3 ~/applications/sublime_text"
+        su $config_system_username -c "mkdir -p ~/bin"
+        su $config_system_username -c "ln -s ~/applications/sublime_text/sublime_text ~/bin/subl"
+
+        # install sublime package control
+        su $config_system_username -c 'curl -o "$HOME/.config/sublime-text-3/Installed Packages/Package Control.sublime-package" "https://sublime.wbond.net/Package%20Control.sublime-package"'
+
+        # populate sublime preferences
+        su $config_system_username -c "echo '{' > ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"auto_complete_commit_on_tab\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"caret_style\": \"phase\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"color_scheme\": \"Packages/Color Scheme - Default/Sunburst.tmTheme\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"font_face\": \"ForMateKonaVe\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"font_size\": 14,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"highlight_line\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"highlight_modified_tabs\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"match_brackets_angle\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"scroll_past_end\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"scroll_speed\": 2.0,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"translate_tabs_to_spaces\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '    \"trim_trailing_white_space_on_save\": true' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        su $config_system_username -c "echo '}' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+
+        # configure hotkeys (some are plugin dependent and will simply not work)
+        su $config_system_username -c 'echo "[" > "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+enter\"], \"command\": \"goto_python_definition\"}," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+tab\"], \"command\": \"next_view\" }," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+shift+tab\"], \"command\": \"prev_view\" }," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "    { \"keys\": [\"alt+m\"], \"command\": \"markdown_preview\", \"args\":" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "        { \"target\": \"browser\", \"parser\": \"markdown\" }" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "    }" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+        su $config_system_username -c 'echo "]" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
+
+        # so far there is no easy way to install or manage packages from bash or subl cli
+
     fi
 
 }
