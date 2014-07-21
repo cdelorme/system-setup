@@ -1,12 +1,12 @@
 
-# Windows 8.1 Multimedia System Documentation
+# Windows Multimedia System Documentation
 #### Updated 2014-4-29
 
-The following documentation is a set of basic configuration steps I take when installing Windows 8/8.1 for multimedia purposes.
+Latest version used in the making of this document was 8.1.  Unfortunately automation for Windows is fairly imposssible, so instead of that I'll simply document the setup and highly recommend creating a disk image backup to counter both time lost reconfiguring as well as virus problems in the future (they will invariably happen on windows).
 
-Multimedia includes games, video playback (and occassional editing), and in a few cases even software development.
+As for the intended function, this system operates primarily as a gaming and video playback system.  In some cases I even use it for software development.
 
-_I may not maintain this document as often as I do my others, as my windows needs change infrequently._
+**I will say up front that I am biased against the windows platform.  I suffered it for 15 years of my life before discovering the glorious world of linux and unix, and only continue to use it because games still use DirectX.  If they used OpenGL and could be run suitably on Linux or even OSX I would drop this system like a bad habit.**
 
 
 ## Xen Tailored
@@ -97,7 +97,7 @@ _It is ill advised that you download the EPSON Kyoukashoutai font from the refer
 
 **Moving onto Productivity Software:**
 
-- [Sublime Text 2](http://www.sublimetext.com/2)
+- [Sublime Text](http://www.sublimetext.com/3)
 - [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
 - [Mumble (Client)](http://sourceforge.net/projects/mumble/)
 - [7zip](http://www.7-zip.org/)
@@ -111,6 +111,11 @@ _It is ill advised that you download the EPSON Kyoukashoutai font from the refer
 Generally I will test launch each application to ensure it is functional and configure it.
 
 **It would be wise to reboot the entire physical machine prior to moving onto the Drivers stage.**
+
+
+### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
+
+Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
 
 
 ### Backup

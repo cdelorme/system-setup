@@ -110,5 +110,5 @@ _Symlink the sublime terminal command:_
 
 ## windows
 
-
+There are no shortcuts or unique ways to automate editing your configuration files in Windows, just use the menu to open the files and configure them via copy and paste.
 
