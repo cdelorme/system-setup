@@ -124,6 +124,8 @@ _Run to install all packages:
 
 ## system configuration
 
+Many of the installed services and UI tools are not yet configured, or have less acceptable defaults.
+
 
 ### installing custom fonts
 
@@ -173,6 +175,8 @@ _my preferred slim configuration (`/`):_
 
 ### configuring & theming openbox
 
+We can start by copying the default files found in `/etc/xdg/openbox/` to `~/.config/openbox/`.
+
 Files of importance:
 
 - rc.xml config
@@ -180,9 +184,24 @@ Files of importance:
 
 
 
+##### comamnds
+
+**Set openbox as default window & session manager:**
+
+    update-alternatives --set x-window-manager /usr/bin/openbox
+    update-alternatives --set x-session-manager /usr/bin/openbox-session
+
+**Set default terminal emulator:**
+
+    update-alternatives --set x-terminal-emulator /usr/bin/urxvt
+
+**Copy default files:**
+
+    mkdir -p ~/.config/openbox
+    cp /etc/xdg/openbox/* ~/.config/openbox/
+
 
 ### configuring pcmanfm
-
 
 
 ### configuring & theming conky
@@ -383,15 +402,6 @@ _Run these commands to download and install the `youtube-dl` command:_
     rm -rf youtube-dl
 
 
-
-
-
-
-
-
-
-
-
 ## Google Chrome Dev Channel
 
 I prefer the dev channel of google chrome.  The easy way to install it is to go to your current web browser, search "Google Chrome Dev Channel" and then download the `.deb` and install it with `sudo dpkg -i`.
@@ -424,12 +434,7 @@ _Install these packages:_
 
 _Set as default browser:_
 
-    update-alternatives --set x-www-browser /usr/bin/google-chrome-unstable
-
-
-
-
-
+    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
 
 
 ### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
@@ -464,6 +469,11 @@ I have not yet tested this.
 Most other viewing or previewing software is extremely bad in either speed or simplicity.
 
 Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan on installing it when Debian Jessie is released as the new stable.
+
+
+
+
+
 
 
 # References
