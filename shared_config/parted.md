@@ -1,16 +1,16 @@
 
-#### Partition Alignment with Parted
+# partition alignment with parted
 
 This is important, because it's a problem I have faced many times in the past and ignored.
 
 Today I will overcome my ignorance and learn how it works.
 
-##### General Best Practice
+## general best practice
 
 An ubuntu article states that advanced format disks (eg. modern hardware) using a space of 2048 (multiple of 8) for sector sizes with an initial offset of 1 MiB is best practice.
 
 
-##### A More Comprehensive Answer
+### more comprehensive answer
 
 You can check disk information in `/sys/block/` and get actual details for performing manual calculations (again for advanced disks the outcome is pretty standard).
 
@@ -35,7 +35,7 @@ Simply set the start point to the last end point.
 To save yourself time calculating the prior disks size, simply check the end value after setting `unit MiB`.
 
 
-##### My Test Case
+### my test case
 
 My current test case is Parallels Desktop, where the hardware is virtualized, so it's not a great example of real situations, but a very common one I believe for modern computing.
 
@@ -55,7 +55,25 @@ I followed these commands up with the finishing touches:
 - `set 3 lvm on`
 
 
-##### References
+## preferred partitioning schema
+
+I use this same schema in almost all linux platforms.
+
+Partitions:
+
+- efi (512M)
+- /boot (512M, noatime)
+- lvm (remainder)
+    - swap (4G)
+    - /tmp (2G, relatime)
+    - /var/log (2G, noexec)
+    - /root (40G, noatime)
+    - /home (remainder, noatime)
+
+Separated log and tmp partitions eliminate the change of some crazy log or tmp script from taking down my system.  Additionally I throw noexec on logs since that shouldn't happen.  It may actually be wiser to mount /tmp via tmpfs (and some systems may override the partition with that).
+
+
+# references
 
 - [HP Article](http://h10025.www1.hp.com/ewfrf/wc/document?cc=uk&lc=en&dlc=en&docname=c03479326)
 - [Independent Tutorial](http://rainbow.chard.org/2013/01/30/how-to-align-partitions-for-best-performance-using-parted/)
