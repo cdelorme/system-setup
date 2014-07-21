@@ -1,6 +1,6 @@
 
 # Windows Multimedia System Documentation
-#### Updated 2014-4-29
+#### Updated 2014-7-20
 
 Latest version used in the making of this document was 8.1.  Unfortunately automation for Windows is fairly imposssible, so instead of that I'll simply document the setup and highly recommend creating a disk image backup to counter both time lost reconfiguring as well as virus problems in the future (they will invariably happen on windows).
 
