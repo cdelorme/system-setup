@@ -1,6 +1,6 @@
 
 # OS X Mavericks (10.9) Documentation
-#### Updated 2014-6-24
+#### Updated 2014-7-20
 
 For me this document is an aid to help reproduce my OSX Mavericks (10.9) development environment.
 
