@@ -31,4 +31,4 @@ On linux and osx I recommend `~/.go`, and I recommend symlinking the `~/.go/bin`
 
 In Windows you will need to open system properties, then select advanced on the lefthand menu, followed by the "Environment Variables" button.  From here you can add and modify system and user variables.  You may need to either reboot or logout and log back in for any changes here to take effect.
 
-For linux and mac you can simply set the variable manually `GOPATH=~/.go`, or you can add it as `export GOPATH=~/.go` to a `~/.bashrc` or similar.  Similarly you can append GOPATH to PATH with `export PATH=$PATH:$GOPATH/bin`.
+For linux and mac you can simply set the variable manually `GOPATH=~/.go`, or you can add it as `export GOPATH=~/.go` to a `~/.bashrc` or similar.  Similarly you can append GOPATH to PATH with `export PATH=$PATH:$GOPATH/bin`.  If you have already created a local bin folder for your user you can simply use `ln -s ~/bin $GOPATH/bin` to symlink it and won't need to further modify the PATH variable.
