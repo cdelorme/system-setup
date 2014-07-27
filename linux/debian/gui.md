@@ -1,6 +1,6 @@
 
 # Debian Wheezy GUI Documentation
-#### Updated 2014-7-13
+#### Updated 2014-7-27
 
 These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
 
@@ -119,12 +119,12 @@ _This package is a gui overlay that shows up in the menu with a flag to coordina
 
 _Run to install all packages:
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs
 
 
 ## system configuration
 
-Many of the installed services and UI tools are not yet configured, or have less acceptable defaults.
+In some cases the installed packages are not configured, in other cases I preferred alternative configurations.
 
 
 ### installing custom fonts
@@ -166,21 +166,45 @@ To shutdown the system enter `halt` as the username followed by the root passwor
 
 _Run to activate slim at boot time:_
 
-    INCOMPLETE
+    update-rc.d slim defaults
 
 _my preferred slim configuration (`/`):_
 
     INCOMPLETE
 
 
+### startx launch openbox
+
+This is my preferred approach to loading openbox.  It's an alternative to using slim where you login through the console like normal, but use `startx` to launch the graphical interface.
+
+This also allows you to exit openbox and drop back into terminal when desired.
+
+Simply add `exec openbox-session` to `~/.xinitrc`.
+
+
+##### commands
+
+_Adding openbox to xinitrc:_
+
+    echo "exec openbox-session" > ~/.xinitrc
+
+
 ### configuring & theming openbox
 
+In some cases openbox will not be your default window or session manager.  It would be wise to fix this first.
+
 We can start by copying the default files found in `/etc/xdg/openbox/` to `~/.config/openbox/`.
+
+You will then want to replace
+
+
 
 Files of importance:
 
 - rc.xml config
 - menu.xml config
+
+
 
 
 
@@ -191,17 +215,80 @@ Files of importance:
     update-alternatives --set x-window-manager /usr/bin/openbox
     update-alternatives --set x-session-manager /usr/bin/openbox-session
 
-**Set default terminal emulator:**
-
-    update-alternatives --set x-terminal-emulator /usr/bin/urxvt
-
 **Copy default files:**
 
     mkdir -p ~/.config/openbox
     cp /etc/xdg/openbox/* ~/.config/openbox/
 
+_Replace contents in `~/.config/openbox/autostart` with (this is an executable file):_
+
+    #!/bin/sh
+    which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
+    which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &
+    [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
+    which tint2 &> /dev/null && (tint2) &
+    which clipit &> /dev/null && (clipit) &
+    which xset &> /dev/null && (xset r rate 250 25 & xset b off) &
+    which volumeicon &> /dev/null && (volumeicon) &
+    which conky &> /dev/null && (conky -d -q) &
+    which yeahconsole &> /dev/null && (yeahconsole) &
+
+
+### fehbg (optional)
+
+If you want to set a wallpaper background, or better year cycle a set of wallpapers, then `fehbg` is the tool you're looking for!  It has incredibly simple syntax, and is cli friendly.
+
+
+##### commands
+
+_Throw a bunch of preferred images into `~/.wallpaper/` and create `~/.fehbg` with:_
+
+    (while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 10; done;) &
+
+_Or adjust the directorie to pull pictures from as desired._
+
+
+### urxvt configuration
+
+This is a basic terminal emulator with unicode support and is very popular.
+
+Configuring it is quite a task, but once you have it you have an excellent utility at your fingertips.
+
+
+##### commands
+
+**Set default terminal emulator:**
+
+    update-alternatives --set x-terminal-emulator /usr/bin/urxvt
+
+**Configuration to append to `~/.Xdefaults`:**
+
+    INCOMPLETE
+
+
+### yeahconsole
+
+This is a utility that can be used to make an instantly accessible urxvt console pop down from the top of the screen.  This can be incredibly helpful, so I have installed it.
+
+
+##### commands
+
+_YeahConsole configuration append to `~/.Xdefaults`:_
+
+    ! yeahconsole config
+    yeahconsole*term: urxvt
+    yeahconsole*toggleKey: Win+t
+    yeahconsole*toggleFull: None+F11
+    yeahconsole*consoleHeight: 20
+    yeahconsole*aniDelay: 0
+    yeahconsole*stepSize: 10
+
+_FYI: These toggle keys are not virtualbox friendly._
+
 
 ### configuring pcmanfm
+
+
 
 
 ### configuring & theming conky
@@ -215,6 +302,8 @@ _I may also use a lua script to enable transparency effects._
 
 
 ### configuring & theming tint2
+
+
 
 
 
@@ -318,6 +407,10 @@ Currently using this (it's pretty but not full-featured or matching my choice th
     *color7: #eee8d5
     *color15: #fdf6e3
 
+    ! transparency
+    URxvt.transparent:   true
+    URxvt.shading:       20
+
 
 Found this on the web, may tailor to my liking:
 
@@ -328,6 +421,17 @@ Found this on the web, may tailor to my liking:
     URxvt*matcher.button: 1
     # don't forget to change this to your favorite browser
     URxvt*urlLauncher: chromium
+
+! open urls
+urxvt*perl-ext-common: tabbed,default,matcher,-option-popup,-selection-popup,-realine
+urxvt*url-launcher: x-www-browser
+urxvt*matcher.Button: 1
+URxvt.colorUL: #4682B4
+
+
+Urxvt*perl-lib:    /usr/lib/urxvt/perl/
+
+
 
 
 ### user configuration
@@ -445,11 +549,6 @@ Since installing and configuring sublime text is nearly identical between platfo
 ## still investigating
 
 I have a lot of software that I have not yet finished researching or have not successfully setup and want to add it to my list someday.
-
-
-### console enhancements
-
-Looking into `yeahconsole` to make `rxvt-unicode` operate similarly to guake.
 
 
 ### multiple keyboard layout configuration
