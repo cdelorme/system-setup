@@ -1,6 +1,6 @@
 
 # arch template documentation
-#### Updated 2014-2-28
+#### Updated 2014-7-26
 
 I spent six months learning how to work with arch, and this document contains a small amount of knowledge I can share.  I highly recommend viewing their own documentation, while somewhat outdated it is a far cry better than what I have written here.
 
@@ -240,29 +240,34 @@ In Arch, the iptables rules are stored `/etc/iptables/iptables.rules` by default
 
     *filter
 
-    -P INPUT DROP
-    -P OUTPUT ACCEPT
-    -P FORWARD ACCEPT
+    # accept established connections
+    -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-    # Allow traffic for INPUT, OUTPUT on loopback
-    # address interface.
+    # accept local traffic
     -A INPUT -i lo -j ACCEPT
     -A OUTPUT -o lo -j ACCEPT
 
-    # Allow Pings
-    -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+    # accept ping
+    -A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
 
-    # Allow SSH with rate limiting
-    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name DEFAULT --rsource
-    -N LOG_AND_DROP
-    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP
-    -A INPUT -p tcp -m tcp --dport ssh -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP
+    # accept ssh with rate limiting
+    -N LOGDROP
+    -A LOGDROP -j LOG --log-prefix "iptables deny: " --log-level 7
+    -A LOGDROP -j DROP
+    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource
+    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGDROP
     -A INPUT -p tcp -m tcp --dport ssh -j ACCEPT
-    -A LOG_AND_DROP -j LOG --log-prefix "iptables deny: " --log-level 7
-    -A LOG_AND_DROP -j DROP
 
-    # Continue to allow established connections
-    -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+    # drop invalid
+    -A INPUT -m conntrack --ctstate INVALID -j DROP
+
+    # reject all others (linux compliant blacklist)
+    -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+    -A INPUT -p tcp -j REJECT --reject-with tcp-rst
+    -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+
+    # drop forwards
+    -A FORWARD -j DROP
 
     COMMIT
 

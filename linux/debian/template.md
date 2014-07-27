@@ -1,6 +1,6 @@
 
 # template system documentation
-#### Updated 2014-7-13
+#### Updated 2014-7-26
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 
@@ -411,29 +411,34 @@ _Let's start by creating our IPTables file in `/etc/firewall.conf`:_
 
     *filter
 
-    -P INPUT DROP
-    -P OUTPUT ACCEPT
-    -P FORWARD ACCEPT
+    # accept established connections
+    -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-    # Allow traffic for INPUT, OUTPUT on loopback
-    # address interface.
+    # accept local traffic
     -A INPUT -i lo -j ACCEPT
     -A OUTPUT -o lo -j ACCEPT
 
-    # Allow Pings
-    -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+    # accept ping
+    -A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
 
-    # Allow SSH with rate limiting
-    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name DEFAULT --rsource
-    -N LOG_AND_DROP
-    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP
-    -A INPUT -p tcp -m tcp --dport ssh -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP
+    # accept ssh with rate limiting
+    -N LOGDROP
+    -A LOGDROP -j LOG --log-prefix "iptables deny: " --log-level 7
+    -A LOGDROP -j DROP
+    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource
+    -A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGDROP
     -A INPUT -p tcp -m tcp --dport ssh -j ACCEPT
-    -A LOG_AND_DROP -j LOG --log-prefix "iptables deny: " --log-level 7
-    -A LOG_AND_DROP -j DROP
 
-    # Continue to allow established connections
-    -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+    # drop invalid
+    -A INPUT -m conntrack --ctstate INVALID -j DROP
+
+    # reject all others (linux compliant blacklist)
+    -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+    -A INPUT -p tcp -j REJECT --reject-with tcp-rst
+    -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+
+    # drop forwards
+    -A FORWARD -j DROP
 
     COMMIT
 
@@ -541,3 +546,11 @@ _Here is how I create my new users:_
     useradd -m -s /bin/bash username
     passwd username
     usermod -aG sudo username
+
+
+## references
+
+- [iptables securing ssh](http://www.rackaid.com/blog/how-to-block-ssh-brute-force-attacks/)
+- [best practices 2010: "Don’t set the default policy to DROP"](http://major.io/2010/04/12/best-practices-iptables/)
+- [reject > drop](http://unix.stackexchange.com/questions/109459/is-it-better-to-set-j-reject-or-j-drop-in-iptables)
+- [reject & drop equally susceptable to DoS](http://www.linuxquestions.org/questions/linux-security-4/drop-vs-reject-685942/)
