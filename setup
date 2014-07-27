@@ -514,22 +514,24 @@ configure_monit() {
 
 firewall_rules() {
 
+    # create iptables path
+    mkdir -p /etc/iptables/
+
+    # backup current rules (as a restore alternative to flushing)
+    iptables-save > /etc/iptables/empty.rules
+
     # open rules file
-    echo "*filter" > /etc/firewall.conf
+    echo "*filter" > /etc/iptables/iptables.rules
 
-    # set default policies
-    echo "-P INPUT DROP" >> /etc/firewall.conf
-    echo "-P OUTPUT ACCEPT" >> /etc/firewall.conf
-    echo "-P FORWARD DROP" >> /etc/firewall.conf
+    echo "# accept established connections" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT" >> /etc/iptables/iptables.rules
 
-    # allow local traffic
-    echo "# Allow traffic for INPUT, OUTPUT on loopback" >> /etc/firewall.conf
-    echo "-A INPUT -i lo -j ACCEPT" >> /etc/firewall.conf
-    echo "-A OUTPUT -o lo -j ACCEPT" >> /etc/firewall.conf
+    echo "# accept local traffic" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -i lo -j ACCEPT" >> /etc/iptables/iptables.rules
+    echo "-A OUTPUT -o lo -j ACCEPT" >> /etc/iptables/iptables.rules
 
-    # enable pings
-    echo "# Allow Pings" >> /etc/firewall.conf
-    echo "-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT" >> /etc/firewall.conf
+    echo "# accept ping" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT" >> /etc/iptables/iptables.rules
 
     ##
     # conditionally apply more rules
@@ -540,50 +542,55 @@ firewall_rules() {
     then
 
         # samba configuration
-        echo "# samba traffic" >> /etc/firewall.conf
-        echo "-A INPUT -p udp -m multiport --dports 137,138 -j ACCEPT" >> /etc/firewall.conf
-        echo "-A INPUT -p tcp -m multiport --dports 139,445 -j ACCEPT" >> /etc/firewall.conf
+        echo "# samba traffic" >> /etc/iptables/iptables.rules
+        echo "-A INPUT -p udp -m multiport --dports 137,138 -j ACCEPT" >> /etc/iptables/iptables.rules
+        echo "-A INPUT -p tcp -m multiport --dports 139,445 -j ACCEPT" >> /etc/iptables/iptables.rules
 
         # transmission rules
         if which transmission-daemon &> /dev/null
         then
 
-            echo "# tranmission peer traffic (default port 51413)" >> /etc/firewall.conf
-            echo "-A INPUT -p udp -m udp --dport 51413 -j ACCEPT" >> /etc/firewall.conf
+            echo "# tranmission peer traffic (default port 51413)" >> /etc/iptables/iptables.rules
+            echo "-A INPUT -p udp -m udp --dport 51413 -j ACCEPT" >> /etc/iptables/iptables.rules
 
             if [ $config_bt_web_accessible ]
             then
-                echo "# transmission web interface" >> /etc/firewall.conf
-                echo "-A INPUT -p tcp -m tcp --dport ${config_bt_web_port} -j ACCEPT" >> /etc/firewall.conf
+                echo "# transmission web interface" >> /etc/iptables/iptables.rules
+                echo "-A INPUT -p tcp -m tcp --dport ${config_bt_web_port} -j ACCEPT" >> /etc/iptables/iptables.rules
             fi
 
         fi
 
     fi
 
-    # ssh /w rate-limiting
-    echo "# Allow SSH with rate limiting" >> /etc/firewall.conf
-    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --set --name DEFAULT --rsource" >> /etc/firewall.conf
-    echo "-N LOG_AND_DROP" >> /etc/firewall.conf
-    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
-    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP" >> /etc/firewall.conf
-    echo "-A INPUT -p tcp -m tcp --dport ${config_ssh_port} -j ACCEPT" >> /etc/firewall.conf
-    echo "-A LOG_AND_DROP -j LOG --log-prefix \"iptables deny: \" --log-level 7" >> /etc/firewall.conf
-    echo "-A LOG_AND_DROP -j DROP" >> /etc/firewall.conf
+    echo "# accept ssh with rate limiting" >> /etc/iptables/iptables.rules
+    echo "-N LOGREJECTSSH" >> /etc/iptables/iptables.rules
+    echo "-A LOGREJECTSSH -j LOG --log-prefix \"iptables deny: \" --log-level 7" >> /etc/iptables/iptables.rules
+    echo "-A LOGDREJECTSSH -j REJECT" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGREJECTSSH" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p tcp -m tcp --dport ssh -j ACCEPT" >> /etc/iptables/iptables.rules
 
-    # continue to allow established connections
-    echo "# Continue to allow established connections" >> /etc/firewall.conf
-    echo "-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT" >> /etc/firewall.conf
+    echo "# drop invalid" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -m conntrack --ctstate INVALID -j DROP" >> /etc/iptables/iptables.rules
+
+    echo "# reject all others (linux compliant blacklist)" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -p tcp -j REJECT --reject-with tcp-rst" >> /etc/iptables/iptables.rules
+    echo "-A INPUT -j REJECT --reject-with icmp-proto-unreachable" >> /etc/iptables/iptables.rules
+
+    echo "# drop forwards" >> /etc/iptables/iptables.rules
+    echo "-A FORWARD -j DROP" >> /etc/iptables/iptables.rules
 
     # close the configuration file
-    echo "COMMIT" >> /etc/firewall.conf
+    echo "COMMIT" >> /etc/iptables/iptables.rules
 
     # create iptables loader
     echo "#!/bin/bash" > /etc/network/if-up.d/iptables
-    echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables
+    echo "iptables-restore < /etc/iptables/iptables.rules" >> /etc/network/if-up.d/iptables
     chmod +x /etc/network/if-up.d/iptables
 
-    # reloading iptables will not happen until reboot so as to not interfere with script execution
+    # reloading iptables here may stop script execution
 
 }
 
@@ -627,6 +634,23 @@ create_user() {
 
         # apply groups to user
         usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse,scanner,pulse-access ${config_system_username}
+
+        if [ "$1" = "gui" ]
+        then
+
+            # acquire and store user_home_dir for later use
+            user_home_dir=$(cat /etc/passwd | grep ${config_system_username} | awk -F ':' '{print $6}')
+
+            # prepare openbox config
+            echo "exec openbox-session" > "${user_home_dir}/.xinitrc"
+
+
+
+            # optional background cycler
+            echo '(while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 10; done;) &' > "${user_home_dir}/.fehbg"
+
+
+        fi
 
     fi
 
