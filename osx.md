@@ -105,6 +105,7 @@ These are the changes I make to my `System Preferences`, and are listed by the m
             - Enable "Select next source in Input menu" (cmd+alt+space) (checkbox)
         - Spotlight
             - Disable "Show spotlight window" (checkbox)
+            - De-select personal folders
         - Accessibility
             - Disable "Turn VoiceOver on or off" (checkbox)
             - Disable "Show Accessibility controls" (checkbox)
@@ -139,6 +140,17 @@ These are the changes I make to my `System Preferences`, and are listed by the m
 Other minor tweaks include adding at least one extra desktop to Mission Control by default, and from the battery menu I have it "Show Percentage".
 
 _These are my preferences, obviously your settings are subject to your own discretion._
+
+
+## spotlight cache
+
+If you end up with a problem with spotlight you can clear it's cache from command line.
+
+##### commands
+
+_Run this to clear all cache and rebuild (rebuilding can take quite a while):_
+
+    sudo mdutil -E /
 
 
 ## custom fonts
@@ -302,6 +314,8 @@ The latest release also offers Cheat Sheets, which I also downloaded a few from:
 While I install a large number of docsets, I generally only enable the docsets related to the things I am working on.  So as I switch between projects I may tweek what docs are displayed when I search for things.
 
 There are also many integration options for Dash.  For example you can configure it to run directly inside of tools like Sublime Text and XCode.
+
+You will also want to register a quick-display hotkey.  I generally go with `alt+space`.
 
 
 ### the unarchiver
