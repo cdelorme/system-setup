@@ -190,7 +190,17 @@ install_linux_packages() {
 
     if [ "$1" = "gui" ] || [ "$1" = "all" ]
     then
-        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole google-chrome-stable google-chrome-unstable google-talkplugin xdg-user-dirs
+        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs xcompmgr libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev google-chrome-stable google-chrome-unstable google-talkplugin
+
+        # install compton if able
+        git clone https://github.com/chjj/compton.git /tmp/compton
+        (cd /tmp/compton && make && make install)
+        rm -rf /tmp/compton
+
+        # handle youtube-dl installation
+        git clone https://github.com/rg3/youtube-dl /tmp/youtube-dl
+        (cd /tmp/youtube-dl && python setup.py install)
+        rm -rf /tmp/youtube-dl
     fi
 
     # update our command-not-found cache
@@ -641,14 +651,478 @@ create_user() {
             # acquire and store user_home_dir for later use
             user_home_dir=$(cat /etc/passwd | grep ${config_system_username} | awk -F ':' '{print $6}')
 
-            # prepare openbox config
-            echo "exec openbox-session" > "${user_home_dir}/.xinitrc"
+            if which slim &> /dev/null
+            then
 
+                # set default theme (future iterations may have a custom theme)
+                sed -i "s/^current_theme.*/current_theme default/" /etc/slim.conf
 
+            fi
 
-            # optional background cycler
-            echo '(while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 10; done;) &' > "${user_home_dir}/.fehbg"
+            if which feh &> /dev/null
+            then
 
+                # wallpaper loop
+                echo '(while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 10; done;) &' > "${user_home_dir}/.fehbg"
+
+            fi
+
+            if which urxvt &> /dev/null
+
+                # urxvt config
+                echo 'Xft.dpi:                    96' > "${user_home_dir}/.Xdefaults"
+                echo 'Xft.antialias:              true' >> "${user_home_dir}/.Xdefaults"
+                echo 'Xft.rgba:                   rgb' >> "${user_home_dir}/.Xdefaults"
+                echo 'Xft.hinting:                true' >> "${user_home_dir}/.Xdefaults"
+                echo 'Xft.hintstyle:              hintslight' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.depth:                32' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt*background:           [70]#001E27' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.geometry:             80x24' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.transparent:          true' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.shading:              20' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.fading:               0' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.loginShell:           true' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.saveLines:            1000000' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.internalBorder:       3' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.lineSpace:            0' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.scrollStyle:          rxvt' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.scrollBar:            false' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.cursorBlink:          true' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.cursorColor:          #657b83' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.cursorUnderline:      false' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.pointerBlank:         true' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt*font:                 xft:ForMateKonaVe:pixelsize=14' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt*letterSpace:          -1' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.perl-ext-common:      default,matcher' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.matcher.button:       1' >> "${user_home_dir}/.Xdefaults"
+                echo 'URxvt.urlLauncher:          x-www-browser' >> "${user_home_dir}/.Xdefaults"
+                echo '*background:                [70]#001E27' >> "${user_home_dir}/.Xdefaults"
+                echo '*foreground:                #9CC2C3' >> "${user_home_dir}/.Xdefaults"
+                echo '*fadeColor:                 #002832' >> "${user_home_dir}/.Xdefaults"
+                echo '*cursorColor:               #F34F00' >> "${user_home_dir}/.Xdefaults"
+                echo '*pointerColorBackground:    #003747' >> "${user_home_dir}/.Xdefaults"
+                echo '*pointerColorForeground:    #9CC2C3' >> "${user_home_dir}/.Xdefaults"
+                echo '*color0:                    #002831' >> "${user_home_dir}/.Xdefaults"
+                echo '*color1:                    #D11C24' >> "${user_home_dir}/.Xdefaults"
+                echo '*color2:                    #6CBE6C' >> "${user_home_dir}/.Xdefaults"
+                echo '*color3:                    #A57706' >> "${user_home_dir}/.Xdefaults"
+                echo '*color4:                    #2176C7' >> "${user_home_dir}/.Xdefaults"
+                echo '*color5:                    #C61C6F' >> "${user_home_dir}/.Xdefaults"
+                echo '*color6:                    #259286' >> "${user_home_dir}/.Xdefaults"
+                echo '*color7:                    #EAE3CB' >> "${user_home_dir}/.Xdefaults"
+                echo '*color8:                    #006488' >> "${user_home_dir}/.Xdefaults"
+                echo '*color9:                    #F5163B' >> "${user_home_dir}/.Xdefaults"
+                echo '*color10:                   #51EF84' >> "${user_home_dir}/.Xdefaults"
+                echo '*color11:                   #B27E28' >> "${user_home_dir}/.Xdefaults"
+                echo '*color12:                   #178EC8' >> "${user_home_dir}/.Xdefaults"
+                echo '*color13:                   #E24D8E' >> "${user_home_dir}/.Xdefaults"
+                echo '*color14:                   #00B39E' >> "${user_home_dir}/.Xdefaults"
+                echo '*color15:                   #FCF4DC' >> "${user_home_dir}/.Xdefaults"
+
+                # create urxvtq launcher in ~/bin
+                echo "#!/bin/bash" > "${user_home_dir}/bin/urxvtq"
+                echo 'wid=$(xdotool search --name urxvtq)' >> "${user_home_dir}/bin/urxvtq"
+                echo 'if [ -z "$wid" ]' >> "${user_home_dir}/bin/urxvtq"
+                echo 'then' >> "${user_home_dir}/bin/urxvtq"
+                echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
+                echo '    urxvt -name urxvtq -geometry 200x24 &' >> "${user_home_dir}/bin/urxvtq"
+                echo '    while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done' >> "${user_home_dir}/bin/urxvtq"
+                echo 'fi' >> "${user_home_dir}/bin/urxvtq"
+                echo 'if [ -f "/tmp/.urxvtq" ]' >> "${user_home_dir}/bin/urxvtq"
+                echo 'then' >> "${user_home_dir}/bin/urxvtq"
+                echo '    xdotool windowunmap $wid' >> "${user_home_dir}/bin/urxvtq"
+                echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
+                echo 'else' >> "${user_home_dir}/bin/urxvtq"
+                echo '    xdotool windowmap $wid' >> "${user_home_dir}/bin/urxvtq"
+                echo '    xdotool windowactivate $wid' >> "${user_home_dir}/bin/urxvtq"
+                echo '    xdotool windowfocus $wid' >> "${user_home_dir}/bin/urxvtq"
+                echo '    touch /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
+                echo 'fi' >> "${user_home_dir}/bin/urxvtq"
+
+            fi
+
+            if which openbox-session &> /dev/null && which openbox &> /dev/null
+            then
+
+                # prepare openbox config
+                echo "exec openbox-session" > "${user_home_dir}/.xinitrc"
+
+                # make openbox directories
+                mkdir -p "${user_home_dir}/.config/openbox/"
+
+                # copy openbox defaults from xdg
+                cp /etc/xdg/openbox/* "${user_home_dir}/.config/openbox/"
+
+                # configure openbox autostart
+                echo "#!/bin/sh" > "${user_home_dir}/.config/openbox/autostart"
+                echo 'which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"' >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "if which compton &> /dev/null" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "then" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "    (compton -c) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "elif which xcompmgr &> /dev/null" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "then" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "    (xcompmgr -c) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "fi" >> "${user_home_dir}/.config/openbox/autostart"
+                echo 'which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &' >> "${user_home_dir}/.config/openbox/autostart"
+                echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which tint2 &> /dev/null && (tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which clipit &> /dev/null && (clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which volumeicon &> /dev/null && (volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
+                echo "which conky &> /dev/null && (conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
+                # echo "which yeahconsole &> /dev/null && (yeahconsole) &" >> "${user_home_dir}/.config/openbox/autostart"
+
+                # configure openbox menu (~/.config/openbox/menu.xml)
+                echo '<?xml version="1.0" encoding="UTF-8"?>' > "${user_home_dir}/.config/openbox/menu.xml"
+                echo '<openbox_menu xmlns="http://openbox.org/"' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '    xsi:schemaLocation="http://openbox.org/' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '    file:///usr/share/openbox/menu.xsd">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '    <menu id="root-menu" label="Openbox 3">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="Web browser">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Execute"><execute>x-www-browser</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="Terminal emulator">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Execute"><execute>x-terminal-emulator</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="File Manager">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Execute"><execute>pcmanfm</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <menu id="/Debian" />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <separator />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <menu id="client-list-menu" />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <separator />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="ObConf">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Execute"><execute>obconf</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="Reconfigure">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Reconfigure" />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="Restart">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Restart" />' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        <item label="Exit">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            <action name="Exit">' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '                <prompt>no</prompt>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '            </action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '    </menu>' >> "${user_home_dir}/.config/openbox/menu.xml"
+                echo '</openbox_menu>' >> "${user_home_dir}/.config/openbox/menu.xml"
+
+                # configure openbox theme & settings (~/.config/openbox/rc.xml)
+                echo '<?xml version="1.0" encoding="UTF-8"?>' > "${user_home_dir}/.config/openbox/rc.xml"
+                echo '<openbox_config xmlns="http://openbox.org/3.4/rc" xmlns:xi="http://www.w3.org/2001/XInclude">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <resistance><strength>10</strength><screen_edge_strength>20</screen_edge_strength></resistance>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <focus><focusNew>yes</focusNew><followMouse>no</followMouse><focusLast>yes</focusLast><underMouse>no</underMouse><focusDelay>200</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <placement><policy>Smart</policy><center>yes</center><monitor>Primary</monitor><primaryMonitor>1</primaryMonitor></placement>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <theme>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <name>Mire_v2_orange</name>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <titleLayout>NLIMC</titleLayout>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keepBorder>yes</keepBorder>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <animateIconify>yes</animateIconify>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="ActiveWindow"><name>ForMateKonaVe</name><size>8</size><weight>bold</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="InactiveWindow"><name>ForMateKonaVe</name><size>8</size><weight>bold</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="MenuHeader"><name>ForMateKonaVe</name><size>9</size><weight>normal</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="MenuItem"><name>ForMateKonaVe</name><size>9</size><weight>normal</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="ActiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <font place="InactiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    </theme>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <desktops><number>3</number><firstdesk>1</firstdesk><names></names><popupTime>875</popupTime></desktops>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>10</x><y>10</y></popupFixedPosition></resize>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <margins><top>0</top><bottom>0</bottom><left>0</left><right>0</right></margins>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <dock><position>TopLeft</position><floatingX>0</floatingX><floatingY>0</floatingY><noStrut>no</noStrut><stacking>Above</stacking><direction>Vertical</direction><autoHide>no</autoHide><hideDelay>300</hideDelay><showDelay>300</showDelay><moveButton>Middle</moveButton></dock>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <keyboard>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <chainQuitKey>C-g</chainQuitKey>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-A-Up"><action name="GoToDesktop"><to>up</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-A-Down"><action name="GoToDesktop"><to>down</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="S-A-Up"><action name="SendToDesktop"><to>up</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="S-A-Down"><action name="SendToDesktop"><to>down</to><wrap>no</wrap></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-1"><action name="GoToDesktop"><to>1</to></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-2"><action name="GoToDesktop"><to>2</to></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-3"><action name="GoToDesktop"><to>3</to></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-d"><action name="ToggleShowDesktop"/></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="A-F4"><action name="Close"/></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="A-space"><action name="ShowMenu"><menu>client-menu</menu></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="C-A-Tab"><action name="NextWindow"><panels>yes</panels><desktop>yes</desktop><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-S-Right"><action name="DirectionalCycleWindows"><direction>right</direction></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-S-Up"><action name="DirectionalCycleWindows"><direction>up</direction></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-S-Down"><action name="DirectionalCycleWindows"><direction>down</direction></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-w"><action name="Execute"><command>x-www-browser</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-t"><action name="Execute"><command>x-terminal-emulator</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-f"><action name="Execute"><command>pcmanfm</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-m"><action name="Execute"><command>vlc</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    </keyboard>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <mouse>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <dragThreshold>1</dragThreshold>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <doubleClickTime>200</doubleClickTime>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <screenEdgeWarpTime>400</screenEdgeWarpTime>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <screenEdgeWarpMouse>false</screenEdgeWarpMouse>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Frame">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Left" action="Click"><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-S-Up" action="Click"><action name="SendToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-S-Down" action="Click"><action name="SendToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Titlebar">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Move"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="DoubleClick"><action name="ToggleMaximize"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Up" action="Click"><action name="if"><shaded>no</shaded><then><action name="Shade"/><action name="FocusToBottom"/><action name="Unfocus"/><action name="Lower"/></then></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Down" action="Click"><action name="if"><shaded>yes</shaded><then><action name="Unshade"/><action name="Raise"/></then></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Titlebar Top Right Bottom Left TLCorner TRCorner BRCorner BLCorner">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Top">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Resize"><edge>top</edge></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Left">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Resize"><edge>left</edge></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Right">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Resize"><edge>right</edge></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Bottom">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Resize"><edge>bottom</edge></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="TRCorner BRCorner TLCorner BLCorner">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Drag"><action name="Resize"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Client">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Icon">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="AllDesktops">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Click"><action name="ToggleOmnipresent"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Shade">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Click"><action name="ToggleShade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Iconify">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Click"><action name="Iconify"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Maximize">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Click"><action name="ToggleMaximize"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Middle" action="Click"><action name="ToggleMaximize"><direction>vertical</direction></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Click"><action name="ToggleMaximize"><direction>horizontal</direction></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Close">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Click"><action name="Close"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Desktop">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="Root">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Middle" action="Press"><action name="ShowMenu"><menu>client-list-combined-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <context name="MoveResize">' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        </context>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    </mouse>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <menu><file>/var/lib/openbox/debian-menu.xml</file><file>menu.xml</file><hideDelay>200</hideDelay><middle>no</middle><submenuShowDelay>100</submenuShowDelay><submenuHideDelay>400</submenuHideDelay><applicationIcons>yes</applicationIcons><manageDesktops>no</manageDesktops></menu>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    <applications>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '        <application name="urxvtq"><decor>no</decor><position force="yes"><x>center</x><y>0</y></position><desktop>all</desktop><layer>above</layer><skip_pager>yes</skip_pager><skip_taskbar>yes</skip_taskbar><maximized>Horizontal</maximized></application>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '    </applications>' >> "${user_home_dir}/.config/openbox/rc.xml"
+                echo '</openbox_config>' >> "${user_home_dir}/.config/openbox/rc.xml"
+
+            fi
+
+            if which yeahconsole &> /dev/null
+            then
+
+                # yeahconsole config
+                echo 'yeahconsole*term:           urxvt' >> "${user_home_dir}/.Xdefaults"
+                echo 'yeahconsole*toggleKey:      Win+t' >> "${user_home_dir}/.Xdefaults"
+                echo 'yeahconsole*toggleFull:     None+F11' >> "${user_home_dir}/.Xdefaults"
+                echo 'yeahconsole*consoleHeight:  20' >> "${user_home_dir}/.Xdefaults"
+                echo 'yeahconsole*aniDelay:       0' >> "${user_home_dir}/.Xdefaults"
+                echo 'yeahconsole*stepSize:       10' >> "${user_home_dir}/.Xdefaults"
+            fi
+
+            # symlink Xdefaults to Xresoures for compatibility
+            ln -s $user_home_dir/.Xdefaults $user_home_dir/.Xresources
+
+            if which clipit &> /dev/null
+            then
+
+                # clipit settings
+                echo "[rc]" > "${user_home_dir}/.config/clipit/clipitrc"
+                echo "use_copy=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "use_primary=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "synchronize=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "automatic_paste=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "show_indexes=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "save_uris=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "use_rmb_menu=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "save_history=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "history_limit=50" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "items_menu=20" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "statics_show=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "statics_items=10" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "hyperlinks_only=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "confirm_clear=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "single_line=true" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "reverse_history=false" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "item_length=50" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "ellipsize=2" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "history_key=<Ctrl><Alt>H" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "actions_key=<Ctrl><Alt>A" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "menu_key=<Ctrl><Alt>P" >> "${user_home_dir}/.config/clipit/clipitrc"
+                echo "search_key=<Ctrl><Alt>F" >> "${user_home_dir}/.config/clipit/clipitrc"
+            fi
+
+            if which conky &> /dev/null
+            then
+
+                # conky config dirs
+                mkdir -p "${user_home_dir}/.conkyrc.d"
+
+                # conky lua transparency
+                echo "-- dependencies" > "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "require 'cairo'" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- settings" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "bg_colour = 0x000000" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "bg_alpha = 0.35" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "corner_r = 10" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- rgb converter" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "function rgb_to_r_g_b(colour,alpha)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    return ((colour / 0x10000) % 0x100) / 255., ((colour / 0x100) % 0x100) / 255., (colour % 0x100) / 255., alpha" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "end" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- primary bg function" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "function conky_draw_bg()" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    if conky_window == nil then return end" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    local w = conky_window.width" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    local h = conky_window.height" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- create starting point (x/y)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    local cs = cairo_xlib_surface_create(conky_window.display, conky_window.drawable, conky_window.visual, w, h)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cr = cairo_create(cs)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- draw a box to fill" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_move_to(cr, corner_r, 0)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_line_to(cr, w-corner_r, 0)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_curve_to(cr, w, 0, w, 0, w, corner_r)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_line_to(cr, w, h-corner_r)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_curve_to(cr, w, h, w, h, w-corner_r, h)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_line_to(cr, corner_r, h)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_curve_to(cr, 0, h, 0, h, 0, h-corner_r)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_line_to(cr, 0, corner_r)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_curve_to(cr, 0, 0, 0, 0, corner_r, 0)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_close_path(cr)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "-- set fill color and fill" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_set_source_rgba(cr, rgb_to_r_g_b(bg_colour, bg_alpha))" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "    cairo_fill(cr)" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+                echo "end" >> "${user_home_dir}/.conkyrc.d/scripts/lua/bg"
+
+                # conky slim config
+                echo "background yes" > "${user_home_dir}/.conkyrc.d/slim"
+                echo "update_interval 1.0" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "cpu_avg_samples 5" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "net_avg_samples 5" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "diskio_avg_samples 5" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "alignment tm" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "gap_y 0" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "gap_x 0" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "use_xft yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "xftalpha 0.2" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "xftfont ForMateKonaVe:size=9" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "uppercase no" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "override_utf8_locale yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "default_color 6CBE6C" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "own_window yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager" >> "${user_home_dir}/.conkyrc.d/slim"
+                if which xcompmgr &> /dev/null
+                then
+                    echo "own_window_transparent no" >> "${user_home_dir}/.conkyrc.d/slim"
+                    echo "own_window_argb_visual yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                    echo "own_window_argb_value 120" >> "${user_home_dir}/.conkyrc.d/slim"
+                else
+                    echo "own_window_transparent yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                    echo "lua_load ~/.conkyrc.d/scripts/lua/bg" >> "${user_home_dir}/.conkyrc.d/slim"
+                    echo "lua_draw_hook_pre draw_bg" >> "${user_home_dir}/.conkyrc.d/slim"
+                fi
+                echo "double_buffer yes" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo "TEXT" >> "${user_home_dir}/.conkyrc.d/slim"
+                echo 'cpu ${cpubar cpu0 8,120}             ${alignc}mem  ${membar 5,120}          ${alignr}/     ${fs_bar 5,120 /}' >> "${user_home_dir}/.conkyrc.d/slim"
+                echo '    ${offset 120}             ${alignc}swap ${swapbar 5,120}          ${alignr}/home ${fs_bar 5,120 /home}' >> "${user_home_dir}/.conkyrc.d/slim"
+                echo '${time %H:%M, %Y/%m/%d}${offset 120}${alignc}${addr}${offset 120}${alignr}${uptime}' >> "${user_home_dir}/.conkyrc.d/slim"
+
+                # symlink default conky to slim config
+                ln -s "${user_home_dir}/.conkyrc.d/slim" "${user_home_dir}/conkyrc"
+            fi
+
+            if which volumeicon &> /dev/null
+            then
+
+                # volumeicon config
+                mkdir -p "${user_home_dir}/.config.volumeicon"
+                echo "[StatusIcon]" > "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "stepsize=3" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "lmb_slider=false" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "mmb_mute=false" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "use_horizontal_slider=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "show_sound_level=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "onclick=urxvt -e 'alsamixer'" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "theme=Default" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "[Hotkeys]" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "up_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "down_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "mute_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "up=XF86AudioRaiseVolume" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "down=XF86AudioLowerVolume" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "mute=XF86AudioMute" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "[Alsa]" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+                echo "card=default" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+            fi
+
+            # reset ownership on newly added files
+            chown -$ $config_system_username:$config_system_username $user_home_dir
 
         fi
 

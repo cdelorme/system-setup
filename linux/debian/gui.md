@@ -48,6 +48,11 @@ File Browser:
 
 - pcmanfm
 
+Composite Manager (Transparency etc):
+
+- xcompmgr
+- compton (many dependencies but better than xcompmgr)
+
 Terminal Audio Packages:
 
 - alsa-base
@@ -112,6 +117,7 @@ GUI Keyboard Layout Toggle:
 
 - fbxkb
 
+
 _This package is a gui overlay that shows up in the menu with a flag to coordinate with languages, and is an interface to the xserver keyboard layouts.  It's a very nice lightweight language switcher._
 
 
@@ -119,12 +125,12 @@ _This package is a gui overlay that shows up in the menu with a flag to coordina
 
 _Run to install all packages:
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs xcompmgr libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev
 
 
 ## system configuration
 
-In some cases the installed packages are not configured, in other cases I preferred alternative configurations.
+In some cases the installed packages are not configured; in other cases I preferred alternative configurations.
 
 
 ### installing custom fonts
@@ -154,7 +160,7 @@ _I often find myself using the terminal exclusively when accessing my system, so
 
 You may have to set it to boot at startup.
 
-The theme configuration file can be found at `/`.
+The available themes can be found in `/usr/share/slim/themes/`, and you can set the theme to use in `/etc/slim.conf` by the attribute `current_theme`.
 
 
 #### tips when using slim
@@ -168,18 +174,16 @@ _Run to activate slim at boot time:_
 
     update-rc.d slim defaults
 
-_my preferred slim configuration (`/`):_
+_My custom theme is named `???` and is sectioned into:_
 
     INCOMPLETE
 
 
-### startx launch openbox
+### startx configuration
 
-This is my preferred approach to loading openbox.  It's an alternative to using slim where you login through the console like normal, but use `startx` to launch the graphical interface.
+We want the `startx` command to load openbox, which means we have to tell startx what to do using the `~/.xinitrc` file.  Simply add `exec openbox-session` to `~/.xinitrc`.
 
-This also allows you to exit openbox and drop back into terminal when desired.
-
-Simply add `exec openbox-session` to `~/.xinitrc`.
+It would be wise to use `update-alternatives` to set the default window manager and session manager as well.
 
 
 ##### commands
@@ -195,17 +199,11 @@ In some cases openbox will not be your default window or session manager.  It wo
 
 We can start by copying the default files found in `/etc/xdg/openbox/` to `~/.config/openbox/`.
 
-You will then want to replace
+You will then want to replace the contents of `~/.config/openbox/autostart` with whatever needs to get launched with your openbox session.
 
+To configure the main drop-menu that openbox uses, we'll want to modify `~/.config/openbox/menu.xml` and either add, remove, or change values.  _Some operations for example may require privileges, you can remove them or add gksu to execute the command with sudo privileges asking for a password from the UI._  I usually simply add the File Manager and change the order of the top few items.
 
-
-Files of importance:
-
-- rc.xml config
-- menu.xml config
-
-
-
+For desktop, openbox themes, application control, and more you'll want to modify `~/.config/openbox/rc.xml`.  This configuration file is very large so I won't go into detail; I recommend visitng the official documentation.  You can find a list of named themes available to your system in `/usr/share/themes/`, which can be set in `~/.config/openbox/rc.xml`.
 
 
 ##### comamnds
@@ -223,7 +221,15 @@ Files of importance:
 _Replace contents in `~/.config/openbox/autostart` with (this is an executable file):_
 
     #!/bin/sh
+    which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
     which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
+    if which compton &> /dev/null
+    then
+        (compton -c) &
+    elif which xcompmgr &> /dev/null
+    then
+        (xcompmgr -c) &
+    fi
     which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &
     [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
     which tint2 &> /dev/null && (tint2) &
@@ -231,10 +237,212 @@ _Replace contents in `~/.config/openbox/autostart` with (this is an executable f
     which xset &> /dev/null && (xset r rate 250 25 & xset b off) &
     which volumeicon &> /dev/null && (volumeicon) &
     which conky &> /dev/null && (conky -d -q) &
-    which yeahconsole &> /dev/null && (yeahconsole) &
+    # which yeahconsole &> /dev/null && (yeahconsole) &
+
+_My preferred `~/.config/openbox/menu.xml`:_
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <openbox_menu xmlns="http://openbox.org/"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://openbox.org/
+        file:///usr/share/openbox/menu.xsd">
+        <menu id="root-menu" label="Openbox 3">
+            <item label="Web browser">
+                <action name="Execute"><execute>x-www-browser</execute></action>
+            </item>
+            <item label="Terminal emulator">
+                <action name="Execute"><execute>x-terminal-emulator</execute></action>
+            </item>
+            <item label="File Manager">
+                <action name="Execute"><execute>pcmanfm</execute></action>
+            </item>
+            <menu id="/Debian" />
+            <separator />
+            <menu id="client-list-menu" />
+            <separator />
+            <item label="ObConf">
+                <action name="Execute"><execute>obconf</execute></action>
+            </item>
+            <item label="Reconfigure">
+                <action name="Reconfigure" />
+            </item>
+            <item label="Restart">
+                <action name="Restart" />
+            </item>
+            <item label="Exit">
+                <action name="Exit">
+                    <prompt>no</prompt>
+                </action>
+            </item>
+        </menu>
+    </openbox_menu>
+
+_My preferred `~/.config/openbox/rc.xml`:_
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <openbox_config xmlns="http://openbox.org/3.4/rc" xmlns:xi="http://www.w3.org/2001/XInclude">
+        <resistance><strength>10</strength><screen_edge_strength>20</screen_edge_strength></resistance>
+        <focus><focusNew>yes</focusNew><followMouse>no</followMouse><focusLast>yes</focusLast><underMouse>no</underMouse><focusDelay>200</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>
+        <placement><policy>Smart</policy><center>yes</center><monitor>Primary</monitor><primaryMonitor>1</primaryMonitor></placement>
+        <theme>
+            <name>Mire_v2_orange</name>
+            <titleLayout>NLIMC</titleLayout>
+            <keepBorder>yes</keepBorder>
+            <animateIconify>yes</animateIconify>
+            <font place="ActiveWindow"><name>ForMateKonaVe</name><size>8</size><weight>bold</weight><slant>normal</slant></font>
+            <font place="InactiveWindow"><name>ForMateKonaVe</name><size>8</size><weight>bold</weight><slant>normal</slant></font>
+            <font place="MenuHeader"><name>ForMateKonaVe</name><size>9</size><weight>normal</weight><slant>normal</slant></font>
+            <font place="MenuItem"><name>ForMateKonaVe</name><size>9</size><weight>normal</weight><slant>normal</slant></font>
+            <font place="ActiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>
+            <font place="InactiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>
+        </theme>
+        <desktops><number>3</number><firstdesk>1</firstdesk><names></names><popupTime>875</popupTime></desktops>
+        <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>10</x><y>10</y></popupFixedPosition></resize>
+        <margins><top>0</top><bottom>0</bottom><left>0</left><right>0</right></margins>
+        <dock><position>TopLeft</position><floatingX>0</floatingX><floatingY>0</floatingY><noStrut>no</noStrut><stacking>Above</stacking><direction>Vertical</direction><autoHide>no</autoHide><hideDelay>300</hideDelay><showDelay>300</showDelay><moveButton>Middle</moveButton></dock>
+        <keyboard>
+            <chainQuitKey>C-g</chainQuitKey>
+            <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+            <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+            <keybind key="C-A-Up"><action name="GoToDesktop"><to>up</to><wrap>no</wrap></action></keybind>
+            <keybind key="C-A-Down"><action name="GoToDesktop"><to>down</to><wrap>no</wrap></action></keybind>
+            <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+            <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+            <keybind key="S-A-Up"><action name="SendToDesktop"><to>up</to><wrap>no</wrap></action></keybind>
+            <keybind key="S-A-Down"><action name="SendToDesktop"><to>down</to><wrap>no</wrap></action></keybind>
+            <keybind key="C-1"><action name="GoToDesktop"><to>1</to></action></keybind>
+            <keybind key="C-2"><action name="GoToDesktop"><to>2</to></action></keybind>
+            <keybind key="C-3"><action name="GoToDesktop"><to>3</to></action></keybind>
+            <keybind key="W-d"><action name="ToggleShowDesktop"/></keybind>
+            <keybind key="A-F4"><action name="Close"/></keybind>
+            <keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>
+            <keybind key="A-space"><action name="ShowMenu"><menu>client-menu</menu></action></keybind>
+            <keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
+            <keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
+            <keybind key="C-A-Tab"><action name="NextWindow"><panels>yes</panels><desktop>yes</desktop><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
+            <keybind key="W-S-Right"><action name="DirectionalCycleWindows"><direction>right</direction></action></keybind>
+            <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>
+            <keybind key="W-S-Up"><action name="DirectionalCycleWindows"><direction>up</direction></action></keybind>
+            <keybind key="W-S-Down"><action name="DirectionalCycleWindows"><direction>down</direction></action></keybind>
+            <keybind key="W-w"><action name="Execute"><command>x-www-browser</command></action></keybind>
+            <keybind key="W-t"><action name="Execute"><command>x-terminal-emulator</command></action></keybind>
+            <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>
+            <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>
+            <keybind key="W-f"><action name="Execute"><command>pcmanfm</command></action></keybind>
+            <keybind key="W-m"><action name="Execute"><command>vlc</command></action></keybind>
+            <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>
+            <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>
+            <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>
+        </keyboard>
+        <mouse>
+            <dragThreshold>1</dragThreshold>
+            <doubleClickTime>200</doubleClickTime>
+            <screenEdgeWarpTime>400</screenEdgeWarpTime>
+            <screenEdgeWarpMouse>false</screenEdgeWarpMouse>
+            <context name="Frame">
+                <mousebind button="A-Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="A-Left" action="Click"><action name="Unshade"/></mousebind>
+                <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
+                <mousebind button="A-Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
+                <mousebind button="A-Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
+                <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="A-S-Up" action="Click"><action name="SendToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="A-S-Down" action="Click"><action name="SendToDesktop"><to>next</to></action></mousebind>
+            </context>
+            <context name="Titlebar">
+                <mousebind button="Left" action="Drag"><action name="Move"/></mousebind>
+                <mousebind button="Left" action="DoubleClick"><action name="ToggleMaximize"/></mousebind>
+                <mousebind button="Up" action="Click"><action name="if"><shaded>no</shaded><then><action name="Shade"/><action name="FocusToBottom"/><action name="Unfocus"/><action name="Lower"/></then></action></mousebind>
+                <mousebind button="Down" action="Click"><action name="if"><shaded>yes</shaded><then><action name="Unshade"/><action name="Raise"/></then></action></mousebind>
+            </context>
+            <context name="Titlebar Top Right Bottom Left TLCorner TRCorner BRCorner BLCorner">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+            </context>
+            <context name="Top">
+                <mousebind button="Left" action="Drag"><action name="Resize"><edge>top</edge></action></mousebind>
+            </context>
+            <context name="Left">
+                <mousebind button="Left" action="Drag"><action name="Resize"><edge>left</edge></action></mousebind>
+            </context>
+            <context name="Right">
+                <mousebind button="Left" action="Drag"><action name="Resize"><edge>right</edge></action></mousebind>
+            </context>
+            <context name="Bottom">
+                <mousebind button="Left" action="Drag"><action name="Resize"><edge>bottom</edge></action></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+            </context>
+            <context name="TRCorner BRCorner TLCorner BLCorner">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Left" action="Drag"><action name="Resize"/></mousebind>
+            </context>
+            <context name="Client">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+            </context>
+            <context name="Icon">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+            </context>
+            <context name="AllDesktops">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Left" action="Click"><action name="ToggleOmnipresent"/></mousebind>
+            </context>
+            <context name="Shade">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="Left" action="Click"><action name="ToggleShade"/></mousebind>
+            </context>
+            <context name="Iconify">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="Left" action="Click"><action name="Iconify"/></mousebind>
+            </context>
+            <context name="Maximize">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Left" action="Click"><action name="ToggleMaximize"/></mousebind>
+                <mousebind button="Middle" action="Click"><action name="ToggleMaximize"><direction>vertical</direction></action></mousebind>
+                <mousebind button="Right" action="Click"><action name="ToggleMaximize"><direction>horizontal</direction></action></mousebind>
+            </context>
+            <context name="Close">
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+                <mousebind button="Left" action="Click"><action name="Close"/></mousebind>
+            </context>
+            <context name="Desktop">
+                <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+                <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+            </context>
+            <context name="Root">
+                <mousebind button="Middle" action="Press"><action name="ShowMenu"><menu>client-list-combined-menu</menu></action></mousebind>
+                <mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind>
+            </context>
+            <context name="MoveResize">
+                <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+                <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+                <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+            </context>
+        </mouse>
+        <menu><file>/var/lib/openbox/debian-menu.xml</file><file>menu.xml</file><hideDelay>200</hideDelay><middle>no</middle><submenuShowDelay>100</submenuShowDelay><submenuHideDelay>400</submenuHideDelay><applicationIcons>yes</applicationIcons><manageDesktops>no</manageDesktops></menu>
+        <applications>
+            <application name="urxvtq"><decor>no</decor><position force="yes"><x>center</x><y>0</y></position><desktop>all</desktop><layer>above</layer><skip_pager>yes</skip_pager><skip_taskbar>yes</skip_taskbar><maximized>Horizontal</maximized></application>
+        </applications>
+    </openbox_config>
 
 
-### fehbg (optional)
+### fehbg
 
 If you want to set a wallpaper background, or better year cycle a set of wallpapers, then `fehbg` is the tool you're looking for!  It has incredibly simple syntax, and is cli friendly.
 
@@ -250,9 +458,11 @@ _Or adjust the directorie to pull pictures from as desired._
 
 ### urxvt configuration
 
-This is a basic terminal emulator with unicode support and is very popular.
+This is a basic terminal emulator with unicode support and is very popular.  Configuring it is quite a task, but once you have it you have an excellent utility at your fingertips.
 
-Configuring it is quite a task, but once you have it you have an excellent utility at your fingertips.
+The urxvt configuration is done through `~/.Xdefaults`.  I prefer a dark background and transparency.  I have tmux, so I don't use or enable tabs.
+
+Initially I used `yeahconsole` as a means of creating a drop-down accessible terminal, but I ended up going with an alternative approach due to the short-comings of yeahconsole.
 
 
 ##### commands
@@ -263,12 +473,93 @@ Configuring it is quite a task, but once you have it you have an excellent utili
 
 **Configuration to append to `~/.Xdefaults`:**
 
-    INCOMPLETE
+    ! xft (font)
+    Xft.dpi:                    96
+    Xft.antialias:              true
+    Xft.rgba:                   rgb
+    Xft.hinting:                true
+    Xft.hintstyle:              hintslight
+
+    ! urxvt (terminal)
+    URxvt.depth:                32
+    URxvt*background:           [70]#001E27
+    URxvt.geometry:             80x24
+    URxvt.transparent:          true
+    URxvt.shading:              20
+    URxvt.fading:               0
+    URxvt.loginShell:           true
+    URxvt.saveLines:            1000000
+    URxvt.internalBorder:       3
+    URxvt.lineSpace:            0
+    URxvt.scrollStyle:          rxvt
+    URxvt.scrollBar:            false
+    URxvt.cursorBlink:          true
+    URxvt.cursorColor:          #657b83
+    URxvt.cursorUnderline:      false
+    URxvt.pointerBlank:         true
+    URxvt*font:                 xft:ForMateKonaVe:pixelsize=14
+    URxvt*letterSpace:          -1
+    URxvt.perl-ext-common:      default,matcher
+    URxvt.matcher.button:       1
+    URxvt.urlLauncher:          x-www-browser
+
+    !!
+    ! Solarized High Contrast Dark
+    !!
+    *background:                [70]#001E27
+    *foreground:                #9CC2C3
+    *fadeColor:                 #002832
+    *cursorColor:               #F34F00
+    *pointerColorBackground:    #003747
+    *pointerColorForeground:    #9CC2C3
+    *color0:                    #002831
+    *color1:                    #D11C24
+    *color2:                    #6CBE6C
+    *color3:                    #A57706
+    *color4:                    #2176C7
+    *color5:                    #C61C6F
+    *color6:                    #259286
+    *color7:                    #EAE3CB
+    *color8:                    #006488
+    *color9:                    #F5163B
+    *color10:                   #51EF84
+    *color11:                   #B27E28
+    *color12:                   #178EC8
+    *color13:                   #E24D8E
+    *color14:                   #00B39E
+    *color15:                   #FCF4DC
+
+_For forward compatibility, symlink `~/.Xdefaults` to `~/.Xresources`:_
+
+    ln -s ~/.Xdefaults ~/.Xresources
+
+_To give openbox a means of showing & hiding a true-transparency urxvt instance on demand, I wrote `~/bin/urxvtq`:_
+
+    #!/bin/bash
+    wid=$(xdotool search --name urxvtq)
+    if [ -z "$wid" ]
+    then
+        rm -f /tmp/.urxvtq
+        urxvt -name urxvtq -geometry 200x24 &
+        while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done
+    fi
+    if [ -f "/tmp/.urxvtq" ]
+    then
+        xdotool windowunmap $wid
+        rm -f /tmp/.urxvtq
+    else
+        xdotool windowmap $wid
+        xdotool windowactivate $wid
+        xdotool windowfocus $wid
+        touch /tmp/.urxvtq
+    fi
 
 
 ### yeahconsole
 
 This is a utility that can be used to make an instantly accessible urxvt console pop down from the top of the screen.  This can be incredibly helpful, so I have installed it.
+
+However, it only features psuedo-transparency support and does not work with a composite manager.  The result isn't as clean as I'd have preferred, so instead I choose to use a script to manage a single terminal instance in a similar fashion.
 
 
 ##### commands
@@ -276,160 +567,160 @@ This is a utility that can be used to make an instantly accessible urxvt console
 _YeahConsole configuration append to `~/.Xdefaults`:_
 
     ! yeahconsole config
-    yeahconsole*term: urxvt
-    yeahconsole*toggleKey: Win+t
-    yeahconsole*toggleFull: None+F11
-    yeahconsole*consoleHeight: 20
-    yeahconsole*aniDelay: 0
-    yeahconsole*stepSize: 10
+    yeahconsole*term:           urxvt
+    yeahconsole*toggleKey:      Win+t
+    yeahconsole*toggleFull:     None+F11
+    yeahconsole*consoleHeight:  20
+    yeahconsole*aniDelay:       0
+    yeahconsole*stepSize:       10
 
 _FYI: These toggle keys are not virtualbox friendly._
 
 
-### configuring pcmanfm
-
-
-
-
 ### configuring & theming conky
 
-I usually have two conky processes running as it allows me to separately print out certain sets of data, and at different intervals.  For example log output does not need to be as commonly parsed, and separating it lets me reduce the amount of processing necessary.
+I like to have a lightweight conky script running that displays general system status.
 
-_I may also use a lua script to enable transparency effects._
+I prefer a transparent background to aid in readability, which is helpful when using a dynamically changing background or wallpaper.
 
+There are two ways to acheive transparency.  Conky does not have built-in transparency and requires a compositor be loaded with openbox (such as `xcompmgr` or `compton`).  While `xcompmgr` comes prepackaged, `compton` addresses many bugs with `xcompmgr`.
 
-
-
-
-### configuring & theming tint2
+If you don't want to run a composite manager you can use a lua script with a cairo package dependency to redraw a background for you.  This can be helpful if your system doesn't have a compositor as well (such as a raspberry pi).  _However, it will cause a problem with changing wallpapers where it will keep the old wallpaper for the section where the lua script box exists, until the conky refresh triggers._
 
 
+##### commands
+
+_Create a directory and file for conky configuration, and symlink it as the default:_
+
+    mkdir -p ~/.conkyrc.d/scripts/lua
+    touch ~/.conkyrc.d/slim
+    ln -s ~/.conkyrc.d/slim ~/.conkyrc
+
+_Create `~/.conkyrc.d/scripts/lua/bg` with:_
+
+    -- dependencies
+    require 'cairo'
+
+    -- settings
+    bg_colour = 0x000000
+    bg_alpha = 0.35
+    corner_r = 10
+
+    -- rgb converter
+    function rgb_to_r_g_b(colour,alpha)
+        return ((colour / 0x10000) % 0x100) / 255., ((colour / 0x100) % 0x100) / 255., (colour % 0x100) / 255., alpha
+    end
+
+    -- primary bg function
+    function conky_draw_bg()
+        if conky_window == nil then return end
+        local w = conky_window.width
+        local h = conky_window.height
+
+    -- create starting point (x/y)
+        local cs = cairo_xlib_surface_create(conky_window.display, conky_window.drawable, conky_window.visual, w, h)
+        cr = cairo_create(cs)
+
+    -- draw a box to fill
+        cairo_move_to(cr, corner_r, 0)
+        cairo_line_to(cr, w-corner_r, 0)
+        cairo_curve_to(cr, w, 0, w, 0, w, corner_r)
+        cairo_line_to(cr, w, h-corner_r)
+        cairo_curve_to(cr, w, h, w, h, w-corner_r, h)
+        cairo_line_to(cr, corner_r, h)
+        cairo_curve_to(cr, 0, h, 0, h, 0, h-corner_r)
+        cairo_line_to(cr, 0, corner_r)
+        cairo_curve_to(cr, 0, 0, 0, 0, corner_r, 0)
+        cairo_close_path(cr)
+
+    -- set fill color and fill
+        cairo_set_source_rgba(cr, rgb_to_r_g_b(bg_colour, bg_alpha))
+        cairo_fill(cr)
+
+    end
+
+_Popualte ~/.conkyrc.d/slim` with:_
+
+    ##
+    # Conky-Slim
+    # @author Casey DeLorme <cdelorme@gmail.com>
+    ##
+    background yes
+    update_interval 1.0
+    cpu_avg_samples 5
+    net_avg_samples 5
+    diskio_avg_samples 5
+    alignment tm
+    gap_y 0
+    gap_x 0
+    use_xft yes
+    xftalpha 0.2
+    xftfont ForMateKonaVe:size=9
+    uppercase no
+    override_utf8_locale yes
+    default_color 6CBE6C
+    double_buffer yes
+    own_window yes
+    own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+
+    # for true transparency
+    own_window_transparent no
+    own_window_argb_visual yes
+    own_window_argb_value 120
+
+    # for non-composite psuedo-transparency support
+    #own_window_transparent yes
+    #lua_load ~/.conkyrc.d/scripts/lua/bg
+    #lua_draw_hook_pre draw_bg
+
+    ##
+    # content
+    ##
+    TEXT
+    cpu ${cpubar cpu0 8,120}             ${alignc}mem  ${membar 5,120}          ${alignr}/     ${fs_bar 5,120 /}
+        ${offset 120}             ${alignc}swap ${swapbar 5,120}          ${alignr}/home ${fs_bar 5,120 /home}
+    ${time %H:%M, %Y/%m/%d}${offset 120}${alignc}${addr}${offset 120}${alignr}${uptime}
+
+_Spacing matters and will effect formatting/display.  With these files in place, simply running conky should take care of the rest._
+
+
+### configuring clipit
+
+First run will ask you some questions and setup some defaults.  You can modify them afterwards by clicking its icon in the `tint2` menubar.
+
+
+##### commands
+
+_Recommended configuration in `~/.config/clipit/clipitrc`:_
+
+    [rc]
+    use_copy=true
+    use_primary=true
+    synchronize=true
+    automatic_paste=false
+    show_indexes=false
+    save_uris=true
+    use_rmb_menu=false
+    save_history=false
+    history_limit=50
+    items_menu=20
+    statics_show=true
+    statics_items=10
+    hyperlinks_only=false
+    confirm_clear=false
+    single_line=true
+    reverse_history=false
+    item_length=50
+    ellipsize=2
+    history_key=<Ctrl><Alt>H
+    actions_key=<Ctrl><Alt>A
+    menu_key=<Ctrl><Alt>P
+    search_key=<Ctrl><Alt>F
 
 
 
-### configuring & theming urxvt
-
-Currently using this (it's pretty but not full-featured or matching my choice theme):
-
-    !-------------------------------------------------------------------------------
-    ! Xft settings
-    !-------------------------------------------------------------------------------
-
-    Xft.dpi:                    96
-    Xft.antialias:              false
-    Xft.rgba:                   rgb
-    Xft.hinting:                true
-    Xft.hintstyle:              hintslight
-
-    !-------------------------------------------------------------------------------
-    ! URxvt settings
-    ! Colours lifted from Solarized (http://ethanschoonover.com/solarized)
-    ! More info at:
-    ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.1.pod
-    !-------------------------------------------------------------------------------
-
-    URxvt.depth:                32
-    URxvt.geometry:             90x30
-    URxvt.transparent:          false
-    URxvt.fading:               0
-    ! URxvt.urgentOnBell:         true
-    ! URxvt.visualBell:           true
-    URxvt.loginShell:           true
-    URxvt.saveLines:            50
-    URxvt.internalBorder:       3
-    URxvt.lineSpace:            0
-
-    ! Fonts
-    URxvt.allow_bold:           false
-    /* URxvt.font:                 -*-terminus-medium-r-normal-*-12-120-72-72-c-60-iso8859-1 */
-    URxvt*font: xft:Monospace:pixelsize=14
-    URxvt*boldFont: xft:Monospace:pixelsize=14
-
-    ! Fix font space
-    URxvt*letterSpace: -1
-
-    ! Scrollbar
-    URxvt.scrollStyle:          rxvt
-    URxvt.scrollBar:            false
-
-    ! Perl extensions
-    URxvt.perl-ext-common:      default,matcher
-    URxvt.matcher.button:       1
-    URxvt.urlLauncher:          firefox
-
-    ! Cursor
-    URxvt.cursorBlink:          true
-    URxvt.cursorColor:          #657b83
-    URxvt.cursorUnderline:      false
-
-    ! Pointer
-    URxvt.pointerBlank:         true
-
-    !!Source http://github.com/altercation/solarized
-
-    *background: #002b36
-    *foreground: #657b83
-    !!*fading: 40
-    *fadeColor: #002b36
-    *cursorColor: #93a1a1
-    *pointerColorBackground: #586e75
-    *pointerColorForeground: #93a1a1
-
-    !! black dark/light
-    *color0: #073642
-    *color8: #002b36
-
-    !! red dark/light
-    *color1: #dc322f
-    *color9: #cb4b16
-
-    !! green dark/light
-    *color2: #859900
-    *color10: #586e75
-
-    !! yellow dark/light
-    *color3: #b58900
-    *color11: #657b83
-
-    !! blue dark/light
-    *color4: #268bd2
-    *color12: #839496
-
-    !! magenta dark/light
-    *color5: #d33682
-    *color13: #6c71c4
-
-    !! cyan dark/light
-    *color6: #2aa198
-    *color14: #93a1a1
-
-    !! white dark/light
-    *color7: #eee8d5
-    *color15: #fdf6e3
-
-    ! transparency
-    URxvt.transparent:   true
-    URxvt.shading:       20
-
-
-Found this on the web, may tailor to my liking:
-
-    # these three lines enable clicking on links to open them ;)
-    ## if you want to enable tab support, append ,tabbed to the next line
-    ## then use shift+down arrow to create tabs and shift+{left,right} arrows to switch between them
-    URxvt*perl-ext-common: default,matcher,-option-popup,-selection-popup,-realine
-    URxvt*matcher.button: 1
-    # don't forget to change this to your favorite browser
-    URxvt*urlLauncher: chromium
-
-! open urls
-urxvt*perl-ext-common: tabbed,default,matcher,-option-popup,-selection-popup,-realine
-urxvt*url-launcher: x-www-browser
-urxvt*matcher.Button: 1
-URxvt.colorUL: #4682B4
-
-
-Urxvt*perl-lib:    /usr/lib/urxvt/perl/
+### tint2 configuration
+### pcmanfm configuration
 
 
 
@@ -463,7 +754,7 @@ _This can be done via a **single** command line:_
 
 This uses the `volumeicon-alsa` package, and requires the user to be in the `pulse-access` group in order to modify the volume state.
 
-Preferred volume config (`~/.???`):
+Preferred volume config (`~/.config/volumeicon/volumeicon`):
 
     [StatusIcon]
     stepsize=3
@@ -560,7 +851,7 @@ This depends on `xorg` currently, but I have a lot of details to work out still.
 
 For linux this is the alternative to silverlight.  You can run a browser in linux while it connects silverlight plugin through a wine bottle.
 
-I have not yet tested this.
+**I have not yet tested this.**
 
 
 ### [viewnoir](https://github.com/xsisqox/Viewnior)
@@ -568,11 +859,6 @@ I have not yet tested this.
 Most other viewing or previewing software is extremely bad in either speed or simplicity.
 
 Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan on installing it when Debian Jessie is released as the new stable.
-
-
-
-
-
 
 
 # References
@@ -587,3 +873,8 @@ Unfortunately this software requires newer packages than are available to debian
 - [gmrun in openbox](http://naniland.wordpress.com/2011/10/25/alt-f2-on-openbox/)
 - [openbox pulseaudio through amixer adjusted hotkeys](https://wiki.archlinux.org/index.php/openbox#Pulseaudio)
 - [urxvt popup options](https://bbs.archlinux.org/viewtopic.php?id=57202)
+- [urxvt kuake scripts](https://bbs.archlinux.org/viewtopic.php?id=71789&p=1)
+- [urxvt geometry](https://bbs.archlinux.org/viewtopic.php?id=72515)
+- [slim themes and testing](https://wiki.archlinux.org/index.php/SLiM#Theming)
+- [inserting lines with sed](http://unix.stackexchange.com/questions/35201/how-to-insert-a-line-into-text-document-right-before-line-containing-some-text-i)
+- [inserting with sed or awk](http://www.theunixschool.com/2012/06/insert-line-before-or-after-pattern.html)
