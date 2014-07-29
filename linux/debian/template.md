@@ -1,6 +1,6 @@
 
 # template system documentation
-#### Updated 2014-7-26
+#### Updated 2014-7-29
 
 I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
 
@@ -69,7 +69,6 @@ You may or may not find any of these to be of help, but if you want to ensure th
 - usbutils
 - uuid-runtime
 - debconf-utils
-- cpufrequtils
 
 I install these packages as support tools for various hardware and software that interacts with hardware.  I recommend all of them.
 
@@ -169,7 +168,7 @@ _Here are the all the commands I run to cover the entire packages section of doc
     aptitude clean
     aptitude update
     dpkg -rq vim-common vim-tiny
-    aptitude reinstall -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf
+    aptitude reinstall -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf
     aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils cpufrequtils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf
     update-command-not-found
 
