@@ -192,8 +192,8 @@ install_linux_packages() {
     aptitude clean
     aptitude update
     aptitude upgrade -yq
-    aptitude reinstall -ryq "${packages}"
-    aptitude install -ryq "${packages}"
+    aptitude reinstall -ryq $packages
+    aptitude install -ryq $packages
 
     # manual installs
     if [ "$1" = "gui" ] || [ "$1" = "dev" ] || [ "$1" = "all" ]
