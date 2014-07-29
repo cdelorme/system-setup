@@ -646,7 +646,7 @@ create_user() {
         # apply groups to user
         usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse,scanner,pulse-access ${config_system_username}
 
-        if [ "$1" = "gui" ]
+        if [ "$1" = "gui" ] || [ "$1" = "all" ]
         then
 
             # acquire and store user_home_dir for later use
