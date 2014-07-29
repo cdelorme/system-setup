@@ -1,6 +1,6 @@
 
 # Debian Wheezy GUI Documentation
-#### Updated 2014-7-27
+#### Updated 2014-7-29
 
 These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
 
@@ -76,7 +76,7 @@ Xorg Packages:
 
 - xorg
 - xserver-xorg-video-all
-- x11-server-utils
+- x11-xserver-utils
 - xinit
 - xinput
 - xtightvncviewer
@@ -128,7 +128,7 @@ Documentation Generator:
 
 _Run to install all packages:
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs xcompmgr libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc
 
 
 ## system configuration
@@ -226,13 +226,7 @@ _Replace contents in `~/.config/openbox/autostart` with (this is an executable f
     #!/bin/sh
     which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
     which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
-    if which compton &> /dev/null
-    then
-        (compton -c) &
-    elif which xcompmgr &> /dev/null
-    then
-        (xcompmgr -c) &
-    fi
+    if which compton &> /dev/null && (compton -c) &
     which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &
     [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
     which tint2 &> /dev/null && (tint2) &
@@ -539,21 +533,20 @@ _For forward compatibility, symlink `~/.Xdefaults` to `~/.Xresources`:_
 _To give openbox a means of showing & hiding a true-transparency urxvt instance on demand, I wrote `~/bin/urxvtq`:_
 
     #!/bin/bash
-    wid=$(xdotool search --name urxvtq)
-    if [ -z "$wid" ]
+    if [ $(ps aux | grep -v grep | grep "urxvt -name urxvtq") -eq 0 ]
     then
         rm -f /tmp/.urxvtq
         urxvt -name urxvtq -geometry 200x24 &
-        while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done
     fi
+    while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done
     if [ -f "/tmp/.urxvtq" ]
     then
         xdotool windowunmap $wid
         rm -f /tmp/.urxvtq
     else
-        xdotool windowmap $wid
-        xdotool windowactivate $wid
+        xdotool windowmap --sync $wid
         xdotool windowfocus $wid
+        xdotool windowactivate $wid &> /dev/null
         touch /tmp/.urxvtq
     fi
 

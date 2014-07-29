@@ -108,12 +108,10 @@ user_dot_files() {
             fi
         fi
 
-        # testing!
-        echo su $config_system_username -s /bin/bash -c $df_cmd
-        su $config_system_username -s /bin/bash -c $df_cmd
-
-        # cleanup
+        # install & cleanup
+        su $config_system_username -s /bin/bash -c "${df_cmd}"
         su $config_system_username -s /bin/bash -c "rm -rf ~/install.log ~/downloads ~/install"
+        rm /tmp/install
     fi
 }
 
@@ -150,7 +148,7 @@ install_linux_packages() {
     # remove tiny-vim
     if which vi &> /dev/null && ! which vim
     then
-        dpkg -rq vim-common vim-tiny
+        dpkg -r vim-common vim-tiny
     fi
 
     # pre-configure comm packages
@@ -185,7 +183,7 @@ install_linux_packages() {
         fi
 
         # add gui packages to list
-        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc google-chrome-stable google-chrome-unstable google-talkplugin"
+        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc google-chrome-stable google-chrome-unstable google-talkplugin"
     fi
 
     # prep & install all packages (reinstall adds any recommended to our base system packages)
@@ -208,6 +206,9 @@ install_linux_packages() {
         git clone https://github.com/rg3/youtube-dl /tmp/youtube-dl
         (cd /tmp/youtube-dl && python setup.py install)
         rm -rf /tmp/youtube-dl
+
+        # cleanup chrome sources
+        rm /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
     fi
 
 }
@@ -247,7 +248,7 @@ configure_linux_services() {
     if which sensors-detect &> /dev/null
     then
         echo "configuring lm-sensors..."
-        yes "y" | sensors-detect
+        yes "" | sensors-detect
     fi
 
     # ensure watchdog is enabled
@@ -411,6 +412,10 @@ configure_linux_services() {
     if which openbox &> /dev/null
     then
         update-alternatives --set x-window-manager /usr/bin/openbox
+    fi
+    if which urxvt &> /dev/null
+    then
+        update-alternatives --set x-terminal-emulator /usr/bin/urxvt
     fi
 
     # add locale & download custom fonts
@@ -647,10 +652,15 @@ configure_user_services() {
         echo 'Xft.hinting:                true' >> "${user_home_dir}/.Xdefaults"
         echo 'Xft.hintstyle:              hintslight' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.depth:                32' >> "${user_home_dir}/.Xdefaults"
-        echo 'URxvt*background:           [70]#001E27' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.geometry:             80x24' >> "${user_home_dir}/.Xdefaults"
-        echo 'URxvt.transparent:          true' >> "${user_home_dir}/.Xdefaults"
-        echo 'URxvt.shading:              20' >> "${user_home_dir}/.Xdefaults"
+        if which compton &> /dev/null
+        then
+            echo 'URxvt*background:           [70]#001E27' >> "${user_home_dir}/.Xdefaults"
+        else
+            echo 'URxvt*background:           #001E27' >> "${user_home_dir}/.Xdefaults"
+            echo 'URxvt.transparent:          true' >> "${user_home_dir}/.Xdefaults"
+            echo 'URxvt.shading:              20' >> "${user_home_dir}/.Xdefaults"
+        fi
         echo 'URxvt.fading:               0' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.loginShell:           true' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.saveLines:            1000000' >> "${user_home_dir}/.Xdefaults"
@@ -667,7 +677,7 @@ configure_user_services() {
         echo 'URxvt.perl-ext-common:      default,matcher' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.matcher.button:       1' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.urlLauncher:          x-www-browser' >> "${user_home_dir}/.Xdefaults"
-        echo '*background:                [70]#001E27' >> "${user_home_dir}/.Xdefaults"
+        echo '*background:                #001E27' >> "${user_home_dir}/.Xdefaults"
         echo '*foreground:                #9CC2C3' >> "${user_home_dir}/.Xdefaults"
         echo '*fadeColor:                 #002832' >> "${user_home_dir}/.Xdefaults"
         echo '*cursorColor:               #F34F00' >> "${user_home_dir}/.Xdefaults"
@@ -694,25 +704,25 @@ configure_user_services() {
         ln -s $user_home_dir/.Xdefaults $user_home_dir/.Xresources
 
         # create urxvtq launcher
-        mkdir -p "${user_home_dir}/bin"
-        echo "#!/bin/bash" > "${user_home_dir}/bin/urxvtq"
-        echo 'wid=$(xdotool search --name urxvtq)' >> "${user_home_dir}/bin/urxvtq"
-        echo 'if [ -z "$wid" ]' >> "${user_home_dir}/bin/urxvtq"
-        echo 'then' >> "${user_home_dir}/bin/urxvtq"
-        echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
-        echo '    urxvt -name urxvtq -geometry 200x24 &' >> "${user_home_dir}/bin/urxvtq"
-        echo '    while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done' >> "${user_home_dir}/bin/urxvtq"
-        echo 'fi' >> "${user_home_dir}/bin/urxvtq"
-        echo 'if [ -f "/tmp/.urxvtq" ]' >> "${user_home_dir}/bin/urxvtq"
-        echo 'then' >> "${user_home_dir}/bin/urxvtq"
-        echo '    xdotool windowunmap $wid' >> "${user_home_dir}/bin/urxvtq"
-        echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
-        echo 'else' >> "${user_home_dir}/bin/urxvtq"
-        echo '    xdotool windowmap $wid' >> "${user_home_dir}/bin/urxvtq"
-        echo '    xdotool windowactivate $wid' >> "${user_home_dir}/bin/urxvtq"
-        echo '    xdotool windowfocus $wid' >> "${user_home_dir}/bin/urxvtq"
-        echo '    touch /tmp/.urxvtq' >> "${user_home_dir}/bin/urxvtq"
-        echo 'fi' >> "${user_home_dir}/bin/urxvtq"
+        mkdir -p "${user_home_dir}/.bin"
+        echo "#!/bin/bash" > "${user_home_dir}/.bin/urxvtq"
+        echo 'if [ $(ps aux | grep -v grep | grep "urxvt -name urxvtq") -eq 0 ]' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'then' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    urxvt -name urxvtq -geometry 200x24 &' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'fi' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'if [ -f "/tmp/.urxvtq" ]' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'then' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    xdotool windowunmap $wid' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'else' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    xdotool windowmap --sync $wid' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    xdotool windowfocus $wid' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    xdotool windowactivate $wid &> /dev/null' >> "${user_home_dir}/.bin/urxvtq"
+        echo '    touch /tmp/.urxvtq' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'fi' >> "${user_home_dir}/.bin/urxvtq"
+        chmod +x "${user_home_dir}/.bin/urxvtq"
     fi
 
     # turn on openbox-session with `startx`
@@ -733,14 +743,14 @@ configure_user_services() {
         echo "#!/bin/sh" > "${user_home_dir}/.config/openbox/autostart"
         echo 'which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"' >> "${user_home_dir}/.config/openbox/autostart"
         echo "which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "if which compton &> /dev/null && (compton -c) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo 'which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &' >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which compton &> /dev/null && (compton -c) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo 'which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &' >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
         echo "which tint2 &> /dev/null && (tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which clipit &> /dev/null && (clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which volumeicon &> /dev/null && (volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which conky &> /dev/null && (conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which clipit &> /dev/null && (sleep 2 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which volumeicon &> /dev/null && (sleep 2 && volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which conky &> /dev/null && (sleep 10 && conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
         # echo "which yeahconsole &> /dev/null && (yeahconsole) &" >> "${user_home_dir}/.config/openbox/autostart"
 
         # configure openbox menu (~/.config/openbox/menu.xml)
@@ -750,13 +760,16 @@ configure_user_services() {
         echo '    xsi:schemaLocation="http://openbox.org/' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '    file:///usr/share/openbox/menu.xsd">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '    <menu id="root-menu" label="Openbox 3">' >> "${user_home_dir}/.config/openbox/menu.xml"
-        echo '        <item label="Web browser">' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        <item label="web">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '            <action name="Execute"><execute>x-www-browser</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
-        echo '        <item label="Terminal emulator">' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        <item label="editor">' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '            <action name="Execute"><execute>subl</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        <item label="terminal">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '            <action name="Execute"><execute>x-terminal-emulator</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
-        echo '        <item label="File Manager">' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        <item label="files">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '            <action name="Execute"><execute>pcmanfm</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        <menu id="/Debian" />' >> "${user_home_dir}/.config/openbox/menu.xml"
@@ -1035,7 +1048,7 @@ configure_user_services() {
         echo "default_color 6CBE6C" >> "${user_home_dir}/.conkyrc.d/slim"
         echo "own_window yes" >> "${user_home_dir}/.conkyrc.d/slim"
         echo "own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager" >> "${user_home_dir}/.conkyrc.d/slim"
-        if which xcompmgr &> /dev/null
+        if which compton &> /dev/null
         then
             echo "own_window_transparent no" >> "${user_home_dir}/.conkyrc.d/slim"
             echo "own_window_argb_visual yes" >> "${user_home_dir}/.conkyrc.d/slim"
@@ -1052,30 +1065,30 @@ configure_user_services() {
         echo '${time %H:%M, %Y/%m/%d}${offset 120}${alignc}${addr}${offset 120}${alignr}${uptime}' >> "${user_home_dir}/.conkyrc.d/slim"
 
         # symlink default conky to slim config
-        ln -s "${user_home_dir}/.conkyrc.d/slim" "${user_home_dir}/conkyrc"
+        ln -s "${user_home_dir}/.conkyrc.d/slim" "${user_home_dir}/.conkyrc"
     fi
 
     # configure volumeicon
     if which volumeicon &> /dev/null
     then
-        mkdir -p "${user_home_dir}/.config.volumeicon"
-        echo "[StatusIcon]" > "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "stepsize=3" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "lmb_slider=false" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "mmb_mute=false" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "use_horizontal_slider=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "show_sound_level=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "onclick=urxvt -e 'alsamixer'" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "theme=Default" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "[Hotkeys]" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "up_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "down_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "mute_enabled=true" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "up=XF86AudioRaiseVolume" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "down=XF86AudioLowerVolume" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "mute=XF86AudioMute" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "[Alsa]" >> "${user_home_dir}/.config.volumeicon/volumeicon"
-        echo "card=default" >> "${user_home_dir}/.config.volumeicon/volumeicon"
+        mkdir -p "${user_home_dir}/.config/volumeicon"
+        echo "[StatusIcon]" > "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "stepsize=3" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "lmb_slider=false" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "mmb_mute=false" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "use_horizontal_slider=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "show_sound_level=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "onclick=x-terminal-emulator -e 'alsamixer'" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "theme=Default" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "[Hotkeys]" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "up_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "down_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "mute_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "up=XF86AudioRaiseVolume" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "down=XF86AudioLowerVolume" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "mute=XF86AudioMute" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "[Alsa]" >> "${user_home_dir}/.config/volumeicon/volumeicon"
+        echo "card=default" >> "${user_home_dir}/.config/volumeicon/volumeicon"
     fi
 
     # configure weechat
@@ -1106,9 +1119,9 @@ configure_user_services() {
 
         # modify all of the below commands, remove the su, and append the path
         chown -R $config_system_username:$config_system_username /tmp/sublime_text_3
-        mkdir -p "${user_home_dir}/applications" "${user_home_dir}/bin" "${user_home_dir}/.config/sublime-text-3/Packages/User"
+        mkdir -p "${user_home_dir}/applications" "${user_home_dir}/.bin" "${user_home_dir}/.config/sublime-text-3/Packages/User" "${user_home_dir}/.config/sublime-text-3/Installed Packages/"
         mv /tmp/sublime_text_3 "${user_home_dir}/applications/sublime_text"
-        ln -s "${user_home_dir}/applications/sublime_text/sublime_text" "${user_home_dir}/bin/subl"
+        ln -s "${user_home_dir}/applications/sublime_text/sublime_text" "${user_home_dir}/.bin/subl"
 
         # install sublime package control
         curl -o "${user_home_dir}/.config/sublime-text-3/Installed Packages/Package Control.sublime-package" "https://sublime.wbond.net/Package%20Control.sublime-package"
