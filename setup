@@ -190,7 +190,7 @@ install_linux_packages() {
 
     if [ "$1" = "gui" ] || [ "$1" = "all" ]
     then
-        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs xcompmgr libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev google-chrome-stable google-chrome-unstable google-talkplugin
+        aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-server-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs xcompmgr libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc google-chrome-stable google-chrome-unstable google-talkplugin
 
         # install compton if able
         git clone https://github.com/chjj/compton.git /tmp/compton
@@ -367,6 +367,7 @@ configure_linux_services() {
     then
 
         if which google-chrome-stable &> /dev/null
+        then
 
             # set chrome as the default browser
             update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
@@ -668,6 +669,7 @@ create_user() {
             fi
 
             if which urxvt &> /dev/null
+            then
 
                 # urxvt config
                 echo 'Xft.dpi:                    96' > "${user_home_dir}/.Xdefaults"
@@ -1197,6 +1199,7 @@ automate_nix() {
 
     # package dependencies
     install_linux_packages $1
+    do_dot_files $1
 
     # async operations
     configure_linux_services $1 &
@@ -1205,7 +1208,6 @@ automate_nix() {
     configure_hosts $1 &
     firewall_rules $1 &
     configure_jis_locale $1 &
-    do_dot_files $1 &
 
 }
 
