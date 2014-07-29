@@ -766,7 +766,7 @@ configure_user_services() {
         echo '        <item label="editor">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '            <action name="Execute"><execute>subl</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
-        echo '        <item label="terminal">' >> "${user_home_dir}/.config/openbox/menu.xml"
+        echo '        <item label="cli">' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '            <action name="Execute"><execute>x-terminal-emulator</execute></action>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        </item>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        <item label="files">' >> "${user_home_dir}/.config/openbox/menu.xml"

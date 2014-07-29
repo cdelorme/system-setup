@@ -244,13 +244,16 @@ _My preferred `~/.config/openbox/menu.xml`:_
         xsi:schemaLocation="http://openbox.org/
         file:///usr/share/openbox/menu.xsd">
         <menu id="root-menu" label="Openbox 3">
-            <item label="Web browser">
+            <item label="web">
                 <action name="Execute"><execute>x-www-browser</execute></action>
             </item>
-            <item label="Terminal emulator">
+            <item label="editor">
+                <action name="Execute"><execute>subl</execute></action>
+            </item>
+            <item label="cli">
                 <action name="Execute"><execute>x-terminal-emulator</execute></action>
             </item>
-            <item label="File Manager">
+            <item label="files">
                 <action name="Execute"><execute>pcmanfm</execute></action>
             </item>
             <menu id="/Debian" />
@@ -479,10 +482,7 @@ Initially I used `yeahconsole` as a means of creating a drop-down accessible ter
 
     ! urxvt (terminal)
     URxvt.depth:                32
-    URxvt*background:           [70]#001E27
     URxvt.geometry:             80x24
-    URxvt.transparent:          true
-    URxvt.shading:              20
     URxvt.fading:               0
     URxvt.loginShell:           true
     URxvt.saveLines:            1000000
@@ -500,10 +500,17 @@ Initially I used `yeahconsole` as a means of creating a drop-down accessible ter
     URxvt.matcher.button:       1
     URxvt.urlLauncher:          x-www-browser
 
+    ! real-transparency
+    URxvt*background:           [70]#001E27
+
+    ! psuedo-transparency
+    !URxvt.transparent:          true
+    !URxvt.shading:              20
+
     !!
     ! Solarized High Contrast Dark
     !!
-    *background:                [70]#001E27
+    *background:                #001E27
     *foreground:                #9CC2C3
     *fadeColor:                 #002832
     *cursorColor:               #F34F00
