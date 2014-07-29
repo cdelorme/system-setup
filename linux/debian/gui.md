@@ -226,7 +226,7 @@ _Replace contents in `~/.config/openbox/autostart` with (this is an executable f
     #!/bin/sh
     which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
     which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
-    if which compton &> /dev/null && (compton -c) &
+    which compton &> /dev/null && (compton -c) &
     which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &
     [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
     which tint2 &> /dev/null && (tint2) &
