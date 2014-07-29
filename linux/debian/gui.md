@@ -666,12 +666,12 @@ _Popualte ~/.conkyrc.d/slim` with:_
     own_window yes
     own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 
-    # for true transparency
+    # real transparency
     own_window_transparent no
     own_window_argb_visual yes
     own_window_argb_value 120
 
-    # for non-composite psuedo-transparency support
+    # non-composite psuedo-transparency
     #own_window_transparent yes
     #lua_load ~/.conkyrc.d/scripts/lua/bg
     #lua_draw_hook_pre draw_bg
