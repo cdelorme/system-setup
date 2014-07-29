@@ -706,7 +706,7 @@ configure_user_services() {
         # create urxvtq launcher
         mkdir -p "${user_home_dir}/.bin"
         echo "#!/bin/bash" > "${user_home_dir}/.bin/urxvtq"
-        echo 'if [ $(ps aux | grep -v grep | grep "urxvt -name urxvtq") -eq 0 ]' >> "${user_home_dir}/.bin/urxvtq"
+        echo 'if [ $(ps aux | grep -v grep | grep -c "urxvt -name urxvtq") -eq 0 ]' >> "${user_home_dir}/.bin/urxvtq"
         echo 'then' >> "${user_home_dir}/.bin/urxvtq"
         echo '    rm -f /tmp/.urxvtq' >> "${user_home_dir}/.bin/urxvtq"
         echo '    urxvt -name urxvtq -geometry 200x24 &' >> "${user_home_dir}/.bin/urxvtq"
