@@ -533,7 +533,7 @@ _For forward compatibility, symlink `~/.Xdefaults` to `~/.Xresources`:_
 _To give openbox a means of showing & hiding a true-transparency urxvt instance on demand, I wrote `~/bin/urxvtq`:_
 
     #!/bin/bash
-    if [ $(ps aux | grep -v grep | grep "urxvt -name urxvtq") -eq 0 ]
+    if [ $(ps aux | grep -v grep | grep -c "urxvt -name urxvtq") -eq 0 ]
     then
         rm -f /tmp/.urxvtq
         urxvt -name urxvtq -geometry 200x24 &
