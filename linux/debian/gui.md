@@ -231,7 +231,7 @@ _Replace contents in `~/.config/openbox/autostart` with (this is an executable f
     [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
     which tint2 &> /dev/null && (tint2) &
     which clipit &> /dev/null && (clipit) &
-    which xset &> /dev/null && (xset r rate 250 25 & xset b off) &
+    which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
     which volumeicon &> /dev/null && (volumeicon) &
     which conky &> /dev/null && (conky -d -q) &
     # which yeahconsole &> /dev/null && (yeahconsole) &

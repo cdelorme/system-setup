@@ -745,7 +745,7 @@ configure_user_services() {
         echo "which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which compton &> /dev/null && (compton -c) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo 'which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &' >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
         echo "which tint2 &> /dev/null && (tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which clipit &> /dev/null && (sleep 2 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
