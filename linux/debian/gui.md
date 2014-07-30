@@ -451,7 +451,7 @@ If you want to set a wallpaper background, or better year cycle a set of wallpap
 
 _Throw a bunch of preferred images into `~/.wallpaper/` and create `~/.fehbg` with:_
 
-    (while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 10; done;) &
+    (while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 300; done;) &
 
 _Or adjust the directorie to pull pictures from as desired._
 
