@@ -587,7 +587,7 @@ firewall_rules() {
     echo "# accept ssh with rate limiting" >> /etc/iptables/iptables.rules
     echo "-N LOGREJECTSSH" >> /etc/iptables/iptables.rules
     echo "-A LOGREJECTSSH -j LOG --log-prefix \"iptables deny: \" --log-level 7" >> /etc/iptables/iptables.rules
-    echo "-A LOGDREJECTSSH -j REJECT" >> /etc/iptables/iptables.rules
+    echo "-A LOGREJECTSSH -j REJECT" >> /etc/iptables/iptables.rules
     echo "-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource" >> /etc/iptables/iptables.rules
     echo "-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGREJECTSSH" >> /etc/iptables/iptables.rules
     echo "-A INPUT -p tcp -m tcp --dport ssh -j ACCEPT" >> /etc/iptables/iptables.rules
