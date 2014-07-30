@@ -624,8 +624,17 @@ create_user() {
             useradd -m -s /bin/bash -p $(mkpasswd -m md5 "${config_system_password}") ${config_system_username}
         fi
 
-        # apply groups to user
-        usermod -aG sudo,adm,video,audio,bluetooth,netdev,fuse,scanner,pulse-access ${config_system_username}
+        # apply groups to user conditionally
+        usermod -aG sudo,adm ${config_system_username}
+
+        if which smbd &> /dev/null
+        then
+            usermod -aG sambashare ${config_system_username}
+        fi
+        if which openbox &> /dev/null
+        then
+            usermod -aG video,audio,bluetooth,netdev,fuse,scanner,pulse-access ${config_system_username}
+        fi
     fi
 
 }
