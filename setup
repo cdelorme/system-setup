@@ -723,6 +723,14 @@ configure_user_services() {
         echo "exec openbox-session" > "${user_home_dir}/.xinitrc"
     fi
 
+    # configure pulse
+    if which pulseaudio &> /dev/null
+    then
+        # copy the defaults.pa into ~/.pulse, for pavucontrol
+        mkdir -p "${user_home_dir}/.pulse"
+        cp "/etc/pulse/default.pa" "${user_home_dir}/.pulse"
+    fi
+
     # configure openbox
     if which openbox &> /dev/null
     then
@@ -760,7 +768,6 @@ configure_user_services() {
         echo '        <separator />' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        <item label="ObConf"><action name="Execute"><execute>obconf</execute></action></item>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        <item label="Reconfigure"><action name="Reconfigure" /></item>' >> "${user_home_dir}/.config/openbox/menu.xml"
-        echo '        <item label="Restart"><action name="Restart" /></item>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '        <item label="Exit"><action name="Exit"><prompt>no</prompt></action></item>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '    </menu>' >> "${user_home_dir}/.config/openbox/menu.xml"
         echo '</openbox_menu>' >> "${user_home_dir}/.config/openbox/menu.xml"
