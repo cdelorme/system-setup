@@ -183,7 +183,7 @@ install_linux_packages() {
         fi
 
         # add gui packages to list
-        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin"
+        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio pavucontrol pulseaudio-bluetooth feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin"
     fi
 
     # prep & install all packages (reinstall adds any recommended to our base system packages)
@@ -741,7 +741,6 @@ configure_user_services() {
         echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
         echo "which tint2 &> /dev/null && (tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which clipit &> /dev/null && (sleep 2 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which volumeicon &> /dev/null && (sleep 2 && volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which conky &> /dev/null && (sleep 10 && conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
 
         # configure openbox menu (~/.config/openbox/menu.xml)
@@ -1039,29 +1038,6 @@ configure_user_services() {
 
         # symlink default conky to slim config
         ln -s "${user_home_dir}/.conkyrc.d/slim" "${user_home_dir}/.conkyrc"
-    fi
-
-    # configure volumeicon
-    if which volumeicon &> /dev/null
-    then
-        mkdir -p "${user_home_dir}/.config/volumeicon"
-        echo "[StatusIcon]" > "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "stepsize=3" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "lmb_slider=false" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "mmb_mute=false" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "use_horizontal_slider=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "show_sound_level=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "onclick=x-terminal-emulator -e 'alsamixer'" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "theme=Default" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "[Hotkeys]" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "up_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "down_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "mute_enabled=true" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "up=XF86AudioRaiseVolume" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "down=XF86AudioLowerVolume" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "mute=XF86AudioMute" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "[Alsa]" >> "${user_home_dir}/.config/volumeicon/volumeicon"
-        echo "card=default" >> "${user_home_dir}/.config/volumeicon/volumeicon"
     fi
 
     # configure weechat
