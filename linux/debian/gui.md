@@ -1,6 +1,6 @@
 
-# Debian Wheezy GUI Documentation
-#### Updated 2014-7-29
+# gui documentation
+#### Updated 2014-8-17
 
 These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
 
@@ -9,7 +9,7 @@ It assumes that work picks up where the template documentation left off.
 
 ## troubleshooting
 
-A graphics card will be required, though driver installation varies wildly and won't be covered here.  If you install the packages below and cannot run startx or telinit 3 into the slim, then you may have to look elsewhere for future guides.
+A graphics card will be required, though driver installation varies wildly and won't be covered here.  If you install the packages below and cannot run startx, then you may have to look elsewhere.
 
 
 ## install packages
@@ -68,10 +68,6 @@ Lightweight Unicode Terminal:
 
 - rxvt-unicode
 
-Graphical Login Manager:
-
-- slim
-
 Xorg Packages:
 
 - xorg
@@ -111,13 +107,9 @@ GUI file search tool:
 
 - catfish
 
-_I think this is totally useful and should have an openbox hotkey._
-
 GUI Keyboard Layout Toggle:
 
 - fbxkb
-
-_This package is a gui overlay that shows up in the menu with a flag to coordinate with languages, and is an interface to the xserver keyboard layouts.  It's a very nice lightweight language switcher._
 
 Documentation Generator:
 
@@ -128,7 +120,7 @@ Documentation Generator:
 
 _Run to install all packages:
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools
 
 
 ## system configuration
@@ -153,33 +145,6 @@ After copying the files you will need to refresh the font cache using the `fc-ca
 _Run this to rebuild font cache:_
 
     fc-cache -fr
-
-
-### configuring & theming slim
-
-Slim is a UI that can be configured to run when the system starts and give you a UI to login with.  It is both lightweight and customizable.
-
-_I often find myself using the terminal exclusively when accessing my system, so I don't really make use of slim, but if you want a system with multiple users or a graphical login it is excellent._
-
-You may have to set it to boot at startup.
-
-The available themes can be found in `/usr/share/slim/themes/`, and you can set the theme to use in `/etc/slim.conf` by the attribute `current_theme`.
-
-
-#### tips when using slim
-
-To shutdown the system enter `halt` as the username followed by the root password.  Similarly to reboot the system use `reboot` as the username.
-
-
-##### commands
-
-_Run to activate slim at boot time:_
-
-    update-rc.d slim defaults
-
-_My custom theme is named `???` and is sectioned into:_
-
-    INCOMPLETE
 
 
 ### startx configuration
@@ -227,14 +192,12 @@ _Replace contents in `~/.config/openbox/autostart` with (this is an executable f
     which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
     which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
     which compton &> /dev/null && (compton -c) &
-    which hsetroot &> /dev/null && (hsetroot -solid "#2E3436") &
+    which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &
+    which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5 & xset -dpms & xset s off) &
     [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
-    which tint2 &> /dev/null && (tint2) &
-    which clipit &> /dev/null && (clipit) &
-    which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
-    which volumeicon &> /dev/null && (volumeicon) &
-    which conky &> /dev/null && (conky -d -q) &
-    # which yeahconsole &> /dev/null && (yeahconsole) &
+    which clipit &> /dev/null && (sleep 2 && clipit) &
+    which tint2 &> /dev/null && (sleep 3 tint2) &
+    which conky &> /dev/null && (sleep 10 && conky -d -q) &
 
 _My preferred `~/.config/openbox/menu.xml`:_
 
@@ -244,36 +207,17 @@ _My preferred `~/.config/openbox/menu.xml`:_
         xsi:schemaLocation="http://openbox.org/
         file:///usr/share/openbox/menu.xsd">
         <menu id="root-menu" label="Openbox 3">
-            <item label="web">
-                <action name="Execute"><execute>x-www-browser</execute></action>
-            </item>
-            <item label="editor">
-                <action name="Execute"><execute>subl</execute></action>
-            </item>
-            <item label="cli">
-                <action name="Execute"><execute>x-terminal-emulator</execute></action>
-            </item>
-            <item label="files">
-                <action name="Execute"><execute>pcmanfm</execute></action>
-            </item>
+            <item label="web"><action name="Execute"><execute>x-www-browser</execute></action></item>
+            <item label="editor"><action name="Execute"><execute>subl</execute></action></item>
+            <item label="cli"><action name="Execute"><execute>x-terminal-emulator</execute></action></item>
+            <item label="files"><action name="Execute"><execute>pcmanfm</execute></action></item>
             <menu id="/Debian" />
             <separator />
             <menu id="client-list-menu" />
             <separator />
-            <item label="ObConf">
-                <action name="Execute"><execute>obconf</execute></action>
-            </item>
-            <item label="Reconfigure">
-                <action name="Reconfigure" />
-            </item>
-            <item label="Restart">
-                <action name="Restart" />
-            </item>
-            <item label="Exit">
-                <action name="Exit">
-                    <prompt>no</prompt>
-                </action>
-            </item>
+            <item label="ObConf"><action name="Execute"><execute>obconf</execute></action></item>
+            <item label="Reconfigure"><action name="Reconfigure" /></item>
+            <item label="Exit"><action name="Exit"><prompt>no</prompt></action></item>
         </menu>
     </openbox_menu>
 
@@ -501,7 +445,7 @@ Initially I used `yeahconsole` as a means of creating a drop-down accessible ter
     URxvt.urlLauncher:          x-www-browser
 
     ! real-transparency
-    URxvt*background:           [70]#001E27
+    URxvt*background:           [30]#001E27
 
     ! psuedo-transparency
     !URxvt.transparent:          true
@@ -556,28 +500,6 @@ _To give openbox a means of showing & hiding a true-transparency urxvt instance 
         xdotool windowactivate $wid &> /dev/null
         touch /tmp/.urxvtq
     fi
-
-
-### yeahconsole
-
-This is a utility that can be used to make an instantly accessible urxvt console pop down from the top of the screen.  This can be incredibly helpful, so I have installed it.
-
-However, it only features psuedo-transparency support and does not work with a composite manager.  The result isn't as clean as I'd have preferred, so instead I choose to use a script to manage a single terminal instance in a similar fashion.
-
-
-##### commands
-
-_YeahConsole configuration append to `~/.Xdefaults`:_
-
-    ! yeahconsole config
-    yeahconsole*term:           urxvt
-    yeahconsole*toggleKey:      Win+t
-    yeahconsole*toggleFull:     None+F11
-    yeahconsole*consoleHeight:  20
-    yeahconsole*aniDelay:       0
-    yeahconsole*stepSize:       10
-
-_FYI: These toggle keys are not virtualbox friendly._
 
 
 ### configuring & theming conky
@@ -642,7 +564,7 @@ _Create `~/.conkyrc.d/scripts/lua/bg` with:_
 
     end
 
-_Popualte ~/.conkyrc.d/slim` with:_
+_Populate ~/.conkyrc.d/slim` with:_
 
     ##
     # Conky-Slim
@@ -680,9 +602,8 @@ _Popualte ~/.conkyrc.d/slim` with:_
     # content
     ##
     TEXT
-    cpu ${cpubar cpu0 8,120}             ${alignc}mem  ${membar 5,120}          ${alignr}/     ${fs_bar 5,120 /}
-        ${offset 120}             ${alignc}swap ${swapbar 5,120}          ${alignr}/home ${fs_bar 5,120 /home}
-    ${time %H:%M, %Y/%m/%d}${offset 120}${alignc}${addr}${offset 120}${alignr}${uptime}
+    cpu ${cpu cpu0}% ${cpubar cpu0 8,120}           ${alignc}mem (${memperc}%) ${mem}/${memmax} ${membar 5,120}          ${alignr}/     (${fs_used_perc /}%) ${fs_bar 5,120 /}
+    uptime ${uptime}${alignc}         network address ${addr eth1}${alignr}/home  (${fs_used_perc /home}%) ${fs_bar 5,120 /home}
 
 _Spacing matters and will effect formatting/display.  With these files in place, simply running conky should take care of the rest._
 
@@ -721,11 +642,18 @@ _Recommended configuration in `~/.config/clipit/clipitrc`:_
     search_key=<Ctrl><Alt>F
 
 
-
 ### tint2 configuration
+
+    NONE NECESSARY
+
+_I haven't gotten around to this yet, and I haven't found a reason or need to either._
+
+
 ### pcmanfm configuration
 
+    NONE NECESSARY
 
+_I haven't gotten around to this yet, and I haven't found a reason or need to either._
 
 
 ### user configuration
@@ -739,49 +667,19 @@ For full privileges users should belong to these groups:
 - audio
 - video
 - adm
+- pulse
 - pulse-access
 
 Many of these groups are assigned by default when a new user is created through the UI.
 
-The `adm` group is necessary for log access; fuse gives the user mounting privileges.  The `pulse-access` group is intended for specific volume controls.  The others are all rather self-explanitory.
+The `adm` group is necessary for log access; fuse gives the user mounting privileges.  The `pulse-access` and `pulse` groups are intended for specific volume controls.  The `netdev` group is for network device access, and may not be necessary if you aren't using graphical networking tools (which I don't).  The others are all rather self-explanitory.
 
 
 ##### commands
 
 _This can be done via a **single** command line:_
 
-    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse-access username
-
-
-### gui volume controls with pulse and alsa
-
-This uses the `volumeicon-alsa` package, and requires the user to be in the `pulse-access` group in order to modify the volume state.
-
-Preferred volume config (`~/.config/volumeicon/volumeicon`):
-
-    [StatusIcon]
-    stepsize=3
-    lmb_slider=false
-    mmb_mute=false
-    use_horizontal_slider=true
-    show_sound_level=true
-    onclick=urxvt -e 'alsamixer'
-    theme=Default
-
-    [Hotkeys]
-    up_enabled=true
-    down_enabled=true
-    mute_enabled=true
-    up=XF86AudioRaiseVolume
-    down=XF86AudioLowerVolume
-    mute=XF86AudioMute
-
-    [Alsa]
-    card=default
-
-**The volumeicon package provides a UI component, but is not required to adjust the volume by hotkeys.**
-
-**Still researching the volume controls via `XF86`.**
+    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse,pulse-access username
 
 
 ## [Youtube Downloader](https://github.com/rg3/youtube-dl)
@@ -818,8 +716,6 @@ _Create a file at `/etc/apt/sources.list.d/google` with these lines:_
     # Google Chrome repo http://www.google.com/linuxrepositories/
     deb http://dl.google.com/linux/chrome/deb/ stable main
     deb http://dl.google.com/linux/talkplugin/deb/ stable main
-    deb http://dl.google.com/linux/earth/deb/ stable main
-    deb http://dl.google.com/linux/musicmanager/deb/ stable main
 
 _Run these commands to update aptitude:_
 
@@ -834,6 +730,11 @@ _Set as default browser:_
 
     update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
 
+_Remove the duplicate sources to prevent errors on future `aptitude update` commands:_
+
+    rm /etc/apt/sources.list.d/google.list
+    rm /etc/apt/sources.list.d/google-chrome-unstable.list
+
 
 ### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
 
@@ -847,7 +748,7 @@ I have a lot of software that I have not yet finished researching or have not su
 
 ### multiple keyboard layout configuration
 
-This depends on `xorg` currently, but I have a lot of details to work out still.
+This depends on `xorg` currently, but I have a lot of details to work out still.  I'm also working on how to use the `fbxkb` package to toggle layouts.
 
 
 ### pipelight
@@ -859,9 +760,7 @@ For linux this is the alternative to silverlight.  You can run a browser in linu
 
 ### [viewnoir](https://github.com/xsisqox/Viewnior)
 
-Most other viewing or previewing software is extremely bad in either speed or simplicity.
-
-Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan on installing it when Debian Jessie is released as the new stable.
+The viewnior program is a superb lightweight image viewer with quick previews, outmatching most competator image-viewer software.  Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan to install it when Debian Jessie is released as the new stable.
 
 
 # References
