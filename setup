@@ -383,16 +383,6 @@ configure_linux_services() {
         service transmission-daemon start
     fi
 
-    # patch pulseaudio bug
-    if [ -f /etc/default/pulseaudio ]
-    then
-        sed -i "s/PULSEAUDIO_SYSTEM_START=0/PULSEAUDIO_SYSTEM_START=1/" /etc/default/pulseaudio
-        if which pulseaudio &> /dev/null
-        then
-            service pulseaudio restart
-        fi
-    fi
-
     # disable slim at startup & change default theme
     if which slim &> /dev/null
     then
@@ -662,9 +652,9 @@ configure_user_services() {
         echo 'Xft.hintstyle:              hintslight' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.depth:                32' >> "${user_home_dir}/.Xdefaults"
         echo 'URxvt.geometry:             80x24' >> "${user_home_dir}/.Xdefaults"
-        if which compton &> /dev/null
+        if which compton &> /dev/null || which xcompmgr &> /dev/null
         then
-            echo 'URxvt*background:           [70]#001E27' >> "${user_home_dir}/.Xdefaults"
+            echo 'URxvt*background:           [30]#001E27' >> "${user_home_dir}/.Xdefaults"
         else
             echo 'URxvt*background:           #001E27' >> "${user_home_dir}/.Xdefaults"
             echo 'URxvt.transparent:          true' >> "${user_home_dir}/.Xdefaults"
@@ -1043,7 +1033,7 @@ configure_user_services() {
         then
             echo "own_window_transparent no" >> "${user_home_dir}/.conkyrc.d/slim"
             echo "own_window_argb_visual yes" >> "${user_home_dir}/.conkyrc.d/slim"
-            echo "own_window_argb_value 120" >> "${user_home_dir}/.conkyrc.d/slim"
+            echo "own_window_argb_value 30" >> "${user_home_dir}/.conkyrc.d/slim"
         else
             echo "own_window_transparent yes" >> "${user_home_dir}/.conkyrc.d/slim"
             echo "lua_load ~/.conkyrc.d/scripts/lua/bg" >> "${user_home_dir}/.conkyrc.d/slim"
