@@ -183,7 +183,7 @@ install_linux_packages() {
         fi
 
         # add gui packages to list
-        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode slim xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre yeahconsole xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin"
+        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin"
     fi
 
     # prep & install all packages (reinstall adds any recommended to our base system packages)
@@ -381,13 +381,6 @@ configure_linux_services() {
 
         # restart daemon
         service transmission-daemon start
-    fi
-
-    # disable slim at startup & change default theme
-    if which slim &> /dev/null
-    then
-        update-rc.d slim disable
-        sed -i "s/^current_theme.*/current_theme default/" /etc/slim.conf
     fi
 
     # update default web browser, session & window managers
@@ -750,7 +743,6 @@ configure_user_services() {
         echo "which clipit &> /dev/null && (sleep 2 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which volumeicon &> /dev/null && (sleep 2 && volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which conky &> /dev/null && (sleep 10 && conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
-        # echo "which yeahconsole &> /dev/null && (yeahconsole) &" >> "${user_home_dir}/.config/openbox/autostart"
 
         # configure openbox menu (~/.config/openbox/menu.xml)
         echo '<?xml version="1.0" encoding="UTF-8"?>' > "${user_home_dir}/.config/openbox/menu.xml"
