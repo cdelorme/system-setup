@@ -151,12 +151,6 @@ install_linux_packages() {
         netselect-apt -sn
     fi
 
-    # remove tiny-vim
-    if which vi &> /dev/null && ! which vim
-    then
-        dpkg -r vim-common vim-tiny
-    fi
-
     # pre-configure comm packages
     if [ "$1" = "comm" ] || [ "$1" = "dev" ]  || [ "$1" = "all" ]
     then
@@ -188,7 +182,7 @@ install_linux_packages() {
         [ -f /etc/apt/sources.list.d/deb-multimedia.list ] || echo "deb http://www.deb-multimedia.org stable main non-free" > /etc/apt/sources.list.d/deb-multimedia.list
 
         # add gui packages to list
-        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio pavucontrol pulseaudio-bluetooth feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin deb-multimedia-keyring libfaac-dev libx264-dev"
+        packages="$packages bluez bluez-tools bluez-utils alsa-base alsa-utils pulseaudio pulseaudio-bluetooth pavucontrol shared-mime-info suckless-tools transmission transmission-cli xdg-user-dirs xorg xserver-xorg-video-all xsel xinit xinput x11-utils x11-xserver-utils arandr gksu gmrun hsetroot desktop-base dmz-cursor-theme lxappearance gnome-icon-theme gnome-icon-theme-extras menu obconf obmenu openbox openbox-themes openshot pcmanfm rxvt-unicode tint2 catfish clipit conky-all volumeicon-alsa zenity zenity-common xtightvncviewer gparted chromium google-chrome-stable google-talkplugin fbxkb fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer deb-multimedia-keyring libfaac-dev libx264-dev lame ffmpeg vlc flashplugin-nonfree evince feh gtk-recordmydesktop gimp gimp-plugin-registry libconfig-dev libdbus-1-dev libdrm-dev libx11-dev libxcomposite-dev libxdamage-dev libxext-dev libxfixes-dev libXinerama-dev libxrandr-dev libxrender-dev libpcre3-dev libgl1-mesa-dev"
     fi
 
     # add web server packages (incomplete)
@@ -200,7 +194,7 @@ install_linux_packages() {
     # add dev packages
     if [ "$1" = "dev" ] || [ "$1" = "all" ]
     then
-        packages="$packages build-essential debconf-utils debhelper git-flow g++ kernel-package libncurses5-dev devscripts"
+        packages="$packages build-essential debconf-utils debhelper git-flow g++ kernel-package libncurses5-dev devscripts bpython openjdk-7-jre python-dev python3-dev"
     fi
 
     # prep & install all packages
@@ -217,6 +211,8 @@ install_linux_packages() {
         git clone https://github.com/chjj/compton.git /tmp/compton
         (cd /tmp/compton && make && make install)
         rm -rf /tmp/compton
+        aptitude purge -ryq asciidoc
+        aptitude clean
 
         # attempt youtube-dl installation
         git clone https://github.com/rg3/youtube-dl /tmp/youtube-dl
@@ -224,7 +220,7 @@ install_linux_packages() {
         rm -rf /tmp/youtube-dl
 
         # cleanup chrome sources
-        rm /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
+        rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
     fi
 
     # dev manual installs & tweaks
@@ -274,10 +270,10 @@ configure_linux_services() {
         rm -rf /tmp/downloads /tmp/install.log /tmp/install
     fi
 
-    # fix grub and turn off auto-powersave features
+    # fix grub and turn off powersave features
     if [ -f /etc/default/grub ]
     then
-        sed -i 's/GRUB_COMMANDLINE_LINUX_DEFALT=.*/GRUB_COMMANDLINE_LINUX_DEFALT="quiet panic=10 acpi=0 apm=0"/' /etc/default/grub
+        sed -i 's/GRUB_COMMANDLINE_LINUX_DEFALT=.*/GRUB_COMMANDLINE_LINUX_DEFALT="quiet panic=10"/' /etc/default/grub
         update-grub
     fi
 
@@ -864,11 +860,13 @@ configure_user_services() {
         echo '        <keybind key="W-t"><action name="Execute"><command>x-terminal-emulator</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
-        echo '        <keybind key="W-f"><action name="Execute"><command>pcmanfm</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+        echo '        <keybind key="W-b"><action name="Execute"><command>pcmanfm</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-m"><action name="Execute"><command>vlc</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+        echo '        <keybind key="W-f"><action name="Execute"><command>catfish</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
+        echo '        <keybind key="W-s"><action name="Execute"><command>bash -c "sleep 2; xset dpms force off"</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>amixer set Master 5%+</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="XF86AudioLowerVolume"><action name="Execute"><command>amixer set Master 5%-</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
         echo '        <keybind key="XF86AudioMute"><action name="Execute"><command>amixer set Master toggle</command></action></keybind>' >> "${user_home_dir}/.config/openbox/rc.xml"
