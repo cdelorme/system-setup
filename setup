@@ -190,10 +190,8 @@ install_linux_packages() {
     if [ "$1" = "web" ] || [ "$1" = "dev" ] || [ "$1" = "all" ]
     then
 
-        # dev systems
-
         # add web-specific packages
-        packages="$packages"
+        packages="$packages nginx-full"
     fi
 
     # preconfigure dev packages
@@ -204,11 +202,10 @@ install_linux_packages() {
         packages="$packages devscripts"
     fi
 
-    # prep & install all packages (reinstall adds any recommended to our base system packages)
+    # prep & install all packages
     aptitude clean
     aptitude update
     aptitude upgrade -yq
-    aptitude reinstall -ryq $packages
     aptitude install -ryq $packages
 
     # gui manual installs & tweaks
@@ -276,6 +273,13 @@ configure_linux_services() {
         rm -rf /tmp/downloads /tmp/install.log /tmp/install
     fi
 
+    # fix grub and turn off auto-powersave features
+    if [ -f /etc/default/grub ]
+    then
+        sed -i 's/GRUB_COMMANDLINE_LINUX_DEFALT=.*/GRUB_COMMANDLINE_LINUX_DEFALT="quiet panic=10 acpi=0 apm=0"/' /etc/default/grub
+        update-grub
+    fi
+
     # update our command-not-found cache
     if which update-command-not-found &> /dev/null
     then
@@ -284,7 +288,6 @@ configure_linux_services() {
 
     if which sensors-detect &> /dev/null
     then
-        echo "configuring lm-sensors..."
         yes "" | sensors-detect
     fi
 
@@ -778,15 +781,15 @@ configure_user_services() {
 
         # configure openbox autostart
         echo "#!/bin/sh" > "${user_home_dir}/.config/openbox/autostart"
+        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5 & xset -dpms & xset s off) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo 'which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"' >> "${user_home_dir}/.config/openbox/autostart"
         echo "which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which compton &> /dev/null && (compton -c) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo 'which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &' >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5 & xset -dpms & xset s off) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find ~/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which tint2 &> /dev/null && (tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which clipit &> /dev/null && (sleep 2 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
-        echo "which volumeicon &> /dev/null && (sleep 3 && volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo '[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find $HOME/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"' >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which tint2 &> /dev/null && (sleep 3 tint2) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which clipit &> /dev/null && (sleep 5 && clipit) &" >> "${user_home_dir}/.config/openbox/autostart"
+        echo "which volumeicon &> /dev/null && (sleep 5 && volumeicon) &" >> "${user_home_dir}/.config/openbox/autostart"
         echo "which conky &> /dev/null && (sleep 10 && conky -d -q) &" >> "${user_home_dir}/.config/openbox/autostart"
 
         # configure openbox menu (~/.config/openbox/menu.xml)
