@@ -136,7 +136,13 @@ configure_osx_services() {
 install_linux_packages() {
 
     # add template packages to list
-    packages="firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime debconf-utils bzip2 lzop p7zip-full zip unzip unrar xz-utils unace rzip unalz zoo arj netselect-apt ssh curl ntp rsync whois vim git git-flow mercurial debhelper libncurses5-dev kernel-package build-essential fakeroot e2fsprogs parted sshfs fuse-utils gvfs-fuse exfat-fuse exfat-utils fusesmb os-prober sudo bash-completion command-not-found tmux screen bc less keychain pastebinit anacron miscfiles monit markdown avahi-utils avahi-daemon libnss-mdns wireless-tools htop linux-headers-3.2.0-4-all lm-sensors resolvconf watchdog g++"
+    packages="netselect-apt monit ntp resolvconf watchdog ssh sudo uuid-runtime whois rsync curl e2fsprogs sshfs screen tmux vim command-not-found git mercurial markdown unace unalz unrar zip zoo rzip p7zip-full arj lzop"
+
+    # add desktop packages
+    if ! [ "$1" = "web" ] && ! [ "$1" = "comm" ]
+    then
+        packages="$packages linux-headers-3.2.0-4-all lm-sensors avahi-utils firmware-linux miscfiles keychain parted pastebinit exfat-fuse exfat-utils fuse-utils fusesmb"
+    fi
 
     # install net-select to improve mirror speeds
     if ! which netselect-apt &> /dev/null
@@ -167,7 +173,6 @@ install_linux_packages() {
         packages="$packages samba samba-tools smbclient mdadm weechat-curses transmission-daemon"
     fi
 
-    # preconfigure gui packages
     if [ "$1" = "gui" ] || [ "$1" = "dev" ] || [ "$1" = "all" ]
     then
 
@@ -183,23 +188,19 @@ install_linux_packages() {
         [ -f /etc/apt/sources.list.d/deb-multimedia.list ] || echo "deb http://www.deb-multimedia.org stable main non-free" > /etc/apt/sources.list.d/deb-multimedia.list
 
         # add gui packages to list
-        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio pavucontrol pulseaudio-bluetooth feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin libfaac-dev libx264-dev"
+        packages="$packages desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio pavucontrol pulseaudio-bluetooth feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools google-chrome-stable google-chrome-unstable google-talkplugin deb-multimedia-keyring libfaac-dev libx264-dev"
     fi
 
-    # preconfigure web packages
+    # add web server packages (incomplete)
     if [ "$1" = "web" ] || [ "$1" = "dev" ] || [ "$1" = "all" ]
     then
-
-        # add web-specific packages
         packages="$packages nginx-full"
     fi
 
-    # preconfigure dev packages
+    # add dev packages
     if [ "$1" = "dev" ] || [ "$1" = "all" ]
     then
-
-        # add dev packages
-        packages="$packages devscripts"
+        packages="$packages build-essential debconf-utils debhelper git-flow g++ kernel-package libncurses5-dev devscripts"
     fi
 
     # prep & install all packages
