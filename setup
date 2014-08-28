@@ -136,7 +136,7 @@ configure_osx_services() {
 install_linux_packages() {
 
     # add template packages to list
-    packages="netselect-apt monit ntp resolvconf watchdog ssh sudo uuid-runtime whois rsync curl e2fsprogs sshfs screen tmux vim command-not-found git mercurial markdown unace unalz unrar zip zoo rzip p7zip-full arj lzop"
+    packages="netselect-apt monit ntp resolvconf watchdog ssh sudo uuid-runtime whois rsync curl e2fsprogs sshfs screen tmux vim command-not-found git mercurial bzr subversion subversion-tools markdown unace unalz unrar zip zoo rzip p7zip-full arj lzop"
 
     # add desktop packages
     if ! [ "$1" = "web" ] && ! [ "$1" = "comm" ]
