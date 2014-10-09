@@ -766,101 +766,6 @@ _Finally, here is a set of cleanup tasks to run, if you look at the output for t
 Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
 
 
-## configuring golang
-
-I recommend installing [goconvey](https://github.com/smartystreets/goconvey) and [gin](https://github.com/codegangsta/gin).
-
-The first is a test enhancer that will make it easier to read debug output.
-
-The second allows you to run a project while watching for file changes and automatically rebuilding and running it.  This is very useful for web development, but not as much for run-time application development or command development.
-
-
-##### commands
-
-_Run these lines to install the recommended go packages:_
-
-    go get -t github.com/smartystreets/goconvey
-    go get github.com/codegangsta/gin
-
-
-### installing `pip` & python packages
-
-The python package manager should be installed if you intend to use python (and you probably will without realizing it).
-
-If you develop in python you will want `pip` to add the `pep8` package for syntax support.  For interactive python debugging you should also install [bpython](https://pypi.python.org/pypi/bpython).
-
-Additionally we want to install the virtual environment wrapper, such that we can have more finely tuned controls per application or environment as for what python version is to be used and packages are installed.
-
-
-##### commands
-
-_If you did not use brew to install python, or for whatever reason brew did not install `pip`, then you will want to run this first:_
-
-    sudo easy_install pip3
-
-_Then you can run this to install and update related packages:_
-
-    sudo pip install virtualenvwrapper
-    pip3 install --upgrade setuptools
-    pip3 install --upgrade pip
-    pip3 install bpython
-    pip3 install pep8
-    pip install virtualenv
-    pip3 install virtualenv
-
-_You can omit the 3.3 and use just pip if you program in the 2.x version of python._
-
-
-### nodejs globals
-
-For nodejs development, I recommend installing some tools globally.  Here is my recommended list:
-
-- csslint
-- jshint
-- csso
-- yo
-- grunt
-- grunt-watch
-- markdown
-- forever
-- mocha
-- jscoverage
-- uglify-js
-
-
-##### commands
-
-_To install nodejs globals:_
-
-    npm install -g csslint jshint csso uglify-js mocha jscoverage yo grunt grunt-contrib-watch markdown forever bower
-
-_You may optionally add `mongo` and `mysql` as needed, but it may be wiser to use a local copy of those per project.  Same goes for bower and grunt packages, if you expect many projects to be using them at the same time._
-
-
-### creating a crontab
-
-Ideally you should setup a script to automatically update your homebrew and npm packages.  One good option for this is your "crontab".
-
-
-##### commands
-
-_You can put the script in `/usr/local/bin/autobrewnpm` and you can add these lines:_
-
-    #!/bin/bash
-
-    brew update
-    brew upgrade
-    npm update
-
-_Make sure the script file you create is executable._
-
-_You can run `crontab -e` to open your crontab (likely new/empty), and add this line:_
-
-    0 2 * * * /usr/local/bin/autoupdate &> /dev/null
-
-_This script should now execute everyday at 2AM._
-
-
 ### path modifications
 
 Many of the packages you install with homebrew will already exist on the machine.  When you run a command it checks the paths in the order they appear in the PATH variable and stops as soon as it finds the command.  To use the new versions of same-named commands you have to change the `PATH` global variable to include the local bin first.  Be sure to add this to your `~/.bashrc`:
@@ -982,20 +887,6 @@ I remove any other software from my dock except the following list:
 I do use more software than is in this list, but I almost never use the dock to access it, I use spotlight because it is faster.  **This list is really here for drag-and-drop applications.**
 
 
-## sync accounts
-
-I no longer bother synchronizing my accounts, but if you choose to do so you can hook your gmail up to your `Mail`, `Contacts` and `Calendar` software on the system.
-
-I do syncrhonize my google chrome, but because I use google chrome I do not need any of the other software configured.
-
-
-## file vault
-
-I no longer bother encrypting my drive.  It has a small performance hit, and **may still be a good idea for mission critical business laptops**, but the hard drive is now soldered into the machine.  The new machines have soldered their drives in, so it's significantly less likely they will be able to hook it up to another machine running OS X.  It also has no CD drive.  This leaves only USB bootable media to access the drive contents, and to my recollection linux can't read journaled HFS+ drives.
-
-As mentioned in my previous documentation, if you intend to encrypt your drive, wait until you have finished installing all system updates because patches to the encryption code will require you to decrypt, update, then re-encrypt; a process which can take many hours.
-
-
 ## conclusion
 
 Thus concludes my comprehensive OS X 10.9 setup and configuration process.  If you have configured your machine in the same way it will be ready for most development projects.
@@ -1012,8 +903,3 @@ For that reason I recommend visiting my [debian documentation](../linux/debian) 
 - [Remap Capslock](http://stackoverflow.com/questions/127591/using-caps-lock-as-esc-in-mac-os-x)
 - [iTerm2 alt hotkeys](https://code.google.com/p/iterm2/issues/detail?id=1052)
 - [iTerm2 unlimited history](http://stackoverflow.com/questions/12459755/zsh-iterm2-increase-number-of-lines-history)
-
-
-## future goals
-
-- I want to figure out how to modify plist files from command line so I can automate the configuration of various software, which can be done with lines similar to `defaults read com.apple.LaunchServices.plist`, but I have not yet experimented with it enough.
