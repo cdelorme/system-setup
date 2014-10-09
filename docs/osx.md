@@ -483,7 +483,6 @@ _Create SSH key and add to ssh-agent:_
 _You will have to follow prompts when creating the key, and your email is an optional flag._
 
 
-
 ### git configuration
 
 I usually set a number of defaults in my `~/.gitconfig`:
