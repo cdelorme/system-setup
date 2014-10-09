@@ -863,30 +863,6 @@ I install this so I can easily preview markdown files, the [repository is here](
 With this package you can use the space-bar like with images and pdf files, and it will display HTML rendered preview of a markdown file.
 
 
-## reorganize dock
-
-I remove any other software from my dock except the following list:
-
-- finder
-- chrome
-- safari
-- sublime text
-- iterm2
-- virtualbox
-- transmission
-- robomongo
-- sql pro
-- itunes
-- ibooks
-- app store
-- system preferences
-- _divider_
-- downloads
-- trash
-
-I do use more software than is in this list, but I almost never use the dock to access it, I use spotlight because it is faster.  **This list is really here for drag-and-drop applications.**
-
-
 ## conclusion
 
 Thus concludes my comprehensive OS X 10.9 setup and configuration process.
