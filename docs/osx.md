@@ -377,166 +377,41 @@ Finally under the "Peers" tab I tell it to prefer encrypted peers **and** ignore
 
 ## [homebrew](http://brew.sh/)
 
-This process has changed since OSX 10.8 and there are many steps past installing it to cover.
+OSX lacks a package manager to install additional software without going to the web like you would on Windows.  Fortuntely, because it runs UNIX it is capable of supporting a package manager, and a few have come into being.
 
-OS X is running UNIX, but it does not come with a package manager by default.  As such two have been created.  There is [macports](http://www.macports.org/) if you would rpefer, but I use homebrew.  You can use both if you want to get software that each provides.  I prefer the homebrew `no-password` phylosophy towards installing user-local software.
+I favor homebrew for its user-local approach, which generally does not require sudo operations.  The [macports](http://www.macports.org/) alternative has more packages but tends to **"sudo-all-the-things"**.
 
-**Homebrew depends on Command Line Tools, but the latest version of the install script will ask you to install the command line tools automatically.**
+_A newer package manager has recently come into being called [nix](https://nixos.org/nix/), which works on linux as well as osx.  It does not have great traction on OSX yet, but may be worth checking out in the future._
 
-Here is my comprehensive list of recommended homebrew packages, including all dependent packages:
+**Homebrew depends on Command Line Tools, but this should automatically prompt to install on newer versions of OSX.**
 
-- readline
-- apple-gcc42
-- pkg-config
-- intltool
-- cmake
-- autoconf
-- gmp4
-- bash-completion
-- libexif
-- watch
-- gmp
-- d-bus
-- cabextract
-- libffi
+For a well-rounded terminal experience with plenty of options, these are the packages I install:
+
+- wget
+- tmux
 - openssl
+- git
 - git-flow
 - mercurial
-- node
-- go
-- phplint
-- libunistring
-- aspell
-- ilmbase
-- openexr
-- jbig2dec
-- fftw
-- hicolor-icon-theme
-- boost-build
-- glew
-- mpfr
-- isl
-- scons
+- svn
 - bzr
-- awscli
-- fop
-- nspr
-- xz
-- gettext
-- libevent
-- libgpg-error
-- pcre
-- jpeg
-- nasm
-- jpeg9
-- libpng
-- libusb
-- libtool
-- libgsm
-- gettext
-- gdbm
-- libtasn1
-- bdw-gc
-- icu4c
-- giflib
-- lame
-- gsl
-- boost
-- popt
-- libxml2
-- lame
-- libogg
-- sdl2
-- unixodbc
-- mpfr2
-- isl011
-- tmux
-- automake
-- jpeg-turbo
-- winetricks
-- cppcheck
-- git
-- wget
-- nettle
-- guile
-- swftools
-- libsigc++
-- libmpc
-- cloog
-- rtmpdump
-- lua
-- libgcrypt
-- libtiff
-- freetype
-- libusb-compat
-- jasper
-- glib
-- sqlite
-- pixman
-- p11-kit
-- webp
-- flac
-- libvorbis
-- glfw3
-- osxfuse
-- libmpc08
-- cloog018
-- gnutls
-- liblqr
-- sshfs
-- tidy
-- glibmm
+- go
 - youtube-dl
-- wxmac
-- gd
-- little-cms2
-- libicns
-- sane-backends
-- python3
-- fontconfig
-- gobject-introspection
-- little-cms
-- libsndfile
-- gcc48
+- awscli
+- swftools
 - vim
 - weechat
-- libwmf
-- ghostscript
-- openjpeg
-- erlang
-- spidermonkey
-- libgphoto2
-- cairo
-- gdk-pixbuf
-- atk
-- wine
-- imagemagick
+- sshfs
+- ffmpeg
+- sfml
+- sdl2
 - graphicsmagick
-- at-spi2-core
-- harfbuzz
-- cairomm
-- atkmm
-- poppler
-- couchdb
-- py2cairo
-- py3cairo
-- at-spi2-atk
-- pango
-- pygobject3
-- gtk+
-- gtk+3
-- pangomm
-- gtkmm
-- zenity
-- php54
 
-Originally I had grouped packages by type, but I realized during this latest installation that dependencies were a big concern if you are running something like `wine` which needs the 32 bit "universal" build.  As such I now list them in dependency order.
+Some of these packages have special flags for installation.  They should automatically install dependencies, but depending on the package there may be more to it than that.
 
-Many packages have custom build options, dependencies, and post-installation instructions.  To check for this information you can run `brew info package`.
+To check package information prior to installing, you can use `brew info`.
 
-_Note that on your first execution of the `sshfs` command (or mount type) you will get a warning popup notifying you of an untrusted kext, it'll still work but you'll have to click the ok the first time._
-
-_During my last tests there was an `inkscape` package in brew that did not yet work, and the pygobject3 package is also broken due to an issue with python3 copy of gi-repository not existing._
+_The first time you attempt to use `sshfs` you will get a warning popup notifying you of an untrusted kext.  The software will still work, but you need to permit it once._
 
 
 ##### commands
@@ -547,216 +422,53 @@ _Let's start by adding this line (with your own token) to your dot-files such as
 
 _If you are using my [dot-files repository](https://github.com/cdelorme/dot-files/), the install script accepts your github username and password, and will auto-detect that you are using OS X and get you a fresh token on install._
 
-_Run these commands to install homebrew and all of my packages:_
+_This will install homebrew and my list of packages:_
 
     ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-
-_If you have not already installed the OSX Command Line Tools, brew's install script will automatically launch the installer prompt, which is awesome since we don't need to spend two hours downloading xCode anymore.  Next we want to run a few commands as a pre-amble to our package installation:_
-
     brew doctor
     brew tap homebrew/versions
-    brew tap homebrew/dupes
-    brew tap josegonzalez/php
     brew update
-
-_This is my complete set of packages, and all the options I use to install them:_
-
-    # no dependencies
-    brew install readline
-    brew install apple-gcc42
-    brew install pkg-config
-    brew install intltool
-    brew install cmake
-    brew install autoconf
-    brew install gmp4
-    brew install bash-completion
-    brew install libexif
-    brew install watch
-    brew install gmp
-    brew install d-bus
-    brew install cabextract
-    brew install libffi
+    brew install wget
+    brew install tmux
     brew install openssl
+    brew install --with-gettext --with-pcre git
     brew install git-flow
     brew install mercurial
-    brew install node
-    brew install --cross-compile-all go
-    brew install phplint
-    brew install libunistring
-    brew install aspell
-    brew install ilmbase
-    brew install openexr
-    brew install jbig2dec
-    brew install fftw
-    brew install hicolor-icon-theme
-    brew install boost-build
-    brew install glew
-    brew install mpfr
-    brew install isl
-    brew install scons
     brew install bzr
-    brew install awscli
-    brew install fop
-    brew install nspr
-
-    # universals no dependencies
-    brew install --universal xz
-    brew install --universal gettext
-    brew install --universal libevent
-    brew install --universal libgpg-error
-    brew install --universal pcre
-    brew install --universal jpeg
-    brew install --universal nasm
-    brew install --universal jpeg9
-    brew install --universal libpng
-    brew install --universal libusb
-    brew install --universal libtool
-    brew install --universal libgsm
-    brew install --universal gettext
-    brew install --universal gdbm
-    brew install --universal libtasn1
-    brew install --universal bdw-gc
-    brew install --universal icu4c
-    brew install --universal giflib
-    brew install --universal lame
-    brew install --universal gsl
-    brew install --universal --c++11 boost
-    brew install --universal popt
-    brew install --universal libxml2
-    brew install --universal lame
-    brew install --universal libogg
-    brew install --universal sdl2
-    brew install unixodbc --universal
-
-    # dependency chain level 1
-    brew install mpfr2
-    brew install isl011
-    brew install tmux
-    brew install automake
-    brew install jpeg-turbo
-    brew install winetricks
-    brew install cppcheck
-    brew install --with-gettext --with-pcre git
-    brew install wget
-    brew install nettle
-    brew install guile
-    brew install --with-fftw --with-jpeg --with-giflib --with-lame --with-xpdf swftools
-    brew install libsigc++
-    brew install libmpc
-    brew install cloog
-    brew install rtmpdump
-
-    # universal, dependency chain level 1
-    brew install --with-completion --universal lua
-    brew install --universal libgcrypt
-    brew install --universal libtiff
-    brew install --universal freetype
-    brew install --universal libusb-compat
-    brew install --universal jasper
-    brew install --universal glib
-    brew install --universal sqlite
-    brew install --universal pixman
-    brew install --universal p11-kit
-    brew install --universal webp
-    brew install --with-libogg --universal flac
-    brew install --universal libvorbis
-    brew install --universal glfw3
-
-    # dependency chain level 2
-    brew install osxfuse
-    brew install libmpc08
-    brew install cloog018
-    brew install --with-guile gnutls
-    brew install liblqr
-    brew install sshfs
-    brew install --HEAD homebrew/dupes/tidy
-    brew install glibmm
+    brew install --with-python svn
+    brew install --cross-compile-all go
     brew install --with-rtmpdump youtube-dl
-    brew install wxmac
-
-    # universal, dependency chain level 2
-    brew install --universal --with-freetype --with-libtiff gd
-    brew install --universal little-cms2
-    brew install --universal libicns
-    brew install --universal sane-backends
-    brew install --universal --with-brewed-openssl python3
-    brew install --universal fontconfig
-    brew install --universal gobject-introspection
-    brew install --universal --with-python little-cms
-    brew install --universal libsndfile
-
-    # dependency chain level 3
-    brew install --enable-multilib gcc48
+    brew install awscli
+    brew install --with-fftw --with-jpeg --with-giflib --with-lame --with-xpdf swftools
     brew install --with-lua --with-python3 --override-system-vi vim
     brew install --with-aspell --with-lua --with-python --with-guile --with-perl weechat
-    brew install libwmf
-    brew install ghostscript
-    brew install openjpeg
-    brew install erlang
-    brew install spidermonkey
-
-    # universal, dependency chain level 3
-    brew install --universal --with-libexif libgphoto2
-    brew install --universal cairo
-    brew install --universal gdk-pixbuf
-    brew install --universal atk
-    brew install --universal --with-python svn
-
-    # dependency chain level 4
-    brew install --with-libgsm wine
-    brew install --with-fontconfig --with-ghostscript --with-jasper --with-liblqr --with-libtiff --with-libwmf --with-little-cms2 --with-openexr --with-perl --with-webp imagemagick
+    brew install sshfs
+    brew install --with-tools ffmpeg
+    brew install sfml
+    brew install --static glfw3
+    brew install sdl2
     brew install --with-ghostscript --with-libtiff --with-jasper --with-libwmf --with-little-cms2 --with-perl graphicsmagick
-    brew install at-spi2-core
-    brew install harfbuzz
-    brew install cairomm
-    brew install atkmm
-    brew install --with-glib --with-lcms2 poppler
-    brew install couchdb
-
-    # universal, dependency chain level 4
-    brew install --universal py2cairo
-    brew install --universal py3cairo || brew install py3cairo
-
-    # dependency chain level 5
-    brew install at-spi2-atk
-    brew install pango
-
-    # dependency chain level 6
-    brew install --with-jasper gtk+
-    brew install --with-jasper gtk+3
-    brew install pangomm
-
-    # dependency chain level 7
-    brew install gtkmm
-    brew install zenity
-    brew install --universal --with-python3 --with-libffi pygobject3
-    brew install php54 --with-intl --with-tidy --without-apache
-
-_The gobject-introspection, python3, and pygobject3 packages are finally working properly, the caveat being that you must install both python2 and python3 for the pygobject3 to build for python3 (odd I know)._
-
-_Finally, here is a set of cleanup tasks to run, if you look at the output for the related packages they contain the instructions telling you to run these commands:_
-
-    brew link --overwrite jpeg9
-    ln -s /usr/local/bin/gcc-4.8 /usr/local/bin/gcc
-    ln -s /usr/local/bin/g++-4.8 /usr/local/bin/g++
-    mkdir -p ~/Library/LaunchAgents
-    LDBUSFOLDER=""
-    for DBUSFOLDER in /usr/local/Cellar/d-bus/*
-    do
-        LDBUSFOLDER=$DBUSFOLDER
-    done
-    mkdir -p ~/go/{bin,src,pkg}
-    cp "/usr/local/Cellar/d-bus/${LDBUSFOLDER}/org.freedesktop.dbus-session.plist" ~/Library/LaunchAgents/
-    launchctl load -w ~/Library/LaunchAgents/org.freedesktop.dbus-session.plist
-    brew doctor
-    LOSXFUSEFOLDER=""
-    for OSXFUSEFOLDER in /usr/local/Cellar/osxfuse/*
-    do
-        LOSXFUSEFOLDER=$OSXFUSEFOLDER
-    done
-    sudo /bin/cp -RfX "/usr/local/Cellar/osxfuse/${LOSXFUSEFOLDER}/Library/Filesystems/osxfusefs.fs" /Library/Filesystems
+    sudo /bin/cp -RfX /usr/local/opt/osxfuse/Library/Filesystems/osxfusefs.fs /Library/Filesystems/
     sudo chmod +s /Library/Filesystems/osxfusefs.fs/Support/load_osxfusefs
+    aws configure
+    pip3 install --upgrade pip
     sudo youtube-dl -U
+
+_I recommend creating a file at `/usr/local/bin/brewgrade` with these lines:_
+
+    #!/bin/bash
+    brew clean
+    brew update
+    brew upgrade
+    brew doctor
+
+_Then adding a command to a crontab to automate running it:_
+
+    chmod +x /usr/local/bin/brewgrade
+    echo "@daily /usr/local/bin/brewgrade" >> ~/.crontab
+    crontab ~/.crontab
+
+_OSX effectively stopped supporting crontab and is pushing towards its own ctl-style configs with 20+ lines of XML instead of a single line to run a scheduled operation.  As a result it won't let you easily modify the crontab; thus far my experience shows that if you want to change the file you will have to edit it manually with `vim` (or any editor), then reload the file via `crontab ~/.crontab`.  If you attempt to use `crontab -e` it will not save changes or throw errors to indicate why._
 
 
 ## dot-files
