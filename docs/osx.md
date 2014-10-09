@@ -1,47 +1,33 @@
 
 # osx documentation
 
-For me this document is an aid to help reproduce my OSX Mavericks (10.9) development environment.
-
-For anyone else it's a comprehensive guide to optional configuration for OSX.
+This document is an aid to follow when configuring a fresh copy of OSX for development.
 
 
-## installation
+## during installation
 
 **Do not:**
 
-- use a Case Sensative HFS+, this breaks software like the entire Adobe suite.
-- encrypt your drive (eg. `File Vault`), it may need re-encryption after updates.
+- use a Case Sensative HFS+
+- encrypt your drive with File Vault
 
-Which leads us to the first post-install step:
+Case Sensative HFS+ partitions break loads of software and is an unnecessary change.
+
+Using File Vault prior to downloading the latest updates after installing can lead to having to unencrypt, update, then re-encrypt the drive, which is a huge time sink.
+
+**Which leads us to the first post-install step:**
 
 - check for updates.
 
 
-## mythical root user
+## firewall
 
-The root user exists on osx, and its `$HOME` is `/var/root`.  By default the root account on OSX uses the `/bin/sh` shell.
-
-I tested switching it to `/bin/bash` and configuring the environment a bit, but the end result involved some undesirable performance issues.  So I do not recommend tampering with it.
-
-
-## automatic updates
-
-The latest release of OSX features automatic updates!  While this worries me, it is not at the level of "Windows Updates" and will not force a reboot.  However it will pop open a notification if an update requires a reboot.
-
-Having now used it for a few months, it seems to be very reliable.  More importantly it has not interfered with or hindered my productivity.
-
-
-## updated firewall
-
-This is something I was not aware of when I first updated, but the latest firewall is extra awkward at responding to updated applications.  Anytime an application replaces itself during an update, your firewall will ask again if you want to allow it.
-
-I have found this feature to be incredibly annoying, to the point of nearly wanting to disable the firewall.  If I allow a software, all versions of that software should be allowed.  I don't expect the firewall should have to store the file signature and bother me everytime it changes, but this is a "feature" of OSX now and I'll have to deal with it.
+The latest updates to the firewall have made it such that any application which updates may need to be approved again when launched.
 
 
 ## system preferences
 
-These are the changes I make to my `System Preferences`, and are listed by the main section, then each sub-option:
+Here are some suggested changes to `System Preferences`:
 
 - General
     - Graphite Color-scheme
@@ -136,14 +122,13 @@ These are the changes I make to my `System Preferences`, and are listed by the m
 - Time Machine
     - Do not show menu bar icon
 
-Other minor tweaks include adding at least one extra desktop to Mission Control by default, and from the battery menu I have it "Show Percentage".
-
-_These are my preferences, obviously your settings are subject to your own discretion._
+Adding an additional desktop to Mission Control and setting the battery to display its percentage are also advisable changes.
 
 
 ## spotlight cache
 
 If you end up with a problem with spotlight you can clear it's cache from command line.
+
 
 ##### commands
 
@@ -179,11 +164,11 @@ _To stop the dashboard from starting by default:_
 
 ## finder settings
 
-Open the finder settings menu with command + j.  _The desktop has a separate menu, so be sure you have selected a finder window before using the hotkey._
+Open the finder settings menu with "command + j".  _The desktop has a separate menu, so be sure you have opened a finder window and that it is in focus before using the hotkey._
 
 I generally check the box to force `List View` as the default.  I also check the calculate size option, because it makes checking folder and file sizes fast and easy.
 
-This release has provided a checkbox to **display the `~/Library` folder**, which saves us an extra step we previously had to do via command line.
+In newer versions of OSX there is a checkbox to **display the `~/Library` folder**, which saves us an extra step we previously had to do via command line.
 
 **Be sure you select "Use as Defaults" at the bottom or it won't take globally.**  Afterwards you'll want to remove saved view settings (the `.DS_Store` hidden files) recursively and globally to ensure the new settings take and are not overwritten locally per directory.
 
@@ -237,7 +222,7 @@ Here are some items I always grab from the App Store:
 
 _Dash is a mac only software that costs money, but it is a worth-while purchase.  It gives you a complete comprehensive local copy of documentation for multiple languages.  This is awesome for travel purposes, or even just quick-checks on object types or method arguments.  I highly recommend it._
 
-I would consider XCode optional.  If you do not plan to be developing for Mac using their specific libraries and Objective-C, then you probably don't need it.  I still install it, but I never use it.  Also it cane take upwards of two hours to download.
+I would consider XCode optional.  If you do not plan to be developing for Mac using their specific libraries and Objective-C, then you probably don't need it.  _Also it cane take upwards of two hours to download on moderately fast internet connections._
 
 
 ## software
@@ -253,18 +238,15 @@ Here is a list of software I install:
 - [VirtualBox](https://www.virtualbox.org/)
 - [Transmission](http://www.transmissionbt.com/download/)
 - [VLC](http://www.videolan.org/vlc/download-macosx.html)
-- [xQuartz](http://xquartz.macosforge.org/landing/)
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
 - [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 
-VirtualBox is a free Virtual Machine software that has better linux guest support and more up-to-date features (like efi booting) that VMWare and Parallels.  It is also cross platform, so you can use the same software on any machine.  These combined benefits make it my preferred (type 2) VM software of choice.
-
-The xQuartz package is a necessary evil for certain packages we'll install later.
+VirtualBox is a free Virtual Machine software with better linux guest support than leading commercial software such as Parallels and VMWare.  It is also cross platform, allowing you to create a virtual machine and transfer it anywhere with no major changes to interface or drivers.  _If you need 3D capabilities you will want to look at [Parallels Desktop]()._
 
 In spite of the fact that flash is a dying industry, I often find myself in need of the ability to run an swf file, and the Flash Projector comes in a debug flavor, which makes it super easy to have a tiny executable that can run and test flash files without browser concerns.
 
 
-## sonfiguring installed software
+## configuring installed software
 
 ### dash
 
@@ -327,8 +309,6 @@ Preferred Settings:
 - Move the archive to the trash after extraction
 - Under advanced set automatic detection confidence level to 100%
 
-_It is highly unlikely that the archiver won't know an encoding that a user would be able to pick from that giant list._
-
 
 ### iterm2
 
@@ -349,16 +329,16 @@ This will allow you to use alt to jump between words while in iTerm2 (eg delete 
 
 Finally, import the [`Solarized High Contrast Dark`](https://github.com/mariozaizar/dotfiles/blob/master/themes/iTerm2/Solarized%20High%20Contrast%20Dark.itermcolors) color scheme from the GUI.
 
-_Color schemes in iterm are loaded into a plist file and so doing so from command line is not as easy.  Someday I will document how to, if I ever figure it out myself._
+_Color schemes in iterm are loaded into a plist file and so doing so from command line is not as easy.  I may document the process in the future if I ever have time._
 
 
 ### virtualbox
 
 VirtualBox offers USB 2.0 support, but you have to download and install the [Extension Pack](https://www.virtualbox.org/wiki/Downloads).
 
-I also recommend creating a Host-Only network with a predictable IP range (I generally use 10.0.5.1).
+I also recommend creating a Host-Only network with a predictable IP range, which you can then specify static ip's in your virtual machines.
 
-_VirtualBox networking is a bit complex.  There are built-in firewalls around their NAT, so you can't simply access ports, you have to have an internal "unsafe" network adapter, and then an internet access network adapter.  The combination generally tends to be NAT + Host-Only._
+_Unfortunately VirtualBox caters towards the enterprise crowd and focuses on security at the cost of convenience and usability.  There is no "Shared Adapter" that allows virtual machines to have both internet access and local access, due to a built-in firewall on their NAT.  To gain local access you need a second host-only network device._
 
 
 ### transmission
@@ -588,3 +568,5 @@ Despite my preferences and installed packages here, a majority of the work I do 
 - [Remap Capslock](http://stackoverflow.com/questions/127591/using-caps-lock-as-esc-in-mac-os-x)
 - [iTerm2 alt hotkeys](https://code.google.com/p/iterm2/issues/detail?id=1052)
 - [iTerm2 unlimited history](http://stackoverflow.com/questions/12459755/zsh-iterm2-increase-number-of-lines-history)
+- [ForMateKonaVe](http://d.hatena.ne.jp/hetima/20061102/1162435711)
+- [EPSON Kyoukashoutai](http://www.wazu.jp/gallery/Fonts_Japanese.html)
