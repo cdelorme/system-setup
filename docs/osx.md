@@ -889,11 +889,9 @@ I do use more software than is in this list, but I almost never use the dock to 
 
 ## conclusion
 
-Thus concludes my comprehensive OS X 10.9 setup and configuration process.  If you have configured your machine in the same way it will be ready for most development projects.
+Thus concludes my comprehensive OS X 10.9 setup and configuration process.
 
-Note that despite how many tools I install on the system, I prefer, and often use, virtualization to offload a majority of testing to keep the main system running light and smooth.  Many services like a database or web server would consume resources if run while not in use, and add to the number of things my main system is then responsible for.
-
-For that reason I recommend visiting my [debian documentation](../linux/debian) and setting up a virtual machine for web development or any code that can be offloaded and is not needed on your host.
+Despite my preferences and installed packages here, a majority of the work I do is done through virtual machines.  If you found this in any way useful, I highly recommend you visit my debian/linux documentation.
 
 
 ## references
