@@ -48,6 +48,50 @@ Start by logging in as root to run through these steps.
 
 #### install packages
 
+---
+
+Refreshed list and loads of changes coming:
+
+netselect-apt
+
+monit
+ntp
+resolvconf
+watchdog
+ssh
+sudo
+uuid-runtime
+whois
+rsync
+curl
+e2fsprogs
+exfat-fuse
+exfat-utils
+fuse-utils
+sshfs
+
+screen
+tmux
+vim
+command-not-found
+git
+mercurial
+markdown
+
+unace
+unalz
+unrar
+zip
+zoo
+rzip
+p7zip-full
+arj
+lzop
+
+
+---
+
+
 I install lots of packages to form the basic foundation of a multi-functional platform.  In some cases not all of these packages are necessary, but in most cases they are helpful to have.  Worth noting that I use `aptitude` because it is a single sensible command interface, and for these packages I add the `-r` flag to install any recommended packages.  If you want to go full minimalist then omit this flag and pick and choose the packages to install.  However I recommend this to avoid any possibly problems later on.
 
 The first task I perform is I install the `netselect-apt` package, which allows us to detect the best mirrors available and set our sources to them.
