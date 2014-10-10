@@ -207,3 +207,64 @@ It is worth noting that this does incur some risk of infection between the initi
 By giving the system a month to adjust, it will be able to more clearly identify your system usage, and will more appropriately allocate the resources in the machine to the tasks you perform more regularly.  If you make an immediate backup you loose that machine-learning data.
 
 Also, the purpose for a good image backup is **not** simply for emergencies, it is effectively a mandatory part of the windows life-cycle that eventually the system will either get slower, or the inevitable infection will occur.
+
+
+**I have some new instructions and am in the process of merging these and extracting some others.**
+
+### windows fresh steps
+
+Post-Install Steps:
+
+- Reboot it post-install to ensure it is installed properly
+- Run Windows Updates and reboot as needed until no updates remain
+- Disable UAC
+- Disable Windows Defender
+- Set Clock Time/Date, public UTP server, and 24 hour displayed time
+- Adjust indexing options, removing everything except Start Menu
+- Standard taskbar/navigation settings (desktop by default instead of metro, no recent files/progs)
+- Action center undo alerts for most things
+- activate windows
+- uninstall all the shit metro software that comes with windows
+- check windows updates again
+- adjust display (**complex problems, see below**)
+- activate windows features from programs and features (Legacy/DirectPlay && .NET3.5/2.0)
+
+
+Post OS-Configuration Steps:
+
+Install drivers for all unfound devices:
+
+- motherboard
+- PCIe/Graphics
+
+_With 8.1 almost all of my drivers were found._
+
+
+Install Tools & Development Software:
+
+- google chrome
+- 7zip
+- sumatrapdf
+- sublime text
+- silverlight
+- visual studio
+- golang
+- git
+- flash projector
+- jdk7
+
+
+Now for multimedia and gaming software:
+
+- windows movie maker
+- ffsplit
+- k-lite mega codec pack
+- steam
+
+_My list of choice games probably varies from anyone elses, but I'll list any that I have played with notes in the docs._
+
+After much investigation I decided to go with the k-lite codec pack, because I come across loads of media and don't like the idea of finding out I spent X hours manually installing and configuring filters and muxers manually that don't support some file without adding in another component.  I am sure the alternative is a lighter weight solution, but I did not do so and have no documentation to offer for it.
+
+**If you want to use a great torrent software I highly recommend `transmissin-qt`, it's free and a thousand times better than the recent releases of utorrent.**
+
+
