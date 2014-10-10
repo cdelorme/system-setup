@@ -107,6 +107,9 @@ _It is ill advised that you download the EPSON Kyoukashoutai font from the refer
 - [Daemon Tools](http://www.daemon-tools.cc/downloads)
 - [Transmission-QT](http://trqtw.sourceforge.net/blog/)
 - SoThink SWF Decompiler
+- [ffsplit](http://www.ffsplit.com/)
+
+The ffsplit software is an absolutely fantastic screen-capture, recording, and merging software that is for Windows only.  It works out-of-the-box, allows you to easily specify capture devices and move them around on a display.  Setting the hotkeys, recording settings like resolution etc are simple too.  I use this with an HD Avermedia Capture Card and lay a webcam video ontop.  It took 5 minutes to get it ready for the first recording.
 
 Generally I will test launch each application to ensure it is functional and configure it.
 
