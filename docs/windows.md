@@ -166,6 +166,32 @@ Install Development Software:
 _The express copy of Visual Studio 2013 is free._
 
 
+---
+
+Turn CapsLock into Control key!
+
+Open `regedt32` and go to the key at `[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]`, and add a binary key named `Scancode Map` with the following values:
+
+    00 00 00 00 00 00 00 00
+    02 00 00 00 1D 00 3A 00
+    00 00 00 00
+
+The format is two 0-value byte headers in the first row, following by a byte with the size of the map (including the null-terminator), then we have 4-bit representation of keys where 1D is control and 3A is capslock, this remaps control to capslock.  Finally the null terminator, 8 empty bits indicating the end of the map.
+
+---
+
+Disabling "Folders" in "My Computer"!
+
+
+Open `regedt32` and go to `[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\]`.  You will see the following hashes, simply delete them:
+
+- Desktop Folder: {B4BFCC3A-DB2C-424C-B029-7FE99A87C641}
+- Documents Folder: {A8CDFF1C-4878-43be-B5FD-F8091C1C60D0}
+- Downloads Folder: {374DE290-123F-4565-9164-39C4925E467B}
+- Music Folder: {1CF1260C-4DD0-4ebb-811F-33C572699FDE}
+- Pictures Folder: {3ADD1653-EB32-4cb0-BBD7-DFA0ABB5ACCA}
+- Videos Folder: {A0953C92-50DC-43bf-BE83-3742FED03C9C}
+
 
 ## final steps
 
