@@ -1,5 +1,5 @@
 
-#### How to mount Virtual Machine partitions for recovery or backup!
+# How to mount Virtual Machine partitions for recovery or backup!
 
 This is useful in many situations; here are some examples:
 
