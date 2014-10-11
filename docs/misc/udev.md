@@ -1,5 +1,5 @@
 
-#### UDev Device Manager
+# UDev Device Manager
 
 As a device manager its job is to build the `/dev/` directory and fill it with devices.  However, beyond that it is also intended to simplify and enforce consistency.
 
@@ -8,6 +8,6 @@ So, situations like drive names changing due to the cable they connected from be
 On many systems it is also preconfigured to recognize the network adapters and whether you are running in a virtual environment (_and for some reason it will lock those adapters by name in debian and fedora_).
 
 
-##### Future Plans
+## Future Plans
 
 I would like to build my own udev scripts that automate naming and device reconnection, to allow for a more dynamic network device experience.

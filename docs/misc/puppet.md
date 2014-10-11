@@ -1,5 +1,5 @@
 
-#### Puppet
+# Puppet
 
 [Puppet](http://puppetlabs.com/) is an automated provisioning system that is used to define the "state" of an operating system.
 

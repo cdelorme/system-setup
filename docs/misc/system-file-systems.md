@@ -1,12 +1,12 @@
 
-#### System File Systems
+# System File Systems
 
 You'll surely forgive the redundant name once you recognize the benefits of understanding the system file systems.
 
 **Both the `sysfs` and `procfs` draw from the `device tree` data structure.**
 
 
-##### `procfs`
+## `procfs`
 
 The `procfs` or "Process File System" was used originally to make process information accessible in a file-system managed way.
 
@@ -19,7 +19,7 @@ The `procfs` has been deprecated in favor of `sysfs`, a newer set of tools that 
 Many systems still have it, whether they intend to keep it long-term is up for debate.
 
 
-##### `sysfs`
+## `sysfs`
 
 The "System File System", is the new more redundant title where the information from procfs has been moved and restructured.
 
@@ -34,7 +34,7 @@ For example, raid can be controlled by echoing a status into a file in the sysfs
 Granted _doing any of this requires substantial knowledge of the structure, or that you accept the risks involved._
 
 
-##### References
+## References
 
 - [sysfs wiki](http://en.wikipedia.org/wiki/Sysfs)
 - [procfs wiki](http://en.wikipedia.org/wiki/Procfs)

@@ -1,5 +1,5 @@
 
-#### Switching from sysvinit to systemd
+# Switching from sysvinit to systemd
 
 This section, as you may have guessed, is incomplete.  By default debian uses the sysvinit boot process, and the reasons include:
 
@@ -29,6 +29,6 @@ I have used systemd on fedora and arch distros, and its stability was mostly ter
 
 To explain further, systemd is being tied to the latest gnome interface and binary logging tools.  Debugging errors just got way harder (not easier).  Meanwhile gnome continues to push extremely tight integration with all of its services, such as its network manager which has never once been a pleasing experience to use.
 
-I intend to attempt systemd on my non-server system, using a different graphical user interface.  If I can manage to retain traditional logging and it remains stable I will likely add it to the steps in this file.
+I intend to attempt systemd on my non-server system, using a different graphical user interface.  If I can manage to retain traditional logging and it remains stable I will likely add it to the steps in this file.  The next release of debian, "jessie" supposedly will have systemd as the new default bootloader, so I may give jessie a try as a shortcut to configuring systemd in wheezy.
 
 _Keep in mind that by installing systemd I could also omit monit tools and configuration, though I do not know whether systemd offers any kind of api or web interface to determine service statuses from external sources like monit/munin do._

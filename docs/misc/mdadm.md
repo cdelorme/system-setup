@@ -1,5 +1,5 @@
 
-#### mdadm
+# mdadm
 
 This is just some quick tips on managing mdadm software raid configurations.
 
@@ -29,7 +29,7 @@ With `systemd` you will want to make sure the mdadm service is run at boot time:
     systemctl start mdadm
     systemctl enable mdadm
 
-##### Drive Checks
+## Drive Checks
 
 Using the sysfs you can force a check or repair of the raid by echoing operations.
 
