@@ -1,0 +1,7 @@
+#!/bin/bash
+# run these to prevent the monitor from going to sleep
+xset s 0 0
+xset s noexpose
+xset s noblank
+xset s off
+xset -dpms

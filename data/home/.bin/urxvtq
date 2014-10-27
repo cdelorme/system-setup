@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $(ps aux | grep -v grep | grep -c "urxvt -name urxvtq") -eq 0 ]
+then
+    rm -f /tmp/.urxvtq
+    urxvt -name urxvtq -geometry 200x24 &
+fi
+while [ -z "$wid" ]; do wid=$(xdotool search --name urxvtq); done
+if [ -f "/tmp/.urxvtq" ]
+then
+    xdotool windowunmap $wid
+    rm -f /tmp/.urxvtq
+else
+    xdotool windowmap --sync $wid
+    xdotool windowfocus $wid
+    xdotool windowactivate $wid &> /dev/null
+    touch /tmp/.urxvtq
+fi

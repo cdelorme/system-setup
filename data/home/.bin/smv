@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# safe-move will move files from the current directory to the destination directory
+# if same-named files exist it will continue to append numeric prefixes until they are unique
+
+mv_FROM="$1"
+mv_TO="$2"
+
+for FILE in "$mv_FROM"/*
+do
+    echo $(basename $FILE)
+    if [ -f "${mv_TO}$(basename $FILE)" ]
+    then
+        echo "${mv_TO}$(basename $FILE)  already exists"
+    fi
+done
+
