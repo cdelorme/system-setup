@@ -1,0 +1,14 @@
+{
+	"auto_complete_commit_on_tab": true,
+	"caret_style": "phase",
+	"color_scheme": "Packages/Color Scheme - Default/Sunburst.tmTheme",
+	"font_face": "ForMateKonaVe",
+	"font_size": 14,
+	"highlight_line": true,
+	"highlight_modified_tabs": true,
+	"match_brackets_angle": true,
+	"scroll_past_end": true,
+	"scroll_speed": 2.0,
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
+}
