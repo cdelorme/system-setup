@@ -164,11 +164,38 @@ _To stop the dashboard from starting by default:_
 
 ## finder settings
 
-Open the finder settings menu with "command + j".  _The desktop has a separate menu, so be sure you have opened a finder window and that it is in focus before using the hotkey._
+Finder has two sections for configuration.  Starting with preferences (accessed via "command + ,") I generally use the following:
 
-I generally check the box to force `List View` as the default.  I also check the calculate size option, because it makes checking folder and file sizes fast and easy.
+- General
+    - All Checkboxes for "Show on Desktop"
+    - New Finder windows show my user home folder
+    - uncheck Springload animation
+- Tags
+    - I uncheck all tags, I don't use them
+- Sidebar
+    - Favorites
+        - uncheck "All my Files", "AirDrop", "Movies", "Music", and "Pictures"
+        - Check "Applications", "Desktop", "Documents", "Downloads", and user home folder
+    - Shared
+        - uncheck all
+    - Devices
+        - check all
+    - tags
+        - unchecked
+- Advanced
+    - Check all boxes
+    - Search using current folder
 
-In newer versions of OSX there is a checkbox to **display the `~/Library` folder**, which saves us an extra step we previously had to do via command line.
+You can open the finder settings menu with "command + j".  _The desktop has a separate menu, so be sure you have opened a finder window and that it is in focus before using the hotkey._
+
+I generally check the box to force `List View` as the default.  I make sure to check all four of these options:
+
+- Use relative dates
+- Calculate all sizes
+- Show icon preview
+- Show Library Folder
+
+_I was rather happy when they added the library folder checkbox, though there is a command line method that still works as well._
 
 **Be sure you select "Use as Defaults" at the bottom or it won't take globally.**  Afterwards you'll want to remove saved view settings (the `.DS_Store` hidden files) recursively and globally to ensure the new settings take and are not overwritten locally per directory.
 
