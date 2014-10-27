@@ -1,5 +1,5 @@
 
-# Parallels Desktop Mods
+# parallels desktop modifications
 
 To install parallels tools you will need to mount the iso with execution options:
 

@@ -1,5 +1,5 @@
 
-# It's Not `source` .
+# it's not `source` .
 
 This is a short rant on any bash documentation that uses the `source` command.
 
@@ -12,7 +12,7 @@ The use of the `source` command is not, and is in fact not supported on many ver
 I absolutely hate when I read someones guide or their script and they have `source /path/to/some/shell_script`.  I know that not only that script, but anything else they have written probably won't work on half of the distros I use, and not because those distros are lacking, but because they chose to remain POSIX compliant.
 
 
-## Here are the Facts
+## here are the facts
 
 The `.` is a bash built-in POSIX compliant command to executing the subsequent script.
 

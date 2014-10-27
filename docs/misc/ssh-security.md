@@ -1,5 +1,5 @@
 
-# SSH Security
+# ssh security
 
 In some of my previous documentation and scripts I had specified settings that ignored security risks, such as man-in-the-middle attacks.
 

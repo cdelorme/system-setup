@@ -1,5 +1,5 @@
 
-# Solarized High Contrast Dark
+# solarized high contrast dark
 
 ANSI Color 0: #002831
 ANSI Color 1: #D11C24

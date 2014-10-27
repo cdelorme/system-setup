@@ -1,5 +1,5 @@
 
-### Windows 8.1 JIS Input Configuration
+### windows 8.1 jis input configuration
 
 This configuration requires Windows 8.1, with Windows 8 you can accomplish something similar but may encounter a myriad of other issues if you remove the english input device from languages.
 

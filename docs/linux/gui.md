@@ -681,12 +681,12 @@ _This can be done via a **single** command line:_
     usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse,pulse-access username
 
 
-## [Youtube Downloader](https://github.com/rg3/youtube-dl)
+## [youtube downloader](https://github.com/rg3/youtube-dl)
 
 This is a really cool command line utility that you can use to download (the highest quality) youtube videos without any GUI utilities.  It includes asynchronous processing and even spits out the percent status.
 
 
-##### Commands
+##### commands
 
 _Run these commands to download and install the `youtube-dl` command:_
 
@@ -697,14 +697,14 @@ _Run these commands to download and install the `youtube-dl` command:_
     rm -rf youtube-dl
 
 
-## Google Chrome Dev Channel
+## google chrome dev channel
 
 I prefer the dev channel of google chrome.  The easy way to install it is to go to your current web browser, search "Google Chrome Dev Channel" and then download the `.deb` and install it with `sudo dpkg -i`.
 
 It should ask to be set as the default browser at first launch.
 
 
-##### Commands
+##### commands
 
 _Register google's apt key:_
 
@@ -762,7 +762,7 @@ For linux this is the alternative to silverlight.  You can run a browser in linu
 The viewnior program is a superb lightweight image viewer with quick previews, outmatching most competator image-viewer software.  Unfortunately this software requires newer packages than are available to debian, and attempts to build it have been unsuccessful.  I would like to try previous versions, or in the worst case scenario plan to install it when Debian Jessie is released as the new stable.
 
 
-# References
+# references
 
 - [wallpapers wa](http://wallpaperswa.com/)
 - [google repo info](https://www.google.com/linuxrepositories/)

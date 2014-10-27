@@ -1,5 +1,5 @@
 
-# Grub VM Resolution
+# grub vm resolution
 
 First, open up `/etc/default/grub` and find the line with `#GRUB_GFXMODE=640x480` and change it to `GRUB_GFXMODE=1024x768` or a resolution of your choice.
 

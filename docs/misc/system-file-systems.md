@@ -1,5 +1,5 @@
 
-# System File Systems
+# system file systems
 
 You'll surely forgive the redundant name once you recognize the benefits of understanding the system file systems.
 
@@ -34,7 +34,7 @@ For example, raid can be controlled by echoing a status into a file in the sysfs
 Granted _doing any of this requires substantial knowledge of the structure, or that you accept the risks involved._
 
 
-## References
+## references
 
 - [sysfs wiki](http://en.wikipedia.org/wiki/Sysfs)
 - [procfs wiki](http://en.wikipedia.org/wiki/Procfs)

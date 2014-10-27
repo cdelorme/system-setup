@@ -1,5 +1,5 @@
 
-# Switching from sysvinit to systemd
+# switching from sysvinit to systemd
 
 This section, as you may have guessed, is incomplete.  By default debian uses the sysvinit boot process, and the reasons include:
 

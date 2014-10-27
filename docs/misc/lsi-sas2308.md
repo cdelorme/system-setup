@@ -1,5 +1,5 @@
 
-# Fixing the LSI SAS2308 RAID Controller
+# fixing the LSI SAS2308 RAID controller
 
 My ASRock Z77 Extreme11 came with this chipset onboard to control 8 SATA ports.
 
@@ -8,7 +8,7 @@ They are now releasing consumer motherboards with entire controllers, which does
 At the same time, these cards come default configured to be fully managed raid chipsets, which tend to cause problems with mdadm or "software" raid managed by the OS.
 
 
-## A Brief Opinionated Rant
+## a brief opinionated rant
 
 Many years ago when processors were not as capable, hardware raid was a very good solution to offload the handling of calculations.  That said, in current day hardware raid has several failings.  To transfer a hardware raid configuration you need a compatible card, and often those cards cost a boatload and are only on the market for a fixed period of time.
 
@@ -17,14 +17,14 @@ With the growing rate of new hardware being released, the changes of hard-ware r
 I use software raid, because I can spinup any copy of linux or unix with mdadm support and access my data, on any set of hardware I wire them into.
 
 
-## The Bug
+## the bug
 
 When using this chipset without any modifications to attach MDADM raid, you will find that your disks drop randomly and the RAID degrades for seemingly no reason.
 
 The exact reason for this is unknown, but it has to do with a managed chipset interpretting transactions and probably assuming the configuration is invalid and therefore dropping the drives.
 
 
-## Solving the Bug
+## solving the bug
 
 Fortunately, the bug can be solved.  It is an easy fix, but poorly documented anywhere on the web.
 

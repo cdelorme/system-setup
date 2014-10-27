@@ -29,7 +29,7 @@ With `systemd` you will want to make sure the mdadm service is run at boot time:
     systemctl start mdadm
     systemctl enable mdadm
 
-## Drive Checks
+## drive checks
 
 Using the sysfs you can force a check or repair of the raid by echoing operations.
 

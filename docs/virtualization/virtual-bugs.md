@@ -1,5 +1,5 @@
 
-# Virtual Bugs
+# virtual bugs
 
 Virtual Machines have their own set of issues, and I will cover those that I have encountered here (and solutions where applicable).
 

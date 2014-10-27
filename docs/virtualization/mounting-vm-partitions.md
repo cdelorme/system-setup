@@ -1,5 +1,5 @@
 
-# How to mount Virtual Machine partitions for recovery or backup!
+# how to mount virtual machine partitions for recovery or backup!
 
 This is useful in many situations; here are some examples:
 
@@ -24,7 +24,7 @@ Now we can mount it using the offset option with the mount command:
 **Important: Windows 8 is extremely sensative to being mounted and may cause it to trigger a long winded recovery process on the next boot, for that reason it is recommended to use the `ro` option after `loop` in the mount command if mounting a windows partition.**
 
 
-## Now for a live example!
+## now for a live example!
 
 Less than an hour ago I removed Xen & a modified Kernel from my system with dpkg.  This is to test some newly available features and patches.  However, I forgot to backup some of the files on my Windows system.
 
