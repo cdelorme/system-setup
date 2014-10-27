@@ -63,6 +63,10 @@ Here are some suggested changes to `System Preferences`:
         - Firewall Options:
             - Stealth Mode
 
+- Spotlight
+    - Uncheck all but `Applications` and `System Preferences`
+    - Privacy tab: Add user home folder (you will have a dialog to confirm)
+
 - Display
     - Disable "Automatically adjust brightness"
 
