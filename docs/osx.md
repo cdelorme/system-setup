@@ -141,14 +141,9 @@ _Run this to clear all cache and rebuild (rebuilding can take quite a while):_
     sudo mdutil -E /
 
 
-## custom fonts
+## [custom fonts](shared/custom-fonts.md)
 
-- [ForMateKonaVe](http://d.hatena.ne.jp/hetima/20061102/1162435711)
-- [EPSON Kyoukashoutai](http://www.wazu.jp/gallery/Fonts_Japanese.html)
-
-The EPSON font has been uploaded with skewed ASCII conversion, so while the font will work, its name is nearly impossible to type.  I recommend running it through a font editor simply to adjust the name to something sensible.
-
-_The links for these fonts are externally hosted and may no-longer be valid, and I have decided to include a copy of each in this repository._
+Review the referenced document, and you can optionally download and install them onto OSX.
 
 Installing fonts can be done by opening them and clicking the install button, or you can install them locally into `~/Library/Fonts/`, or globally `/Library/Fonts`.
 
@@ -598,5 +593,3 @@ Despite my preferences and installed packages here, a majority of the work I do 
 - [Remap Capslock](http://stackoverflow.com/questions/127591/using-caps-lock-as-esc-in-mac-os-x)
 - [iTerm2 alt hotkeys](https://code.google.com/p/iterm2/issues/detail?id=1052)
 - [iTerm2 unlimited history](http://stackoverflow.com/questions/12459755/zsh-iterm2-increase-number-of-lines-history)
-- [ForMateKonaVe](http://d.hatena.ne.jp/hetima/20061102/1162435711)
-- [EPSON Kyoukashoutai](http://www.wazu.jp/gallery/Fonts_Japanese.html)
