@@ -1,0 +1,20 @@
+[StatusIcon]
+stepsize=3
+lmb_slider=true
+mmb_mute=true
+use_horizontal_slider=true
+show_sound_level=true
+onclick=x-terminal-emulator -e 'pavucontrol'
+theme=Default
+
+[Hotkeys]
+up_enabled=false
+down_enabled=false
+mute_enabled=false
+up=XF86AudioRaiseVolume
+down=XF86AudioLowerVolume
+mute=XF86AudioMute
+
+[Alsa]
+card=default
+channel=PCM
