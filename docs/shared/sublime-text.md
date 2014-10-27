@@ -51,12 +51,8 @@ _User configuration file (assumes `ForMateKonaVe` font is installed):_
 _Custom hotkeys `~/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap`:_
 
     [
-        { "keys": ["ctrl+enter"], "command": "goto_python_definition"},
         { "keys": ["ctrl+tab"], "command": "next_view" },
         { "keys": ["ctrl+shift+tab"], "command": "prev_view" },
-        { "keys": ["alt+m"], "command": "markdown_preview", "args":
-            { "target": "browser", "parser": "markdown" }
-        }
     ]
 
 
@@ -111,4 +107,23 @@ _Symlink the sublime terminal command:_
 ## windows
 
 There are no shortcuts or unique ways to automate editing your configuration files in Windows, just use the menu to open the files and configure them via copy and paste.
+
+
+## plugin configuration
+
+The two plugins I customize are `GoSublime` and `Markdown Preview`.
+
+Starting with Markdown Preview, I set it's build command to open a tab in the browser:
+
+    {
+        "build_action": "browser"
+    }
+
+I set GoSublime's GOPATH, since it does not appear to interpret the `~/.bashrc`:
+
+    {
+        "env": {
+            "GOPATH": "$HOME/.go"
+        }
+    }
 
