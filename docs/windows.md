@@ -1,6 +1,8 @@
 
-# Windows Multimedia System Documentation
-#### Updated 2014-7-20
+# windows
+
+Windows is an excellent gaming and multimedia platform, with a wide range of driver support, making ideal for specialized hardware.
+
 
 Latest version used in the making of this document was 8.1.  Unfortunately automation for Windows is fairly imposssible, so instead of that I'll simply document the setup and highly recommend creating a disk image backup to counter both time lost reconfiguring as well as virus problems in the future (they will invariably happen on windows).
 
