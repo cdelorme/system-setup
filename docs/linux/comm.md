@@ -1,6 +1,5 @@
 
 # comm server documentation
-#### updated 2014-7-13
 
 This documentation picks up where the template documentation leaves off, and is intended to work as a headless system.
 

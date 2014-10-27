@@ -1,6 +1,5 @@
 
 # dev environment documentation
-#### updated 2014-8-17
 
 This document consists of configuration steps that will extend gui and comm system configuration.
 

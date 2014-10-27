@@ -1,6 +1,5 @@
 
 # debian
-#### Updated 2014-7-13
 
 This is my favorite linux distribution, both by familiarity and by functionality.
 

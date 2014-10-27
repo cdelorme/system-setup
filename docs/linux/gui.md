@@ -1,6 +1,5 @@
 
 # gui documentation
-#### Updated 2014-8-17
 
 These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
 
