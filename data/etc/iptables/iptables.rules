@@ -1,0 +1,31 @@
+*filter
+# accept established connections
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# accept local traffic
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+# accept ping
+-A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
+# samba traffic
+-A INPUT -s 10.0.0.0/24 -p udp -m multiport --dports 137,138 -j ACCEPT
+-A INPUT -s 10.0.0.0/24 -p tcp -m multiport --dports 139,445 -j ACCEPT
+# tranmission peer traffic (default port 51413)
+-A INPUT -p udp -m udp --dport 51413 -j ACCEPT
+# transmission web interface
+-A INPUT -s 10.0.0.0/24 -p tcp -m tcp --dport 9010 -j ACCEPT
+# accept ssh with rate limiting
+-N LOGREJECTSSH
+-A LOGREJECTSSH -j LOG --log-prefix "iptables deny: " --log-level 7
+-A LOGREJECTSSH -j REJECT
+-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource
+-A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGREJECTSSH
+-A INPUT -p tcp -m tcp --dport ssh -j ACCEPT
+# drop invalid
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+# reject all others (linux compliant blacklist)
+-A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -p tcp -j REJECT --reject-with tcp-rst
+-A INPUT -j REJECT --reject-with icmp-proto-unreachable
+# drop forwards
+-A FORWARD -j DROP
+COMMIT
