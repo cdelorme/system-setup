@@ -667,18 +667,32 @@ For full privileges users should belong to these groups:
 - video
 - adm
 - pulse
-- pulse-access
 
 Many of these groups are assigned by default when a new user is created through the UI.
 
-The `adm` group is necessary for log access; fuse gives the user mounting privileges.  The `pulse-access` and `pulse` groups are intended for specific volume controls.  The `netdev` group is for network device access, and may not be necessary if you aren't using graphical networking tools (which I don't).  The others are all rather self-explanitory.
+The `adm` group is necessary for log access; fuse gives the user mounting privileges.  The `pulse` group is intended for specific volume controls.  The `netdev` group is for network device access, and may not be necessary if you aren't using graphical networking tools (which I don't).  The others are all rather self-explanitory.
 
 
 ##### commands
 
 _This can be done via a **single** command line:_
 
-    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse,pulse-access username
+    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse username
+
+
+## configuring pulse-audio
+
+For whatever reason pulse-audio refuses to play nicely until you have copied the default configuration file from it's global location to your user folder.  The result is a wonky, and often unresponsive or breaking experience.
+
+It is neither mentioned during the package installation, nor is it easy to find anything to explain the phenomina that happen when you don't, hence why this step is here.
+
+
+##### commands
+
+_Copy and modify the pulse audio default config:_
+
+    mkdir -p ~/.pulse
+    cp /etc/pulse/default.pa ~/.pulse/default.pa
 
 
 ## [youtube downloader](https://github.com/rg3/youtube-dl)
