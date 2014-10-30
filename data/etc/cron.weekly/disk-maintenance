@@ -1,0 +1,15 @@
+#!/bin/bash
+# search and destroy mac/windows garbage files
+find /media/samba -iname "thumbs.db" -exec rm -rf {} \;
+find /media/samba -iname ".ds_store" -exec rm -rf {} \;
+find /media/samba -name '._*' -exec rm -rf {} \;
+# reduced io stress with weekly fstrim
+for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
+do
+    fstrim "${DEVICE}"
+done
+# defragment ext4 devices
+for DEVICE in $(mount | grep ext4 | awk '{print $1}')
+do
+    e4defrag "${DEVICE}"
+done

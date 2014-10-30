@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#!/bin/bash
+mv /etc/apt/sources.list /etc/apt/sources.list.bak
+netselect-apt -sn -o /etc/apt/sources.list
+aptitude clean
+if ! aptitude update
+then
+    mv /etc/apt/sources.list.bak /etc/apt/sources.list
+    aptitude update
+fi
+aptitude upgrade -yq
+update-command-not-found
