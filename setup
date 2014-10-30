@@ -1152,9 +1152,19 @@ configure_user_services() {
         # echo ']' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
 
         # populate markdown-preview config file
+        echo '{' > "${user_home_dir}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
+        echo '    "build_action": "browser"' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
+        echo '}' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
 
+        # populate go-sublime package config
+        echo '{' > "${user_home_dir}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+        echo '    "env": {' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+        echo '        "GOPATH": "$HOME/.go"' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+        echo '    }' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+        echo '}' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
 
         # so far there is no easy way to install or manage packages from bash or subl cli
+        # as such, the plugins for the above config files are not yet installed and those settings are ignored
 
     fi
 
