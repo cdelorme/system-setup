@@ -15,7 +15,7 @@ Here are the packages:
 
 ## system configuration
 
-We want to add a couple of new rules to our IPTables to allow Samba connections:
+We want to add a couple of new rules to our iptables to allow Samba connections:
 
     # Samba Traffic (limited to internal network)
     -A INPUT -p udp -s 10.0.1.0/24 -m multiport --dports 137,138 -j ACCEPT

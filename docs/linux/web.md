@@ -220,9 +220,9 @@ Here is an example shell script for rsync:
 
 ### system modifications
 
-**IPTables Additions:**
+**Add to iptables:**
 
-Insert these rules after SSH rules inside `/etc/fireall.conf`:
+Insert these rules after SSH rules inside `/etc/iptables/iptables.rules`:
 
     # Allow tcp traffic for  (HTTP, HTTPS)
     -A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT

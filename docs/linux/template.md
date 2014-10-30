@@ -444,12 +444,17 @@ _To generate an ssh key, here is the command (prompts will be required after):_
 
 The `iptables` package makes for an excellent firewall.  However, its configuration can be quite confusing.  I recommend reading up on it if you want a solid understanding.
 
+The standard location for iptables configuration is `/etc/iptables/iptables.rules`, though unless you have installed additional utilities the directory will likely not exist.
 I usually create a set of rules in `/etc/firewall.conf`, though some services would have you place it into `/etc/iptables/iptables.rules` and auto-load it by default.  However, I do not use the iptables daemon, instead I connect them to my `network up` sequence by creating a file in `/etc/network/if-up.d/` to reload the iptable rules.
 
 
 ##### commands & files
 
-_Let's start by creating our IPTables file in `/etc/firewall.conf`:_
+_Begin by creating the directory:_
+
+    mkdir - /etc/iptables
+
+_Next let's populate `/etc/iptables/iptables.rules` with some basic compliant rules:_
 
     *filter
 
@@ -486,10 +491,12 @@ _Let's start by creating our IPTables file in `/etc/firewall.conf`:_
 
 _Remember that the `ssh` port number varies and the string evaluates to port 22 (the default)._
 
+**_It would be wise to test that you can still access remote systems with these rules active before setting them at boot time._**
+
 _Next let's create our file `/etc/network/if-up.d/iptables` with loading code:_
 
     #!/bin/bash
-    iptables-restore < /etc/firewall.conf
+    iptables-restore < /etc/iptables/iptables.rules
 
 _Finally, we need to make the iptables script executable:_
 
