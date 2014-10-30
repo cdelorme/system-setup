@@ -1103,8 +1103,8 @@ configure_user_services() {
         mkdir -p "${user_home_dir}/.weechat"
         sed -i 's/max_buffer_lines_number.*/max_buffer_lines_number = 0/' "${user_home_dir}/.weechat/weechat.conf"
         sed -i 's/freenode\.autoconnect.*/freenode\.autoconnect = on/' "${user_home_dir}/.weechat/irc.conf"
-        sed -i 's/freenode\.nicks.*/freenode\.nicks = \"${config_irc_username}, ${config_irc_username}_\"/' "${user_home_dir}/.weechat/irc.conf"
-        sed -i 's/freenode\.password.*/freenode\.password = \"${config_irc_password}\"/' "${user_home_dir}/.weechat/irc.conf"
+        sed -i "s/freenode\.nicks.*/freenode\.nicks = \"${config_irc_username}, ${config_irc_username}_\"/" "${user_home_dir}/.weechat/irc.conf"
+        sed -i "s/freenode\.password.*/freenode\.password = \"${config_irc_password}\"/" "${user_home_dir}/.weechat/irc.conf"
     fi
 
     # install independent gui software
