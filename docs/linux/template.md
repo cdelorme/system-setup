@@ -220,52 +220,46 @@ _Here are the all the commands I run to cover the entire packages section of doc
 
 I schedule a series of custom cronjobs to handle various tasks within the system that keep it up the date and running smoothly.  Generally I only add these to the primary cron folders, but that means they may not execute if the system is not running 24/7, so be sure to adjust your implementation accordingly.
 
-I create a file in `/etc/cron.monthly/` that re-runs `netselect-apt` to ensure we still have the best mirrors available.
-
-I create three files in `/etc/cron.weekly/`, including one to update our packages, one to defragment any ext4 partitions, and one to execute `fstrim` on any ext4 partitions (useful for solid state drives).
+I update packages on the system daily, and run disk maintenance and cleanup weekly.
 
 
 ##### commands & files
 
-_Starting with the files and their contents:_
+_Let's create the system update script at `/etc/cron.daily/system-updates` with these lines:_
 
-**`/etc/cron.daily/aptitude`:**
-
-    #!/bin/sh
-
-    # update mirrors & packages daily
-    netselect-apt -sn
+    #!/bin/bash
+    mv /etc/apt/sources.list /etc/apt/sources.list.bak
+    netselect-apt -sn -o /etc/apt/sources.list
     aptitude clean
-    aptitude update
+    if ! aptitude update
+    then
+        mv /etc/apt/sources.list.bak /etc/apt/sources.list
+        aptitude update
+    fi
     aptitude upgrade -yq
     update-command-not-found
 
-**`/etc/cron.weekly/e4defrag`:**
+_Next we can create weekly disk maintenance at `/etc/cron.weekly/disk-maintenance` with these lines:_
 
-    #!/bin/sh
-
-    # defragment ext4 devices
+    #!/bin/bash
+    # search and destroy mac/windows garbage files (assumes mounts for storage disks)
+    if [ -d "/media" ]
+    then
+        find /media -iname "thumbs.db" -exec rm -rf {} \;
+        find /media -iname ".ds_store" -exec rm -rf {} \;
+        find /media -name '._*' -exec rm -rf {} \;
+    fi
+    # defragment ext4 devices, and reduce stress by running condensed fstrim operations
     for DEVICE in $(mount | grep ext4 | awk '{print $1}')
     do
         e4defrag "${DEVICE}"
-    done
-
-**`/etc/cron.weekly/fstrim`:**
-
-    #!/bin/bash
-
-    # Handle regular trim cleanup (much less IO problems than setting discard flag in fstab)
-    for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
-    do
         fstrim "${DEVICE}"
     done
 
-_Now I make sure all of them are executable:_
+_Finally I make sure they are executable:_
 
-    chmod +x /etc/cron.monthly/netselect-apt
-    chmod +x /etc/cron.weekly/aptitude
-    chmod +x /etc/cron.weekly/e4defrag
-    chmod +x /etc/cron.weekly/fstrim
+    chmod +x /etc/cron.daily/system-updates
+    chmod +x /etc/cron.weekly/disk-maintenance
 
 
 #### optimizations & permissions
@@ -375,6 +369,21 @@ _Edit the `/etc/hosts` file manually, and add or replace this line:_
     127.0.1.1 hostname.domain.dev hostname
 
 _Now if we type `hostname -f` we will get the whole domain name._
+
+
+#### fixing grub panics
+
+Sometimes there are problems and a kernel panic happens.  While rare, this can be a huge problem if the system is remote, so I add another flag to attempt to tell the system to automatically reboot shortly after a panic.
+
+To do this, we want to add a configuration change to grub!
+
+
+##### commands
+
+_Run this to add another option to your grub, then run the next command to update the grub config:_
+
+    sed -i "s/quiet/quiet panic=10/" /etc/default/grub
+    update-grub
 
 
 #### static ip address
