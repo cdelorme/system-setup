@@ -695,6 +695,54 @@ _Copy and modify the pulse audio default config:_
     cp /etc/pulse/default.pa ~/.pulse/default.pa
 
 
+## keep the monitor awake
+
+By default the Xorg/xserver is configured to turn off after inactivity.  Unfortunately it decides what "inactivity" means, and that is effectively keyboard and mouse interaction.
+
+When you have installed a graphical environment and are running a web browser, or playing a video (as simple examples) it will decide to shut off the display if you haven't tapped the keyboard or jiggled the mouse in roughly the past hour.
+
+To fix this I've created two scripts, one to force the system to keep awake, and another to ensure it switches on when you have any of a set number of named applications running.
+
+**You can certainly set this permanently instead, or run the script once at boot with modifications to ensure the monitor never sleeps.**
+
+
+##### commands
+
+_Create a script at `~/.bin/nosleep` containing:_
+
+    #!/bin/bash
+    # run these to prevent the monitor from going to sleep
+    xset s 0 0
+    xset s noexpose
+    xset s noblank
+    xset s off
+    xset -dpms
+
+_Create another script, `~/.bin/nosleep-daemon` containing:_
+
+    #!/bin/bash
+    # run nosleep on a 5 minute interval while any applications below are running
+    nosleep_apps=("vlc" "flash" "chrom")
+    which nosleep &> /dev/null || exit 1
+    while [ true ]
+    do
+        for app in ${nosleep_apps[*]}
+        do
+            if [ $(ps aux | grep -v "grep" | grep -c "${app}") -gt 0 ]
+            then
+                nosleep
+            fi
+        done
+        sleep 300
+    done
+
+_Make sure both are executable, then tell openbox to run the daemon when it starts:_
+
+    echo "which nosleep-daemon &> /dev/null && (nosleep-daemon) &" >> ~/.config/openbox/autostart
+
+_As an alternative, you can set the `nosleep` script as a crontab event instead (this may be more reliable, but it will run even if you haven't loaded the gui environment)._
+
+
 ## [youtube downloader](https://github.com/rg3/youtube-dl)
 
 This is a really cool command line utility that you can use to download (the highest quality) youtube videos without any GUI utilities.  It includes asynchronous processing and even spits out the percent status.
