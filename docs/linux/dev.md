@@ -8,10 +8,6 @@ It will install additional development packages, and configure them as well as m
 
 ## install packages
 
-- gd
-- imagemagick
-- graphicsmagic
-
 
 
 
@@ -28,12 +24,12 @@ For development, you should disable this feature by creating, and then modifying
 
 _Create the config file:_
 
-    TODO
+    cd /etc/X11
+    Xorg --configure
 
 _Modify the line that restricts higher FPS:_
 
-    TODO
-
+    sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
 
 
 ## golang
@@ -43,6 +39,8 @@ For stability reasons debian opts to not update packages after release.  As a re
 To install the latest version, you will need to download the package, extract it, and then move the files to the appropriate places.
 
 **Building golang depends on `gcc`, `libc6-dev`, `libc6-dev-i386`, and `mercurial` packages.**
+
+Additional steps include adding its vim package to your plugins, and setting your system to auto-run `go fmt` on write.
 
 
 ##### commands
@@ -62,4 +60,9 @@ _Run these to download the golang repository and build then install the latest *
     ln -sf /usr/lib/go/bin/go /usr/local/bin/go
     ln -sf /usr/lib/go/bin/gofmt /usr/local/bin/gofmt
 
+_Augmenting vim:_
+
+    echo '" add go fmt' >> ~/.vimrc
+    echo 'autocmd FileType go autocmd BufWritePre <buffer> Fmt' >> ~/.vimrc
+    cp -R /usr/lib/go/misc/vim/* ~/.vim/
 
