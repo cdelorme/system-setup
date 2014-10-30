@@ -1143,39 +1143,16 @@ configure_user_services() {
 
         # configure hotkeys (some are plugin dependent and will simply not work)
         echo '[' > "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
-        echo '    { "keys": ["ctrl+enter"], "command": "goto_python_definition"},' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
         echo '    { "keys": ["ctrl+tab"], "command": "next_view" },' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
         echo '    { "keys": ["ctrl+shift+tab"], "command": "prev_view" },' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
-        echo '    { "keys": ["alt+m"], "command": "markdown_preview", "args":' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
-        echo '        { "target": "browser", "parser": "markdown" }' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
-        echo '    }' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
         echo ']' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
+        # echo '[' > "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
+        # echo '    { "keys": ["ctrl+tab"], "command": "next_view" },' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
+        # echo '    { "keys": ["ctrl+shift+tab"], "command": "prev_view" },' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
+        # echo ']' >> "${user_home_dir}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
 
-        # populate sublime preferences
-        # su $config_system_username -c "echo '{' > ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"auto_complete_commit_on_tab\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"caret_style\": \"phase\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"color_scheme\": \"Packages/Color Scheme - Default/Sunburst.tmTheme\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"font_face\": \"ForMateKonaVe\",' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"font_size\": 14,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"highlight_line\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"highlight_modified_tabs\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"match_brackets_angle\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"scroll_past_end\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"scroll_speed\": 2.0,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"translate_tabs_to_spaces\": true,' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '    \"trim_trailing_white_space_on_save\": true' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-        # su $config_system_username -c "echo '}' >> ~/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+        # populate markdown-preview config file
 
-        # configure hotkeys (some are plugin dependent and will simply not work)
-        # su $config_system_username -c 'echo "[" > "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+enter\"], \"command\": \"goto_python_definition\"}," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+tab\"], \"command\": \"next_view\" }," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "    { \"keys\": [\"ctrl+shift+tab\"], \"command\": \"prev_view\" }," >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "    { \"keys\": [\"alt+m\"], \"command\": \"markdown_preview\", \"args\":" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "        { \"target\": \"browser\", \"parser\": \"markdown\" }" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "    }" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
-        # su $config_system_username -c 'echo "]" >> "$HOME/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"'
 
         # so far there is no easy way to install or manage packages from bash or subl cli
 
