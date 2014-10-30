@@ -452,7 +452,7 @@ I usually create a set of rules in `/etc/firewall.conf`, though some services wo
 
 _Begin by creating the directory:_
 
-    mkdir - /etc/iptables
+    mkdir -p /etc/iptables
 
 _Next let's populate `/etc/iptables/iptables.rules` with some basic compliant rules:_
 
