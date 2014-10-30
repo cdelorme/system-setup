@@ -590,6 +590,32 @@ _Here is how I create my new users:_
     usermod -aG sudo username
 
 
+#### automate updating access keys
+
+Over the years I've found that I reinstall systems often enough to never have had an SSH key last more than a year.  This is fine, ssh keys are intended to identify a single system, when you reinstall that system is not the same.
+
+So, one problem I've had has been redistributing keys to servers such that my new systems can access.  Fortunately we can fix that by adding a script to the user bin, and a crontab to run it regularly.
+
+
+##### commands
+
+_Create a file `~/.bin/update-keys` with these lines (placing your github username where the command is):_
+
+    #!/bin/bash
+    keys=$(wget -qO- https://github.com/$(whoami).keys)
+    echo "$keys" | while read -r key
+    do
+        if [ -f "${HOME}/.ssh/authorized_keys" ] && ! grep $key "${HOME}/.ssh/authorized_keys" &> /dev/null
+        then
+            echo $key >> "${HOME}/.ssh/authorized_keys"
+        fi
+    done
+
+_Then run `crontab -e` and add this line:_
+
+    */5 * * * * /home/cdelorme/.bin/update-keys
+
+
 ## references
 
 - [iptables securing ssh](http://www.rackaid.com/blog/how-to-block-ssh-brute-force-attacks/)
