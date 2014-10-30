@@ -1,8 +1,11 @@
 #!/bin/bash
 # search and destroy mac/windows garbage files
-find /media -iname "thumbs.db" -exec rm -rf {} \;
-find /media -iname ".ds_store" -exec rm -rf {} \;
-find /media -name '._*' -exec rm -rf {} \;
+if [ -d /media ]
+then
+    find /media -iname "thumbs.db" -exec rm -rf {} \;
+    find /media -iname ".ds_store" -exec rm -rf {} \;
+    find /media -name '._*' -exec rm -rf {} \;
+fi
 # reduced io stress with weekly fstrim
 for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
 do
