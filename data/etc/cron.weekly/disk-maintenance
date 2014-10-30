@@ -6,13 +6,9 @@ then
     find /media -iname ".ds_store" -exec rm -rf {} \;
     find /media -name '._*' -exec rm -rf {} \;
 fi
-# reduced io stress with weekly fstrim
-for DEVICE in $(mount | grep ext4 | grep -v mapper | awk '{print $1}')
-do
-    fstrim "${DEVICE}"
-done
-# defragment ext4 devices
+# defragment ext4 devices, and reduce stress by running condensed fstrim operations
 for DEVICE in $(mount | grep ext4 | awk '{print $1}')
 do
     e4defrag "${DEVICE}"
+    fstrim "${DEVICE}"
 done
