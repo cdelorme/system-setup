@@ -1,0 +1,10 @@
+vendor
+.git
+.gitignore
+.DS_Store
+desktop.ini
+composer.lock
+composer.phar
+.vagrant
+Vagrantfile
+node_modules
