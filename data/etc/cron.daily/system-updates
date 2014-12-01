@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #!/bin/bash
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
 netselect-apt -sn -o /etc/apt/sources.list
