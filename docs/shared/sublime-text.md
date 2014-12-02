@@ -14,6 +14,7 @@ I recommend these packages for the editor:
 - [Package Control](https://sublime.wbond.net/)
 - [Markdown Preview](https://github.com/revolunet/sublimetext-markdown-preview)
 - [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
+- [DefaultFileType](https://github.com/spadgos/sublime-DefaultFileType)
 - [Origami](https://github.com/SublimeText/Origami)
 - [EncodingHelper](https://github.com/SublimeText/EncodingHelper)
 - [GoSublime](https://github.com/DisposaBoy/GoSublime)
@@ -48,12 +49,18 @@ _User configuration file (assumes `ForMateKonaVe` font is installed):_
         "trim_trailing_white_space_on_save": true
     }
 
-_Custom hotkeys `~/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap`:_
+_Custom hotkeys `~/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap` (keeping in mind that the initial path will vary by platform):_
 
     [
         { "keys": ["ctrl+tab"], "command": "next_view" },
         { "keys": ["ctrl+shift+tab"], "command": "prev_view" },
     ]
+
+_Set the default file type to markdown for new files with `~/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings`:_
+
+    {
+        "default_new_file_syntax": "Packages/Markdown/Markdown.tmLanguage"
+    }
 
 
 ## linux
@@ -126,4 +133,3 @@ I set GoSublime's GOPATH, since it does not appear to interpret the `~/.bashrc`:
             "GOPATH": "$HOME/.go"
         }
     }
-
