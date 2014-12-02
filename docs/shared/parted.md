@@ -1,16 +1,17 @@
 
-# partition alignment with parted
+# parted
 
-This is important, because it's a problem I have faced many times in the past and ignored.
+The `parted` utility is used to handle drive partitioning, and is an important tool to know for system configuration.
 
-Today I will overcome my ignorance and learn how it works.
+This document will cover partition alignment, and also my preferred partitioning schema.
+
 
 ## general best practice
 
 An ubuntu article states that advanced format disks (eg. modern hardware) using a space of 2048 (multiple of 8) for sector sizes with an initial offset of 1 MiB is best practice.
 
 
-### more comprehensive answer
+### about `/sys/block/`
 
 You can check disk information in `/sys/block/` and get actual details for performing manual calculations (again for advanced disks the outcome is pretty standard).
 
@@ -35,7 +36,7 @@ Simply set the start point to the last end point.
 To save yourself time calculating the prior disks size, simply check the end value after setting `unit MiB`.
 
 
-### my test case
+### partition alignment test-case
 
 My current test case is Parallels Desktop, where the hardware is virtualized, so it's not a great example of real situations, but a very common one I believe for modern computing.
 
@@ -57,9 +58,9 @@ I followed these commands up with the finishing touches:
 
 ## preferred partitioning schema
 
-I use this same schema in almost all linux platforms.
+I use this same schema in all installations.
 
-Partitions:
+**Partitions:**
 
 - efi (512M)
 - /boot (512M, noatime)
@@ -67,10 +68,21 @@ Partitions:
     - swap (4G)
     - /tmp (2G, relatime)
     - /var/log (2G, noexec)
-    - /root (40G, noatime)
+    - /root (20G, noatime)
     - /home (remainder, noatime)
 
-Separated log and tmp partitions eliminate the change of some crazy log or tmp script from taking down my system.  Additionally I throw noexec on logs since that shouldn't happen.  It may actually be wiser to mount /tmp via tmpfs (and some systems may override the partition with that).
+I've heard from far too many folks about how their logs went out of control and filled up the disk.  While you can take specific steps to make sure that does not happen, the most effective strategy that won't ever leave you in a bind with a filled root partition is to create a separate partition for logs.
+
+I've also found that creating one for `tmp/` can also be beneficial, although a ramdisk (ex. tmpfs) may be similarly useful if you are not concerned about persisting temporary data.
+
+The efi and boot partitions are required in order to get your system to boot without any major issues.  A 512MB partition _should_ be enough to hold many linux kernel images, as well as an efi bootloader and possibly an entire efi shell.
+
+_The efi partition must be fat32, and therefore has no separately applied filesystem options._
+
+
+**Partition Sizes:**
+
+An entire headless (no gui) linux installation can exist on a 2GB disk.  With a graphical environment the root partition would take up roughly 6GB~, and while you could make due with 10GB of space for a full desktop environment you may run into problems depending on what packages you install from there.  An optimal root partition size with plenty of room for additional software and to build large source packages is 20GB, _although I will often go with 40GB._
 
 
 # references
@@ -79,4 +91,3 @@ Separated log and tmp partitions eliminate the change of some crazy log or tmp s
 - [Independent Tutorial](http://rainbow.chard.org/2013/01/30/how-to-align-partitions-for-best-performance-using-parted/)
 - [Ubuntu Summary](http://askubuntu.com/questions/201164/proper-alignment-of-partitions-on-an-advanced-format-hdd-using-parted)
 - [Awesome Picture Description](http://superuser.com/questions/291978/western-digital-green-drive-from-512-byte-sectors-jumpered-to-4k-byte-sectors/291992#291992)
-
