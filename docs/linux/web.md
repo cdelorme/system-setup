@@ -1,143 +1,116 @@
 
 # web server documentation
 
-This template extends my Debian template configuration process, and is intended for use as a development web and DNS server.  Ideally one that could easily be cloned into production with a few minor security enhancements.
+These steps extend my template configuration steps, and is intended for use as a bare-bones web & proxy server.  _Additional services can be installed and configured afterwards (such as nodejs, php, etc)._
 
-This document covers the following services extensively:
+In my case I've moved away from almost all personal projects that involve a high degree of complication, so I don't include extra software in my configuration.
 
-- nginx
-- php-fpm
-- mariadb
-- monit
-- nodejs
-- sphinx
-- bind9 (dns)
+Key utilities that will be covered:
 
-Other services may be involved as well, but these are the focus of this template.
+- [nginx](http://wiki.nginx.org/Main)
+- [monit](http://mmonit.com/monit/)
 
-We use nginx as the proxy for most of the services extending from this machine.
+Separate documentation that is supplemental to the above tools includes:
 
-We can run php-fpm and nodejs behind nginx for web development or internal web services.
+- [mongodb](../misc/mongodb.md)
+- [php-fpm](../misc/php-fpm.md)
+- [mariadb](../misc/mariadb.md)
+- [msmtp mail server](../misc/msmtp.md)
 
-_The use of mariadb is as an optional drop-in replacement for MySQL, and is by no means a requirement, but currently seems to be the better choice given MySQL has been acquired by Oracle and has been stagnating since as it competes with their enterprise product._
+All web services should run through nginx as a proxy and cache service, and it is especially efficient for static website delivery.
 
-We add more configurations to monit so it can check on our web server services, in addition to being an ideal approach to launching nodejs applications.
-
-Sphinx indexer is a great tool to enhance search engines in our various web services, and is probably the fastest solution to this.
-
-Finally, the purpose of bind9 may be for an internal or "intranet" based development services, such as local-only access to the web server using internally recognized domain names.
-
-**All instructions are written under the assumption that you have root privielges.**
-
-_I have not thoroughly tested the snakeoil key generation instructions, but the default keys should work and do exist in the directories specific.  I will update the documentation according to any issues I encounter when I get a chance to test each step myself._
-
-_While I use the bind9 configuration described below, setup has always been a bit of a pain and I have not thoroughly tested and debugged all the "gotcha" scenarios.  You may consider waiting for an update to that section before following my instructions, or if you encounter problems either add an issue to the issue tracker and wait for me to follow-up._
+For a server it makes more sense to use something like `monit` to watch for whether services cease to run or begin behaving erratically, and either notify the maintainer or restart them automatically.
 
 
-### adding new services
+## service installation
 
-This section covers installing any new services and modifications that may be required.
+To install our new packages we want to add the [`dotdeb` repository](../misc/dotdeb.md), which will give us a more up-to-date version of nginx, since debian stability prevents newer versions.
 
-
-**Adding DotDeb:**
-
-Execute to add key:
-
-    wget http://www.dotdeb.org/dotdeb.gpg
-    cat dotdeb.gpg | apt-key add -
-    rm dotdeb.gpg
-
-Add the sources to `/etc/apt/sources.list`:
-
-    deb http://packages.dotdeb.org wheezy all
-    deb-src http://packages.dotdeb.org wheezy all
-
-_The dotdeb repositories are a trusted and well maintained set of packages which are great for development and production use._
-
-
-**MariaDB Sources:**
-
-Register the key & add their repository:
-
-    apt-get install python-software-properties
-    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
-    add-apt-repository 'deb http://mirror.jmu.edu/pub/mariadb/repo/5.5/debian wheezy main'
-
-
-**Installing Services:**
+Now we are ready to cleanup
 
     aptitude clean
     aptitude update
-    aptitude install -ryq nginx-full ssl-cert php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl msmtp-mta monit bind9 python-pip bpython sphinxsearch imagemagick graphicsmagick libgraphicsmagick1-dev mariadb-server mongodb
+    aptitude install -ryq nginx-full
+
+If you are concerned with stability of auto-updates you are welcome to put key packages on hold:
+
+    aptitude hold nginx-full
+
+With that in effect your system can upgrade other packages, but any new versions of `nginx-full` would be ignored.  This can be helpful if you are concerned with upgrades:
+
+- introducing instability
+- breaking backwards compatibility
+- replacing configuration files
+
+There are other options around it as well, but that tends to be a _prudent_ solution for a production server.  If you are using debian stable packages, then you usually won't have to worry about any instabilities being introduced.
 
 
-**Installing nodejs:**
+## monit
 
-Safely download, build and install it off their site:
+I use monit for many things starting with basic system performance to workstation applications and services, as well as my server to keep things from locking up or overloading the system.  I have configuration for other utilities in my [workstation documentation](workstation.md).
 
-    cd /usr/src
-    wget http://nodejs.org/dist/node-latest.tar.gz
-    tar xf node-latest.tar.gz
-    rm node-latest.tar.gz
-    cd node-v*
-    ./configure && make && make install
+For nginx, add these lines to `/etc/monit/monitrc.d/nginx`:
 
-Ideally you should keep the source files for later in case you want to remove the installed contents.  Alternatively you can use checkinstall in place of make and make install, but you'll have to install that package first.
+    check process nginx with pidfile /var/run/nginx.pid
+        start program = "/etc/init.d/nginx start"
+        stop program  = "/etc/init.d/nginx stop"
+        group www-data
+        if cpu > 80% for 5 cycles then restart
+        if memory > 80% for 5 cycles then restart
+        if 3 restarts within 8 cycles then timeout
+
+It can also be used to make sure your website is up, and take action if it is not:
+
+    check host example.com with address example.com
+        restart program = "/etc/init.d/nginx restart"
+        if failed port 80 protocol http for 2 cycles then restart
+        if failed port 443 protocol https for 2 cycles then restart
+
+We want to make sure that these services continue to run, and will restart if they are locking up or eating up more resources than they should be (aka erratic behavior).
+
+The format for the configurations is extremely human, and you should read through the [documentation](http://mmonit.com/monit/documentation/) at their website for more examples.
 
 
-**npm services:**
+## iptables
 
-nodejs comes with the `npm` package manager, and you can install packages on a per-project, or global, basis.  Here are the packages I recommend a global installation for:
+We only need to add one line, but this is required to enable http and https traffic (I use the keywords to be more explicit, but you can exchange them for ports 80,443):
 
-    npm install -g csslint jshint csso uglify-js mocha jscoverage yo grunt grunt-contrib-watch markdown forever bower
+    # Allow tcp traffic for  (HTTP, HTTPS)
+    -A INPUT -p tcp -m multiport --dports http,https -m conntrack --ctstate NEW -j ACCEPT
 
-_You may optionally add `mongo` and `mysql` as needed, but it may be wiser to use a local copy of those per project.  Same goes for bower and grunt packages, if you expect many projects to be using them at the same time._
-
-Also, if your test machine or server has less than a gigabyte of memory you may want to create a swap file.  When npm searches the registry it parses a massive json file which can at times exceed over a gigabyte and crash.  _If the system runs out of memory then you can always use an alternative approach via `sudo dd if=/dev/zero of=/swap bs=1024k count=2048` to build a 2GB swap file, then `sudo mkswap /swap` and `sudo swapon /swap`, to temporarily give yourself more memory.  It is slow but it will work._
+_If you have additional services you want to run on non-standard ports, you will want to add additional rules to your iptables list._  Ideally you should use standard ports to avoid complications and increasing the number of entry-points.
 
 
-### creating a development environment
+## preparing a server environment
 
-I start by creating three new groups then adding my user to them:
+On many projects over the years I've found that permissions can be a plague.  Setting who has access rights, and creating some semblance of a standardized layout for projects can be a hassle.
 
-    groupadd projectdev
-    groupadd webdev
+One of the biggest concerns is automating git repositories without breaking the permissions because of who checked out the latest source.
+
+My solution is to supply a default structure, and use the stickybit to enforce group and permissions that _should_ ensure things continue to run smoothly.
+
+First, create the `www-data`, `webdev`, and `gitdev` groups if either does not yet exist.  Be sure to add your user to these groups, and any users you want to have access.  **This includes whatever user is running the nginx server, or processing content dynamically, or accessing the database.**  _Some languages make a real mess of this, like php, so be prepared for dealing with madness from time-to-time._
+
+    groupadd www-data
     groupadd gitdev
-    usermod -aG projectdev username
-    usermod -aG webdev username
-    usermod -aG gitdev username
+    groupadd webdev
+    usermod -aG webdev,gitdev username
 
-Since I want the workflow to be as smooth as possible I add `www-data` to the `webdev` group as well.
+Next, we can create the `/srv/www` folder and apply ownership changes and stickybit (`6775` or `2775` depending on needs) permissions for normal access:
 
-    usermod -aG webdev www-data
+    mkdir -p /srv/www
+    mkdir -p /srv/git
+    chown -R www-data:www-data /srv
+    chown -R www-data:webdev /srv/www
+    chown -R www-data:gitdev /srv/git
+    chmod -R 6775 /srv
 
-For a workspace I prefer using `/srv` as this is a server, so it makes sense.  I start by setting ownership and permissions:
+_The 2 and 6 are `sticky bits` which in binary represent specific functions.  2 is `010` which means permissions on the group are applied to all child objects created under that folder.  Similarly 6 translates to `110` which means group and owner permissions are passed down to all contained objects.  Using the sticky-bit ensures permissions are passed down to contained files and folders, and the group should not change from `webdev`, giving access to all developers, and also to the web server.  We can also choose when to compromise security and go to `7` for other on specific files (usually for php...)._
 
-    chown root:projectdev /srv
-    chmod 2775 /srv
-
-Next I create some subdirectories underneath:
-
-    mkdir /srv/www
-    mkdir /srv/git
-    mkdir /srv/projects
-
-I then set alternative ownership on these directories:
-
-    chown username:webdev /srv/www
-    chown username:gitdev /srv/git
-
-_While the sticky-bit for group-id is helpful, ideally we should also make sure that nginx, php-fpm, and nodejs are all set to apply the webdev group to files (I will cover this per config section), and that pam.d has been told to use a umask default of `002` (as covered in the original template documentation)._
+Next we can either use bare git repositories and a `post-receive` hook to automate deployment, _or_ for static content we can use a cronjob to pull from a git repository regularly and automate deployment.
 
 
-**Advanced Git Control:**
-
-As a development machine we may as well host our own repositories, hence the `/srv/git` directory.  However, understanding the workflow is important to be productive.
-
-Generally when working on a shared repository or branch you have to pull before pushing etc, or create your own branches to work in.  This is fine, but pushing to a remote everytime can be troublesome, whether due to having to run pull first, or simply poor internet connectivity, having a local repository can resolve a huge chunk of this pain.
-
-Instead, create a bare repository to act as a second (or better yet a primary) remote, and add your internet remote (such as github or bitbucket) with the appropriate label.
-
+### bare git repositories
 
 **Creating/Cloning a Bare Repo:**
 
@@ -159,7 +132,6 @@ Then from your local machine you can clone it, or add it as a remote via:
 
 _Personally, I prefer making the `origin` remote my local dev repo, and creating github or bitbucket remotes._
 
-
 **Adjusted Workflow:**
 
 With the bare repository in place you can now set a remote origin to push to without having to worry.
@@ -172,463 +144,142 @@ Then add the bare repository as origin:
 
     git remote add origin username@remote_ip:/srv/git/project_name.git
 
-Now you can push/pull without extra specification.  When you have a finished and tested set of changes you can easily run:
+You can now test on a local box by pushing changes there first:
 
-    git pull && git push internet
+    git push origin
 
+Which should automate via a post-receive hook on that server, and once tested you can easily push and pull to the other remote (usually the public or shared repository):
 
-**Testing with rsync:**
+    git pull internet
+    git push internet
 
-If you want to test changes very quickly you can use rsync to synchronize any changed files between a local and remote directory.
+**Adding a post-receive hook:**
 
-If you are using Sublime Text 2 you can automatically execute an rsync script or command with the commandOnSave plugin, otherwise you can create a script and run it.
+If you want to perform a specific action when new content has been received, you can do so by creating an executable file at the relative path `.git/hooks/post-receive`.
 
-Here is an example shell script for rsync:
+For example, assuming you serve your site from `/srv/www/` using nginx, you can checkout the latest source via:
 
-    #!/bin/sh
+    #!/bin/bash
+    git --git-dir=/srv/git/site.com.git --work-tree=/srv/www/site.com checkout -f
 
-    if [ ! -f "rsync" ];
-    then
+_Obviously this example does not take into account alternative branches, since you'd need folders for each branch configured as well, but it is possible._
 
-        touch "rsync";
-
-        # Sync Atom VM Files /w rsync (use full paths)
-        SERVER="remote_ip";
-        USERNAME="username";
-        REMOTE_PATH="";
-        LOCAL_PATH="";
-        SSH_KEY_PATH="";
-
-        # Excludes
-        EXCLUDES=();
-        EXCLUDES=(${EXCLUDES[*]} '.git');
-        EXCLUDES=(${EXCLUDES[*]} '.gitignore');
-        EXCLUDES=(${EXCLUDES[*]} '.settings');
-        EXCLUDES=(${EXCLUDES[*]} 'composer.lock');
-        EXCLUDES=(${EXCLUDES[*]} '*.gitignore');
-        EXCLUDES=(${EXCLUDES[*]} '.buildpath');
-        EXCLUDES=(${EXCLUDES[*]} '.project');
-        EXCLUDES=(${EXCLUDES[*]} '.externalToolBuilders');
-        EXCLUDES=(${EXCLUDES[*]} '.DS_Store');
-
-        rsync -atvz -e "ssh -i $SSH_KEY_PATH" ${LOCAL_PATH} ${USERNAME}@${SERVER}:${REMOTE_PATH} `for i in ${EXCLUDES[@]}; do printf " --exclude ${i}"; done`
-
-        rm "rsync";
-
-    fi
+Alternatively you can have the server execute unit and integration tests as part of an entire deployment process.
 
 
-### system modifications
+## log rotation
 
-**Add to iptables:**
+Assuming our nginx service is configured to place logs with the websites inside our `/srv` environment then we will want to create a logrotation script to keep our drive from flooding.
 
-Insert these rules after SSH rules inside `/etc/iptables/iptables.rules`:
-
-    # Allow tcp traffic for  (HTTP, HTTPS)
-    -A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT
-
-    # Allow DNS
-    -A INPUT -p tcp --dport 53 -j ACCEPT
-    -A INPUT -p udp --dport 53 -j ACCEPT
-
-
-**Server Website Logs:**
-
-Create a new file in `/etc/logrotate.d/websites` with these contents:
+Create a new logrotate configuration file `/etc/logrotate.d/websites` with these rules:
 
     /srv/www/*/logs/*.log {
-       daily
-       missingok
-       rotate 3
-       compress
-       delaycompress
-       notifempty
-       sharedscripts
-       prerotate
-          if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
-          run-parts /etc/logrotate.d/httpd-prerotate; \
-       fi; \
-       endscript
-       postrotate
-       [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`
-       endscript
+        copytruncate
+        daily
+        missingok
+        rotate 3
+        compress
+        delaycompress
+        notifempty
+        size 300k
     }
 
-This will ensure that our log files inside the /srv/www development area will be rotated instead of filling up.
+This finds ant `.log` files inside `logs/` folders inside `/srv/www` paths (for example `/srv/www/example.com/logs/`).
 
+The configuration will keep the maximum size below 300k, and rotate it in sets of 3 files at a time.  The second oldest will always be compressed, giving you two files to search through.  It will run daily unless that size limit is exceeded.
 
-### configuring monit
+Because nginx is connected to the file it logging to we use `copytruncate` to keep the file in-place and simply copy it's records elsewhere.  _This copy process can result on lost messages if they occur during the logrotate copy, but because our max size is small it should never occur (or at least very rarely)._
 
-We will want to add several new configurations to monit.
 
-Remember that monit can also be useful for firing up nodejs instances (a future release may contain exmaples).
+## nginx configuration and optimization
 
-Key services of concern:
+Our next goal is to configure and optimize nginx to serve content or websites from our `/srv/www` folders, as well as other running services (since it is a proxy server).
 
-- nginx
-- php-fpm
-- bind9
-- mariadb
+We'll want to remove the default site template and prepare an ssl directory and configuration plus script directories:
 
-We want to make sure that these services continue to run, and will restart if they are locking up.
+    rm /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+    mkdir -p /etc/nginx/ssl /etc/nginx/conf.d /etc/nginx/scripts.d
 
-The format for the configurations is extremely human, and you should read through the [documentation](http://mmonit.com/monit/documentation/) at their website for more examples.  Here I will provide three basic examples we use in our production system (located in `/etc/monit/conf.d/`):
+_This should let us organize our configuration files, and import them intelligently._
 
-NGinx Monitor `/etc/monid/conf.d/nginx.conf`:
+One wonderful thing about nginx is that it comes with completely sane defaults that will usually be performant without modification for your average website.  However, if you want to go the extra lengths to squeeze more out of your server, or if your working on an entirely different scale then you will want to change the defaults.
 
-    check process nginx with pidfile /var/run/nginx.pid
-        start program = "/etc/init.d/nginx start"
-        stop program  = "/etc/init.d/nginx stop"
-        group www-data
 
-PHP Monitor `/etc/monid/conf.d/php.conf`:
+### nginx optimizations
 
-    check process php5-fpm with pidfile /var/run/php5-fpm.pid
-        start program = "/etc/init.d/php5-fpm start"
-        stop program = "/etc/init.d/php5-fpm stop"
-        group www-data
+I place all global optimization scripts inside `/etc/nginx/conf.d`, and import them from the primary configuration.
 
-Bind9 Monitor `/etc/monid/conf.d/bind.conf`:
+Per-site optimization scripts are placed into `/etc/nginx/scripts.d`, hence the separate path.
 
-    check process named with pidfile /var/run/named/named.pid
-        start program = "/etc/init.d/bind9 start"
-        stop program = "/etc/init.d/bind9 stop"
-        group www-data
 
-MariaDB Monitor `/etc/monid/conf.d/mariadb.conf`:
+**Global Optimizations:**
 
-    check process mysqld with pidfile /var/run/mysqld/mysqld.pid
-        start program = "/etc/init.d/mysql start"
-        stop program = "/etc/init.d/mysql stop"
-        group www-data
-
-These additions will ensure that these new services continue to run at all times.
-
-
-#### configuring the mail server
-
-I'll be honest, I absolutely loath mail servers.  They have never been easy to configure and setup, which is why there are dozens of them out there instead of just a few really good ones.
-
-Besides that, I feel that mail is the kind of technology we should leave to the groups doing it right, instead of trying to run our own.
-
-If you want to setup exim4 for production, check out the [Linode's Library](https://library.linode.com/email/exim/send-only-mta-ubuntu-12.04-precise-pangolin).
-
-Otherwise I recommend a simple SMTP mail forwarding service (msmpt-mta).
-
-
-**(Optional) MSMTP for Development SendMail Only Server:**
-
-Now we want to create a file at `/etc/msmtprc`, and add configuration data similar to:
-
-    # Set default values for all following accounts.
-    defaults
-    tls on
-    tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-    # Default Account
-    account gmail
-    host smtp.gmail.com
-    port 587
-    auth on
-    user username
-    password password
-    from username@gmail.com
-
-    # Set a default account
-    account default : gmail
-
-Since this file will carry a raw password you will want to secure it by adjusting permissions:
-
-    chmod 0600 /etc/msmtprc
-
-_You can create multiple accounts and are not limited to just one, this allows you to change sender data accordingly._
-
-By default installing msmtp will add a symlink to `/usr/sbin/sendmail` for the local mail protocol, meaning you should not need to change anything else.  However, you can also symlink `/usr/sbin/msmtp` to `/usr/bin/msmtp` if you want to be able to access it on normal user accounts.
-
-
-#### configuring the www-data user
-
-This user will be responsible for most of the web activity going on, so we want to make sure they are setup properly.
-
-We can start by giving them a real `/home` path:
-
-    usermod -m -d /home/www-data www-data
-
-_Check that the contents of `/etc/skel` did not create or add any unwanted files._
-
-
-**Creating a (Passwordless) SSH key:**
-
-For our `www-data` user to run certain automated operations, such as pulling from private repositories or otherwise as needed by composer for example, we will want to create an SSH key for this user without a password so it can run requests without interaction.
-
-**However, as mentioned in the previous template documentation, any keys without a password should be limited to read-only access on the any remote contents to which they are added.**
-
-To create a strong SSH key:
-
-    ssh-keygen -t rsa -b 4096
-
-Let it choose the default location for `~/.ssh/id_rsa` private and a public key.  You may then optionally enter a password, or nothing and hit enter to create it as a **passwordless** key.
-
-
-#### configuring php-fpm
-
-We want to modify `/etc/php5/fpm/php.ini` to set your [timezone](http://php.net/manual/en/timezones.php):
-
-    date.timezone = America/New_York
-
-
-**Install Composer Globally:**
-
-Execute these commands to install Composer globally:
-
-    wget --no-check-certificate https://getcomposer.org/installer
-    php installer
-    rm installer
-    mv composer.phar /usr/local/bin/composer
-
-
-**Development Error Output:**
-
-By default PHP5-FPM is configured to silence error output for production, but if you are running a development server and wish to see these errors from the browser to debug and correct them you will need to modify a line in `/etc/php5/fpm/php.ini`:
-
-    display_errors = On
-
-
-**PHP File Uploads:**
-
-By default PHP allows 2 Megabytes at most, which is tiny by todays standards, so let's increase it:
-
-    upload_max_filesize = 32M
-
-Remember, you can enforce upload sizes in other ways, this simply makes it require less tweaking in the service itself.
-
-
-**Add pecl Packages:**
-
-We can only install mongodb and gmagick extensions for php using pecl, the pear package system.  To do so, let's run these commands:
-
-    pecl install gmagick
-    pecl install mongo
-
-Next we need to tell php to load these modules.  We can do so the "proper" way by creating `/etc/php5/mods-available/gmagick.ini` and `/etc/php5/mods-available/mongodb.ini` with their extentions like so:
-
-    echo "extension=gmagick.so" > /etc/php5/mods-available/gmagick.ini
-    echo "extension=mongo.so" > /etc/php5/mods-available/mongodb.ini
-
-Finally we can symlink these into `/etc/php5/conf.d`, and reboot php-fpm for the changes to take affect:
-
-    cd /etc/php5/conf.d
-    ln -s ../mods-available/gmagick.ini gmagick.ini
-    ln -s ../mods-available/mongodb.ini mongodb.ini
-    service php5-fpm restart
-
-
-##### optimization
-
-Optimization can be tricky, and ideally you should optimize late instead of make it the focus of your build.  It **should** be according to the services you are delivering, but there are technically two approaches.
-
-1. If you have an existing web service with statistics on requests per second you should optimize by traffic (this is the best approach because it lets you know whether you should be upgrading or downgrading your equipment).
-
-2. If you have a fixed amount of equipment and a brand new service you can optimize the systems resources to that service.
-
-_As you add more web serviers optimization becomes a complete balancing act._
-
-Let's start by covering some of the configuration settings, which can be found inside `/etc/php5/fpm/pool.d/www.conf`:
-
-- `pm.start_servers`
-- `pm.min_spare_servers`
-- `pm.max_spare_servers`
-- `pm.max_children`
-- `pm.max_requests`
-
-The `fpm` stands for FastCGI Process Manager, and a `pm` manages a pool of php `servers`.  So the `start_servers` is the number it boots with.  Each server has `max_children` processes it can execute.
-
-If you have 4 servers with 25 children you can handle 100 php requests at a time.  The spare servers are spun up as you hit that maximum to handle additional incoming requests.  So if you have a minimum of 2 and max of 6, then it will load another 50 processes allowing it to flexibly handle all the way up to 150 additional requests.
-
-Optimization comes from balancing the children per php-server as best the hardware can handle while consuming the least amount of memory but responding evenly to all requests.
-
-
-In the first scenario, you will look at statistics like requests per second (ex. 3000), time to handle each requests (ex. 0.02), and memory consumed per request (ex. 2MB).
-
-PHP-FPM is running event driven, which means it will server per tick or "microsecond".  Take that 3000 multiply it by 0.02 and it becomes 60 requests at a time, roughly.
-
-If I have 4 servers with 25 children, they can handle 100 requests, so we are within the threshold with some room to spare with regards to requests.
-
-Next for memory, we look at the 2mb per request, and also the idle consumption of 4 php-servers with 25 children.  Let's set 88mb, so 22mb per server, plus 25*2 or 50mb per request, which means approx. 72mb per server under load.  Our 4 servers will consume an average of 308MB, so long as we have that much RAM spare and our CPU isn't being killed causing bad response time, then we are all set.  If response time is bad but memory is not a problem, we need more vcpu's.
-
-
-In the second scenario let's say we have 4 cores or vcpus with 2GB of memory.  A base install of debian maybe consumes 180MB so we have roughly 1.8GB free.  If all we are doing is serving PHP contents we can safely choose to assign 40% or 720MB to PHP-FPM.
-
-Ideally we would run something like [Seige](http://www.joedog.org/siege-home/), and using monit we can watch the memory consumed by our servers.  We build an average and slowly increase both the children and servers until we hit our limit.  Ideally we test various combinations to see where the best CPU and Memory consumption balance is.
-
-
-Here are the settings I stick with:
-
-    pm.max_children = 25
-    pm.start_servers = 2
-    pm.min_spare_servers = 2
-    pm.max_spare_servers = 5
-    pm.max_requests = 500
-
-This tends to be plenty for development and testing, but obviously I would do the ground-work above if I wanted to make sure it was tailored to the service I was building.
-
-
-Finally, after all of the above changes, we can try rebooting php-fpm, if it works we are all set, and we can verify the changes with phpinfo from nginx.
-
-    service php5-fpm restart
-
-
-#### configuring nginx
-
-Let's move into `/etc/nginx`, remove the default template configurations and add some folders:
-
-    cd /etc/nginx
-    rm sites-available/default
-    rm sites-enabled/default
-    mkdir -p ssl conf.d scripts.d
-
-Next we will create some scripts to be loaded per virtual host.
-
-    cd scripts.d
-
-Create `favicon.conf` with:
-
-    # favicon 404 fix
-    location /favicon.ico {
-        access_log off;
-        log_not_found off;
-    }
-
-Create `php.conf` with:
-
-    # PHP Handler
-    location ~ \.php$ {
-        try_files $uri =404;
-        include fastcgi_params;
-        fastcgi_pass unix:/var/run/php5-fpm.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }
-
-Next we can create `cache.conf`, but there are two approaches.  The best performance with the most headaches is to add one line `expires max;`, which we would then have to override for every file we don't want to be forever cached.  The best approach I have found is to be specific about the files we want their browser to cache, and to break it up according to specific types:
-
-    location ~* \.(ico|gif|jpe?g|png)$ {
-        expires max;
-        add_header Pragma public;
-        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    }
-
-    location ~* \.(css|js)$ {
-        expires 5m;
-        add_header Pragma public;
-        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    }
-
-_You may consider also adding `access_log off;` and `log_not_found off;` to the static files._
-
-Create a `hidden.conf` file with:
-
-    location ~ /\. {
-        access_log off;
-        log_not_found off;
-        deny all;
-    }
-
-Create `servernamehash.conf` with:
-
-    server_names_hash_bucket_size  64;
-
-_This allows your `server_name` values to be very long, such as setting several domains in a single server config._
-
-This prevents users from seeing dot files and directories, such as `.git` folders.
-
-
-##### optimizng nginx
-
-We'll start with changes to `/etc/nginx/nginx.conf`.
-
-We want to check the user line and make it read as follows:
+Let's start with a modified base configuration file:
 
     user www-data webdev;
+    worker_processes 4;
+    pid /run/nginx.pid;
 
-This makes sure it runs as www-data and has the group webdev.
-
-Next let's check `worker_processes` and `worker_connections`.  NGinx is a proxy server, it's very light-weight.  It is also multi-core tuned, so if you have 2 or more cores you should have 2 or more `worker_processes`.  The default for nginx should probably be 4, if you have 2 cores and know your scripts are lightweight, then this is fine, but if you are doign some heavy lifting you might consider dropping it to match the number of cores.
-
-The `worker_processes` is how many processes will be handled per worker, and you are welcome to raise this number.  The default is between 768 and 1024, but you can probably go to 2048 without any significant changes.  Until you actually have over 8000 simultanious requests coming into the server you probably won't have any way to test the best configuration, so for development and even most production environments the default number tends to work just fine.
-
-Inside the events brackets let's check for or add:
-
-    multi_accept on;
-    use epoll;
-
-These are two features that enhance multi-core handling, but may have the adverse affect if your worker count is above the number of available cores.
-
-Make sure these key settings exist:
-
-    sendfile on;
-    tcp_nopush on;
-
-The first allows context switching and can greatly boost CPU performance, the second ensures that no HTTP headers are split into chunks and sent separately.
-
-Locate `keepalive_timeout` and make sure it reads `keepalive_timeout 15;` to reduce the timeout duration to 15 seconds.  _The `keepalive_timeout` setting reduces headers in multiple requests, such as when a page also asks for images, js, and css files, but otherwise it is not that helpful.  The default is very long and can reduce the number of connections per second.  If it comes down to performance vs requests per second you may consider turning this off._
-
-Finally we want to check that the line `include /etc/nginx/conf.d/*.conf;` exists within the http brackets, so we can visit that directory to add enhancements:
-
-    cd conf.d
-
-Let's start by creating `charset.conf` with:
-
-    charset utf-8;
-
-_This adds security by ensuring data types going in and out should be utf-8._
-
-Create a `tokens.conf` file with:
-
-    server_tokens off;
-
-Create an `uploads.conf` with:
-
-    client_max_body_size 32m;
-    client_body_buffer_size 128k;
-
-NGinx file uploads are by default limited to 1m, despite what php is set to.  If you plan to support file uploads you will want to choose a size and change it in both nginx and php.
-
-Create `pma.conf` with:
-
-    # PHP My Admin SSH Forwarded Service
-    server {
-
-        listen ####;
-        server_name localhost 127.0.0.1;
-        root /srv/www/pma;
-        index index.php;
-
-        # Access Rights
-        allow 127.0.0.1;
-        deny all;
-
-        # PHP Handler
-        include /etc/nginx/php_conf;
-
+    events {
+        worker_connections 1024;
+        multi_accept on;
+        use epoll;
     }
 
-_The pma.conf script secures phpmyadmin access to localhost only, and can be accessed using ssh tunneling, which gives you a nice GUI that is also secure:**
+    http {
 
-    ssh -f -N username@domain.com -L ####:localhost:####
+        ##
+        # Basic Settings
+        ##
 
-_You will have to download a copy of phpmyadmin and place it at `/srv/www/pma` for the pma config above to work properly.  More details will be explained in the virtual hosts section._
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 15;
+        types_hash_max_size 2048;
 
-For just a quick moment, to add pma.conf properly, we need to move to `/srv/www` and grab a copy of phpmyadmin so it can be accessed from `/srv/www/pma`:
+        ##
+        # Mime Types
+        ##
 
-    cd /srv/www
-    wget "http://downloads.sourceforge.net/project/phpmyadmin/phpMyAdmin/4.0.8/phpMyAdmin-4.0.8-all-languages.zip?r=http%3A%2F%2Fwww.phpmyadmin.net%2Fhome_page%2Findex.php&ts=1381830040&use_mirror=superb-dca2" -O pma.zip
-    unzip pma.zip
-    mv php* pma
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
 
-This prevents the http headers from being sent in chunks.
 
-Let's also create `gzip.conf` with:
+        ##
+        # Logging Settings
+        ##
+
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+
+
+        ##
+        # Gzip Settings
+        ##
+
+        gzip on;
+        gzip_disable "msie6";
+
+
+        ##
+        # Virtual Host Configs
+        ##
+
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+    }
+
+The changes I made are non-breaking.  If the nginx package is auto-upgraded it will likely replace these changes, _which is another reason you may want to consider using `aptitude hold nginx-full` on a production box._
+
+The `keepalive_timeout` is useful when serving a lot of dependencies per-page, by reducing the headers necessary for subsequent requests.  If you are serving a very large number of images, javascript, and css files then the default may be alright, but I turned it down to 15 from 65, which should be plenty.  _If you have a minimal number of css and js dependencies and serve images from a CDN it'd be worth considering turning it off to free up connections faster._
+
+With these changes each worker will handle more connections, and have better concurrent processing (`multi_accept`) plus throughput (`epoll`).  The defaults nginx comes with are not only "sane" but also very performant, even on lesser machines such as virtual systems.  However if you have a high powered server you can probably increase the defaults quite a bit, and if you have heavy traffic you may also want to experiment with some of the optimizations I'm about to propose.
+
+
+**Compression:**
+
+I recommend the following added to `/etc/nginx/conf.d/gzip.conf`:
 
     # Compress all Proxied requests too
     gzip_proxied any;
@@ -667,347 +318,235 @@ Let's also create `gzip.conf` with:
     # Increase minimum length for gzip to avoid wasting compression cycles:
     gzip_min_length 50;
 
+_The highest compression level reduces bandwidth at the cost of more CPU necessary to translate the response.  When dealing with mobile devices or very large files you may want to consider a lighter compression level (mobile devices are great at handling large chunks of traffic in bursts but don't have the greatest processors)._
 
-**Adding SSL:**
-
-Let's talk about SSL Certificates.  Real ones cost money and are a requirement if you intend to serve any kind of secured and trusted contents, such as a store front.
-
-Without SSL contents are sent as plain-text, including any logins sent through forms.  Any system where your visitors login should have ssl for security.
-
-For testing or if your users don't care about the trustworthyness of the certificate (eg. the account and service has no connection to external things) then you can get around this using self-signed certificates.
-
-We will create a snakeoil certificate, which is a self-signed certificate that can be used legitimately.  For starters backup the `/usr/share/ssl-cert/ssleay.cnf` file, as this is our template for the certificate.  We will make it look like this:
-
-**Warning: The following changes are untested.**
-
-    RANDFILE                = /dev/urandom
-
-    [ req ]
-    default_bits        = 4096
-    default_keyfile     = privkey.pem
-    distinguished_name  = req_distinguished_name
-    prompt              = no
-    policy              = policy_anything
-    req_extensions      = v3_req
-    x509_extensions     = v3_req
-
-    [ req_distinguished_name ]
-    countryName         = US
-    stateOrProvinceName = NY
-    localityName        = Rochester
-    commonName          = *.domain.com
-    emailAddress        = admin@domain.com
-
-    [ v3_req ]
-    basicConstraints        = CA:FALSE
-
-Once saved we are ready to execute
-
-    make-ssl-cert generate-default-snakeoil --force-overwrite
-
-This will generate a key and pem file at:
-
-    /etc/ssl/certs/ssl-cert-snakeoil.pem
-    /etc/ssl/private/ssl-cert-snakeoil.key
-
-We want to copy those into `/etc/nginx/ssl/` for our use.
-
-**I will cover how to use these ssl keys in the virtual hosts section.**
+By default it uses the `www-data` user and group.  My change tells it to use the `webdev` group, but with the sticky-bits set on our server content folder, we should have no problems either way.
 
 
-##### creating virtual hosts
+**Character Sets:**
 
-While this name is more of an apache origin, the intended purpose is to catch requests to multiple addresses and route them accordingly.  The nginx term for "virtual hosts" is a "server block", and just like apache you can have as many as you like.
+I highly recommend you enforce a character set, and the proxy-server is a good place to be sure transmissions proxied between services remains the same.  For that, create `/etc/nginx/conf.d/charset.conf` with:
 
-The configuration of server blocks is best done by separating them per site into properly named files.  Generally you place the actual files inside the sides-available directory, and symlink them to the sites-enabled directory.  This allows you to easily enable and disable sites and reboot the nginx service.
+    charset utf-8;
 
-Here is a very basic example of a `domain.com` website, which we will place into `/etc/nginx/sites-available/domain.com`:
 
-    # HTTP Config
+**Large Server Names:**
+
+This is optional, but you if you have a long domain name, or need to set a lot of rules you may consider increasing the server name hash size by creating `/etc/nginx/conf.d/servernamehash.conf` with:
+
+    server_names_hash_bucket_size 64;
+
+
+**Turning off tokens:**
+
+This is not a matter of security, but rather a way to reduce what gets sent with every http call.  Create `/etc/nginx/conf.d/tokens.conf` with:
+
+    server_tokens off;
+
+_This will reduce the number of headers that get sent on every request, which when serving a large number of requests can be a substantial savings._
+
+
+**Uploads:**
+
+Finally, if you expect to be handling file uploads, you will want to modify size restrictions to allow these.  To do so create `/etc/nginx/conf.d/uploads.conf` with these settings:
+
+    client_max_body_size 32m;
+    client_body_buffer_size 128k;
+
+By default the file upload size supported by nginx is 1MB, in spite of what any proxied service limitations are.  By increasing the size here we lift a size constraint.  The second parameter is how much of client body from one or more transmissions is accepted before it gets placed into a temporary file.  By setting it to something sizable we can eliminate temporary file creation for small uploads (below that limit).
+
+
+These changes should provide quite a boost to the core performance, but we also have configuration scripts that can be included on every website that can also greatly improve performance.
+
+Therefore, let's move onto...
+
+**Site Optimizations:**
+
+Optimizations can be made per-site, which can be included in bulk from the `/etc/nginx/scripts.d` folder.  This makes it easy to host multiple sites and import all the settings with a single addition.
+
+
+**Favicon:**
+
+Create `/etc/nginx/scripts.d/favicon.conf` with:
+
+    # favicon 404 fix
+    location /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+
+Even if your site has a favicon, without this line every single page load will either add an access message, or an error message for 404 (not found).  Usually, we don't care whether the favicon was available, or when it is loaded.
+
+
+**Caching:**
+
+In highly recommend placing the following inside `/etc/nginx/scripts.d/cache.conf`:
+
+    location ~* \.(css|js|html|ico|gif|jpe?g|png|svg)$ {
+        expires 5m;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    }
+
+For non-dynamic file types I specify a 5 minute expiration.  If your site is not receiving hits every 5 minutes, keeping those files in memory servers no purpose.  This also tends to yield a decent cache-invalidation time so you get updates from dynamic content.
+
+_While I do include image extensions, I do not recommend storing images on your web server._  Those should generally be stored and delivered on a CDN, such as AWS S3.
+
+
+**Hidden Files:**
+
+Files and folders that start with a period, we usually don't want to serve those.  I recommend creating `/etc/nginx/scripts.d/hidden.conf` with:
+
+Create a `hidden.conf` file with:
+
+    location ~ /\. {
+        access_log off;
+        log_not_found off;
+        deny all;
+    }
+
+This will prevent access to files and folders that start with a period.  I have also disabled any messages about whether the file existed or access was attempted.  No reason to clutter the logs if we've added this as a security measure, unless you want to verify whether it is working.
+
+_There are situations where `.htaccess` or `.git/` may be in the public folders.  It is never ideal, but having something in place is helpful._
+
+
+### ssl certificates
+
+SSL allows HTTPS traffic on port 443, and enables content encryption between the server and client.  This is exceptionally beneficial if the site has a login or any administrative features.
+
+There is absolutely no excuse not to have https on your sites today:
+
+- [ssl certificates can be acquired for free](https://www.startssl.com/)
+- [nginx SNI allows multiple ssl certificates per ip](https://www.digitalocean.com/community/tutorials/how-to-set-up-multiple-ssl-certificates-on-one-ip-with-nginx-on-ubuntu-12-04)
+
+Configuring nginx for ssl literally takes 5 minutes.  Redirecting to it is 3 lines of configuration as well.
+
+
+**Where to keey your keys:**
+
+We created `/etc/nginx/ssl` for this purpose.  I recommend storing the main host key in that folder directly, but every websites signed ssl key can be placed into.
+
+
+**Generating ssl certificates:**
+
+There are two parts, a signed key, and a host key.  The host can can be re-used, but the signed key is either self-signed or needs to be provided by a service like startssl.
+
+Start by creating a server key:
+
+    openssl genrsa -des3 -out host.key 2048
+
+You will be prompted for a password.  Next we will want to remove the passphrase from this key, so we can load it in nginx without entering a password everytime it restarts:
+
+    openssl rsa -in host.key -out server.key
+
+_You will need to enter the password for this._
+
+We can now use the `host.key` to generate "certificate requests", and `server.key` can be used by nginx as the host key.
+
+Let's create a signed certificate request:
+
+    openssl req -new -key host.key -out example.com.csr
+
+You will be prompted for the password for `host.key`, then a series of identification questions.  This information will likely be required for the request to be considered valid by the third party signee.  **If you need a wildcard certificate you will want to enter `*.example.com` as the common-name.**  Wildcard certificates are "free" through startssl, but you need to pay $60 for full identification and must supply them with two forms of ID.  If you need subdomains, that is the only option.
+
+_This `.csr` file can now be supplied to a company such as startssl for a legitimate signed certificate._
+
+
+**Self Signed Keys:**
+
+This is an alternative, useful for testing but even then it can be a hassle.  An unsigned key will result in your web browser complaining every attempt to load it, and if you do not add the certificate to your local system as trusted it'll prevent you from making much use of it
+
+However, in the event that you do need one temporarily, here is how to create it!
+
+Using the passwordless server key, and the certificate request from the previous steps, we can generate a self-signed certificate.
+
+Taking the host key we generated previously, we will feed it to a request for generating a self-signed certificate:
+
+     openssl x509 -req -days 365 -in example.com.csr -signkey server.key -out example.com.crt
+
+We can now use our self-signed `.crt` file for development.
+
+**I will cover how to configure nginx with https next.**
+
+
+### virtual hosts
+
+As they were called in `apache`, virtualhosts allow you to point multiple domain names to a single IP Address, and have a single port and server pass along requests accordingly.
+
+With nginx you can create new hosts in `/etc/nginx/sites-available/`.
+
+Here is a good baseline example, let's assume we placed it into `/etc/nginx/sites-available/example.com`:
+
+    # redirect to https (SECURITY)
     server {
-
         listen 80 default;
+        server_name www.example.com example.com;
+        return 301 https://www.example.com$request_uri;
+    }
 
-        server_name domain.com www.domain.com;
-        access_log /srv/www/domain.com/logs/access.log;
-        error_log /srv/www/domain.com/logs/error.log;
+    # redirect to www prefix (SEO)
+    server {
+        listen 443;
+        server_name www.cdelorme.com cdelorme.com caseydelorme.com;
+        return 301 https://www.caseydelorme.com$request_uri;
+    }
 
-        root /srv/www/domain.com/public_html;
-        index index.html index.php;
+    # HTTPS config
+    server {
+        listen 443 default ssl;
+
+        ssl_certificate ssl/example.com.crt;
+        ssl_certificate_key ssl/server.key;
+
+        server_name www.example.com;
+        access_log /srv/www/example.com/logs/access.log;
+        error_log /srv/www/example.com/logs/error.log;
+
+        root /srv/www/example.com/public;
+        index index.html;
         rewrite_log on;
 
-        # Include Configs
-        include /etc/nginx/scripts.d/*.conf;
-
+        # generic configuration
+        #include scripts.d/*.conf;
     }
 
-The listen argument `default` says that if the user reaches this IP Address with an unmatched web address we display this site.  You can use that to display a totally different page if preferred.
+While it is possible to perform all the redirects in a single block, it is significantly more efficient to create separate blocks to handle those cases.
 
-We provide one or more space delimited addresses for the `server_name`, and can individually separate the error and access logs for easier debugging of site problems.  We specify the root address for the site, and what to consider the main page.  By default nginx does not allow directory browsing.  You can turn it on by adding `autoindex on;`, and you can even specify a location block if you want it to apply to specific sub-directories.
+If you have an SSL certificate and https is configured, you should always be using it.
 
-Location blocks can be added to separate specific content, and it does support rewrites (just like apache htaccess files), but usually the application should handle all of that, not the web server (a continuing mistake from arcane/dated technology).  If anything a single line to redirect all unfound paths to index would make sense.
+It is highly recommended that you pick a prefix and stick with it consistently.  SEO advocates claim that the `www.` prefix is beneficial, so I usually add this redirect for https traffic.
 
-Finally the include statement will load our script configurations, such as the favicon error blocker, and the php fastcgi parser.  These both use location blocks.  Note that these could be added globally to the `/etc/nginx/conf.d` if preferred as well, but the only performance change will be when the server is restarted, not during runtime as nginx puts together all that info when started, unlike apache which interprets configs at runtime.
+The use of `default` assumes that you have no other sites, or that if someone enters the ip address they will see that site as the default.  It is not required, but if your server hosts many websites it may be wise to select a default.
 
+You can use https without an ssl certificate by omitting the `ssl` option, but this can its own set of problems.
 
-**Easy & Efficient www Redirection:**
+We specify the paths to the certificates for the server and the website.
 
-This can be done in either direction without using rewrites to ensure that SEO doesn't become jumbled due to the www prefix.  You simply create a server with the name you don't want used and force a 301 redirect:
+The configuration assumes we own `example.com`, and requires `/srv/www/example.com` to exist, as well as `/srv/www/example.com/logs`, and `/srv/www/example.com/public`.  It will look for index.html in any folder paths within there.
 
-    server {
-        listen       80;
-        server_name  domain.com;
-        return       301 http://www.domain.com$request_uri;
-    }
+Finally, we include all the configuration scripts we created earlier to optimize the behavior of our site.
 
-The `$request_uri` is a nginx variable that contains any paths that were sent, allowing you to cleanly redirect in the event that the url had an undesirable prefix but a valid path.  _Remember to do the same for https/443 versions of the domain._
 
+**Enabling a website:**
 
-**Configuring HTTPS/403 Hosts:**
+The purpose behind having an enabled and available folder is that we can use symlinks to easily turn on or off a website.  This allows us to quickly take down a server without removing the actual configuration files for it.
 
-Using the key files we generated earlier, we can move/copy them from `/etc/ssl/` into our `/etc/nginx/ssl` folder.  If we are creating a key per domain we may want to consider creating something like `/etc/nginx/ssl/domain.com/`.
+So, to enable our `example.com` website, we need to run:
 
-    mkdir -p /etc/nginx/ssl/domain.com/
-    cp /etc/ssl/certs/ /etc/nginx/ssl/domain.com/domain.com.crt
-    cp /etc/ssl/private/ /etc/nginx/ssl/domain.com/domain.com.key
+    ln -sf ../sites-available/example.com example.com
 
-    cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/nginx/ssl/domain.com/domain.com.crt
-    cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/nginx/ssl/domain.com/domain.com.key
+_This will force-create a relative-path symlink, but you can use full paths if you'd prefer._
 
-Next we can define an SSL server block, which looks like this:
 
-    server {
-        listen 443 ssl;
+**Test and Reboot!**
 
-        ssl_certificate /etc/nginx/ssl/domain.com/domain.com.crt;
-        ssl_certificate_key /etc/nginx/ssl/domain.com/domain.com.key;
-
-        server_name domain.com www.domain.com;
-        access_log /srv/www/domain.com/logs/access.log;
-        error_log /srv/www/domain.com/logs/error.log;
-
-        root /srv/www/domain.com/public_html;
-        index index.html index.php;
-        rewrite_log on;
-
-        # Tell FastCGI this is a secure line
-        fastcgi_param HTTPS on;
-
-        # Include Configs
-        include /etc/nginx/scripts.d/*.conf;
-    }
-
-Notice the only prominent changes are the change to the listen property, and adding the certificate and key paths.  We still need all the same properties as we had before, preferably to match the other configuration file.
-
-
-**Personally Encountered Problems:**
-
-If your page contents include a large quantity of data, such as a bulky framework, personal experience with wordpress and a store system combined with ssl created contents too large for the fastcgi buffers, and as a result pages wouldn't load.  To resolve this you may have to add a line to your server config (but preferably not globally):
-
-    fastcgi_buffers 8 32k;
-
-Enlarged buffers solved the problem, no clue as to the exact details why, but other configuration options in the optimizations sections may have also resolved the problem in a cleaner way.  FastCGI buffers allocate memory on request, and this can eat substantial amounts of additional RAM if globally increased.  Ideally a large number of small buffers is preferred, as the buffers themselves are only useful if they are filled, otherwise it's just wasted memory.
-
-
-**Example of a completely fleshed out file:**
-
-Ideally we can place all of those server sections into the single named file, and we'll get something like the following:
-
-    server {
-        listen       80;
-        server_name  www.domain.com;
-        return       301 http://domain.com$request_uri;
-    }
-
-    server {
-        listen       443 ssl;
-        ssl_certificate /etc/nginx/ssl/domain.com/domain.com.crt;
-        ssl_certificate_key /etc/nginx/ssl/domain.com/domain.com.key;
-        server_name  www.domain.com;
-        return       301 https://domain.com$request_uri;
-    }
-
-    # HTTP Config
-    server {
-
-        listen 80 default;
-
-        server_name domain.com;
-        access_log /srv/www/domain.com/logs/access.log;
-        error_log /srv/www/domain.com/logs/error.log;
-
-        root /srv/www/domain.com/public_html;
-        index index.html index.php;
-        rewrite_log on;
-
-        # Include Configs
-        include /etc/nginx/scripts.d/*.conf;
-
-    }
-
-    server {
-        listen 443 ssl;
-
-        ssl_certificate /etc/nginx/ssl/domain.com/domain.com.crt;
-        ssl_certificate_key /etc/nginx/ssl/domain.com/domain.com.key;
-
-        server_name domain.com;
-        access_log /srv/www/domain.com/logs/access.log;
-        error_log /srv/www/domain.com/logs/error.log;
-
-        root /srv/www/domain.com/public_html;
-        index index.html index.php;
-        rewrite_log on;
-
-        # Tell FastCGI this is a secure line
-        fastcgi_param HTTPS on;
-
-        # Include Configs
-        include /etc/nginx/scripts.d/*.conf;
-    }
-
-Remember to create matching paths inside of our working web directory:
-
-    mkdir -p /srv/www/domain.com/public_html /srv/www/domain.com/logs
-
-
-**Turning it on and off:**
-
-The layout of sites-available and sites-enabled gives us the ability to quickly disable a site and reboot the system if we need to take down a site or debug it.
-
-To add a site we symlink it:
-
-    ln -s /etc/nginx/sites-available/www.domain.com /etc/nginx/sites-enabled/www.domain.com
-
-To remove that same site we just delete the symlink:
-
-    rm /etc/nginx/sites-enabled/www.domain.com
-
-After either change we reboot nginx:
-
-    service nginx restart
-
-_If you want to do things properly you might want to run `nginx -t` to test the configuration before rebooting._
-
-
-#### configuring mariadb
-
-AFAIK tuning MariaDB is the same as MySQL through the `my.cnf` file.
-
-I generally leave this alone, if there are performance problems they can almost always be traced back to the code, not the dbms.
-
-If you optimize your queries and properly index your tables and you'll be fine.
-
-
-#### configuring bind9
-
-**I was recently told to try out `unbound` for a DNS server, supposedly it is significantly easier to configure and manage than bind9.  I agree that bind9 was an enormous pain to get working, so I'm looking into unbound currently but do not yet have detailed instructions.  When I finish I will likely remove bind9 instructions from this document.**
-
-For development environments on a local network where more than one person may be connecting it can help to add a DNS Server to your Web Server.  This allows you to distribute the addresses to projects across the local network.
-
-Let's begin by installing the our DNS Server;
-
-
-We can start the process by defining a zone and reverse lookup, I won't go into detail explaining these as that is not the goal of this guide, if you have questions Google is your friend.
-
-Add content to the `/etc/bind/named.conf.local` similar to the following:
-
-    // Primary Domain Zones File
-    zone "domain.com" {
-            type master;
-            file "/etc/bind/zones/domain.com.db";
-    };
-
-    // Reverse Network Zones File
-    zone "0.0.10.in-addr.arpa" {
-            type master;
-            file "/etc/bind/zones/0.0.10.rev";
-    };
-
-_Note: generally a DNS has a static IP, and the reverse lookup is used for the local network.  In the case above the 0.0.10 is the reverse of a Class A private network (10.0.0.0).  In many cases you will instead see `0.168.192`, a Class C network address._
-
-Next we need to define the zone files.  Let's start with the forward lookup file named according to our domain (`/etc/bind/zones/domain.com.db`):
-
-    $TTL    3600
-    @       IN      SOA     domain.com. root.domain.com. (
-                   2013051310           ; Serial
-                         3600           ; Refresh [1h]
-                          600           ; Retry   [10m]
-                        86400           ; Expire  [1d]
-                          600 )         ; Negative Cache TTL [1h]
-
-    ;; Name Server
-                               NS       domain.com.
-
-    ;; CNAME Records
-    www.domain.com.    IN    CNAME    domain.com.
-    *.domain.com.      IN    CNAME    domain.com.
-
-    ;; A Records (IPv4 addresses)
-    domain.com.        IN    A        10.0.0.5
-
-I won't go into detail here, just know that it works, just a few caveats.  First, the Serial format is often preferred as a date plus a 2 digit counter so you can make many changes in one day.  The Serial must increase every time you make a change and reload Bind, otherwise it will fail to take the changes.
-
-The first two records are the zone (primary address), and owner of the domain (root aka root@domain.com).  It is generally best practice to include the calculated values in comments for the reader, for Expiration, Refresh, Retry, and Cache times etc...  This particular configuration is tailored for development systems and has very short durations for all settings.
-
-Then like any other DNS configuration we have an @, marking the DNS server, followed by a mixture of A records and CNAME records, where A records hold an IP address and CNAME records are linked to the A records.
-
-Finally, we want to add a reverse lookup, which is effectively all the addresses that the IP can resolve to:
-
-    $TTL 3600
-    @ IN SOA        domain.com. root.domain.com. (
-                       2013010132           ; Serial
-                             3600           ; Refresh [1h]
-                              600           ; Retry   [10m]
-                            86400           ; Expire  [1d]
-                              600 )         ; Negative Cache TTL [1h]
-    ;
-    @       IN      NS      domain.com.
-    5       IN      PTR     www.domain.com.
-
-If you want to add more, entirely different, domains you can do so by simply creating more zones and configurations to match.  Generally it is easier to work off a single zones file with sub-domains; a common practice.
-
-I will end configuring Bind with a [recommended reference](http://brian.serveblog.net/2011/07/31/how-to-setup-a-dns-server-on-debian/), which does far better than I can explaining all the details.
-
-Now, if you restart the bind service (`service bind9 restart`) your system should now be broadcasting.  However, this alone means nothing unless someone knows to listen.
-
-There are two ways you can put a development DNS to use.  First is by asking others to add the Development systems IP to their DNS statically.  Second is if you an control the local networks router, you can add the DNS servers it distributes via DHCP.  Just remember that _if_ you go with a Router solution any machines that have a client-assigned static IP must have the DNS added statically as well.  Also, order matters.  If your DNS Server is secondary any existing web domains will go to the external location, not the internal one.  If you are trying to override a real address for internal development, add your DNS server first (this is generally not wise if you ever want to access the real site as changing DNS afterwards can be a pain).
-
-
-### unbound dns notes (_incomplete_)
-
-Wow sweet, modifications to `/etc/resolv.conf` that enable load balanced DNS requests and reduce failover time:
-
-    domain domain.lan
-    search domain.lan domain.lan2 domain.lan3 domain.lan4
-    nameserver 192.168.0.1
-    nameserver 192.168.0.2
-    options ndots:1 timeout:0.3 attempts:1 rotate
-
-- [unbound optimizations](http://unbound.net/documentation/howto_optimise.html)
-
-An example unbound config:
-
-    # outgoing-range: 4096
-    outgoing-range: 32768
-
-    # so-rcvbuf: 0
-    so-rcvbuf: 32m
-
-    # msg-cache-size: 4m
-    msg-cache-size: 256m
-
-    num-queries-per-thread: 4096
-
-    # rrset-cache-size: 4m
-    rrset-cache-size: 256m
-
-    # infra-cache-numhosts: 10000
-    infra-cache-numhosts: 100000
-
-Apparently it supports easy split-horizon configuration, such that you can redirect local traffic to the right place without having to go out of the internal network and back in through the firewall.
+The final steps are to test the configuration and reboot nginx.  To test that your configuration is error-free run `nginx -t`.  If that works, go ahead and restart nginx `service nginx restart`.
 
 
 # references
 
-- [unbound reference (I have not finished reading)](https://calomel.org/unbound_dns.html)
+- [sticky-bits](http://unix.stackexchange.com/questions/64126/why-does-chmod-1777-and-chmod-3777-both-set-the-sticky-bit)
+- [modifying deb postinst dpkg packaging](https://yeupou.wordpress.com/2012/07/21/modifying-preinst-and-postinst-scripts-before-installing-a-package-with-dpkg/)
+- [nginx optimization tips](http://tweaked.io/guide/nginx/)
+- [generating ssl for websites](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-nginx-for-ubuntu-12-04)
+- [configuring nginx ssl](https://www.digicert.com/ssl-certificate-installation-nginx.htm)
