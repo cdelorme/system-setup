@@ -1,51 +1,28 @@
 
-# template system documentation
+# template
 
-I use these template instructions to prepare a virtual machine template which can be used for basic cloning when I need a fresh test system.
-
-Having a documented default or "base" install can greatly reduce room for error when setting up new machines, as well as expedite the setup process.
+These are template instructions, including initial installation, that will prepare a base image.  That image is ready for use as a server, workstation, development machine, etc.  It's intended use is to be a "starting point", by making the system more usable from the start.
 
 
-### hardware configuration
+### hardware configuration & installation
 
 Applications vary wildly, but this machine will run sufficiently on 512MB of RAM, but I tend to use 1GB or more.
 
+I don't create an additional user besides the root account during the initial installation.
 
-#### ideal partitioning & installation
+I use Logical Volumes for partitioning.  My **preferred partitioning schema** [is in my parted documentation](../shared/parted.md)
 
-I use Logical Volumes for my partitioning, and I always create partitions for error-prone areas like the logs.  This is purely a preventative step such that I never end up with a machine that I cannot even debug due to having no available drive space.
-
-Logical Volumes provide you with a great deal of additional flexibility, and are compatible with pretty much every linux distribution.  Dynamically expanding and shrinking volumes, and paths that do not change based on the order the drive is connected in.  They can span multiple disks, or even handle a portion of RAID if needed.  If you have to reinstall you can do so without wiping your home directory.  Also you have a quick and easy way to backup each partition.
-
-However, keep in mind that the root partition cannot be resized on the fly (or at the very least cannot _easily_ be resized on the fly), so it is best to allot the amount you will need for that up front, plus a margin-of-error (eg. if you expect to need 8GB assign 12GB).  I can say that a minimalist GUI and complete OS tend to take less than 6GB of space on root, but that will vary by packages installed, and can quickly escalate.
-
-I try to keep my templates limited to 20GB of space, which should give you plenty of room to work with for starters, and is easier to backup and restore at that size.
-
-Here is a break-down of my partitioning scheme:
-
-- 512MB PC-Grub/EFI Partition
-- 512MB ext4 /boot
-- Remainder to Volume Group
-    - VG Name "debian"
-        - 2GB swap
-        - 8GB root /
-        - 512MB log /var/log
-        - 512MB tmp /tmp
-        - Remainder home /home (8GB)
-
-I also only ever install `system utilities` from the package options, this is primarily because when running the install off of the disk things work much slower.  If you want to install other packages you can use debconf post-install.
-
-I don't always use a desktop environment so I save those things for later.  I also don't use every application that the gnome3 base packages come with, and prefer a minimalist installation to save space.
-
-Because I modify the dot files heavily I also tend to avoid creating any other users besides root.  This allows me to add utilities and create dot files in `/etc/skel` before creating a user, at which point they automatically get all the new files which saves me some typing.
+For a lightweight installation I only select `system utilities` and deselect the desktop environment and any other combined packages.
 
 
-### post installation steps
+### install packages
 
-Start by logging in as root to run through these steps.
+Since this is just a templte system that should extend to fit many use cases my goal is to limit installed utilities to utilities and services that are important in all cases, or which improve usability.
+
+To speed up package installation I generally install `netselect-apt` first and attempt to determine the best mirrors.  _Due to a bug that can yield "-" as a mirror, this is not always reliable._
 
 
-#### install packages
+
 
 ---
 
@@ -90,12 +67,6 @@ lzop
 
 ---
 
-
-I install lots of packages to form the basic foundation of a multi-functional platform.  In some cases not all of these packages are necessary, but in most cases they are helpful to have.  Worth noting that I use `aptitude` because it is a single sensible command interface, and for these packages I add the `-r` flag to install any recommended packages.  If you want to go full minimalist then omit this flag and pick and choose the packages to install.  However I recommend this to avoid any possibly problems later on.
-
-The first task I perform is I install the `netselect-apt` package, which allows us to detect the best mirrors available and set our sources to them.
-
-By default debian comes with `vim-tiny` which creates a `vi` symlink that I've found at times does **not** get replaced when the complete `vim` package is installed.  To avoid problems with accidentally launching the tiny version I remove `vim-common` and `vim-tiny` packages.
 
 Moving onto our big install list; I've sectioned all the packages into groups that make some sense as far as their purpose on the machine, which may help you decide whether to install them yourself.
 
