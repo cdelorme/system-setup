@@ -37,13 +37,13 @@ While all platforms share sublime text configurations, the install path varies:
 
 Here is a set of configuration files, assuming a starting at the parent paths by platform above, which link to my preferenced configurations:
 
-- [`Packages/User/Preferences.sublime-settings`](../../data/home/.config/sublime-text-3/Packags/User/Preferences.sublime-settings)
-- [`Packages/User/Default (Linux).sublime-keymap`](../../data/home/.config/sublime-text-3/Packags/User/Default (Linux).sublime-keymap)
-- [`Packages/User/Default (Windows).sublime-keymap`](../../data/home/.config/sublime-text-3/Packags/User/Default (Windows).sublime-keymap)
-- [`Packages/User/Default (OSX).sublime-keymap`](../../data/home/.config/sublime-text-3/Packags/User/Default (OSX).sublime-keymap)
-- [`Packages/User/default_file_type.sublime-settings`](../../data/home/.config/sublime-text-3/Packags/User/default_file_type.sublime-settings)
-- [`Packages/User/MarkdownPreview.sublime-settings`](../../data/home/.config/sublime-text-3/Packags/User/MarkdownPreview.sublime-settings)
-- [`Packages/User/GoSublime.sublime-settings`](../../data/home/.config/sublime-text-3/Packags/User/GoSublime.sublime-settings)
+- [`Packages/User/Preferences.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings)
+- [`Packages/User/Default (Linux).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap)
+- [`Packages/User/Default (Windows).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap)
+- [`Packages/User/Default (OSX).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap)
+- [`Packages/User/default_file_type.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings)
+- [`Packages/User/MarkdownPreview.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings)
+- [`Packages/User/GoSublime.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings)
 
 
 ## platform specific tuning
