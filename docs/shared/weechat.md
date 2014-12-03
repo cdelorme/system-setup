@@ -1,7 +1,23 @@
 
 # weechat
 
-If you have not yet, [register a freenode account](https://freenode.net/faq.shtml).
+An IRC client with a decent amount of features and enhancements.
+
+If you have not yet, [register a freenode account](https://freenode.net/faq.shtml).  You will want to do so to ensure you have a standard identification when accessing the freenode server.
+
+
+## installation
+
+On linux:
+
+    aptitude install -ryq weechat-curses
+
+On OSX (assuming homebrew is installed):
+
+    brew install weechat
+
+
+# configuration
 
 Weechat is all command line, so it's configuration is handled via commands.
 
@@ -19,3 +35,5 @@ _Obviously substitute your preferences as desired._
 With these changes you should now have infinite history.  You will be automatically connected to freenode at boot, and it will verify your identity with NickServ.
 
 The raw configuration itself is stored as key/value text files (traditional configuration), and can be found in `~/.weechat/` named accordingly (eg. `~/.weechat/irc.conf` and `~/.weechat/weechat.conf`, etc).  **If weechat has not yet been run, then no configuration files may exist.**
+
+
