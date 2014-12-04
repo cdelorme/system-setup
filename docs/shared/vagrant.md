@@ -12,4 +12,3 @@ Here is a list of key benefits that I can attest to personally:
 
 - Eliminates situations like "Doesn't work on my computer", by enforcing consistent environments
 - Allows quick project setup for a distributed system (via repository systems for example)
-
