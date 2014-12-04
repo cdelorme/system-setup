@@ -1,41 +1,58 @@
 
 # system setup
 
-This repository was created as a personal reference to track optimal configurations over time.
+This repository serves dual-purpose as reference documentation storage and automation scripts.
 
-It changes both with my own knowledge on how to improve my environment, as well as with any major changes and new releases of operating systems and utilities.
-
-The documentation is to be extended into automated scripts where applicable.
+The documentation, and subsequently automation scripts, will be updated as I continue to refine any environment I work in regularly, including but not limited to new software releases and distros.
 
 
 ## history
 
-This repository has a crazy history, so following the changes may be very difficult.  Initially it was created to store automated scripts, but then expanded to cover a wider range of system configuration, and include documentation.
+This repository has a pretty crazy history; as the commits will indicate it flip-flopped between being for scripts to being for documentation and back again.
 
-At some point the automated scripts were difficult to keep up with so the contents shifted purely to documentation.
+To maintain automated scripts as well as documenting the steps that led to their creation is time consuming.
 
-The documentation included a wide variety of experiments and setups, and is in the process of shifting back over to a mixture of automation and more concise documentation.
-
-Most of my linux experience stems from extensive [virtualization](docs/virtualization/readme.md), where I have run many tests and applied my documentation thousands of times over.
+I also began experimenting heavily with virtualization, and so I have a large number of documents that were specifically for special test cases.
 
 
-## usage
+## [documentation](docs/)
 
-The documentation is for your viewing pleasure, the setup script is a WIP but can be downloaded and executed stand-alone.
+Currently I try to maintain three main configurations of linux, as well as one Windows and one OSX.
 
-To execute the supplied setup script, simply supply a matching environment as an argument.  For example:
+I use linux as a server environment, and as a development workstation.  I try to upkeep a set of template instructions that sets the basis for any system I use to go either way, then steps to produce a development or server environment are separated.
 
-    ./setup dev
+Due to the lack of automation tools, there are no Windows scripts.  I may at some point add one to run in git-scm's git-bash on windows, but it will be super lightweight.
 
-_My setup code was written for debian, and should work on most systems based on debian._  Operations for OSX will be added eventually.
+While not complete, I do intend to add osx support to the automation scripts in the future, to the extent that it is feasible.
+
+Despite my love of linux, I use an osx laptop primarily for work and development.  At the time of writing this I have had only half as many years experience using osx or linux over windows.
+
+My first real deep dive into linux occurred on the `debian` distro, and it has been preference since.  This is due to a combination of familiarity and experienced instability in other comparable distros.  For a short while I did attempt to upkeep documentation for various other distros, but I have since ceased to do so.
+
+**If you are looking for a great platform that is already configured and do not have any particular preferences I highly recommend [crunchbang](http://crunchbang.org/) as an alternative.**
 
 
-## notes
+## [automation](scripts/)
 
-Despite my love of linux, I use a mac laptop primarily for work and development.  I also have more than 15 years of experience on Windows, and only half that in Mac or Linux.
+All of my scripts are written in `bash`, and use standard cross-platform tools where able.
 
-However, I began using linux with the `debian` distro, and been using it for significantly longer than any other linux distro.  I have used `ubuntu`, `mint`, `fedora`, `centos`, `redhat`, `crunchbang`, `arch`, and `gentoo` distros (I have spent at least one month in each).  Attempting to upkeep documentation for all of those platforms is too difficult, so I write my scripts biased for debian.
+I originally had all of my automation code in a single `setup` file, but this became difficult to read and maintain.
 
-**If you are looking for a great platform that is already configured and do not have any particular preferences I highly recommend [crunchbang](http://crunchbang.org/) as an alternative.**  My configuration borrows heavily from the simplicity of crunchbang, with a variety of alternative software as a matter of personal preference.
+I am now using modular scripts for ease of maintenance and individual function reference.  This is both more readable, and more maintainable.
 
-Not for lack of trying, but I have yet to resolve the Windows itch; there are no solutions for gamers to enjoy most games without it.  As a result I still use it, and document it's configuration, but automation on Windows is pretty much non-existent.
+I still offer a `setup` script with interactive prompt for configuration, which will execute a series of modular scripts.
+
+You can run my setup script remotely via:
+
+    bash <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/setup")
+
+It will ask you for the configuration options as necessary to execute, downloading remote resources as needed.
+
+You can also clone or download the repository and run it locally.  However, it is assumed that you will have a network connection since many steps involve downloading software via the distro package manager...
+
+
+## [data](data/)
+
+I created a data folder to store any number of configuration files, and special binaries.  Some of the binaries do not belong to me, but are no-longer available for download anywhere on the internet.
+
+The files are organized in a linux-friendly way, such that they can be copied and pasted directly onto a system for installation.
