@@ -13,13 +13,13 @@ One of the smarter OS's with DPI and has been applying specific customizations s
 _I have not experienced any dpi related settings or situations yet with linux, and cannot speak towards it._
 
 
-## windows
+## [windows](https://www.youtube.com/watch?v=wGSKmy3JUns)
 
 Windows has had DPI settings even back in XP, but it has not attempted to automate them ever.
 
 The setting worked great, by rendering things at larger scale.  This is what made it possible to use an HDTV properly.
 
-Windows 8.1 Super Sketchy DPI problems:
+Windows 8.1 Super Sketchy DPI problems, and the header links to a demonstration of them:
 
 I continue to experience erratic behavior with my DPI in Windows 8.1
 
@@ -39,9 +39,3 @@ Known Locations:
 
 - Your account (probably has the correct settings in config): `[HKEY_CURRENT_USER/Control Panel/Desktop]`
 - Some set of unknowns that I think are causing the problem and may be missing the DWords: `[HKEY_USERS/*/Control Panel/Desktop]`
-
-To demonstrate the problem:
-
-- [video demo](https://www.youtube.com/watch?v=wGSKmy3JUns)
-
-
