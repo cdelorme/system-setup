@@ -10,4 +10,3 @@ Fortunately SSH can be told to use certain insecure features per commnad, such a
     ssh -o StrictHostKeyChecking=no example.com
 
 However, the question is whether or not all services I may use in scripts offer similar "options" flags.
-

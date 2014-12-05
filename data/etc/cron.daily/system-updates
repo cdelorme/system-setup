@@ -5,6 +5,7 @@ aptitude clean
 if ! aptitude update
 then
     mv /etc/apt/sources.list.bak /etc/apt/sources.list
+    aptitude clean
     aptitude update
 fi
 aptitude upgrade -yq
