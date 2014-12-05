@@ -1,9 +1,50 @@
 
 # dev
 
+This document extends my [template](template.md) instructions, and you should review them first.
+
 Continuing from my gui instructions, these steps will prepare a platform for development loaded with all manner of tools and configuration.
 
 It will install additional development packages, and configure them as well as modify some system configuration defaults.
+
+
+
+
+
+# generate and send ssh keys to github
+
+Generate and Upload SHH Key to github:
+
+    # generate key
+    ssh-keygen -q -b 4096 -t rsa -N "$SSL_PASSWORD" -f "$DOWNLOADS/.ssh/id_rsa"
+
+    # add public key to trusted list on github
+    HOST=$(hostname -s)
+    DATE=$(date '+%Y/%m/%d')
+
+    # attempt to push the key to github
+    curl -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"${HOST} (${DATE})\",\"key\":\"$(cat $DOWNLOADS/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+
+_Don't forget to make sure the key files have 600 permissions._
+
+Request token from github for osx homebrew:
+
+    # Request keys from github
+    keys=$(curl -s -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X GET https://api.github.com/authorizations)
+    if echo $keys | grep "homebrew" &> /dev/null
+    then
+        token=$(echo "${keys#*homebrew}" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
+    else
+        keys=$(curl -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"scopes\":[\"gist\",\"repo\",\"user\"],\"note\":\"homebrew\"}" https://api.github.com/authorizations)
+        token=$(echo "$keys" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
+    fi
+
+    if [ -n "$token" ]
+    then
+
+        # push token into .bashrc
+        echo -ne "\n# homebrew github token (remove rate-limiting)\nexport HOMEBREW_GITHUB_API_TOKEN=${token}" >> "$DOWNLOADS/.bashrc"
+    fi
 
 
 ## install packages
@@ -12,6 +53,82 @@ Add these packages to my dev platform:
 
     python-pip bpython python3 python3-pip bpython3 imagemagick graphicsmagick
 
+
+
+
+**Firmware to help with non-standard hardware or adding devices after the fact:**
+
+- firmware-linux
+- firmware-linux-free
+- firmware-linux-nonfree
+
+
+**Hardware & File System Utilities:**
+
+- usbutils
+- uuid-runtime
+- debconf-utils
+- gvfs-fuse
+- exfat-fuse
+- exfat-utils
+- fuse-utils
+- sshfs
+- fusesmb
+
+
+**Compression Utilities:**
+
+- lzop
+- p7zip-full
+- p7zip-rar
+- zip
+- unrar
+- unace
+- rzip
+- unalz
+- zoo
+- arj
+
+These are all non-standard, but can be useful in certain circumstances.  I find they may be occasionally necessary in day-to-day use on a desktop.
+
+
+**Development Support Utilities:**
+
+- git-flow
+- debhelper
+- libncurses5-dev
+- kernel-package
+- build-essential
+- fakeroot
+- htop
+- linux-headers-$(uname -r)
+
+
+**File System Utilities:**
+
+- e2fsprogs
+- parted
+- sshfs
+- fuse-utils
+- gvfs-fuse
+- exfat-fuse
+- exfat-utils
+- fusesmb
+- os-prober
+
+
+**Support Utilities:**
+
+- pastebinit
+- anacron
+- miscfiles
+- markdown
+
+These are some packages that contain utilities and general data that may help fill-in-the-blanks of a system.
+
+The `anacron` package is for an asynchronous crontab, great for desktops which do not have a 24/7 uptime (for example, a virtual machine, or general desktop that doesn't stay on 24/7).
+
+The `miscfiles` package is non-executable files that contain loads of data that other software may find helpful, so I recommend it.  I use `markdown` for literally everything, so I install it.  The `monit` package allows me to specifically monitor important services and keep them from locking up or crashing permanently.
 
 
 ## xorg framerate limiting
@@ -146,14 +263,14 @@ As earlier instructed, we should already have `netselect-apt` installed to reduc
 
 **Development Support Utilities:**
 
-- git
 - git-flow
-- mercurial
 - debhelper
 - libncurses5-dev
 - kernel-package
 - build-essential
 - fakeroot
+- htop
+- linux-headers-$(uname -r)
 
 The `git` and `mercurial` packages are for popular version control software.  If you use `svn` you can throw that in too.  The last four will install all the necessary tools to build and compile source code, such as a custom kernel, or any software you cannot find in a debian package.
 
@@ -176,6 +293,21 @@ The `vim` package is my preferred terminal editor, but there are others such as 
 - os-prober
 
 I use `parted` regularly, and `e2fsprogs` as well.  The `sshfs` package makes it much easier to secure direct local access to a set of remote files, and all of the fuse packages are excellent if you need to access special file systems such as example samba and exfat.  The `os-prober` package may help if you are troubleshooting drives or partitions.  If you don't plan to be accessing other file systems, then you don't need all of them, but I use them myself, and often.
+
+
+**Sensors Utilities:**
+
+- lm-sensors
+- cpufrequtils
+
+
+**Wireless Utilities:**
+
+- avahi-utils
+- avahi-daemon
+- libnss-mdns
+- wireless-tools
+
 
 **Terminal Support Utilities:**
 
