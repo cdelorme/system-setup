@@ -1,179 +1,66 @@
 
 # windows
 
-Windows is an excellent gaming and multimedia platform, with a wide range of driver support, making ideal for specialized hardware.
+This document covers Windows 8.1; I am genuinly excited for Windows 10 but praying they don't kill it with high prices or monthly billing...
 
+As a game player I have no choice but to install Windows on bare metal (**there are exceptions but they are no more convenient than this currently**).  In some cases it is superior due to graphics drivers being maintained for windows by GPU companies, but usually game companies just don't deliver cross platform.  In other cases it's terribly bad due to driver corruption (this has happened to me a lot since Windows 7, never before that though).
 
-Latest version used in the making of this document was 8.1.  Unfortunately automation for Windows is fairly imposssible, so instead of that I'll simply document the setup and highly recommend creating a disk image backup to counter both time lost reconfiguring as well as virus problems in the future (they will invariably happen on windows).
+In some cases I do small amounts of development; usually for work, not pleasure.
 
-As for the intended function, this system operates primarily as a gaming and video playback system.  In some cases I even use it for software development.
+If you are curious as to viable alternatives to running Windows on bare metal, checkout my [xen documentation](windows/xen.md).
 
-**I will say up front that I am biased against the windows platform.  I suffered it for 15 years of my life before discovering the glorious world of linux and unix, and only continue to use it because games still use DirectX.  If they used OpenGL and could be run suitably on Linux or even OSX I would drop this system like a bad habit.**
 
+## installation
 
-## Xen Tailored
+While there is not much you can "customize", you can end up in locking buggy situations during installation.
 
-These instructions were intended to be run on a Xen HVM with VGA Passthrough.  VGA Passthrough is not entirely stable with consumer cards, and as a result the setup process has been broken up into sections.
+When you get to the drive selection screen, be sure you select the disk, and click the buttons to partition **and format** the drive.  If you do not format, it will claim to do so for you, but when you leave it to the installer it sometimes chokes and can either sit idle indefinetally or spend hours doing what would have taken minutes.
 
-- A section prior to driver installation.
-- System backup occurs here.
-- Driver installation including GPLPV (xen specific drivers).
-- Post driver software installation.
 
-**This means many of the steps I document are precautionary to prevent BSoD problems within the virtual environment.**
+## post-installation configuration
 
-If you too are setting up VGA Passthrough, be sure to follow the documentation closely.
+Always set a password, even if you choose to login automatically having a password can protect your files from other users on the system.  It adds just one extra layer of security.
 
+The first thing to do after installing, is run windows updates.  Continue running windows updates until you no longer get anything.  **This process will very likely involve many reboots, and never always click the "check for updates" link manually to ensure it looks before assuming there are none.**
 
-## Warnings
+Now I disable User Access Control, as this feature is absolutely useless as a security feature, it only prevents the user from accidentally doing something they may not want to.  Most of the time it just adds an extra step to performing an action.
 
-First a quick overview of some trouble with Virtualization of Windows.
+I disable Windows Defender, I don't want to waste CPU cycles on something that is inevitable.  **Windows will get viruses.  That's why I make an image backup.**
 
-VGA Passthrough is still a very buggy situation, and consumer graphics cards are just not built for it unfortunately.  One major bug at present is with state reset.  The only cards that work without much difficulty are AMD graphics cards.  nVidia can be made to work with a series of custom patches, but you'll need to do a lot of footwork and testing.
+I set the system clock to sync to a public UTP server, and display in 24-hour time.
 
-The graphics card lacks a way to adequately reset its own state, since traditionally a rebooted computer will change the power of the adapter switching it off and on again.  In the case of a virtual machine no control is exerted over its power state, hence the problem.
+I adjust indexing options, removing everything except the start menu.  I don't want the search to look through my files and folders, I don't use it for that.
 
-Experiences vary greatly, some people have no problems, others have nothing but problems.
+I set the taskbar to auto-hide, check the new "use the desktop by default instead of metro" checkbox, and don't have it keep track of recent files per program.
 
-I have been successful in reproducing a series of steps that lead to a stable environment with my ADM Radeon HD 6870.
+I disable action center alerts for most things, except troubleshooting and updates.
 
+By this point if windows has not already I will run the activation process.
 
-## Xen Configuration & System Specs
+Next I uninstall all of the worthless metro applications that I will never use.  _I didn't buy an 8 core CPU so I can look at one program at a time; I plan to multitask... a lot._
 
-Virtual Machine Specs:
+After that, any drivers for hardware on the system should be installed.  Doing so one at a time and rebooting when asked so as to avoid driver corruption.
 
-- 8GB RAM
-- 2 Virtual Cores (IvyBridge 3770)
-- 160GB Partition (40GB initially)
+I usually try to set the display settings, as I often have multiple monitors.  Unfortunately [Windows 8.1 has serious dpi issues which can cause all sorts of unpredictable behavior including inaccurate mouse detection and randomly enlarged components](shared/dpi.md).  This sucks, and it doesn't look like they plan to patch it.
 
-_More cores does not yield greater performance, as confirmed by Windows Experience Index and other tests.  Unless the software makes excellent use of multi-core processing the number of cores makes very little difference past 2._
+Finally, depending on which version of windows, I may want to enable specific features, such as Legacy>DirectPlay and .Net3.5/2.0, as necessary for many games.  For whatever reason Microsoft decided nobody was using these.
 
-__Surprisingly, Windows recognizes from task manager that it is in fact using virtual cores.__
 
-Later during the process I pass PCI Devices to the machine:
+### jis input
 
-- AMD Radeon HD 6870 Graphics Card
-- Onboard USB 2.0 & 3.0 Controllers (3 of them)
+I generally prefer [adding JIS IME for japanese input](windows/jis.md).  While the input management in Windows 8 and Windows 8.1 continues to get better and better, it still acts erratic at times.
 
-_A xen configuration file should be included in the list of files in this repository._
+_At some point I managed to install the JIS IME and default to english input, remove the original english keyboard (reducing the number of hotkeys necessary to switch input modes), and without breaking at the login screen.  Unfortunately I have yet to be able to reproduce this, and anytime I've tried it has entirely broken the login screen by defaulting to japanese character inputs.  As a result I had to get the onscreen keyboard to enter my password._
 
-I generally have over a dozen USB devices connected to this machine at any given time.
 
+### [custom fonts](shared/custom-fonts.md)
 
-## Staging (For Xen)
+I install custom fonts, and set them as defaults in other tools later.
 
-In order to ensure my system is functional and easily restored I go through a staging process.
 
-This involves two major states.  Pre-Drivers and Post-Drivers.
+### turning capslock into control
 
-Pre-Drivers is before passing any devices to the machine, accessing it only through VNC or SDL in Xen, and installing only basic software with no graphics dependencies.
-
-Immediately after setting up I will create a backup of the system using `dd` from Xen.
-
-Afterwards I will pass the graphics card, USB controllers, and various other components, as well as increase the partition size.
-
-I can then install all of the drivers.
-
-**It is very important that before I pass the devices that I turn off automatic driver installation.  This will lead to the destruction of the VM due to auto-reboot and the previously mentioned state issues with the graphics card.**
-
-So, it is ideal to pass the devices manually the first time using the xl toolstacks "pci-attach" commands, and to reboot the host frequently during the process instead of just the virtual machine.
-
-## Pre-Drivers
-
-I install and set an algorithm based password.
-
-My first step post-install is to remove all Metro applications and run automatic updates until the system is up to date.
-
-_I loath metro, as any metro applications execution state is entirely separated from the desktop environment, another example of poor design._
-
-I then turn off automatic updates, and automatic hardware driver installation.  In Windows 8 there are three locations for these settings, and if all three are not disabled it can lead to problems with Xen as I mentioned before.
-
-I modify the language settings so that English is still the main language, but the system has Japanese locale and IME setup for use.
-
-I also install two fonts I am very fond of:
-
-- [ForMateKonaVe](http://hetima.com/textmate/index.html)
-- [EPSON Kyoukashoutai](http://www.wazu.jp/gallery/Fonts_Japanese.html)
-
-_It is ill advised that you download the EPSON Kyoukashoutai font from the reference link, as its format was converted to ASCII at some stage and its font name became gibberish when attempting to use it from drop downs or otherwise.  You will want to modify the font name in a font editor first (I did)._
-
-**Moving onto Productivity Software:**
-
-- [Sublime Text](http://www.sublimetext.com/3)
-- [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
-- [Mumble (Client)](http://sourceforge.net/projects/mumble/)
-- [7zip](http://www.7-zip.org/)
-- [SumatraPDF](http://blog.kowalczyk.info/software/sumatrapdf/free-pdf-reader.html)
-- [Flash & Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
-- [CCleaner](http://www.piriform.com/ccleaner)
-- [Daemon Tools](http://www.daemon-tools.cc/downloads)
-- [Transmission-QT](http://trqtw.sourceforge.net/blog/)
-- SoThink SWF Decompiler
-- [ffsplit](http://www.ffsplit.com/)
-
-The ffsplit software is an absolutely fantastic screen-capture, recording, and merging software that is for Windows only.  It works out-of-the-box, allows you to easily specify capture devices and move them around on a display.  Setting the hotkeys, recording settings like resolution etc are simple too.  I use this with an HD Avermedia Capture Card and lay a webcam video ontop.  It took 5 minutes to get it ready for the first recording.
-
-Generally I will test launch each application to ensure it is functional and configure it.
-
-**It would be wise to reboot the entire physical machine prior to moving onto the Drivers stage.**
-
-
-### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
-
-Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
-
-
-### Backup
-
-At this very point you should create a backup of the machine.  This is so that if something goes wrong in the next step you can quickly and easily restore to the state you reached prior to the driver stage.
-
-
-### Drivers
-
-The following drivers are for devices passed to the virtual machine, and to eliminate layers to devices such as from the virtual machine to te hard disk or network adapter.
-
-In general they improve performance, but if the device state of the graphics card is not fresh it can lead to corrupted installation, which creates an unfixable (afaik) BSoD problem.  If you rebooted fresh and passed the devices live to ensure automatic driver installation did not occur, then you should be fine.
-
-**List of Drivers:***
-
-- [Signed GPLPV](http://wiki.univention.de/index.php?title=Installing-signed-GPLPV-drivers)
-- [AMD Drivers](http://support.amd.com/us/gpudownload/windows/Pages/radeonaiw_win8-64.aspx)
-- [ASRock Z77 Extreme9 inf & USB 3.0](http://www.asrock.com/mb/Intel/Z77%20Extreme9/?cat=Download)
-
-**Do the installations one at a time, and if any of them request a reboot be sure to shutdown instead and reboot the physical machine before proceeding.**
-
-The next stage is all the software that is dependent on these drivers or the results of these drivers being installed.
-
-
-## Post-Drivers
-
-Connect and install all USB Devices:
-
-- [Logitech K810 Bluetooth Keyboard](http://www.logitech.com/en-us/support/bluetooth-illuminated-keyboard-k810?section=downloads&bit=&osid=23)
-- [Microsoft XBox 360 Wireless Driver](http://www.microsoft.com/hardware/en-us/d/xbox-360-wireless-controller-for-windows)
-
-Install Video Dependent Software:
-
-- [FFXIV Theme](http://www.finalfantasyxiv.com/alliance/na/dl/)
-- [K-Lite Codec Packs](http://codecguide.com/download_kl.htm)
-- [Windows Movie Maker](http://windows.microsoft.com/en-us/windows-live/movie-maker#t1=overview)
-- [Cave Story](http://www.cavestory.org/downloads_game.php)
-- [Steam](http://store.steampowered.com/)
-- [FFXIV](http://www.finalfantasyxiv.com/playersdownload/na/)
-- [Any Video Converter](http://www.any-video-converter.com/products/for_video_free/)
-- [Silverlight (For Netflix)](http://www.microsoft.com/getsilverlight/Get-Started/Install/Default.aspx)
-
-Install Development Software:
-
-- [Visual Studio 2013](http://www.visualstudio.com/en-us/downloads)
-- [Visual Studio Resharper](http://www.jetbrains.com/resharper/)
-
-_The express copy of Visual Studio 2013 is free._
-
-
----
-
-Turn CapsLock into Control key!
+I don't use capslock, ever.  It annoys me that it's such a large key, and in such a commonly traversed location.  So my solution is to turn it into something useful!
 
 Open `regedt32` and go to the key at `[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]`, and add a binary key named `Scancode Map` with the following values:
 
@@ -183,12 +70,12 @@ Open `regedt32` and go to the key at `[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlS
 
 The format is two 0-value byte headers in the first row, following by a byte with the size of the map (including the null-terminator), then we have 4-bit representation of keys where 1D is control and 3A is capslock, this remaps control to capslock.  Finally the null terminator, 8 empty bits indicating the end of the map.
 
----
 
-Disabling "Folders" in "My Computer"!
+### disabling "folders" in my computer
 
+I'm plenty annoyed by the windows "Library" feature, given how useless a utility that is for a power user it was equally distressing when all the folders were suddenly added to my computer.  I don't use the mouse if I can help it, which means many more buttons to reach my destination (almost always a hard drive, iso, or network drive).  _I have my user folder on the desktop, why would I can about "Folders"?_
 
-Open `regedt32` and go to `[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\]`.  You will see the following hashes, simply delete them:
+In any event, this too can be disabled.  Open `regedt32` and go to `[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\]`.  You will see the following hashes, simply delete them:
 
 - Desktop Folder: {B4BFCC3A-DB2C-424C-B029-7FE99A87C641}
 - Documents Folder: {A8CDFF1C-4878-43be-B5FD-F8091C1C60D0}
@@ -198,75 +85,152 @@ Open `regedt32` and go to `[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Curren
 - Videos Folder: {A0953C92-50DC-43bf-BE83-3742FED03C9C}
 
 
-## final steps
+## software
 
-Once all software has been installed, registered, configured, and tested, I generally use the system for roughly a month before making either a "Windows Image Backup" or (my preferred method) an image backup using `dd` from linux.
+**Utilities & Development:**
 
-By creating a backup I ensure a restore point with everything registered and configured, allowing me to use my system free from worries of viral infection (generally), because restoration is fairly easy.  **I prefer the linux method because I can initiate it without a windows restore disk, and have found windows backups to often times be unreliable.**
+- [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
+- [7zip](http://www.7-zip.org/)
+- [SumatraPDF](http://blog.kowalczyk.info/software/sumatrapdf/free-pdf-reader.html)
+- [Sublime Text](shared/sublime-text.md)
+- [Silverlight (For Netflix)](http://www.microsoft.com/getsilverlight/Get-Started/Install/Default.aspx)
+- [Visual Studio 2013](http://www.visualstudio.com/en-us/downloads)
+- [golang](http://golang.org/)
+- [git](http://git-scm.com/)
+- [Flash Projector](shared/flash-projector.md)
+- [jdk7](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- [CCleaner](http://www.piriform.com/ccleaner)
+- [Daemon Tools](http://www.daemon-tools.cc/downloads)
 
-It is worth noting that this does incur some risk of infection between the initial configuration and backup point, so if you are concerned that you may get an infection between those times you should make a backup immediately.
+I prefer the google chrome browser, and generally opt for the dev channel install to get the latest features.  If you are more concerned with stability then feel free to pick the stable release or go with an alternative.
 
-By giving the system a month to adjust, it will be able to more clearly identify your system usage, and will more appropriately allocate the resources in the machine to the tasks you perform more regularly.  If you make an immediate backup you loose that machine-learning data.
+Utilities like 7zip and sumatrapdf are lightweight and incredibly well built.
 
-Also, the purpose for a good image backup is **not** simply for emergencies, it is effectively a mandatory part of the windows life-cycle that eventually the system will either get slower, or the inevitable infection will occur.
+I use sublime text regularly for note taking, and development.
 
+_The express copy of Visual Studio 2013 is free._  Thought the professional version likely has more to offer.
 
-**I have some new instructions and am in the process of merging these and extracting some others.**
+I use ccleaner to cleanup my mess post-install, but usually never after.  Feel free to either not install it, or remove it after.
 
-### windows fresh steps
-
-Post-Install Steps:
-
-- Reboot it post-install to ensure it is installed properly
-- Run Windows Updates and reboot as needed until no updates remain
-- Disable UAC
-- Disable Windows Defender
-- Set Clock Time/Date, public UTP server, and 24 hour displayed time
-- Adjust indexing options, removing everything except Start Menu
-- Standard taskbar/navigation settings (desktop by default instead of metro, no recent files/progs)
-- Action center undo alerts for most things
-- activate windows
-- uninstall all the shit metro software that comes with windows
-- check windows updates again
-- adjust display (**complex problems, see below**)
-- activate windows features from programs and features (Legacy/DirectPlay && .NET3.5/2.0)
+I don't have a dvd drive anymore, so anything I've had on disc is now an iso.  If I intend to use any of them, daemon tools is a great software for that.  I usually go with the lite version, as I only need mount support.
 
 
-Post OS-Configuration Steps:
+**Multimedia & Gaming:**
 
-Install drivers for all unfound devices:
+- [Steam](http://store.steampowered.com/)
+- [K-Lite Codec Packs](http://codecguide.com/download_kl.htm)
+- [ffsplit](http://www.ffsplit.com/)
+- [Transmission-QT](http://trqtw.sourceforge.net/blog/)
+- [Windows Movie Maker](http://windows.microsoft.com/en-us/windows-live/movie-maker)
+- [Any Video Converter](http://www.any-video-converter.com/products/for_video_free/)
+- [games](games/)
 
-- motherboard
-- PCIe/Graphics
+No modern gaming system would be complete without steam.  It's an excelent digital distribution platform, and has solved many of my game installation woes over the years.
 
-_With 8.1 almost all of my drivers were found._
+I want lots of videos, and install the k-lite codec pack so I can continue using the builtin windows media player.  _In my personally opinion, the Windows Media Player is one of the best products that comes with their operating system, and in spite of my experiences with things like media player classic and VLC I have never really found them preferable._
 
+The ffsplit software is an absolutely fantastic screen-capture, recording, and video merging software that is for Windows only.  It works out-of-the-box, allows you to easily specify capture devices and move them around on a display.  Setting the hotkeys, recording settings like resolution etc are simple too.  I use this with an HD Avermedia Capture Card and lay a webcam video ontop.  It took 5 minutes to get it ready for the first recording.
 
-Install Tools & Development Software:
+If you like to torrent, I recommend transmission-qt, it's the transmission client for windows with a QT interface, and is fairly robust.  It's leagues better than the corrupted [mutorrent](http://www.utorrent.com/).
 
-- google chrome
-- 7zip
-- sumatrapdf
-- sublime text
-- silverlight
-- visual studio
-- golang
-- git
-- flash projector
-- jdk7
+Windows Movie Maker is a nice simple video clip editor, and I find it useful on occasion.  **It's part of the Windows Essentials, of which I only ever want this one, so I don't install the rest.**
 
+Finally, the any-video-converter is a nice, free, video file format converter that can help when formats are not supported by windows media player or windows movie maker.
 
-Now for multimedia and gaming software:
-
-- windows movie maker
-- ffsplit
-- k-lite mega codec pack
-- steam
-
-_My list of choice games probably varies from anyone elses, but I'll list any that I have played with notes in the docs._
-
-After much investigation I decided to go with the k-lite codec pack, because I come across loads of media and don't like the idea of finding out I spent X hours manually installing and configuring filters and muxers manually that don't support some file without adding in another component.  I am sure the alternative is a lighter weight solution, but I did not do so and have no documentation to offer for it.
-
-**If you want to use a great torrent software I highly recommend `transmissin-qt`, it's free and a thousand times better than the recent releases of utorrent.**
+I suspect my choice of games will vary from most everyone else.  I have a set of documents on specific games that have quirks to get them working right.
 
 
+_I recommend launching each program after installation to ensure it is functional.  Anything that asks for you to restart you should do so before proceeding to another installer._
+
+
+### extension association game~
+
+After installing all of these, we will want to set a number of file extensions to be associated with our system.  This is like a ritualistic song-and-dance for me, so here's the list:
+
+Google Chrome:
+
+- .gif
+- .htm
+- .html
+
+Flash Projector:
+
+- .swf
+
+Sublime Text:
+
+- .bash
+- .bat
+- .c
+- .c++
+- .cfg
+- .conf
+- .config
+- .cpp
+- .cs
+- .css
+- .csv
+- .go
+- .h
+- .inf
+- .ini
+- .js
+- .json
+- .log
+- .markdown
+- .md
+- .mkd
+- .mkdown
+- .php
+- .ps1
+- .py
+- .sh
+- .txt
+- .zsh
+
+Windows Photo Viewer:
+
+- .bmp
+- .jpg
+- .png
+- .tiff
+
+Windows Media Player:
+
+- .avi
+- .flac
+- .flv
+- .midi
+- .mkv
+- .mp3
+- .mp4
+- .mpeg
+- .mpg
+- .ogg
+- .ogm
+- .rmvb
+- .ts
+- .wav
+
+_Your preferences may vary._
+
+Sadly, there is no "easy" way to do this in an automated fashion that I'm aware of, so I create a folder and fill it with empty files with those extensions.  Because windows is too dumb to figure out that they're all empty files, it'll assume the type associations, allowing us to right click and change association, and apply the change to all.
+
+
+# references
+
+Drivers for my own devices:
+
+- [ASRock Z77 Extreme9](http://www.asrock.com/mb/Intel/Z77%20Extreme9/?cat=Download&os=Win8a64)
+- [Logitech K810 Bluetooth Keyboard](http://www.logitech.com/en-us/support/bluetooth-illuminated-keyboard-k810?section=downloads&bit=&osid=23)
+- [Microsoft XBox 360 Wireless Driver](http://www.microsoft.com/hardware/en-us/d/xbox-360-wireless-controller-for-windows)
+
+Downloadable games I like:
+
+- [Cave Story](http://www.cavestory.org/downloads_game.php)
+- [SCP Containment Breach](http://www.scpcbgame.com/)
+- [FFXIV](http://www.finalfantasyxiv.com/playersdownload/na/)
+
+Personalized aesthetics:
+
+- [FFXIV Theme](http://www.finalfantasyxiv.com/alliance/na/dl/)
