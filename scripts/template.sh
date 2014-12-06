@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# notify failure without root permissions, and exit
+[ $(id -u) -ne 0 ] && echo "execution will fail without root permissions..." && exit 1
+
+##
+# request additional information
+##
+
+echo -n "enter a username for your new system user: "
+read username
+
+echo -n "enter a password for your new system user: "
+read password
+
+echo -n "enter an ssh port (default: 22): "
+read ssh_port
+
+echo -n "enter a timezone path (default: /usr/share/zoneinfo/US/Eastern): "
+read timezone
+
+echo -n "enable jis (y|n, default: y): "
+read jis
+
+# set defaults
+[ -z "$ssh_port" ] && ssh_port=22
+[ -z "$timezone" ] && timezone="/usr/share/zoneinfo/US/Eastern"
+[ -z "$jis" ] && jis="y"
+
 # install netselect-apt and find the best mirrors
 # then get the system updated before we go forward
 aptitude install -ryq netselect-apt
@@ -33,20 +60,25 @@ then
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 fi
 
-##
-# @todo install cronjobs
-##
+# install cronjobs
+[ -f "data/etc/cron.daily/system-updates" ] && cp "data/etc/cron.daily/system-updates" "/etc/cron.daily/system-updates"  || $dl_cmd "/etc/cron.daily/system-updates" "https://raw.githubusercontent.com/cdelorme/system-setup/master/data/etc/cron.daily/system-updates"
+[ -f "data/etc/cron.weekly/disk-maintenance" ] && cp "data/etc/cron.weekly/disk-maintenance" "/etc/cron.weekly/disk-maintenance"  || $dl_cmd "/etc/cron.daily/system-updates" "https://raw.githubusercontent.com/cdelorme/system-setup/master/data/etc/cron.weekly/disk-maintenance"
 
-##
-# @todo install monit configs
-##
+# todo install monit configs
+[ -f "data/etc/monit/monitrc.d/system" ] && cp "data/etc/monit/monitrc.d/system" "/etc/monit/monitrc.d/system"  || $dl_cmd "/etc/monit/monitrc.d/system" "https://raw.githubusercontent.com/cdelorme/system-setup/master/data/etc/monit/monitrc.d/system"
+[ -f "data/etc/monit/monitrc.d/ssh" ] && cp "data/etc/monit/monitrc.d/ssh" "/etc/monit/monitrc.d/ssh"  || $dl_cmd "/etc/monit/monitrc.d/ssh" "https://raw.githubusercontent.com/cdelorme/system-setup/master/data/etc/monit/monitrc.d/ssh"
+[ -f "data/etc/monit/monitrc.d/web" ] && cp "data/etc/monit/monitrc.d/web" "/etc/monit/monitrc.d/web"  || $dl_cmd "/etc/monit/monitrc.d/web" "https://raw.githubusercontent.com/cdelorme/system-setup/master/data/etc/monit/monitrc.d/web"
+
+# activate with symlinks
+ln -nsf "../monitrc.d/system" "/etc/monit/conf.d/system"
+ln -nsf "../monitrc.d/ssh" "/etc/monit/conf.d/ssh"
+ln -nsf "../monitrc.d/web" "/etc/monit/conf.d/web"
 
 # test and restart monit
 monit -t && service monit restart
 
-# set useast timezone
-# @todo use variable /w fallback
-#sudo ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime
+# set system timezone
+ln -nsf $timezone /etc/localtime
 
 # update hosts
 # @todo add variable for hostname

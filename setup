@@ -1,0 +1,58 @@
+#!/bin/bash
+
+##
+# begin querying for default "used-by-all" options
+##
+
+echo "what type of system is this? (default: template)"
+echo -n "(template|web|dev|osx|windows): "
+read service
+
+echo -n "install dot-files (y|n, default: y)? "
+read dot_files
+
+echo -n "enter a github username for the configuration (optional): "
+read github_username
+
+echo -n "enter a github password for the configuration (optional): "
+read github_password
+
+
+##
+# prepare default variables
+##
+
+[ -z "$service" ] && service="template"
+[ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+
+# assume a default download command for grabbing files during processing
+if which curl &> /dev/null
+then
+    dl_cmd="curl -Lo"
+    source_cmd="curl -s"
+elif which wget &> /dev/null
+then
+    dl_cmd="wget -O"
+    source_cmd="--no-check-certificate -qO-"
+fi
+
+
+# begin executing objective by loading next module
+if [ "$service" = "template" ]
+then
+    [ -f "scripts/template.sh" ] && . "scripts/template.sh" || . <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/scripts/template.sh")
+elif [ "$service" = "web" ]
+then
+    [ -f "scripts/web.sh" ] && . "scripts/web.sh" || . <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/scripts/web.sh")
+elif [ "$service" = "dev" ]
+then
+    [ -f "scripts/dev.sh" ] && . "scripts/dev.sh" || . <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/scripts/dev.sh")
+elif [ "$service" = "osx" ]
+then
+    [ -f "scripts/osx.sh" ] && . "scripts/osx.sh" || . <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/scripts/osx.sh")
+elif [ "$service" = "windows" ]
+then
+    [ -f "scripts/windows.sh" ] && . "scripts/windows.sh" || . <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/scripts/windows.sh")
+fi
+
+echo "finished setup..."

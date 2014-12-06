@@ -1,0 +1,2 @@
+set httpd port 2812
+    allow 127.0.0.1
