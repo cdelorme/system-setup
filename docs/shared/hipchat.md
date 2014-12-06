@@ -1,5 +1,5 @@
 
-# hipchat
+# [hipchat](https://www.hipchat.com/)
 
 This is a communication software by atlassian, and is growing in popularity.
 
