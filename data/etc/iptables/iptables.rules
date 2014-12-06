@@ -7,7 +7,7 @@
 # accept ping
 -A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
 # Allow tcp traffic for  (HTTP, HTTPS)
-#-A INPUT -p tcp -m multiport --dports http,https -m conntrack --ctstate NEW -j ACCEPT
+#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT
 # samba traffic
 #-A INPUT -s 10.0.0.0/24 -p udp -m multiport --dports 137,138 -j ACCEPT
 #-A INPUT -s 10.0.0.0/24 -p tcp -m multiport --dports 139,445 -j ACCEPT
@@ -19,9 +19,9 @@
 -N LOGREJECTSSH
 -A LOGREJECTSSH -j LOG --log-prefix "iptables deny: " --log-level 7
 -A LOGREJECTSSH -j REJECT
--A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --set --name SSH --rsource
--A INPUT -p tcp -m tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGREJECTSSH
--A INPUT -p tcp -m tcp --dport ssh -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH --rsource
+-A INPUT -p tcp -m tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH --rttl --rsource -j LOGREJECTSSH
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
 # drop invalid
 -A INPUT -m conntrack --ctstate INVALID -j DROP
 # reject all others (linux compliant blacklist)
