@@ -1,18 +1,29 @@
 #!/bin/bash
 
 # query for options
-echo "what type of system is this? (default: template)"
-echo -n "(template|web|dev|osx|windows): "
-read service
+while [ "$service" != "template" ] && [ "$service" != "web" ] && [ "$service" != "dev" ] && [ "$service" != "osx" ] && [ "$service" != "windows" ]
+do
+    echo -n "what type of system is this (template|web|dev|osx|windows)? "
+    read service
+done
 
-echo -n "install dot-files (y|n, default: y)? "
-read dot_files
+while [ "$dot_files" != "n" ] && [ "$dot_files" != "y" ]
+do
+    echo -n "install dot-files (y|n)? "
+    read dot_files
+done
 
-echo -n "enter a username for your new system user: "
-read username
+while [ -z "$username" ]
+do
+    echo -n "enter a username for your new system user: "
+    read username
+done
 
-echo -n "enter a password for your new system user: "
-read password
+while [ -z "$password" ]
+do
+    echo -n "enter a password for your new system user: "
+    read password
+done
 
 echo -n "enter a github username for the configuration (optional): "
 read github_username
@@ -23,7 +34,7 @@ read github_password
 # set defaults
 remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
 [ -z "$service" ] && service="template"
-[ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+[ "$dot_files" = "y" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
 
 # stop if no username and password are supplied
 if [ -z "$username" ] || [ -z "$password" ]
