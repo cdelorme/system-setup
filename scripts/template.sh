@@ -1,37 +1,5 @@
 #!/bin/bash
 
-# notify failure without root permissions, and exit
-[ $(id -u) -ne 0 ] && echo "execution will fail without root permissions..." && exit 1
-
-##
-# request additional information
-##
-
-echo -n "enter an ssh port (default: 22): "
-read ssh_port
-
-echo -n "enter a hostname (default: $service): "
-read system_hostname
-
-echo -n "enter a domain name (optional): "
-read domainname
-
-echo -n "enter a timezone path (default: /usr/share/zoneinfo/US/Eastern): "
-read timezone
-
-echo -n "enable jis (y|n, default: y): "
-read jis
-
-echo "would you like to generate an ssh key (y|n, default: y)?"
-read create_ssh
-
-# set defaults
-[ -z "$ssh_port" ] && ssh_port=22
-[ -z "$timezone" ] && timezone="/usr/share/zoneinfo/US/Eastern"
-[ -z "$jis" ] && jis="y"
-[ -z "$system_hostname" ] && system_hostname=$service
-[ -z "$create_ssh" ] && create_ssh="y"
-
 # install netselect-apt and find the best mirrors
 # then get the system updated before we go forward
 aptitude install -ryq netselect-apt
