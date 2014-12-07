@@ -116,7 +116,7 @@ then
 fi
 
 # attempt to upload new ssh key to github account
-if [ -n "$github_username" ] && [ -n "$github_password" ]
+if [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
 then
     curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 fi
