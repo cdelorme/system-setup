@@ -20,8 +20,8 @@ aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-f
 # execute first-run warmups
 update-command-not-found
 
-# enable watchdog
-update-rc.d watchdog defaults
+# enable watchdog if supported
+[ -f "/dev/watchdog" ] && update-rc.d watchdog defaults
 
 # optimize lvm
 sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
@@ -35,7 +35,9 @@ fi
 
 # install cronjobs
 [ -f "data/etc/cron.daily/system-updates" ] && cp "data/etc/cron.daily/system-updates" "/etc/cron.daily/system-updates"  || $dl_cmd "/etc/cron.daily/system-updates" "${remote_source}data/etc/cron.daily/system-updates"
-[ -f "data/etc/cron.weekly/disk-maintenance" ] && cp "data/etc/cron.weekly/disk-maintenance" "/etc/cron.weekly/disk-maintenance"  || $dl_cmd "/etc/cron.daily/system-updates" "${remote_source}data/etc/cron.weekly/disk-maintenance"
+[ -f "data/etc/cron.weekly/disk-maintenance" ] && cp "data/etc/cron.weekly/disk-maintenance" "/etc/cron.weekly/disk-maintenance"  || $dl_cmd "/etc/cron.daily/disk-maintenance" "${remote_source}data/etc/cron.weekly/disk-maintenance"
+chmod +x /etc/cron.daily/system-updates
+chmod +x /etc/cron.weekly/disk-maintenance
 
 # install monit configs
 [ -f "data/etc/monit/monitrc.d/system" ] && cp "data/etc/monit/monitrc.d/system" "/etc/monit/monitrc.d/system"  || $dl_cmd "/etc/monit/monitrc.d/system" "${remote_source}data/etc/monit/monitrc.d/system"
@@ -51,7 +53,7 @@ ln -nsf "../monitrc.d/web" "/etc/monit/conf.d/web"
 monit -t && service monit restart
 
 # set system timezone
-ln -nsf $timezone /etc/localtime
+[ -f "/usr/share/zoneinfo/${timezone}" ] && echo "$timezone" > /etc/timezone && ln -nsf "/usr/share/zoneinfo/${timezone}" /etc/localtime
 
 # update hostname & hosts file /w domain info
 if [ -n "$system_hostname" ]
@@ -88,23 +90,20 @@ then
     locale-gen
 fi
 
-# install custom fonts & rebuild cache
-mkdir -p /usr/share/fonts/ttf/jis
-$dl_cmd "/usr/share/fonts/ttf/jis/ForMateKonaVe.ttf" "${remote_source}data/home/.fonts/ForMateKonaVe.ttf"
-$dl_cmd "/usr/share/fonts/ttf/jis/epkyouka.ttf" "${remote_source}data/home/.fonts/epkyouka.ttf"
-fc-cache -fr
-
-# attempt to run dot-files installer as root so it adds to /etc/skel
-. <($source_cmd "$dot_files") -q
-
 # fix potential permission problems with logs
 chown -R root:adm /var/log/*
 
 # ensure vim is set as default editor
 update-alternatives --set editor /usr/bin/vim.basic
 
+# attempt to run dot-files installer as root so it adds to /etc/skel
+. <($source_cmd "$dot_files") -q
+
 # conditionally create new user and add to core groups
-useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+if [ -n "$username" ] && id "$username" &>/dev/null
+then
+    useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+fi
 usermod -aG sudo,adm $username
 
 # generate ssh key

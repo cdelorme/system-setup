@@ -41,7 +41,7 @@ then
     echo -n "enter a domain name (optional): "
     read domainname
 
-    echo -n "enter a timezone path (default: /usr/share/zoneinfo/US/Eastern): "
+    echo -n "enter a timezone path (default: US/Eastern): "
     read timezone
 
     while [ "$jis" != "n" ] && [ "$jis" != "y" ]
@@ -52,7 +52,7 @@ then
 
     while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
     do
-        echo -n "would you like to generate an ssh key (y|n)? "
+        echo -n "would you like to generate an ssh key (will replace existing ~/.ssh/id_rsa, y|n)? "
         read create_ssh
     done
 
@@ -80,7 +80,7 @@ then
     # set platform defaults
     ##
     [ -z "$ssh_port" ] && ssh_port=22
-    [ -z "$timezone" ] && timezone="/usr/share/zoneinfo/US/Eastern"
+    [ -z "$timezone" ] && timezone="US/Eastern"
     [ -z "$system_hostname" ] && system_hostname=$service
     cronfile="/var/spool/cron/crontabs/${username}"
 
