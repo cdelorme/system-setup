@@ -56,6 +56,14 @@ then
         read create_ssh
     done
 
+    if [ "$create_ssh" = "y" ]
+    then
+        while [ "$send_ssh_to_github" != "n" ] && [ "$send_ssh_to_github" != "y" ]
+        do
+            echo -n "do you want your new ssh key to be sent to github (y|n)? "
+            read send_ssh_to_github
+        done
+    fi
 
     ##
     # request service specific settings
