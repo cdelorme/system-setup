@@ -64,7 +64,7 @@ then
 fi
 
 # fix grub kernel panics
-if [ -f /etc/default/grub ]
+if [ -f /etc/default/grub ] && [ $(grep -c "panic=10" /etc/default/grub) -lt 1 ]
 then
     sed -i 's/GRUB_COMMANDLINE_LINUX_DEFALT=.*/GRUB_COMMANDLINE_LINUX_DEFALT="quiet panic=10"/' /etc/default/grub
     update-grub
@@ -100,7 +100,7 @@ update-alternatives --set editor /usr/bin/vim.basic
 . <($source_cmd "$dot_files") -q
 
 # conditionally create new user and add to core groups
-if [ -n "$username" ] && id "$username" &>/dev/null
+if [ -n "$username" ] && ! id "$username" &>/dev/null
 then
     useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 fi
