@@ -362,6 +362,34 @@ I install custom fonts, and set them as defaults in other tools later.
 ## optimizations
 
 
+## automount usb
+
+This is an extension of graphical interface configuration, and while it applies (in my case) to pcmanfm it is applicable to pretty much any file browser.
+
+Steps:
+
+- add your user to `plugdev` group
+- create a polkit config at `/etc/polkit-1/localauthority/50-local.d/55-storage.pkla`
+
+The config shall contain:
+
+    [Allow Automount]
+    Identity=unix-group:plugdev
+    Action=org.freedesktop.udisks.filesystem-mount
+    ResultAny=yes
+    ResultInactive=yes
+    ResultActive=yes
+
+Gives your user access via the file browser to mount, eject, and read/modify files inside the mount point, including via terminal.
+
+
+## urxvt tabs
+
+Install new tabbedex package (tabbed alternative):
+
+    curl -o /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
+
+
 ## xorg framerate limiting
 
 By default, xorg will restrict framerates to 60fps.  This limit is generally useful as it can prevent choppy video and tearing problems in video or poorly built video code.
