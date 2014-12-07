@@ -3,58 +3,25 @@
 
 This document extends my [template](template.md) instructions, and you should review them first.
 
-Continuing from my gui instructions, these steps will prepare a platform for development loaded with all manner of tools and configuration.
+The goal of these instructions is to provide you with a highly customized development workstation, with features to enhance productivity and convenience.
 
-It will install additional development packages, and configure them as well as modify some system configuration defaults.
-
-
+While this is a more feature-filled set of instructions, the resulting system is likely still much more light-weight than a standard "full" install, especially if you opt not to install a graphical environment, _however the gains you'll get from having one generally outweight the pros of space saved not doing so_.
 
 
-
-# generate and send ssh keys to github
-
-Generate and Upload SHH Key to github:
-
-    # generate key
-    ssh-keygen -q -b 4096 -t rsa -N "$SSL_PASSWORD" -f "$DOWNLOADS/.ssh/id_rsa"
-
-    # add public key to trusted list on github
-    HOST=$(hostname -s)
-    DATE=$(date '+%Y/%m/%d')
-
-    # attempt to push the key to github
-    curl -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"${HOST} (${DATE})\",\"key\":\"$(cat $DOWNLOADS/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
-
-_Don't forget to make sure the key files have 600 permissions._
-
-Request token from github for osx homebrew:
-
-    # Request keys from github
-    keys=$(curl -s -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X GET https://api.github.com/authorizations)
-    if echo $keys | grep "homebrew" &> /dev/null
-    then
-        token=$(echo "${keys#*homebrew}" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
-    else
-        keys=$(curl -i -u "${GITHUB_USERNAME}:${GITHUB_PASSWORD}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"scopes\":[\"gist\",\"repo\",\"user\"],\"note\":\"homebrew\"}" https://api.github.com/authorizations)
-        token=$(echo "$keys" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
-    fi
-
-    if [ -n "$token" ]
-    then
-
-        # push token into .bashrc
-        echo -ne "\n# homebrew github token (remove rate-limiting)\nexport HOMEBREW_GITHUB_API_TOKEN=${token}" >> "$DOWNLOADS/.bashrc"
-    fi
+## objectives
 
 
-## install packages
+## packages
 
-Add these packages to my dev platform:
+python-dev
+python-pip
+python3-dev
+python3-pip
+bpython
+bpython3
 
-    python-pip bpython python3 python3-pip bpython3 imagemagick graphicsmagick
-
-
-
+imagemagick
+graphicsmagick
 
 **Firmware to help with non-standard hardware or adding devices after the fact:**
 
@@ -129,91 +96,6 @@ These are some packages that contain utilities and general data that may help fi
 The `anacron` package is for an asynchronous crontab, great for desktops which do not have a 24/7 uptime (for example, a virtual machine, or general desktop that doesn't stay on 24/7).
 
 The `miscfiles` package is non-executable files that contain loads of data that other software may find helpful, so I recommend it.  I use `markdown` for literally everything, so I install it.  The `monit` package allows me to specifically monitor important services and keep them from locking up or crashing permanently.
-
-
-## xorg framerate limiting
-
-By default, xorg will restrict framerates to 60fps.  This limit is generally useful as it can prevent choppy video and tearing problems in video or poorly built video code.
-
-However, if you are running performance tests, for example trying to test code speed via fps, then it becomes a hindrance on any modern machine.
-
-For development, you should disable this feature by creating, and then modifying the xorg config file.
-
-
-##### commands
-
-_Create the config file:_
-
-    cd /etc/X11
-    Xorg --configure
-
-_Modify the line that restricts higher FPS:_
-
-    sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
-
-
-## golang
-
-For stability reasons debian opts to not update packages after release.  As a result we don't get a newer version of tools like golang.  This is helpful if there are dependencies on the older version tied into the platform, but in this case that's unlikely.
-
-To install the latest version, you will need to download the package, extract it, and then move the files to the appropriate places.
-
-**Building golang depends on `gcc`, `libc6-dev`, `libc6-dev-i386`, and `mercurial` packages.**
-
-Additional steps include adding its vim package to your plugins, and setting your system to auto-run `go fmt` on write.
-
-
-##### commands
-
-_Run these to download the golang repository and build then install the latest **release** version:_
-
-    hg clone -u release https://code.google.com/p/go /tmp/go
-    (cd /tmp/go/src && GOROOT_FINAL="/usr/lib/go" ./make.bash)
-    mv /tmp/go /usr/lib/
-    mkdir -p /usr/share/doc/golang-doc /usr/share/go/
-    mv /usr/lib/go/src /usr/share/go/
-    mv /usr/lib/go/doc /usr/share/doc/golang-doc/html
-    mv /usr/lib/go/favicon.ico /usr/share/doc/golang-doc/
-    ln -sf /usr/share/go/src /usr/lib/go/src
-    ln -sf /usr/share/doc/golang-doc/html /usr/lib/go/doc
-    ln -sf /usr/lib/go/favicon.ico /usr/share/doc/golang-doc/favicon.ico
-    ln -sf /usr/lib/go/bin/go /usr/local/bin/go
-    ln -sf /usr/lib/go/bin/gofmt /usr/local/bin/gofmt
-
-_Augmenting vim:_
-
-    echo '" add go fmt' >> ~/.vimrc
-    echo 'autocmd FileType go autocmd BufWritePre <buffer> Fmt' >> ~/.vimrc
-    cp -R /usr/lib/go/misc/vim/* ~/.vim/
-
-
-
-
-# installing sublime text
-
-
-    # Download Sublime Text 3
-    curl -o ~/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3059_x64.tar.bz2
-    tar xf sublime.tar.bz2
-    rm sublime.tar.bz2
-    mkdir ~/applications
-    mv Sublime* ~/applications/sublime_text/
-    mkdir -p ~/bin
-    ln -s ~/applications/sublime_text/sublime_text ~/bin/subl
-
-
-# workstation
-
-This picks up where my template instructions left off, and continues to build upon it, adding all manner of utilities and helper software that wouldn't be beneficial on, for example, a production server.
-
-It is still a lightweight system, considering it does not include a graphical interface.  This means it can be used as a staging environment, or as a less vital server system.  It can also be the basis of a development platform or shared development server.
-
-The packages installed onto this platform help make it significantly more usable and for more situations, including regular access and use.
-
-
-## install packages
-
-
 
 Moving onto our big install list; I've sectioned all the packages into groups that make some sense as far as their purpose on the machine, which may help you decide whether to install them yourself.
 
@@ -336,21 +218,6 @@ After installing the packages we still have a couple of steps to take care of be
 
 
 
-
-# gui documentation
-
-These are the instructions for setting up a customized OpenBox window manager, and various role supporting software, as well as a number of utility and development applications.
-
-It assumes that work picks up where the template documentation left off.
-
-
-## troubleshooting
-
-A graphics card will be required, though driver installation varies wildly and won't be covered here.  If you install the packages below and cannot run startx, then you may have to look elsewhere.
-
-
-## install packages
-
 **Here is a detailed breakdown of packages grouped by intended purpose or function.**
 
 Desktop Package:
@@ -453,49 +320,102 @@ Documentation Generator:
 - asciidoc
 
 
+_Check the packages list below for anything I may not have included above..._
+
+    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince libX11-dev libmcrypt-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libxinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools
+
+Pretty sure I don't need or use zenity for anything...  Should double check...
+
+wireless query for bluetooth and avahi type pacakges
+
+file sharing query for samba and sshfs type packages
+
+other utilities and dev pacakges should be installed by default
+
+openbox is optional, and will eventually be one of multiple graphical environments I modularly install
+
+transmission will be optional as well
+
+
+
+
+## graphics card troubleshooting
+
+A graphics card will be required, though driver installation varies wildly and won't be covered here.  If you install the packages below and cannot run startx, then you may have to look elsewhere.
+
+
+
+
+## optional
+
+
+
+### [custom fonts](shared/custom-fonts.md)
+
+I install custom fonts, and set them as defaults in other tools later.
+
+
+
+
+
+
+## optimizations
+
+
+## xorg framerate limiting
+
+By default, xorg will restrict framerates to 60fps.  This limit is generally useful as it can prevent choppy video and tearing problems in video or poorly built video code.
+
+However, if you are running performance tests, for example trying to test code speed via fps, then it becomes a hindrance on any modern machine.
+
+For development, you should disable this feature by creating, and then modifying the xorg config file.
+
+
+## golang
+
+For stability reasons debian opts to not update packages after release.  As a result we don't get a newer version of tools like golang.  This is helpful if there are dependencies on the older version tied into the platform, but in this case that's unlikely.
+
+To install the latest version, you will need to download the package, extract it, and then move the files to the appropriate places.
+
+**Building golang depends on `gcc`, `libc6-dev`, `libc6-dev-i386`, and `mercurial` packages.**
+
+Additional steps include adding its vim package to your plugins, and setting your system to auto-run `go fmt` on write.
+
+
 ##### commands
 
-_Run to install all packages:
+_Run these to download the golang repository and build then install the latest **release** version:_
 
-    aptitude install -ryq desktop-base openbox obconf obmenu menu tint2 conky-all chromium zenity zenity-common pcmanfm alsa-base alsa-utils pulseaudio volumeicon-alsa feh hsetroot rxvt-unicode xorg xserver-xorg-video-all x11-xserver-utils xinit xinput xtightvncviewer suckless-tools gmrun arandr clipit xsel gksu catfish fbxkb openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance gparted vlc gtk-recordmydesktop chromium transmission transmission-cli openshot flashplugin-nonfree lame ffmpeg shared-mime-info fontconfig fontconfig-config fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer gimp gimp-plugin-registry evince bpython libX11-dev libmcrypt-dev python-dev python3-dev libperl-dev openjdk-7-jre xdg-user-dirs libconfig-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libXinerama-dev x11-utils libpcre3-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev asciidoc bluez bluez-utils bluez-tools
+    hg clone -u release https://code.google.com/p/go /tmp/go
+    (cd /tmp/go/src && GOROOT_FINAL="/usr/lib/go" ./make.bash)
+    mv /tmp/go /usr/lib/
+    mkdir -p /usr/share/doc/golang-doc /usr/share/go/
+    mv /usr/lib/go/src /usr/share/go/
+    mv /usr/lib/go/doc /usr/share/doc/golang-doc/html
+    mv /usr/lib/go/favicon.ico /usr/share/doc/golang-doc/
+    ln -sf /usr/share/go/src /usr/lib/go/src
+    ln -sf /usr/share/doc/golang-doc/html /usr/lib/go/doc
+    ln -sf /usr/lib/go/favicon.ico /usr/share/doc/golang-doc/favicon.ico
+    ln -sf /usr/lib/go/bin/go /usr/local/bin/go
+    ln -sf /usr/lib/go/bin/gofmt /usr/local/bin/gofmt
+
+_Augmenting vim:_
+
+    echo '" add go fmt' >> ~/.vimrc
+    echo 'autocmd FileType go autocmd BufWritePre <buffer> Fmt' >> ~/.vimrc
+    cp -R /usr/lib/go/misc/vim/* ~/.vim/
 
 
-## system configuration
-
-In some cases the installed packages are not configured; in other cases I preferred alternative configurations.
 
 
-### installing custom fonts
 
-This part is entirely optional, but I have some favorite fonts that I usually install:
-
-- [ForMateKonaVe](https://github.com/cdelorme/system-setup/raw/develop/data/fonts/ForMateKonaVe.ttf)
-- [epkyouka](https://github.com/cdelorme/system-setup/raw/develop/data/fonts/epkyouka.ttf)
-
-Custom fonts can be installed globally into `/usr/share/fonts/`, or per-user at `~/.fonts/`; simply copy the font files into those folders.
-
-After copying the files you will need to refresh the font cache using the `fc-cache` utility.
-
-
-##### commands
-
-_Run this to rebuild font cache:_
-
-    fc-cache -fr
-
+**GRAPHICAL CONFIGURATIONS~**
 
 ### startx configuration
 
 We want the `startx` command to load openbox, which means we have to tell startx what to do using the `~/.xinitrc` file.  Simply add `exec openbox-session` to `~/.xinitrc`.
 
 It would be wise to use `update-alternatives` to set the default window manager and session manager as well.
-
-
-##### commands
-
-_Adding openbox to xinitrc:_
-
-    echo "exec openbox-session" > ~/.xinitrc
 
 
 ### configuring & theming openbox
@@ -511,7 +431,7 @@ To configure the main drop-menu that openbox uses, we'll want to modify `~/.conf
 For desktop, openbox themes, application control, and more you'll want to modify `~/.config/openbox/rc.xml`.  This configuration file is very large so I won't go into detail; I recommend visitng the official documentation.  You can find a list of named themes available to your system in `/usr/share/themes/`, which can be set in `~/.config/openbox/rc.xml`.
 
 
-##### comamnds
+##### commands
 
 **Set openbox as default window & session manager:**
 
@@ -734,7 +654,7 @@ _Throw a bunch of preferred images into `~/.wallpaper/` and create `~/.fehbg` wi
 
     (while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 300; done;) &
 
-_Or adjust the directorie to pull pictures from as desired._
+_Or adjust the directory to pull pictures from as desired._
 
 
 ### urxvt configuration
@@ -979,20 +899,6 @@ _Recommended configuration in `~/.config/clipit/clipitrc`:_
     search_key=<Ctrl><Alt>F
 
 
-### tint2 configuration
-
-    NONE NECESSARY
-
-_I haven't gotten around to this yet, and I haven't found a reason or need to either._
-
-
-### pcmanfm configuration
-
-    NONE NECESSARY
-
-_I haven't gotten around to this yet, and I haven't found a reason or need to either._
-
-
 ### user configuration
 
 For full privileges users should belong to these groups:
@@ -1003,19 +909,15 @@ For full privileges users should belong to these groups:
 - netdev
 - audio
 - video
-- adm
 - pulse
 
 Many of these groups are assigned by default when a new user is created through the UI.
 
-The `adm` group is necessary for log access; fuse gives the user mounting privileges.  The `pulse` group is intended for specific volume controls.  The `netdev` group is for network device access, and may not be necessary if you aren't using graphical networking tools (which I don't).  The others are all rather self-explanitory.
+The `pulse` group is intended for specific volume controls.  The `netdev` group is for network device access, and may not be necessary if you aren't using graphical networking tools (which I don't).  The others are all rather self-explanitory.
 
 
-##### commands
-
-_This can be done via a **single** command line:_
-
-    usermod -aG adm,audio,video,fuse,scanner,netdev,bluetooth,pulse username
+Note:  `plugdev` group and maybe install polkit
+[reference](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)
 
 
 ## configuring pulse-audio
@@ -1023,14 +925,6 @@ _This can be done via a **single** command line:_
 For whatever reason pulse-audio refuses to play nicely until you have copied the default configuration file from it's global location to your user folder.  The result is a wonky, and often unresponsive or breaking experience.
 
 It is neither mentioned during the package installation, nor is it easy to find anything to explain the phenomina that happen when you don't, hence why this step is here.
-
-
-##### commands
-
-_Copy and modify the pulse audio default config:_
-
-    mkdir -p ~/.pulse
-    cp /etc/pulse/default.pa ~/.pulse/default.pa
 
 
 ## keep the monitor awake
@@ -1041,7 +935,7 @@ When you have installed a graphical environment and are running a web browser, o
 
 To fix this I've created two scripts, one to force the system to keep awake, and another to ensure it switches on when you have any of a set number of named applications running.
 
-**You can certainly set this permanently instead, or run the script once at boot with modifications to ensure the monitor never sleeps.**
+**You can certainly run it once to set the settings permanently, or use a crontab to run it conditionally.  However, in a crontab it cannot be stopped when openbox isn't running, making it less efficient than simply setting it permanently.**
 
 
 ##### commands
@@ -1086,58 +980,21 @@ _As an alternative, you can set the `nosleep` script as a crontab event instead 
 This is a really cool command line utility that you can use to download (the highest quality) youtube videos without any GUI utilities.  It includes asynchronous processing and even spits out the percent status.
 
 
-##### commands
+## google chrome
 
-_Run these commands to download and install the `youtube-dl` command:_
+While I usually prefer the dev channel, even google chrome stable has caused my debian wheezy system to crash on occassion.  As such, while I still recommend chrome, I recommend the stable version to avoid problems.
 
-    git clone https://github.com/rg3/youtube-dl
-    cd youtube-dl
-    sudo python setup.py install
-    cd ..
-    rm -rf youtube-dl
-
-
-## google chrome dev channel
-
-I prefer the dev channel of google chrome.  The easy way to install it is to go to your current web browser, search "Google Chrome Dev Channel" and then download the `.deb` and install it with `sudo dpkg -i`.
-
-It should ask to be set as the default browser at first launch.
-
-
-##### commands
-
-_Register google's apt key:_
-
-    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-
-_Create a file at `/etc/apt/sources.list.d/google` with these lines:_
-
-    # Google Chrome repo http://www.google.com/linuxrepositories/
-    deb http://dl.google.com/linux/chrome/deb/ stable main
-    deb http://dl.google.com/linux/talkplugin/deb/ stable main
-
-_Run these commands to update aptitude:_
-
-    sudo aptitude clean
-    sudo aptitude update
-
-_Install these packages:_
-
-    sudo aptitude install -ryq google-chrome-stable google-chrome-unstable google-talkplugin
-
-_Set as default browser:_
-
-    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
-
-_Remove the duplicate sources to prevent errors on future `aptitude update` commands:_
-
-    rm /etc/apt/sources.list.d/google.list
-    rm /etc/apt/sources.list.d/google-chrome-unstable.list
+The easiest way to install it is to download a `.deb` from their site and manually install it with `dpkg -i`, but you can also add their repository manually as an alternative.
 
 
 ### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
 
 Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
+
+
+
+
+
 
 
 ## still investigating
