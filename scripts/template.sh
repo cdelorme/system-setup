@@ -125,10 +125,10 @@ fi
 mkdir -p /home/$username/.bin
 [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
 
-# @todo add crontab to run `update-keys`
-# need to test something like this
-# line="* * * * * /path/to/command"
-# (crontab -u userhere -l; echo "$line" ) | crontab -u userhere -
+# add crontab to run `update-keys`
+echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
+chown $username:crontab /var/spool/cron/crontabs/$username
+chmod 600 /var/spool/cron/crontabs/$username
 
 # reset ownership on user files
 chown -R $username:$username /home/$username
