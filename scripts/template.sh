@@ -95,7 +95,7 @@ $dl_cmd "/usr/share/fonts/ttf/jis/epkyouka.ttf" "${remote_source}data/home/.font
 fc-cache -fr
 
 # attempt to run dot-files installer as root so it adds to /etc/skel
-. <($source_cmd "$dot_files")
+. <($source_cmd "$dot_files") -q
 
 # fix potential permission problems with logs
 chown -R root:adm /var/log/*
@@ -115,9 +115,9 @@ then
     chmod 600 /home/$username/.ssh/*
 fi
 
+# attempt to upload new ssh key to github account
 if [ -n "$github_username" ] && [ -n "$github_password" ]
 then
-    # attempt to upload new ssh key to github account
     curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 fi
 
@@ -125,10 +125,9 @@ fi
 mkdir -p /home/$username/.bin
 [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
 
-# add crontab to run `update-keys`
-echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
-chown $username:crontab /var/spool/cron/crontabs/$username
-chmod 600 /var/spool/cron/crontabs/$username
+# add crontab to run `update-keys` (idempotently)
+[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
+[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
 
 # reset ownership on user files
 chown -R $username:$username /home/$username

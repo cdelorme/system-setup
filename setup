@@ -74,6 +74,7 @@ then
     [ -z "$ssh_port" ] && ssh_port=22
     [ -z "$timezone" ] && timezone="/usr/share/zoneinfo/US/Eastern"
     [ -z "$system_hostname" ] && system_hostname=$service
+    cronfile="/var/spool/cron/crontabs/${username}"
 
 elif [ $(uname) = "Darwin" ]
 then
@@ -120,6 +121,7 @@ then
     ##
     # set platform specific settings
     ##
+    cron_file=~/.crontab
 
 else
     echo "no scripts for this platform..."
