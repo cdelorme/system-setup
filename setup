@@ -52,7 +52,7 @@ then
 
     while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
     do
-        echo "would you like to generate an ssh key (y|n)?"
+        echo -n "would you like to generate an ssh key (y|n)? "
         read create_ssh
     done
 
@@ -162,7 +162,7 @@ then
 elif which wget &> /dev/null
 then
     dl_cmd="wget -O"
-    source_cmd="--no-check-certificate -qO-"
+    source_cmd="wget --no-check-certificate -qO-"
 fi
 
 
