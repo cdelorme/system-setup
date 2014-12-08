@@ -354,9 +354,9 @@ The format for the configurations is extremely human, and you should read throug
 
 ## iptables
 
-We only need to add one line, but this is required to enable http and https traffic (I use the keywords to be more explicit, but you can exchange them for ports 80,443):
+We only need to add one line, but this is required to enable http and https traffic (it is also acceptable to use the strings "http,https" in place of "80,443", which can be more humanly readable):
 
     # Allow tcp traffic for  (HTTP, HTTPS)
-    -A INPUT -p tcp -m multiport --dports http,https -m conntrack --ctstate NEW -j ACCEPT
+    -A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT
 
 _If you have additional services you want to run on non-standard ports, you will want to add additional rules to your iptables list._  Ideally you should use standard ports to avoid complications and increasing the number of entry-points.
