@@ -270,8 +270,8 @@ Here is a good baseline example, let's assume we placed it into `/etc/nginx/site
     # redirect to www prefix (SEO)
     server {
         listen 443;
-        server_name www.cdelorme.com cdelorme.com caseydelorme.com;
-        return 301 https://www.caseydelorme.com$request_uri;
+        server_name www.example.com example.com example.com;
+        return 301 https://www.example.com$request_uri;
     }
 
     # HTTPS config
