@@ -1,6 +1,6 @@
 #!/bin/bash
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
-netselect-apt -sn -o /etc/apt/sources.list
+netselect-apt -sn -o /etc/apt/sources.list $(lsb_release -c | cut -f2)
 aptitude clean
 if ! aptitude update
 then
