@@ -75,7 +75,7 @@ configure_user_services() {
         echo '*color15:                   #FCF4DC' >> "${user_home_dir}/.Xdefaults"
 
         # symlink Xdefaults to Xresoures for compatibility
-        ln -s $user_home_dir/.Xdefaults $user_home_dir/.Xresources
+        ln -nsf .Xdefaults $user_home_dir/.Xresources
 
         # create urxvtq launcher
         mkdir -p "${user_home_dir}/.bin"
