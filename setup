@@ -86,6 +86,14 @@ then
             read install_web
         done
 
+
+        # @todo as if they want a gui (openbox || ?)
+
+        # @todo as if they want irc (weechat || ?)
+
+        # @todo as if they want torrent service (transmission || ?)
+
+
         # @todo much much more...
     fi
 
