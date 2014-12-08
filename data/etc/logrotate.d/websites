@@ -7,4 +7,5 @@
     delaycompress
     notifempty
     size 300k
+    create 644 root adm
 }
