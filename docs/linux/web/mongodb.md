@@ -51,7 +51,7 @@ The configuration file is `/etc/mongodb.conf`, and the default storage path is `
 _If you have concerns about version pinning, I recommend you check the official documentation for details._
 
 
-# monit
+## monit
 
 A monit file can keep the mongodb daemon running.  Add this to `/etc/monit/monitrc.d/mongod`:
 
@@ -67,6 +67,7 @@ Then symlink it to `/etc/monit/conf.d` and restart monit:
 
     ln -nsf ../mongorc.d/mongod /etc/monit/conf.d/mongod
     monit -t && service monit restart
+
 
 # references
 
