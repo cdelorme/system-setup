@@ -71,6 +71,16 @@ then
     if [ "$service" = "web" ]
     then
         echo "web questions"
+
+        # @todo add mongodb question
+        # @todo add public mongodb port question
+        # @todo add mariadb question
+        # @todo add public mariadb port question
+        # @todo add php-fpm question
+        # @todo add public php-fpm port question
+        # @todo add mail-server question
+        # @todo add email & password questions (to generate mail config)
+
     elif [ "$service" = "dev" ]
     then
         echo "dev questions"
@@ -110,7 +120,6 @@ then
         echo -n "generate github homebrew token (y|n): "
         read create_homebrew_token
     done
-
 
     ##
     # set platform specific settings
