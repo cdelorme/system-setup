@@ -122,14 +122,14 @@ then
                 echo -n "would you like to make mongodb publicly accessible (y|n)? "
                 read public_phpfpm
             done
-
-            # ask about processing tools
-            while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
-            do
-                echo -n "would you like to install graphics processing utilities (y|n)? "
-                read install_processing_tools
-            done
         fi
+
+        # ask about processing tools
+        while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
+        do
+            echo -n "would you like to install video, audio, and graphics processing utilities (y|n)? "
+            read install_processing_tools
+        done
 
         # mail server questions
         while [ "$install_msmtp" != "n" ] && [ "$install_msmtp" != "y" ]

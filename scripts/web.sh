@@ -7,6 +7,12 @@
 # web-specific operations
 ##
 
+# conditionally install processing services
+if [ "$install_processing_tools" = "y" ]
+then
+    aptitude install -ryq graphicsmagick imagemagick libgd-tools ffmpeg lame libvorbis-dev libogg-dev
+fi
+
 # add new groups, and to user
 groupadd -f www-data
 groupadd -f gitdev

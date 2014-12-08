@@ -30,7 +30,7 @@ ln -sf ../mods-available/mongodb.ini /etc/php5/conf.d/mongodb.ini
 # optionally add graphics processing utilities
 if [ "$install_processing_tools" = "y"]
 then
-    aptitude install -ryq graphicsmagick imagemagick libgd-tools php5-gd php5-imagick
+    aptitude install -ryq php5-gd php5-imagick
     pecl install gmagick
     echo "extension=gmagick.so" > /etc/php5/mods-available/gmagick.ini
     ln -sf ../mods-available/gmagick.ini /etc/php5/conf.d/gmagick.ini
