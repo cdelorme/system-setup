@@ -97,7 +97,25 @@ chown -R root:adm /var/log/*
 update-alternatives --set editor /usr/bin/vim.basic
 
 # attempt to run dot-files installer as root so it adds to /etc/skel
-. <($source_cmd "$dot_files") -q
+[ "$dot_files" != "n" ] && . <($source_cmd "$dot_files") -q
+
+# install some basic vim plugins & color schemes & copy to /etc/skel/.vim
+mkdir -p ~/.vim/{colors,tmp}
+$dl_cmd ~/.vim/tmp/ctrlp.zip "https://github.com/kien/ctrlp.vim/archive/master.zip"
+$dl_cmd ~/.vim/tmp/vim-json.zip "https://github.com/elzr/vim-json/archive/master.zip"
+for f in ~/.vim/tmp/*.zip
+do
+    unzip -d ~/.vim/tmp $f
+    rm $f
+done
+for f in ~/.vim/tmp/*/*
+do
+    cp -R $f ~/.vim
+done
+$dl_cmd "$HOME/.vim/colors/vividchalk.vim" "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+$dl_cmd "$HOME/.vim/colors/sunburst.vim" "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
+mkdir -p /etc/skel/
+cp -R "$HOME/.vim" "/etc/skel/"
 
 # conditionally create new user and add to core groups
 if [ -n "$username" ] && ! id "$username" &>/dev/null
@@ -120,13 +138,6 @@ then
     curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 fi
 
-# use github username to acquire name & email from github
-if [ -n "$github_username" ]
-then
-    # github_name=
-    # github_email=
-fi
-
 # download update-keys
 if ! [ -f /home/$username/.bin/update-keys ]
 then
@@ -143,3 +154,13 @@ fi
 
 # reset ownership on user files
 chown -R $username:$username /home/$username
+
+# use github username to acquire name & email from github
+if [ -n "$github_username" ]
+then
+    tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
+    github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+    github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+    su $username -c "cd && git config --global user.name $github_username"
+    su $username -c "cd && git config --global user.email $github_email"
+fi
