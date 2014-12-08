@@ -43,7 +43,7 @@ sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate N
 # include nginx script
 [ -f "scripts/linux/web/nginx.sh" ] && . "scripts/linux/web/nginx.sh" || . <($source_cmd "${remote_source}scripts/linux/web/nginx.sh")
 
-# @todo include databases (mongodb & mariabd)
+# include databases (mongodb & mariabd)
 [ -f "scripts/linux/web/mongodb.sh" ] && . "scripts/linux/web/mongodb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mongodb.sh")
 [ -f "scripts/linux/web/mariadb.sh" ] && . "scripts/linux/web/mariadb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mariadb.sh")
 
