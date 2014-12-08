@@ -1,0 +1,10 @@
+/srv/www/*/logs/*.log {
+    copytruncate
+    daily
+    missingok
+    rotate 3
+    compress
+    delaycompress
+    notifempty
+    size 300k
+}
