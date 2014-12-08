@@ -14,48 +14,54 @@ then
     # ask platform specific questions
     ##
 
+    # verify service to install
     while [ "$service" != "template" ] && [ "$service" != "web" ] && [ "$service" != "dev" ]
     do
         echo -n "what type of system is this (template|web|dev)? "
         read service
     done
 
+    # new user credentials
     while [ -z "$username" ]
     do
         echo -n "enter a username for your new system user: "
         read username
     done
-
     while [ -z "$password" ]
     do
         echo -n "enter a password for your new system user: "
         read password
     done
 
+    # verify whether default port is "ok"
     echo -n "enter an ssh port (default: 22): "
     read ssh_port
 
+    # ask for a host & domain name
     echo -n "enter a hostname (default: $service): "
     read system_hostname
-
     echo -n "enter a domain name (optional): "
     read domainname
 
+    # verify timezone
     echo -n "enter a timezone path (default: US/Eastern): "
     read timezone
 
+    # as if they want to enable jis locale
     while [ "$jis" != "n" ] && [ "$jis" != "y" ]
     do
-        echo -n "enable jis (y|n): "
+        echo -n "enable jis locale (y|n)? "
         read jis
     done
 
+    # ask if they want to create a new id_rsa
     while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
     do
-        echo -n "would you like to generate an ssh key (will replace existing ~/.ssh/id_rsa, y|n)? "
+        [ -f "/home/$username/.ssh/id_rsa" ] && echo -n "would you like to create a replacement ssh key (replaces ~/.ssh/id_rsa, y|n)? " || echo -n "would you like to generate an ssh key (y|n)? "
         read create_ssh
     done
 
+    # verify whether they wish to upload their new key to github
     if [ "$create_ssh" = "y" ]
     then
         while [ "$send_ssh_to_github" != "n" ] && [ "$send_ssh_to_github" != "y" ]
@@ -65,30 +71,88 @@ then
         done
     fi
 
+
     ##
     # request service specific settings
     ##
+
     if [ "$service" = "web" ]
     then
-        echo "web questions"
 
-        # @todo add mongodb question
-        # @todo add public mongodb port question
-        # @todo add mariadb question
-        # @todo add public mariadb port question
-        # @todo add php-fpm question
-        # @todo add public php-fpm port question
-        # @todo add mail-server question
-        # @todo add email & password questions (to generate mail config)
+        # mongodb questions
+        while [ "$install_mongodb" != "n" ] && [ "$install_mongodb" != "y" ]
+        do
+            echo -n "would you like to install mongodb (y|n)? "
+            read install_mongodb
+        done
+        if [ "$install_mongodb" = "y" ]
+        then
+            while [ "$public_mongodb" != "n" ] && [ "$public_mongodb" != "y" ]
+            do
+                echo -n "would you like to make mongodb publicly accessible (y|n)? "
+                read public_mongodb
+            done
+        fi
 
+        # mariadb questions
+        while [ "$install_mariadb" != "n" ] && [ "$install_mariadb" != "y" ]
+        do
+            echo -n "would you like to install mariadb (y|n)? "
+            read install_mariadb
+        done
+        if [ "$install_mariadb" = "y" ]
+        then
+            while [ "$public_mariadb" != "n" ] && [ "$public_mariadb" != "y" ]
+            do
+                echo -n "would you like to make mariadb publicly accessible (y|n)? "
+                read public_mariadb
+            done
+        fi
+
+        # php-fpm questions
+        while [ "$install_phpfpm" != "n" ] && [ "$install_phpfpm" != "y" ]
+        do
+            echo -n "would you like to install mongodb (y|n)? "
+            read install_phpfpm
+        done
+        if [ "$install_phpfpm" = "y" ]
+        then
+            while [ "$public_phpfpm" != "n" ] && [ "$public_phpfpm" != "y" ]
+            do
+                echo -n "would you like to make mongodb publicly accessible (y|n)? "
+                read public_phpfpm
+            done
+        fi
+
+        # mail server questions
+        while [ "$install_msmtp" != "n" ] && [ "$install_msmtp" != "y" ]
+        do
+            echo -n "would you like to install the msmtp mail server (y|n)? "
+            read install_msmtp
+        done
+        if [ "$install_msmtp" = "y" ]
+        then
+            while [ -z "$msmtp_email" ]
+            do
+                echo -n "please enter a valid gmail for msmtp: "
+                read msmtp_email
+            done
+            while [ -z "$msmtp_password" ]
+            do
+                echo -n "please enter the password for that gmail: "
+                read msmtp_password
+            done
+        fi
     elif [ "$service" = "dev" ]
     then
         echo "dev questions"
     fi
 
+
     ##
     # set platform defaults
     ##
+
     [ -z "$ssh_port" ] && ssh_port=22
     [ -z "$timezone" ] && timezone="US/Eastern"
     [ -z "$system_hostname" ] && system_hostname=$service
@@ -96,6 +160,8 @@ then
 
 elif [ $(uname) = "Darwin" ]
 then
+
+    # set (assume) service
     service="osx"
 
 
@@ -124,9 +190,12 @@ then
     ##
     # set platform specific settings
     ##
+    cronfile="$HOME/.crontab"
 
 elif [[ $(name) = MINGW* ]]
 then
+
+    # set (assume) service
     service="windows"
 
 
