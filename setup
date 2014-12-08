@@ -122,6 +122,13 @@ then
                 echo -n "would you like to make mongodb publicly accessible (y|n)? "
                 read public_phpfpm
             done
+
+            # ask about processing tools
+            while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
+            do
+                echo -n "would you like to install graphics processing utilities (y|n)? "
+                read install_processing_tools
+            done
         fi
 
         # mail server questions
@@ -132,10 +139,10 @@ then
         done
         if [ "$install_msmtp" = "y" ]
         then
-            while [ -z "$msmtp_email" ]
+            while [ -z "$msmtp_username" ]
             do
-                echo -n "please enter a valid gmail for msmtp: "
-                read msmtp_email
+                echo -n "please enter a valid gmail username for msmtp: "
+                read msmtp_username
             done
             while [ -z "$msmtp_password" ]
             do
