@@ -9,9 +9,26 @@ Installation requires adding a third-party repository.
 
 Register the key & add their repository:
 
-    apt-get install python-software-properties
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
-    add-apt-repository 'deb http://mirror.jmu.edu/pub/mariadb/repo/5.5/debian wheezy main'
+    echo "deb http://nyc2.mirrors.digitalocean.com/mariadb/repo/5.5/debian wheezy main" > /etc/apt/sources.list.d/mariadb.list
+    echo "deb-src http://nyc2.mirrors.digitalocean.com/mariadb/repo/5.5/debian wheezy main" >> /etc/apt/sources.list.d/mariadb.list
+    aptitude clean
+    aptitude update
+
+**Pinning Sources:**
+
+If you are using the [dotdeb repository](dotdeb.md), then you may encounter conflicting packages, and need to add pinnging to `/etc/apt/preferences.mariadb` to override that:
+
+    echo "Package: libmysqlclient18" > /etc/apt/preferences.d/mariadb
+    echo "Pin: origin nyc2.mirrors.digitalocean.com" >> /etc/apt/preferences.d/mariadb
+    echo "Pin-Priority: 900" >> /etc/apt/preferences.d/mariadb
+
+**debconf modifications for unattended install:**
+
+If you are attempting an unattended install you will need to modify debconf selections to override the password entry prompt:
+
+    echo 'mariadb-server-5.5 mysql-server/root_password password ""' | debconf-set-selections
+    echo 'mariadb-server-5.5 mysql-server/root_password_again password ""' | debconf-set-selections
 
 **Installation:**
 

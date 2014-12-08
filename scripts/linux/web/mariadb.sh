@@ -16,8 +16,8 @@ echo "Pin: origin nyc2.mirrors.digitalocean.com" >> /etc/apt/preferences.d/maria
 echo "Pin-Priority: 900" >> /etc/apt/preferences.d/mariadb
 
 # unattended installation requires modifications to debconf selections for automated password entry
-debconf-set-selections <<< 'mariadb-server-5.5 mysql-server/root_password password ""'
-debconf-set-selections <<< 'mariadb-server-5.5 mysql-server/root_password_again password ""'
+echo 'mariadb-server-5.5 mysql-server/root_password password ""' | debconf-set-selections
+echo 'mariadb-server-5.5 mysql-server/root_password_again password ""' | debconf-set-selections
 
 # my beliefs on database access:
 #  root access should never be allowed remote
