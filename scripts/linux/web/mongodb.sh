@@ -20,7 +20,7 @@ then
     sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 fi
 
-# @todo add monit config & test/restart monit
+# add monit config & test/restart monit
 [ -f "data/etc/monit/monitrc.d/mongod" ] && cp "data/etc/monit/monitrc.d/mongod" "/etc/monit/monitrc.d/mongod"  || $dl_cmd "/etc/monit/monitrc.d/mongod" "${remote_source}data/etc/monit/monitrc.d/mongod"
 ln -nsf "../monitrc.d/mongod" "/etc/monit/conf.d/mongod"
 monit -t && service monit restart
