@@ -1,0 +1,7 @@
+check process mongod with pidfile /var/run/mongod.pid
+    start program = "/etc/init.d/mongod start"
+    stop program  = "/etc/init.d/mongod stop"
+    group www-data
+    if cpu > 80% for 5 cycles then restart
+    if memory > 80% for 5 cycles then restart
+    if 3 restarts within 8 cycles then timeout
