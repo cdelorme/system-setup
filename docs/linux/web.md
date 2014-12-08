@@ -24,8 +24,8 @@ Supplemental services that you can review at your leisure:
 - [ssl-ceritifcates](web/ssl-certificates.md)
 - [bare git repositories](web/bare-git-repositories.md)
 - [mongodb](web/mongodb.md)
-- [php-fpm](web/php-fpm.md)
 - [mariadb](web/mariadb.md)
+- [php-fpm](web/php-fpm.md)
 - [msmtp mail server](web/msmtp.md)
 
 All web services should run through nginx as a proxy and cache service, and it is especially efficient for static website delivery.
