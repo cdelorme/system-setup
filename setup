@@ -105,6 +105,12 @@ then
         read create_ssh
     done
 
+    while [ "$create_homebrew_token" != "n" ] && [ "$create_homebrew_token" != "y" ]
+    do
+        echo -n "generate github homebrew token (y|n): "
+        read create_homebrew_token
+    done
+
 
     ##
     # set platform specific settings
@@ -171,7 +177,7 @@ then
     source_cmd="curl -s"
 elif which wget &> /dev/null
 then
-    dl_cmd="wget -O"
+    dl_cmd="wget --no-check-certificate -O"
     source_cmd="wget --no-check-certificate -qO-"
 fi
 
