@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # add dotdeb repository
-$dl_cmd http://www.dotdeb.org/dotdeb.gpg
-cat dotdeb.gpg | apt-key add -
-rm dotdeb.gpg
+$source_cmd http://www.dotdeb.org/dotdeb.gpg | apt-key add -
 
 # add to sources
 echo "deb http://packages.dotdeb.org wheezy all" > /etc/apt/sources.list.d/dotdeb.list
