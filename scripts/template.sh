@@ -114,7 +114,6 @@ do
 done
 $dl_cmd "$HOME/.vim/colors/vividchalk.vim" "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 $dl_cmd "$HOME/.vim/colors/sunburst.vim" "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
-mkdir -p /etc/skel/
 cp -R "$HOME/.vim" "/etc/skel/"
 
 # conditionally create new user and add to core groups
