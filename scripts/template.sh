@@ -4,7 +4,7 @@
 # then get the system updated before we go forward
 aptitude install -ryq netselect-apt
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
-[ $(cat /etc/debian_version) = "8.0" ] && netselect-apt -sn -o /etc/apt/sources.list jessie || netselect-apt -sn -o /etc/apt/sources.list
+netselect-apt -sno /etc/apt/sources.list $(lsb_release -c | cut -f2)
 aptitude clean
 if ! aptitude update
 then
@@ -118,6 +118,13 @@ fi
 if [ -f "/home/$username/.ssh/id_rsa" ] && [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
 then
     curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+fi
+
+# use github username to acquire name & email from github
+if [ -n "$github_username" ]
+then
+    # github_name=
+    # github_email=
 fi
 
 # download update-keys
