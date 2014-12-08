@@ -1,0 +1,7 @@
+check process php5-fpm with pidfile /var/run/php5-fpm.pid
+    start program = "/etc/init.d/php5-fpm start"
+    stop program = "/etc/init.d/php5-fpm stop"
+    group www-data
+    if cpu > 90% for 5 cycles then restart
+    if memory > 80% for 5 cycles then restart
+    if 3 restarts within 8 cycles then timeout
