@@ -42,9 +42,15 @@ I am now using modular scripts for ease of maintenance and individual function r
 
 I still offer a `setup` script with interactive prompt for configuration, which will execute a series of modular scripts.
 
-You can run my setup script remotely via:
+You can run my setup script remotely via `wget`:
+
+    bash <(wget --no-check-certificate -qO- "https://raw.githubusercontent.com/cdelorme/system-setup/master/setup")
+
+Or the `curl` alternative:
 
     bash <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/setup")
+
+_A fresh `debian` install does not have `curl` by default._
 
 It will ask you for the configuration options as necessary to execute, downloading remote resources as needed.
 
