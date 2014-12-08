@@ -38,3 +38,8 @@ You may want to add this to your monit scripts at `/etc/monit/monitrc.d/mariadb`
 Recent history of experience with both mariadb and mysql have shown both to be somewhat unstable and resource hungry, even under moderately small loads, and in spite of every attempt to tune them.
 
 With the advent of databases that store any content and organize it by page instead of a type-restricted normalized form, I haven't had a need for relational databases in recent projects.
+
+
+# references
+
+- [installation instructions](https://downloads.mariadb.org/mariadb/repositories/#mirror=ut-austin&distro=Debian&distro_release=wheezy&version=5.5)
