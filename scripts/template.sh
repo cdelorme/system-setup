@@ -21,7 +21,7 @@ aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-f
 update-command-not-found
 
 # enable watchdog if supported
-[ -f "/dev/watchdog" ] && update-rc.d watchdog defaults
+[ -f /dev/watchdog ] && update-rc.d watchdog defaults || update-rc.d watchdog disable
 
 # optimize lvm
 sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
