@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# verify desire to install
-[ "$install_msmtp" = "y" ] || exit 0
-
 # install msmtp-mta and all related/useful components
 aptitude install -ryq msmtp-mta
 

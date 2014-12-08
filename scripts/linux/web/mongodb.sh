@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# verify desire to install
-[ "$install_mongodb" = "y" ] || exit 0
-
 # add aptitude sources & update aptitude
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' > /etc/apt/sources.list.d/mongodb.list
