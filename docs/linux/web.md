@@ -77,6 +77,7 @@ Create a new logrotate configuration file `/etc/logrotate.d/websites` with these
         delaycompress
         notifempty
         size 300k
+        create 644 root adm
     }
 
 This finds any `.log` files inside `logs/` folders inside `/srv/www` paths (for example `/srv/www/example.com/logs/`).
