@@ -76,7 +76,21 @@ then
     # request service specific settings
     ##
 
-    if [ "$service" = "web" ]
+    if [ "$service" = "dev" ]
+    then
+
+        # ask if they want to install web services
+        while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
+        do
+            echo -n "would you like to install web services (y|n)? "
+            read install_web
+        done
+
+        # @todo much much more...
+    fi
+
+    # for web/dev ask server-service installation questions
+    if [ "$service" = "web" ] || [[ "$service" = "dev" && "$install_web" = "y" ]]
     then
 
         # mongodb questions
@@ -150,11 +164,7 @@ then
                 read msmtp_password
             done
         fi
-    elif [ "$service" = "dev" ]
-    then
-        echo "dev questions"
     fi
-
 
     ##
     # set platform defaults
