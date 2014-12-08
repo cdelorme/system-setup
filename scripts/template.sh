@@ -66,7 +66,7 @@ fi
 # fix grub kernel panics
 if [ -f /etc/default/grub ] && [ $(grep -c "panic=10" /etc/default/grub) -lt 1 ]
 then
-    sed -i 's/GRUB_COMMANDLINE_LINUX_DEFALT=.*/GRUB_COMMANDLINE_LINUX_DEFALT="quiet panic=10"/' /etc/default/grub
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFALT=.*/GRUB_CMDLINE_LINUX_DEFALT="quiet panic=10"/' /etc/default/grub
     update-grub
 fi
 
