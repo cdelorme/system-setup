@@ -39,9 +39,7 @@ Remember, you can enforce upload sizes in other ways, this simply makes it requi
 
 Execute these commands to install Composer globally:
 
-    wget --no-check-certificate https://getcomposer.org/installer
-    php installer
-    rm installer
+    curl -sS https://getcomposer.org/installer | php
     mv composer.phar /usr/local/bin/composer
 
 
@@ -118,6 +116,22 @@ Finally, after all of the above changes, we can try rebooting php-fpm, if it wor
     service php5-fpm restart
 
 
+## nginx script
+
+To make it easier to process php files from multiple virtual-hosts, I usually place a dynamic script in `/etc/nginx/scripts.d/php-fpm.conf` with script includes:
+
+    # PHP Handler
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+If you're already using the import line, then this will add php support without any additional steps, besides rebooting nginx anyways.
+
+
 ## monit
 
 To ensure php continues running and doesn't kill your system you may want to add this to `/etc/monit/monitrc.d/php-fpm`:
@@ -129,3 +143,8 @@ To ensure php continues running and doesn't kill your system you may want to add
         if cpu > 90% for 5 cycles then restart
         if memory > 80% for 5 cycles then restart
         if 3 restarts within 8 cycles then timeout
+
+
+# references
+
+- [php composer](https://getcomposer.org/doc/00-intro.md#globally)
