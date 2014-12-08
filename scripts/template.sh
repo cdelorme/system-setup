@@ -4,7 +4,7 @@
 # then get the system updated before we go forward
 aptitude install -ryq netselect-apt
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
-netselect-apt -sn -o /etc/apt/sources.list
+[ $(cat /etc/debian_version) = "8.0" ] && netselect-apt -sn -o /etc/apt/sources.list jessie || netselect-apt -sn -o /etc/apt/sources.list
 aptitude clean
 if ! aptitude update
 then
