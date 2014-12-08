@@ -36,3 +36,6 @@ $dl_cmd ~/.bin/brewgrade "${remote_source}/data/home/.bin/brewgrade"
 chmod +x ~/.bin/brewgrade
 echo "@daily ~/.bin/brewgrade" >> ~/.crontab
 crontab ~/.crontab
+
+# install golang vim plugin
+# which go 2>/dev/null && cp -R "$(go env GOROOT)/misc/vim/" "$DOWNLOADS/.vim"
