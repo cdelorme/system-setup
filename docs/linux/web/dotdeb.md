@@ -15,3 +15,5 @@ Then we have to add them sources to `/etc/apt/sources.list.d/dotdeb.list`:
 
     deb http://packages.dotdeb.org wheezy all
     deb-src http://packages.dotdeb.org wheezy all
+
+### [dotdeb.sh](../../../scripts/linux/web/dotdeb.sh)
