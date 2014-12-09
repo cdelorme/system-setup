@@ -79,22 +79,20 @@ then
     if [ "$service" = "dev" ]
     then
 
-        # ask if they want to install web services
-        while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
-        do
-            echo -n "would you like to install web services (y|n)? "
-            read install_web
-        done
-
-
         # @todo as if they want a gui (openbox || ?)
 
         # @todo as if they want irc (weechat || ?)
 
         # @todo as if they want torrent service (transmission || ?)
 
-
         # @todo much much more...
+
+        # ask if they want to install web services
+        while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
+        do
+            echo -n "would you like to install web services (y|n)? "
+            read install_web
+        done
     fi
 
     # for web/dev ask server-service installation questions
