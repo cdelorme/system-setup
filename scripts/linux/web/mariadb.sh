@@ -7,19 +7,9 @@ echo "deb-src http://nyc2.mirrors.digitalocean.com/mariadb/repo/5.5/debian wheez
 aptitude clean
 aptitude update
 
-# to resolve dotdeb conflicts (disabled, with dotdeb)
-# echo "Package: libmysqlclient18" > /etc/apt/preferences.d/mariadb
-# echo "Pin: origin nyc2.mirrors.digitalocean.com" >> /etc/apt/preferences.d/mariadb
-# echo "Pin-Priority: 900" >> /etc/apt/preferences.d/mariadb
-
 # unattended installation requires modifications to debconf selections
 echo "mariadb-server-5.5 mysql-server/root_password password root" | debconf-set-selections
 echo "mariadb-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
-
-
-# my beliefs on database access:
-#  root access should never be allowed remote
-#  passwords should be mandatory for external access
 
 # install mariadb
 aptitude install -ryq mariadb-server
