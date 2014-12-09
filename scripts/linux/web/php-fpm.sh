@@ -23,12 +23,15 @@ sed -i "s/group =.*/group = webdev/" /etc/php5/fpm/pool.d/www.conf
 which mysqld && aptitude install -ryq php5-mysqlnd
 
 # install mongo driver via pecl
-yes "" | pecl install mongo
-echo "extension=mongo.so" > /etc/php5/mods-available/mongodb.ini
-ln -sf ../mods-available/mongodb.ini /etc/php5/conf.d/mongodb.ini
+if which mongo &>/dev/null
+then
+    yes "" | pecl install mongo
+    echo "extension=mongo.so" > /etc/php5/mods-available/mongodb.ini
+    ln -sf ../mods-available/mongodb.ini /etc/php5/conf.d/mongodb.ini
+fi
 
 # optionally add graphics processing utilities
-if [ "$install_processing_tools" = "y"]
+if which gm &>/dev/null
 then
     aptitude install -ryq php5-gd php5-imagick
     yes "" | pecl install gmagick
