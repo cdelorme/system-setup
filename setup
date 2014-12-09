@@ -93,11 +93,21 @@ then
             echo -n "would you like to install web services (y|n)? "
             read install_web
         done
+
+        # assume processing tools (may include duplicates of some packages...)
+        [ "$install_web" = "y" ] && install_processing_tools="y"
     fi
 
     # for web/dev ask server-service installation questions
     if [ "$service" = "web" ] || [[ "$service" = "dev" && "$install_web" = "y" ]]
     then
+
+        # ask about processing tools
+        while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
+        do
+            echo -n "would you like to install video, audio, and graphics processing utilities (y|n)? "
+            read install_processing_tools
+        done
 
         # mongodb questions
         while [ "$install_mongodb" != "n" ] && [ "$install_mongodb" != "y" ]
@@ -143,13 +153,6 @@ then
                 read public_phpfpm
             done
         fi
-
-        # ask about processing tools
-        while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
-        do
-            echo -n "would you like to install video, audio, and graphics processing utilities (y|n)? "
-            read install_processing_tools
-        done
 
         # mail server questions
         while [ "$install_msmtp" != "n" ] && [ "$install_msmtp" != "y" ]
