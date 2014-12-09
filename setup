@@ -291,5 +291,5 @@ fi
 ##
 
 echo "loading $service script..."
-[ -f "scripts/${service}.sh" ] && . "scripts/${service}.sh" || . <($source_cmd "${remote_source}scripts/${service}.sh")
+[ -f "scripts/${service}.sh" ] && . "scripts/${service}.sh" || eval "$($source_cmd ${remote_source}scripts/${service}.sh)"
 echo "finished setup..."
