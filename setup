@@ -132,14 +132,14 @@ then
         # php-fpm questions
         while [ "$install_phpfpm" != "n" ] && [ "$install_phpfpm" != "y" ]
         do
-            echo -n "would you like to install mongodb (y|n)? "
+            echo -n "would you like to install php-fpm (y|n)? "
             read install_phpfpm
         done
         if [ "$install_phpfpm" = "y" ]
         then
             while [ "$public_phpfpm" != "n" ] && [ "$public_phpfpm" != "y" ]
             do
-                echo -n "would you like to make mongodb publicly accessible (y|n)? "
+                echo -n "would you like to make php-fpm publicly accessible (y|n)? "
                 read public_phpfpm
             done
         fi
