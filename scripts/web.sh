@@ -40,12 +40,24 @@ sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate N
 # include nginx script
 [ -f "scripts/linux/web/nginx.sh" ] && . "scripts/linux/web/nginx.sh" || . <($source_cmd "${remote_source}scripts/linux/web/nginx.sh")
 
-# include databases (mongodb & mariabd)
-[ "$install_mongodb" = "y" ] && [ -f "scripts/linux/web/mongodb.sh" ] && . "scripts/linux/web/mongodb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mongodb.sh")
-[ "$install_mariadb" = "y" ] && [ -f "scripts/linux/web/mariadb.sh" ] && . "scripts/linux/web/mariadb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mariadb.sh")
+# conditionally include databases (mongodb & mariabd)
+if [ "$install_mongodb" = "y" ]
+then
+    [ -f "scripts/linux/web/mongodb.sh" ] && . "scripts/linux/web/mongodb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mongodb.sh")
+fi
+if [ "$install_mariadb" = "y" ]
+then
+    [ -f "scripts/linux/web/mariadb.sh" ] && . "scripts/linux/web/mariadb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mariadb.sh")
+fi
 
 # install php
-[ "$install_phpfpm" = "y" ] && [ -f "scripts/linux/web/php-fpm.sh" ] && . "scripts/linux/web/php-fpm.sh" || . <($source_cmd "${remote_source}scripts/linux/web/php-fpm.sh")
+if [ "$install_phpfpm" = "y" ]
+then
+    [ -f "scripts/linux/web/php-fpm.sh" ] && . "scripts/linux/web/php-fpm.sh" || . <($source_cmd "${remote_source}scripts/linux/web/php-fpm.sh")
+fi
 
 # msmtp mail server
-[ "$install_msmtp" = "y" ] && [ -f "scripts/linux/web/msmtp.sh" ] && . "scripts/linux/web/msmtp.sh" || . <($source_cmd "${remote_source}scripts/linux/web/msmtp.sh")
+if [ "$install_msmtp" = "y" ]
+then
+    [ -f "scripts/linux/web/msmtp.sh" ] && . "scripts/linux/web/msmtp.sh" || . <($source_cmd "${remote_source}scripts/linux/web/msmtp.sh")
+fi
