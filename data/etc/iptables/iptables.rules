@@ -12,7 +12,7 @@
 #-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT
 # mariadb traffic
 #-A INPUT -p tcp -m tcp --dport 3306 -m conntrack --ctstate NEW -j ACCEPT
-# php0fpm traffic
+# php-fpm traffic
 #-A INPUT -p tcp -m tcp --dport 9000 -m conntrack --ctstate NEW -j ACCEPT
 # samba traffic restricted-local-access
 #-A INPUT -s 10.0.0.0/24 -p udp -m multiport --dports 137,138 -j ACCEPT
