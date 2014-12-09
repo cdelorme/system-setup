@@ -24,10 +24,11 @@ echo 'mariadb-server-5.5 mysql-server/root_password_again password ""' | debconf
 aptitude install -ryq mariadb-server
 
 # reproduce `mysql_secure_installation` operations w/o interactive prompt
-mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
-mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
-mysql -u root -e "FLUSH PRIVILEGES;"
+# temporarily disabled (this disabled root access on localhost...)
+# mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+# mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
+# mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
+# mysql -u root -e "FLUSH PRIVILEGES;"
 
 # configure mariadb (I don't have any optimizations to apply here)
 

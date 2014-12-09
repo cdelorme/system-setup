@@ -27,7 +27,7 @@ chown -R www-data:gitdev /srv/git
 chmod -R 6775 /srv
 
 # download logrotate for websites
-[ -f "data/etc/logrotate.d/websites" ] && cp "data/etc/logrotate.d/websites" "/etc/logrotate.d/websites"  || $dl_cmd "/etc/monit/monitrc.d/web" "${remote_source}data/etc/logrotate.d/websites"
+[ -f "data/etc/logrotate.d/websites" ] && cp "data/etc/logrotate.d/websites" "/etc/logrotate.d/websites"  || $dl_cmd "/etc/logrotate.d/websites" "${remote_source}data/etc/logrotate.d/websites"
 
 # adjust iptables for http/https traffic
 sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
@@ -46,6 +46,9 @@ sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate N
 # include databases (mongodb & mariabd)
 [[ "$install_mongodb" = "y" && -f "scripts/linux/web/mongodb.sh" ]] && . "scripts/linux/web/mongodb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mongodb.sh")
 [[ "$install_mariadb" = "y" && -f "scripts/linux/web/mariadb.sh" ]] && . "scripts/linux/web/mariadb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/mariadb.sh")
+
+# install php
+[[ "$install_phpfpm" = "y" && -f "scripts/linux/web/php-fpm.sh" ]] && . "scripts/linux/web/php-fpm.sh" || . <($source_cmd "${remote_source}scripts/linux/web/php-fpm.sh")
 
 # msmtp mail server
 [[ "$install_msmtp" = "y" && -f "scripts/linux/web/msmtp.sh" ]] && . "scripts/linux/web/msmtp.sh" || . <($source_cmd "${remote_source}scripts/linux/web/msmtp.sh")
