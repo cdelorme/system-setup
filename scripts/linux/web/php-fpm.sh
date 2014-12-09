@@ -4,7 +4,7 @@
 [ "$install_phpfpm" = "y" ] || exit 0
 
 # install php-fpm and all related/useful components
-aptitude install -ryq php5 php5-fpm php5-cli php5-mcrypt php5-curl php5-xmlrpc php5-dev php5-intl php5-xsl php-pear php-apc
+aptitude install -ryq libssl1.0.0=1.0.1e-2+deb7u12 php5 php5-fpm php5-cli php5-mcrypt php5-curl php5-xmlrpc php5-dev php5-intl php5-xsl php-pear php-apc
 
 # set timezone on both fpm & cli
 sed -i "s/;date.timezone.*/date.timezone = America\/New_York/" /etc/php5/fpm/php.ini
@@ -23,7 +23,7 @@ sed -i "s/group =.*/group = webdev/" /etc/php5/fpm/pool.d/www.conf
 which mysqld && aptitude install -ryq php5-mysqlnd
 
 # install mongo driver via pecl
-pecl install mongo
+yes "" | pecl install mongo
 echo "extension=mongo.so" > /etc/php5/mods-available/mongodb.ini
 ln -sf ../mods-available/mongodb.ini /etc/php5/conf.d/mongodb.ini
 
@@ -31,7 +31,7 @@ ln -sf ../mods-available/mongodb.ini /etc/php5/conf.d/mongodb.ini
 if [ "$install_processing_tools" = "y"]
 then
     aptitude install -ryq php5-gd php5-imagick
-    pecl install gmagick
+    yes "" | pecl install gmagick
     echo "extension=gmagick.so" > /etc/php5/mods-available/gmagick.ini
     ln -sf ../mods-available/gmagick.ini /etc/php5/conf.d/gmagick.ini
 fi
