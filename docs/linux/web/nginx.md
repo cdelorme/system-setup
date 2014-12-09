@@ -10,7 +10,7 @@ It's lightweight, and has very simple configuration.
 
 ## installation
 
-To install our new packages we want to add the [`dotdeb` repository](dotdeb.md), which will give us a more up-to-date version of nginx, since debian stability prevents newer versions.
+_I used to use the [`dotdeb` repository](dotdeb.md), because it gave me the latest versions of specific software, but lately their repository has only given me grief with package dependency conflicts so I no longer use it._
 
 Now we are ready to cleanup
 

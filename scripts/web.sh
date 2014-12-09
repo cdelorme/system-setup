@@ -37,8 +37,8 @@ sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate N
 # modular scripts
 ##
 
-# load dotdeb repository
-[ -f "scripts/linux/web/dotdeb.sh" ] && . "scripts/linux/web/dotdeb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/dotdeb.sh")
+# load dotdeb repository (disabled due to conflicts)
+#[ -f "scripts/linux/web/dotdeb.sh" ] && . "scripts/linux/web/dotdeb.sh" || . <($source_cmd "${remote_source}scripts/linux/web/dotdeb.sh")
 
 # include nginx script
 [ -f "scripts/linux/web/nginx.sh" ] && . "scripts/linux/web/nginx.sh" || . <($source_cmd "${remote_source}scripts/linux/web/nginx.sh")

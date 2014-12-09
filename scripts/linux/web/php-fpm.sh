@@ -37,11 +37,11 @@ then
 fi
 
 # optimizations (these are subject to server resources and tailored for a lightweight 1GB ram server)
-sed -i "s/pm.max_children =.*/pm.max_children = 25/" /etc/php5/fpm/pool.d/www.conf
-sed -i "s/pm.start_servers =.*/pm.start_servers = 2/" /etc/php5/fpm/pool.d/www.conf
-sed -i "s/pm.min_spare_servers.*/pm.min_spare_servers 2/" /etc/php5/fpm/pool.d/www.conf
-sed -i "s/pm.max_spare_servers =.*/pm.max_spare_servers = 5/" /etc/php5/fpm/pool.d/www.conf
-sed -i "s/pm.max_requests =.*/pm.max_requests = 500/" /etc/php5/fpm/pool.d/www.conf
+sed -i "s/.*pm.max_children =.*/pm.max_children = 25/" /etc/php5/fpm/pool.d/www.conf
+sed -i "s/.*pm.start_servers =.*/pm.start_servers = 2/" /etc/php5/fpm/pool.d/www.conf
+sed -i "s/.*pm.min_spare_servers =.*/pm.min_spare_servers = 2/" /etc/php5/fpm/pool.d/www.conf
+sed -i "s/.*pm.max_spare_servers =.*/pm.max_spare_servers = 5/" /etc/php5/fpm/pool.d/www.conf
+sed -i "s/.*pm.max_requests =.*/pm.max_requests = 500/" /etc/php5/fpm/pool.d/www.conf
 
 # restart services /w optimizations & added modules
 service php5-fpm restart
@@ -58,6 +58,6 @@ then
 fi
 
 # add monit config & test/restart monit
-[ -f "data/etc/monit/monitrc.d/phpfpm" ] && cp "data/etc/monit/monitrc.d/phpfpm" "/etc/monit/monitrc.d/phpfpm"  || $dl_cmd "/etc/monit/monitrc.d/phpfpm" "${remote_source}data/etc/monit/monitrc.d/phpfpm"
-ln -nsf "../monitrc.d/phpfpm" "/etc/monit/conf.d/phpfpm"
+[ -f "data/etc/monit/monitrc.d/php-fpm" ] && cp "data/etc/monit/monitrc.d/php-fpm" "/etc/monit/monitrc.d/php-fpm"  || $dl_cmd "/etc/monit/monitrc.d/php-fpm" "${remote_source}data/etc/monit/monitrc.d/php-fpm"
+ln -nsf "../monitrc.d/php-fpm" "/etc/monit/conf.d/php-fpm"
 monit -t && service monit restart

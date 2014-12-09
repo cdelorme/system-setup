@@ -1,7 +1,7 @@
 
 # php-fpm
 
-If you have not already, it is advisable that you prepare the [dotdeb repository](dotdeb.md).
+_If you want to give the [dotdeb repository](dotdeb.md) a try it can be pretty decent, but I found that it recently introduced conflicting packages with broken specific packages (such as `php5-dev`)._
 
 To install the packages:
 

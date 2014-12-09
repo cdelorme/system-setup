@@ -15,7 +15,7 @@ Register the key & add their repository:
     aptitude clean
     aptitude update
 
-**Pinning Sources:**
+**Pinning Sources (_for dotdeb users_):**
 
 If you are using the [dotdeb repository](dotdeb.md), then you may encounter conflicting packages, and need to add pinnging to `/etc/apt/preferences.mariadb` to override that:
 

@@ -1,5 +1,7 @@
 
-# dotdeb repository
+# [dotdeb repository](http://www.dotdeb.org/)
+
+**I used to use dotdeb repositories, but with the number of conflicts creating strife installing php components, mysql/mariadb, etc without conflicts breaking automation without quirky work-arounds I've decided to omit it from my standard practices.**
 
 This is a separately maintained repository of web server software.
 
@@ -13,5 +15,3 @@ Then we have to add them sources to `/etc/apt/sources.list.d/dotdeb.list`:
 
     deb http://packages.dotdeb.org wheezy all
     deb-src http://packages.dotdeb.org wheezy all
-
-_The dotdeb repositories are a trusted and well maintained set of packages which are great for development and production use._
