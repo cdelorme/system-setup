@@ -147,4 +147,5 @@ To ensure php continues running and doesn't kill your system you may want to add
 
 # references
 
+- [php-fpm.sh](../../../scripts/linux/web/php-fpm.sh)
 - [php composer](https://getcomposer.org/doc/00-intro.md#globally)

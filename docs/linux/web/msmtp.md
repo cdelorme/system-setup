@@ -37,4 +37,5 @@ By default installing msmtp will add a symlink to `/usr/sbin/sendmail` for the l
 
 # references
 
+- [msmtp.sh](../../../scripts/linux/web/msmtp.sh)
 - [msmtp configuration](http://www.serverwatch.com/tutorials/article.php/3923871/Using-msmtp-as-a-Lightweight-SMTP-Client.htm)

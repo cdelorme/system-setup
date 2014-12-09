@@ -59,4 +59,5 @@ With the advent of databases that store any content and organize it by page inst
 
 # references
 
+- [mariadb.sh](../../../scripts/linux/web/mariadb.sh)
 - [installation instructions](https://downloads.mariadb.org/mariadb/repositories/#mirror=ut-austin&distro=Debian&distro_release=wheezy&version=5.5)

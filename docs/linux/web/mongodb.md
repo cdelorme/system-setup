@@ -71,5 +71,6 @@ Then symlink it to `/etc/monit/conf.d` and restart monit:
 
 # references
 
+- [mongodb.sh](../../../scripts/linux/web/mongodb.sh)
 - [mongodb instructions](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-debian/)
 - [mongodb ports](http://docs.mongodb.org/manual/reference/default-mongodb-port/)
