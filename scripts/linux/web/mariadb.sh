@@ -12,9 +12,10 @@ aptitude update
 # echo "Pin: origin nyc2.mirrors.digitalocean.com" >> /etc/apt/preferences.d/mariadb
 # echo "Pin-Priority: 900" >> /etc/apt/preferences.d/mariadb
 
-# unattended installation requires modifications to debconf selections for automated password entry
-echo "mariadb-server-5.5 mysql-server/root_password password \"$password\"" | debconf-set-selections
-echo "mariadb-server-5.5 mysql-server/root_password_again password \"$password\"" | debconf-set-selections
+# unattended installation requires modifications to debconf selections
+echo "mariadb-server-5.5 mysql-server/root_password password root" | debconf-set-selections
+echo "mariadb-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
+
 
 # my beliefs on database access:
 #  root access should never be allowed remote
@@ -22,6 +23,9 @@ echo "mariadb-server-5.5 mysql-server/root_password_again password \"$password\"
 
 # install mariadb
 aptitude install -ryq mariadb-server
+
+# reset root password
+mysql -uroot -proot -e "SET PASSWORD = PASSWORD('');"
 
 # reproduce `mysql_secure_installation` operations w/o interactive prompt
 mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
