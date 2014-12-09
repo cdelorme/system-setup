@@ -4,7 +4,7 @@
 [ "$install_phpfpm" = "y" ] || exit 0
 
 # install php-fpm and all related/useful components
-aptitude install -ryq libssl1.0.0=1.0.1e-2+deb7u12 php5 php5-fpm php5-cli php5-mcrypt php5-curl php5-xmlrpc php5-dev php5-intl php5-xsl php-pear php-apc
+aptitude install -ryq php5 php5-fpm php5-cli php5-mcrypt php5-curl php5-xmlrpc php5-dev php5-intl php5-xsl php-pear php-apc
 
 # set timezone on both fpm & cli
 sed -i "s/;date.timezone.*/date.timezone = America\/New_York/" /etc/php5/fpm/php.ini
