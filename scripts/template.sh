@@ -41,7 +41,7 @@ fi
 
 # install cronjobs
 [ -f "data/etc/cron.daily/system-updates" ] && cp "data/etc/cron.daily/system-updates" "/etc/cron.daily/system-updates"  || $dl_cmd "/etc/cron.daily/system-updates" "${remote_source}data/etc/cron.daily/system-updates"
-[ -f "data/etc/cron.weekly/disk-maintenance" ] && cp "data/etc/cron.weekly/disk-maintenance" "/etc/cron.weekly/disk-maintenance"  || $dl_cmd "/etc/cron.daily/disk-maintenance" "${remote_source}data/etc/cron.weekly/disk-maintenance"
+[ -f "data/etc/cron.weekly/disk-maintenance" ] && cp "data/etc/cron.weekly/disk-maintenance" "/etc/cron.weekly/disk-maintenance"  || $dl_cmd "/etc/cron.weekly/disk-maintenance" "${remote_source}data/etc/cron.weekly/disk-maintenance"
 chmod +x /etc/cron.daily/system-updates
 chmod +x /etc/cron.weekly/disk-maintenance
 
@@ -84,8 +84,8 @@ service ssh restart
 
 # install iptables
 mkdir -p /etc/iptables
-$dl_cmd "/etc/iptables/iptables.rules" "${remote_source}data/etc/iptables/iptables.rules"
-$dl_cmd "/etc/network/if-up.d/iptables" "${remote_source}data/etc/network/if-up.d/iptables"
+[ -f "/etc/iptables/iptables.rules" ] || $dl_cmd "/etc/iptables/iptables.rules" "${remote_source}data/etc/iptables/iptables.rules"
+[ -f "/etc/network/if-up.d/iptables" ] || $dl_cmd "/etc/network/if-up.d/iptables" "${remote_source}data/etc/network/if-up.d/iptables"
 chmod +x "/etc/network/if-up.d/iptables"
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
 
