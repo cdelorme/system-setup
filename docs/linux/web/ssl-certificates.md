@@ -3,15 +3,10 @@
 
 SSL allows HTTPS traffic on port 443, and enables content encryption between the server and client.  This is exceptionally beneficial if the site has a login or any administrative features.
 
-There is absolutely no excuse not to have https on your sites today:
-
-- [ssl certificates can be acquired for free](https://www.startssl.com/)
-- [nginx SNI allows multiple ssl certificates per ip](https://www.digitalocean.com/community/tutorials/how-to-set-up-multiple-ssl-certificates-on-one-ip-with-nginx-on-ubuntu-12-04)
-
-Configuring nginx for ssl literally takes 5 minutes.  Redirecting to it is 3 lines of configuration as well.
+There is absolutely no excuse not to have https on your sites today; you can get class 1 certificates for free and class 2 which support wildcard subdomains for as little as $70 every two years and an authentication process.  Configuring nginx for ssl literally takes 5 minutes.  Redirecting to it is 3 lines of configuration as well.
 
 
-**Generating ssl certificates:**
+## generating a host key
 
 There are two parts, a signed key, and a host key.  The host can can be re-used, but the signed key is either self-signed or needs to be provided by a service like startssl.
 
@@ -36,7 +31,16 @@ You will be prompted for the password for `host.key`, then a series of identific
 _This `.csr` file can now be supplied to a company such as startssl for a legitimate signed certificate._
 
 
-**Self Signed Keys:**
+## signed key
+
+After you get the signed key (usually a `.crt` file) you will likely need to append the intermediate certificates to it.
+
+Check the company you went through for documentation, they will likely provide two other files that you need to append to the `.crt` to create a chained certificate.
+
+_While most browsers will accept just the signed `.crt`, certain browsers will not._
+
+
+## self signed certificates
 
 This is an alternative, useful for testing but even then it can be a hassle.  An unsigned key will result in your web browser complaining every attempt to load it, and if you do not add the certificate to your local system as trusted it'll prevent you from making much use of it
 
@@ -49,3 +53,11 @@ Taking the host key we generated previously, we will feed it to a request for ge
      openssl x509 -req -days 365 -in example.com.csr -signkey server.key -out example.com.crt
 
 We can now use our self-signed `.crt` file for development.
+
+
+# references
+
+- [ssl certificates can be acquired for free](https://www.startssl.com/)
+- [nginx SNI allows multiple ssl certificates per ip](https://www.digitalocean.com/community/tutorials/how-to-set-up-multiple-ssl-certificates-on-one-ip-with-nginx-on-ubuntu-12-04)
+- [startssl intermediate chain](https://www.startssl.com/?app=42)
+- [verify your ssl status](https://www.sslshopper.com/ssl-checker.html)
