@@ -54,3 +54,6 @@ if [ "$install_openbox" = "y" ]
 then
     [ -f "scripts/linux/gui/openbox.sh" ] && . "scripts/linux/gui/openbox.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/openbox.sh")
 fi
+
+# reset user folder ownership
+chown -R $username:$username /home/$username
