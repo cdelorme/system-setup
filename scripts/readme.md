@@ -5,9 +5,9 @@ The setup script at top level will look here to find the primary modules and all
 
 The main modules are:
 
-- [template.sh](template.sh) (base minimalist linux)
-- [web.sh](web.sh) (web server)
-- [dev.sh](dev.sh) (linux)
+- [template.sh](template.sh)
+- [web.sh](web.sh)
+- [dev.sh](dev.sh)
 - [osx.sh](osx.sh)
 - [windows.sh](windows.sh)
 
