@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# install any missing dependencies
+aptitude install -ryq gcc libc6-dev libc6-dev-i386 mercurial git subversion bzr
+
 # download source
 hg clone -u go1.3.1 https://code.google.com/p/go /tmp/go
 
