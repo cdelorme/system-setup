@@ -79,13 +79,49 @@ then
     if [ "$service" = "dev" ]
     then
 
-        # @todo as if they want a gui (openbox || ?)
+        # ask if they want to install mdadm raid software
+        while [ "$install_mdadm" != "n" ] && [ "$install_mdadm" != "y" ]
+        do
+            echo -n "would you like to install the mdadm software raid package (y|n)? "
+            read install_mdadm
+        done
 
-        # @todo as if they want irc (weechat || ?)
+        # ask if they want to install samba
+        while [ "$install_samba" != "n" ] && [ "$install_samba" != "y" ]
+        do
+            echo -n "would you like to install samba file sharing (y|n)? "
+            read install_samba
+        done
 
-        # @todo as if they want torrent service (transmission || ?)
+        # ask if they want weechat
+        while [ "$install_weechat" != "n" ] && [ "$install_weechat" != "y" ]
+        do
+            echo -n "would you like to install the weechat irc client (y|n)? "
+            read install_weechat
+        done
 
-        # @todo much much more...
+        # ask if they want to install wireless utilities
+        while [ "$install_wireless" != "n" ] && [ "$install_wireless" != "y" ]
+        do
+            echo -n "would you like to install wireless & bluetooth utilities (y|n)? "
+            read install_wireless
+        done
+
+        # ask if they want to install transmission
+        while [ "$install_transmission" != "n" ] && [ "$install_transmission" != "y" ]
+        do
+            echo -n "would you like to install the transmission bittorrent client (y|n)? "
+            read install_transmission
+        done
+
+        # ask if they want openbox
+        while [ "$install_openbox" != "n" ] && [ "$install_openbox" != "y" ]
+        do
+            echo -n "would you like to install the openbox graphical environment (y|n)? "
+            read install_openbox
+        done
+
+        # @todo add questions for openbox options?
 
         # ask if they want to install web services
         while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
@@ -109,6 +145,16 @@ then
             read install_processing_tools
         done
 
+        # confirm whether they want to disable nginx at boot time
+        if [ "$install_web" ]
+        then
+            while [ "$disable_nginx" != "n" ] && [ "$disable_nginx" != "y" ]
+            do
+                echo -n "do you want to disable nginx at boot time (y|n)? "
+                read disable_nginx
+            done
+        fi
+
         # mongodb questions
         while [ "$install_mongodb" != "n" ] && [ "$install_mongodb" != "y" ]
         do
@@ -122,6 +168,16 @@ then
                 echo -n "would you like to make mongodb publicly accessible (y|n)? "
                 read public_mongodb
             done
+
+            # confirm whether they want to disable mongodb at boot time
+            if [ "$install_web" ]
+            then
+                while [ "$disable_mongodb" != "n" ] && [ "$disable_mongodb" != "y" ]
+                do
+                    echo -n "do you want to disable mongodb at boot time (y|n)? "
+                    read disable_mongodb
+                done
+            fi
         fi
 
         # mariadb questions
@@ -137,6 +193,16 @@ then
                 echo -n "would you like to make mariadb publicly accessible (y|n)? "
                 read public_mariadb
             done
+
+            # confirm whether they want to disable at boot time
+            if [ "$install_web" ]
+            then
+                while [ "$disable_mariadb" != "n" ] && [ "$disable_mariadb" != "y" ]
+                do
+                    echo -n "do you want to disable mariadb at boot time (y|n)? "
+                    read disable_mariadb
+                done
+            fi
         fi
 
         # php-fpm questions
@@ -152,6 +218,16 @@ then
                 echo -n "would you like to make php-fpm publicly accessible (y|n)? "
                 read public_phpfpm
             done
+
+            # confirm whether they want to disable at boot time
+            if [ "$install_web" ]
+            then
+                while [ "$disable_phpfpm" != "n" ] && [ "$disable_phpfpm" != "y" ]
+                do
+                    echo -n "do you want to disable php-fpm at boot time (y|n)? "
+                    read disable_phpfpm
+                done
+            fi
         fi
 
         # mail server questions
