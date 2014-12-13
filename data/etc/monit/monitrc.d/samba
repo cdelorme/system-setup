@@ -1,0 +1,6 @@
+check process samba match smbd
+    start program = "/etc/init.d/samba start"
+    stop program = "/etc/init.d/samba stop"
+    group sambashare
+    if cpu usage > 80% for 15 cycles then restart
+    if mem usage > 80% for 30 cycles then restart
