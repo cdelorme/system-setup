@@ -196,6 +196,23 @@ These packages include base functionality such as a file browser, file search, e
 
 _Check this list against the packages above to ensure I have no duplicates, and also no missing, packages._
 
+**Compton dependencies:**
+
+- libdrm-dev
+- libdbus-1-dev
+- libx11-dev
+- libxcomposite-dev
+- libxdamage-dev
+- libxfixes-dev
+- libxext-dev
+- libxrender-dev
+- libxrandr-dev
+- libxinerama-dev
+- libgl1-mesa-dev
+- x11proto-core-dev
+
+These are required to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.
+
 
 ### development
 
@@ -229,18 +246,6 @@ _The last package will install kernel headers, and uses a command to determine t
 - libperl-dev
 - libconfig-dev
 - libpcre3-dev
-- libdrm-dev
-- libdbus-1-dev
-- libx11-dev
-- libxcomposite-dev
-- libxdamage-dev
-- libxfixes-dev
-- libxext-dev
-- libxrender-dev
-- libxrandr-dev
-- libxinerama-dev
-- libgl1-mesa-dev
-- x11proto-core-dev
 
 These provide very important development components, such as basic compiling utilities and libraries, in addition to any new languages, and component development packages.
 
