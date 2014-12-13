@@ -73,6 +73,18 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 - lm-sensors
 - cpufrequtils
 
+**Multimedia libraries:**
+
+- lame
+- ffmpeg
+- libfaac-dev
+- libx264-dev
+- imagemagick
+- graphicsmagick
+- libogg-dev
+- libvorbis-dev
+- vorbis-tools
+
 **Wireless utilities (_optional_):**
 
 - avahi-utils
@@ -85,14 +97,21 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 
 If you have bluetooth or wireless you will likely want these packages installed to access and manage the service layers for that hardware.
 
-**Multimedia libraries:**
+**Transmission bittorrent (_optional_):**
 
-- lame
-- ffmpeg
-- libfaac-dev
-- libx264-dev
-- imagemagick
-- graphicsmagick
+- transmission
+- transmission-cli
+- transmission-daemon
+
+**Weechat irc (_optional_):**
+
+- weechat-ncurses
+
+**Samba file sharing (_optional_):**
+
+- samba
+- samba-tools
+- smbclient
 
 
 ### graphical environment
