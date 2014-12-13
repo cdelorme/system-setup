@@ -1,0 +1,5 @@
+check process transmission-daemon match transmission-daemon
+    start program = "/etc/init.d/transmission-daemon start"
+    stop program = "/etc/init.d/transmission-daemon stop"
+    if cpu usage > 80% for 15 cycles then restart
+    if mem usage > 80% for 30 cycles then restart
