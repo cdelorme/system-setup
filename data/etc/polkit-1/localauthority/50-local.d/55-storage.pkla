@@ -1,0 +1,6 @@
+[Allow Automount]
+Identity=unix-group:plugdev
+Action=org.freedesktop.udisks.filesystem-mount
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
