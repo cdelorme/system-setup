@@ -196,7 +196,7 @@ These packages include base functionality such as a file browser, file search, e
 
 _Check this list against the packages above to ensure I have no duplicates, and also no missing, packages._
 
-**Compton dependencies:**
+**Compton dependencies (optional):**
 
 - libdrm-dev
 - libdbus-1-dev
@@ -211,7 +211,7 @@ _Check this list against the packages above to ensure I have no duplicates, and 
 - libgl1-mesa-dev
 - x11proto-core-dev
 
-These are required to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.
+These are _required_ to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.  If you don't care about a good transparency utility for interface-eye-candy then you are welcome to ignore these and not install compton.
 
 
 ### development
