@@ -8,21 +8,30 @@ The goal of these instructions is to provide you with a highly customized develo
 While this is a more feature-filled set of instructions, the resulting system is likely still much more light-weight than a standard "full" install, especially if you opt not to install a graphical environment, _however the gains you'll get from having one generally outweight the pros of space saved not doing so_.
 
 
-## objectives
-
-
 ## packages
 
-I have grouped packages by arbitrary categories that best describe their function.
+Packages will be sectioned into three areas:
 
-**Firmware to help with non-standard hardware or adding devices after the fact:**
+- workstation
+- graphical environment
+- development
+
+Packages in each area may be grouped with supplemental information to describe their purpose.
+
+There will be explicitly labeled "optional" packages in each area as well, which is related to the automated installation scripts which this document exists to supplement.
+
+
+### workstation
+
+These are packages that should enhance your system as a terminal-based workstation, including a focus on driver support, and hardware monitoring packages.
+
+**Firmware packages for non-standard devices:**
 
 - firmware-linux
 - firmware-linux-free
 - firmware-linux-nonfree
 
-
-**Hardware & File System Utilities:**
+**Hardware and file system utilities:**
 
 - usbutils
 - uuid-runtime
@@ -36,8 +45,7 @@ I have grouped packages by arbitrary categories that best describe their functio
 - parted
 - os-prober
 
-
-**Non-standard Compression Utilities:**
+**Non-standard compression utilities:**
 
 - lzop
 - p7zip-full
@@ -50,37 +58,22 @@ I have grouped packages by arbitrary categories that best describe their functio
 - zoo
 - arj
 
-**Development Support Utilities:**
-
-- git-flow
-- debhelper
-- debconf-utils
-- libncurses5-dev
-- kernel-package
-- build-essential
-- fakeroot
-- htop
-- linux-headers-$(uname -r)
-
-
-**Support Utilities:**
+**Support utilities:**
 
 - pastebinit
 - anacron
 - miscfiles
 - markdown
+- asciidoc
 
+_The `asciidoc` package has a 1GB "recommended" package, so it is highly advisable **not** to install it with recommended packages included._
 
-**Sensors Utilities:**
+**Sensors and monitoring utilities:**
 
 - lm-sensors
 - cpufrequtils
 
-
-
-OPTIONAL:
-
-**Wireless Utilities:**
+**Wireless utilities (_optional_):**
 
 - avahi-utils
 - avahi-daemon
@@ -90,61 +83,44 @@ OPTIONAL:
 - bluez-utils
 - bluez-tools
 
+If you have bluetooth or wireless you will likely want these packages installed to access and manage the service layers for that hardware.
 
-**Window Manager:**
+**Multimedia libraries:**
+
+- lame
+- ffmpeg
+- libfaac-dev
+- libx264-dev
+- imagemagick
+- graphicsmagick
+
+
+### graphical environment
+
+I prefer the `openbox` environment, similar to [crunchbang](http://crunchbang.org/), which is highly recommended as an alternative to my own scripts if you just want a system that **installs and is ready to get stuff done.**
+
+**Window manager and theming:**
 
 - openbox
 - obconf
 - obmenu
 - menu
-
-**Theming Packages:**
-
 - openbox-themes
 - dmz-cursor-theme
 - gnome-icon-theme
 - gnome-icon-theme-extras
 - lxappearance
 
-**Desktop Package:**
+The window manager is the core container that displays the initial graphical environment and is responsible for any applications displayed "inside" it.  This makes it one of the most vital components of your graphical desktop.  Choosing a lightweight package like `openbox` gives you exceptionally low resource consumption and a high degree of flexibility with regards to what goes inside it.
 
-- desktop-base
-
-**Menu Subsystem:**
-
-- tint2
-
-**Monitoring Tools:**
-
-- conky-all
-
-**Web Browser:**
-
-- chromium
-
-**Terminal Triggered Popups:**
-
-- zenity
-- zenity-common
-
-**File Browser:**
-
-- pcmanfm
-
-**Audio Packages:**
+**Audio packages:**
 
 - alsa-base
 - alsa-utils
 - pulseaudio
+- volumeicon-alsa
 
-**Desktop Background Utilities:**
-
-- feh
-- hsetroot
-
-**Lightweight Unicode Terminal:**
-
-- rxvt-unicode
+The volumeicon package gives us an icon in the tint2 menu bar that allows us to adjust the volume from the graphical environment.
 
 **Xorg Packages:**
 
@@ -153,121 +129,100 @@ OPTIONAL:
 - x11-xserver-utils
 - xinit
 - xinput
-- xtightvncviewer
 - suckless-tools
+- x11-utils
 
-**Lightweight Application Launcher:**
+**Window manager features:**
 
+- desktop-base
+- xdg-user-dirs
+- shared-mime-info
+- tint2
+- conky-all
+- chromium
+- zenity
+- zenity-common
+- pcmanfm
+- feh
+- hsetroot
+- rxvt-unicode
 - gmrun
-
-**Graphical Monitor Size & Position Management:**
-
 - arandr
-
-**Clipboard Utilities:**
-
 - clipit
 - xsel
-
-**Graphical Privileged Prompt:**
-
 - gksu
-
-**Search Utility:**
-
 - catfish
-
-**GUI Keyboard Layout Toggle:**
-
 - fbxkb
+- xtightvncviewer
+- gparted
+- vlc
+- gtk-recordmydesktop
+- openshot
+- flashplugin-nonfree
+- gimp
+- gimp-plugin-registry
+- evince
 
-**Documentation Generator:**
+These packages include base functionality such as a file browser, file search, elevated prompt, executable quick-launcher, clipboard management, system status & display, terminal emulator, and much more.  Effectively it's a set of loosely coupled packages that can be used within the `openbox` environment remaining as lightweight as possible, while still being packed with essential features.
 
-- asciidoc
+**Font enhancements:**
 
-_It is highly recommended that you do **not** use the 'recommended' flag when installing asciidoc due to over 1GB of recommended packages._
+- fontconfig
+- fontconfig-config
+- fonts-droid
+- fonts-freefont-ttf
+- fonts-liberation
+- fonts-takao
+- ttf-mscorefonts-installer
 
-
-_Check the packages list below for anything I may not have included above..._
-
-obconf
-obmenu
-menu
-tint2
-conky-all
-chromium
-zenity
-zenity-common
-pcmanfm
-alsa-base
-alsa-utils
-pulseaudio
-volumeicon-alsa
-feh
-hsetroot
-rxvt-unicode
-xorg
-xserver-xorg-video-all
-x11-xserver-utils
-xinit
-xinput
-xtightvncviewer
-gmrun
-arandr
-clipit
-xsel
-gksu
-catfish
-fbxkb
-dmz-cursor-theme
-gnome-icon-theme
-gnome-icon-theme-extras
-lxappearance
-gparted
-vlc
-gtk-recordmydesktop
-openshot
-flashplugin-nonfree
-gimp
-gimp-plugin-registry
-evince
-libX11-dev
-libx11-dev
-libxcomposite-dev
-libxdamage-dev
-libxfixes-dev
-libxext-dev
-libxrender-dev
-libxrandr-dev
-libxinerama-dev
-x11-utils
-libgl1-mesa-dev
+_Check this list against the packages above to ensure I have no duplicates, and also no missing, packages._
 
 
-suckless-tools
-lame
-ffmpeg
-shared-mime-info
-fontconfig
-fontconfig-config
-fonts-droid
-fonts-droid
-fonts-freefont-ttf
-fonts-liberation
-fonts-takao
-ttf-mscorefonts-installer
-xdg-user-dirs
-libmcrypt-dev
-libperl-dev
-openjdk-7-jre
-libconfig-dev
-libpcre3-dev
-libdrm-dev
-libdbus-1-dev
+### development
 
+If you plan to use your system for development, I recommend simply installing all of the packages in this area.  In addition, you may want to conditionally install web server services, extending my [web](web.md) documentation.
 
+**Development support utilities:**
 
+- git-flow
+- debhelper
+- debconf-utils
+- kernel-package
+- fakeroot
+- htop
+- linux-headers-$(uname -r)
 
+_The last package will install kernel headers, and uses a command to determine the kernel version that should find a matching package name (since headers haev full version names and numbers in them)._
+
+**Core development packages:**
+
+- build-essential
+- g++
+- openjdk-7-jre
+- devscripts
+- bpython
+- python-dev
+- python-pip
+- python3-dev
+- python3-pip
+- libncurses5-dev
+- libmcrypt-dev
+- libperl-dev
+- libconfig-dev
+- libpcre3-dev
+- libdrm-dev
+- libdbus-1-dev
+- libx11-dev
+- libxcomposite-dev
+- libxdamage-dev
+- libxfixes-dev
+- libxext-dev
+- libxrender-dev
+- libxrandr-dev
+- libxinerama-dev
+- libgl1-mesa-dev
+
+These provide very important development components, such as basic compiling utilities and libraries, in addition to any new languages, and component development packages.
 
 
 ### graphics card troubleshooting
