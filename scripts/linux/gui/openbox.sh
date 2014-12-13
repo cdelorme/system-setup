@@ -1,20 +1,22 @@
 #!/bin/bash
 
-# @todo install base packages
-# aptitude install -ryq
-# alsa-base alsa-utils pulseaudio pulseaudio-bluetooth pavucontrol
-# xorg xserver-xorg-video-all xsel xinit xinput x11-utils x11-xserver-utils
-# arandr gksu gmrun hsetroot desktop-base dmz-cursor-theme lxappearance
-# gnome-icon-theme gnome-icon-theme-extras menu obconf obmenu openbox
-# openbox-themes openshot pcmanfm rxvt-unicode tint2 catfish clipit conky-all
-# volumeicon-alsa zenity zenity-common xtightvncviewer gparted fbxkb
-# deb-multimedia-keyring flashplugin-nonfree
-# vlc evince feh gtk-recordmydesktop gimp gimp-plugin-registry libconfig-dev
-# libdbus-1-dev libdrm-dev libx11-dev libxcomposite-dev libxdamage-dev libxext-dev
-# libxfixes-dev libXinerama-dev libxrandr-dev libxrender-dev libpcre3-dev libgl1-mesa-dev
+# install gui packages
+aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils xinit xinput suckless-tools x11-utils desktop-base xdg-user-dirs shared-mime-info tint2 conky-all chromium zenity zenity-common pcmanfm feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fontconfig fontconfig-config fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
-# @todo include compton
-# @todo include chrome
+# conditionally install wireless audio package
+if [ "$install_wireless" = "y" ]
+then
+    aptitude install -ryq pulseaudio-bluetooth
+fi
+
+# conditionally include compton
+if [ "$install_compton" = "y" ]
+then
+    [ -f "scripts/linux/gui/compton.sh" ] && . "scripts/linux/gui/compton.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/compton.sh")
+fi
+
+# include chrome
+[ -f "scripts/linux/gui/chrome.sh" ] && . "scripts/linux/gui/chrome.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/chrome.sh")
 
 # conditionally set global alternatives
 if which google-chrome-stable &> /dev/null
@@ -44,7 +46,9 @@ fi
 # install tabbedex for urxvt
 curl -o /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
 
-# @todo polkit usb mount installation
+# download/install polkit usb mount permissions
+mkdir -p etc/polkit-1/localauthority/50-local.d/
+[ -f "data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" ] && cp "data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" "/etc/polkit-1/localauthority/50-local.d/55-storage.pkla"  || $dl_cmd "/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" "${remote_source}data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla"
 
 # install custom fonts globally & rebuild cache
 mkdir -p /usr/share/fonts/ttf/jis
@@ -55,6 +59,9 @@ fc-cache -fr
 # add user to general gui groups
 usermod -aG fuse,scanner,bluetooth,netdev,audio,video,plugdev $username
 
+# ensure user bin folder exists
+mkdir -p "/home/${username}/.bin"
+
 # add openbox to xinitrc
 echo "exec openbox-session" > "/home/${username}/.xinitrc"
 
@@ -62,23 +69,41 @@ echo "exec openbox-session" > "/home/${username}/.xinitrc"
 mkdir -p "/home/${username}/.pulse"
 cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
 
-# @todo download/install .fehbg script
+# download/install .fehbg script
+[ -f "data/home/.fehbg" ] && cp "data/home/.fehbg" "/home/${username}/.fehbg"  || $dl_cmd "/home/${username}/.fehbg" "${remote_source}data/home/.fehbg"
 
-# @todo download/install ~/.Xdefaults
+# download/install ~/.Xdefaults & symlink to ~/.Xresources
+[ -f "data/home/.Xdefaults" ] && cp "data/home/.Xdefaults" "/home/${username}/.Xdefaults"  || $dl_cmd "/home/${username}/.Xdefaults" "${remote_source}data/home/.Xdefaults"
+ln -nsf ".Xdefaults" "/home/${username}/.Xresources"
 
-# symlink xdefaults to ~/.Xresources
-ln -nsf .Xdefaults /home/$username/.Xresources
+# download/install urxvtq guake-like-launcher
+[ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
 
-# @todo download/install urxvtq guake-like-launcher
-# @todo download/install various openbox config files
-#   autostart, menu.xml, rc.xml
-# @todo download/install clipitrc
-# @todo download/install tint2 config
-# @todo download/install volumeicon config
-# @todo download/install conkyrc
-# @todo configure desktop mimetype defaults
+# download/install various openbox config files
+mkdir -p "/home/${username}/.config/openbox"
+[ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
+[ -f "data/home/.config/openbox/menu.xml" ] && cp "data/.config/openbox/menu.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/menu.xml" "${remote_source}data/home/.config/openbox/menu.xml"
+[ -f "data/home/.config/openbox/rc.xml" ] && cp "data/.config/openbox/rc.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/rc.xml" "${remote_source}data/home/.config/openbox/rc.xml"
+
+# download/install clipitrc
+mkdir -p "/home/${username}/.config/clipit"
+[ -f "data/home/.config/clipit/clipitrc" ] && cp "data/.config/clipit/clipitrc" "/home/${username}/.config/clipit/clipitrc"  || $dl_cmd "/home/${username}/.config/clipit/clipitrc" "${remote_source}data/home/.config/clipit/clipitrc"
+
+# @todo download/install tint2 config (not sure if this is necessary, I believe I use the default)
+# [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
+
+# download/install volumeicon config
+[ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
+
+# download/install conkyrc
+[ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
+
+# @todo configure desktop mimetype defaults (still researching)
+# [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
+
 # @todo install nosleep & daemon files
+[ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
+[ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
 
-
-# @todo download/install user-local sublime-text-3
-# @todo create subl shell script to search for user-local subl else run global sublime text 3??
+# include sublime-text-3.sh
+[ -f "scripts/linux/gui/sublime-text-3.sh" ] && . "scripts/linux/gui/sublime-text-3.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/sublime-text-3.sh")
