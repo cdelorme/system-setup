@@ -6,9 +6,10 @@
 # conditionall load web services
 [[ "$install_web" = "y" && -f "scripts/web.sh" ]] && . "scripts/web.sh" || . <($source_cmd "${remote_source}scripts/web.sh")
 
+# @todo conditionally disable services at boot-time
+
 # install basic dev packages
-aptitude install -ryq fontconfig fontconfig-config shared-mime-info suckless-tools xdg-user-dirs fonts-droid fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer libfaac-dev libx264-dev lame ffmpeg build-essential debconf-utils debhelper git-flow g++ kernel-package libncurses5-dev devscripts bpython openjdk-7-jre python-dev python3-dev lm-sensors
-# @todo finish looking for any missing packages and add to the above list
+aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime gvfs-fuse exfat-fuse exfat-utils fuse-utils sshfs fusesmb e2fsprogs parted os-prober lzop p7zip-full p7zip-rar zip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown asciidoc lm-sensors cpufrequtils lame ffmpeg libfaac-dev libx264-dev imagemagick graphicsmagick libogg-dev libvorbis-dev vorbis-tools build-essential openjdk-7-jre pkg-config devscripts bpython python-dev python-pip python3-dev python3-pip libncurses5-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libdrm-dev libdbus-1-dev libx11-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libxinerama-dev libgl1-mesa-dev x11proto-core-dev
 
 # configure sensors
 which sensors-detect &>/dev/null && (yes "" | sensors-detect)

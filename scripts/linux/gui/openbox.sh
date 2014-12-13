@@ -41,6 +41,11 @@ then
     sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
 fi
 
+# install tabbedex for urxvt
+curl -o /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
+
+# @todo polkit usb mount installation
+
 # install custom fonts globally & rebuild cache
 mkdir -p /usr/share/fonts/ttf/jis
 $dl_cmd "/usr/share/fonts/ttf/jis/ForMateKonaVe.ttf" "${remote_source}data/home/.fonts/ForMateKonaVe.ttf"
@@ -48,7 +53,7 @@ $dl_cmd "/usr/share/fonts/ttf/jis/epkyouka.ttf" "${remote_source}data/home/.font
 fc-cache -fr
 
 # add user to general gui groups
-usermod -aG plugdev,video,audio,bluetooth,netdev,fuse,scanner,pulse-access $username
+usermod -aG fuse,scanner,bluetooth,netdev,audio,video,plugdev $username
 
 # add openbox to xinitrc
 echo "exec openbox-session" > "/home/${username}/.xinitrc"
@@ -58,10 +63,13 @@ mkdir -p "/home/${username}/.pulse"
 cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
 
 # @todo download/install .fehbg script
-# @todo download/install Xdefaults
-# symlink xdefaults to xresources
-# ln -nsf .Xdefaults /home/$username/.Xresources
-# @todo download/install urxvt launcher
+
+# @todo download/install ~/.Xdefaults
+
+# symlink xdefaults to ~/.Xresources
+ln -nsf .Xdefaults /home/$username/.Xresources
+
+# @todo download/install urxvtq guake-like-launcher
 # @todo download/install various openbox config files
 #   autostart, menu.xml, rc.xml
 # @todo download/install clipitrc
@@ -69,6 +77,8 @@ cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
 # @todo download/install volumeicon config
 # @todo download/install conkyrc
 # @todo configure desktop mimetype defaults
+# @todo install nosleep & daemon files
+
 
 # @todo download/install user-local sublime-text-3
 # @todo create subl shell script to search for user-local subl else run global sublime text 3??
