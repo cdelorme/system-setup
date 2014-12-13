@@ -121,7 +121,17 @@ then
             read install_openbox
         done
 
-        # @todo add questions for openbox options?
+        # add questions for openbox options
+        if [ "$install_openbox" = "y" ]
+        then
+
+            # ask if they want to install compton
+            while [ "$install_compton" != "n" ] && [ "$install_compton" != "y" ]
+            do
+                echo -n "would you like to install the compton transparency compsitor (y|n)? "
+                read install_compton
+            done
+        fi
 
         # ask if they want to install web services
         while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
