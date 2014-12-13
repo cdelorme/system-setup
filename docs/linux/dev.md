@@ -197,8 +197,8 @@ _The last package will install kernel headers, and uses a command to determine t
 **Core development packages:**
 
 - build-essential
-- g++
 - openjdk-7-jre
+- pkg-config
 - devscripts
 - bpython
 - python-dev
@@ -221,8 +221,11 @@ _The last package will install kernel headers, and uses a command to determine t
 - libxrandr-dev
 - libxinerama-dev
 - libgl1-mesa-dev
+- x11proto-core-dev
 
 These provide very important development components, such as basic compiling utilities and libraries, in addition to any new languages, and component development packages.
+
+_The `compton` compositor package depends on a number of these development packages to build as well._
 
 
 ### graphics card troubleshooting
