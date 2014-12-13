@@ -1,6 +1,6 @@
 #!/bin/bash
 
 # install wireless utility packages
-aptitude install -ryq bluez bluez-tools bluez-utils
+aptitude install -ryq avahi-utils avahi-daemon libnss-mdns wireless-tools bluez bluez-utils bluez-tools
 
 # @todo configure?
