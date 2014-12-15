@@ -12,3 +12,4 @@ usermod -aG sambashare $username
 # download & install samba monit
 [ -f "data/etc/monit/monitrc.d/samba" ] && cp "data/etc/monit/monitrc.d/samba" "/etc/monit/monitrc.d/samba"  || $dl_cmd "/etc/monit/monitrc.d/samba" "${remote_source}data/etc/monit/monitrc.d/samba"
 ln -nsf "../monitrc.d/samba" "/etc/monit/conf.d/samba"
+monit -t && service monit restart
