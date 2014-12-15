@@ -24,14 +24,37 @@ then
     # new user credentials
     while [ -z "$username" ]
     do
-        echo -n "enter a username for your new system user: "
+        echo -n "enter a username for your (new) system user: "
         read username
     done
     while [ -z "$password" ]
     do
-        echo -n "enter a password for your new system user: "
+        echo -n "enter a password for your (new) system user: "
         read password
     done
+
+    # ask if they want to install dot files
+    while [ "$dot_files" != "n" ] && [ "$dot_files" != "y" ]
+    do
+        echo -n "install dot-files (y|n)? "
+        read dot_files
+    done
+
+    echo -n "enter a github username for the configuration (optional): "
+    read github_username
+
+    echo -n "enter a github password for the configuration (optional): "
+    read github_password
+
+    # verify whether they wish to upload their new key to github
+    if [ "$create_ssh" = "y" ] && [ -n "$github_password" ]
+    then
+        while [ "$send_ssh_to_github" != "n" ] && [ "$send_ssh_to_github" != "y" ]
+        do
+            echo -n "do you want your new ssh key to be sent to github (y|n)? "
+            read send_ssh_to_github
+        done
+    fi
 
     # verify whether default port is "ok"
     echo -n "enter an ssh port (default: 22): "
@@ -60,17 +83,6 @@ then
         [ -f "/home/$username/.ssh/id_rsa" ] && echo -n "would you like to create a replacement ssh key (replaces ~/.ssh/id_rsa, y|n)? " || echo -n "would you like to generate an ssh key (y|n)? "
         read create_ssh
     done
-
-    # verify whether they wish to upload their new key to github
-    if [ "$create_ssh" = "y" ]
-    then
-        while [ "$send_ssh_to_github" != "n" ] && [ "$send_ssh_to_github" != "y" ]
-        do
-            echo -n "do you want your new ssh key to be sent to github (y|n)? "
-            read send_ssh_to_github
-        done
-    fi
-
 
     ##
     # request service specific settings
@@ -331,21 +343,6 @@ else
     echo "no scripts for this platform..."
     exit 1
 fi
-
-##
-# ask platform agnostic questions
-##
-while [ "$dot_files" != "n" ] && [ "$dot_files" != "y" ]
-do
-    echo -n "install dot-files (y|n)? "
-    read dot_files
-done
-
-echo -n "enter a github username for the configuration (optional): "
-read github_username
-
-echo -n "enter a github password for the configuration (optional): "
-read github_password
 
 
 ##
