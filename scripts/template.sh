@@ -148,6 +148,7 @@ if ! [ -f /home/$username/.bin/update-keys ]
 then
     mkdir -p /home/$username/.bin
     [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
+    chmod +x /home/$username/.bin/*
 
     # if username != github username swap $(whoami) for supplied github username
     [ "$username" != "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
