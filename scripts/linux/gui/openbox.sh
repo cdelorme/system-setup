@@ -106,8 +106,12 @@ mkdir -p "/home/${username}/.config/clipit"
 # download/install conkyrc
 [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
 
-# @todo configure desktop mimetype defaults (still researching)
-# [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
+# @todo configure desktop mimetype defaults
+[ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
+[ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
+[ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
+[ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
+update-desktop-database
 
 # @todo install nosleep & daemon files
 [ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
