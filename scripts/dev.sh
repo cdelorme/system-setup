@@ -60,5 +60,11 @@ then
     [ -f "scripts/linux/gui/openbox.sh" ] && . "scripts/linux/gui/openbox.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/openbox.sh")
 fi
 
+# grab additional custom-executables
+[ -f "data/home/.bin/7zw" ] && cp "data/home/.bin/7zw" "/etc/home/${username}/.bin/7zw"  || $dl_cmd "/home/${username}/.bin/7zw" "${remote_source}data/home/.bin/7zw"
+
+# add executable flag to all files in user-bin
+chmod +x /home/$username/.bin/*
+
 # reset user folder ownership
 chown -R $username:$username /home/$username
