@@ -18,6 +18,14 @@ fi
 # include chrome
 [ -f "scripts/linux/gui/chrome.sh" ] && . "scripts/linux/gui/chrome.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/chrome.sh")
 
+# install global flash projector /w dependencies
+dpkg --add-architecture i386
+aptitude install -ryq ia32-lib libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386
+$dl_cmd /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
+tar xf /tmp/flash.tar.gz -C /tmp
+rm /tmp/flash.tar.gz
+mv /tmp/flashplayer /usr/bin/flashplayer
+
 # conditionally set global alternatives
 if which google-chrome-stable &> /dev/null
 then
