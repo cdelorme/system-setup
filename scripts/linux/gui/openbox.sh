@@ -24,7 +24,7 @@ aptitude install -ryq ia32-lib libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugi
 $dl_cmd /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
 tar xf /tmp/flash.tar.gz -C /tmp
 rm /tmp/flash.tar.gz
-mv /tmp/flashplayer /usr/bin/flashplayer
+mv /tmp/flashplayer /usr/sbin/flashplayer
 
 # conditionally set global alternatives
 if which google-chrome-stable &> /dev/null
