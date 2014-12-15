@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Flash Projector
+Comment=Run swf files locally
+Exec=flashplayer
+Type=Application
+Categories=Multimedia;AudioVideo;Player;
+MimeType=application/x-shockwave-flash;
