@@ -116,7 +116,7 @@ do
 done
 for f in ~/.vim/tmp/*/*
 do
-    cp -R $f ~/.vim
+    cp -Rf $f ~/.vim
 done
 $dl_cmd "$HOME/.vim/colors/vividchalk.vim" "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 $dl_cmd "$HOME/.vim/colors/sunburst.vim" "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
