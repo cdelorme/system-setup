@@ -11,21 +11,41 @@ if [ "$disable_nginx" = "y" ]
 then
     service nginx stop
     update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    service nginx stop
 fi
 if [ "$disable_mongodb" = "y" ]
 then
     service mongod stop
     update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    service mongod stop
 fi
 if [ "$disable_mariadb" = "y" ]
 then
     service mysql stop
     update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    service mysql stop
 fi
 if [ "$disable_phpfpm" = "y" ]
 then
     service php5-fpm stop
     update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    service php5-fpm stop
 fi
 
 # install basic dev packages
