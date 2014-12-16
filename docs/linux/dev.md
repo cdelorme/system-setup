@@ -89,6 +89,7 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 - libavfilter-dev
 - libavdevice-dev
 - libavutil-dev
+- libav-tools
 
 _The `libfaac-dev` package exists on jessie, but not on wheezy._
 
@@ -101,6 +102,8 @@ _The `libfaac-dev` package exists on jessie, but not on wheezy._
 - bluez
 - bluez-utils
 - bluez-tools
+- bluez-firmware
+- bluez-hcidump
 
 If you have bluetooth or wireless you will likely want these packages installed to access and manage the service layers for that hardware.
 
@@ -217,6 +220,8 @@ _Check this list against the packages above to ensure I have no duplicates, and 
 - libxinerama-dev
 - libgl1-mesa-dev
 - x11proto-core-dev
+- libxml2-utils
+- xsltproc
 
 These are _required_ to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.  If you don't care about a good transparency utility for interface-eye-candy then you are welcome to ignore these and not install compton.
 
@@ -488,3 +493,4 @@ Keyboard layouts are managed by xorg currently, and utilities like `fbxkb` may a
 - [inserting lines with sed](http://unix.stackexchange.com/questions/35201/how-to-insert-a-line-into-text-document-right-before-line-containing-some-text-i)
 - [inserting with sed or awk](http://www.theunixschool.com/2012/06/insert-line-before-or-after-pattern.html)
 - [usb device connection](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)
+- [openbox themes](http://capn-damo.deviantart.com/gallery/37736739/Openbox)
