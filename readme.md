@@ -62,3 +62,75 @@ You can also clone or download the repository and run it locally.  However, it i
 I created a data folder to store any number of configuration files, and special binaries.  Some of the binaries do not belong to me, but are no-longer available for download anywhere on the internet.
 
 The files are organized in a linux-friendly way, such that they can be copied and pasted directly onto a system for installation.
+
+
+## setup variables
+
+The automation scripts will be dependent on the following variables:
+
+
+- username
+- password
+
+**Template:**
+
+- dot_files
+- github_username
+- create_ssh
+- ssh_port
+- system_hostname
+- timezone
+- jis
+- cronfile
+- remote_source
+
+**Web:**
+
+- install_processing_tools
+- install_mongodb
+- public_mongodb
+- install_mariadb
+- public_mariadb
+- install_phpfpm
+- public_phpfpm
+- install_msmtp
+- msmtp_username
+- msmtp_password
+
+**Dev:**
+
+- install_mdadm
+- install_samba
+- install_weechat
+- install_wireless
+- install_transmission
+- install_openbox
+- install_compton
+- install_web
+- disable_nginx
+- disable_mongodb
+- disable_mariadb
+- disable_phpfpm
+
+Obviously, some of these are conditionally dependent on what you want to do, so not all of them are necessary in all cases.
+
+To demonstrate a minimalistic install of each major linux type, I have created three alternatives to [`setup`](setup) that are non-interactive:
+
+- [`template`](template)
+- [`web`](web)
+- [`dev`](dev)
+
+
+## future plans
+
+I have a lot of other projects on my to-do list, and this one generally receives _bursts_ of attention.  However, here is a list of incomplete sections or improvements I'd like to make:
+
+- osx/windows modular scripts need to be written
+- create/add a customized tint2rc file
+- research finer tunings for transmission
+    - paused items are a pain
+    - _copying_ "done" downloads to another folder before seeding
+    - auto-removal of torrent & seed-files upon seed completion
+- consider additional services for web/dev automation:
+    - memcached
+    - elasticsearch

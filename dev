@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# requires root privileges
+[ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
+
+# allow username and password from current environment
+[ -z "$username" ] && username="banana"
+[ -z "$password" ] && password="hammock"
+
+# set required variables
+dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+github_username=$username
+create_ssh="y"
+ssh_port=22
+system_hostname="dev"
+timezone="US/Eastern"
+jis="y"
+cronfile="/var/spool/cron/crontabs/${username}"
+remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
+
+# web
+install_processing_tools="y"
+install_mongodb="y"
+public_mongodb="n"
+install_mariadb="y"
+public_mariadb="n"
+install_phpfpm="y"
+public_phpfpm="n"
+install_msmtp="n"
+
+# dev
+install_mdadm="y"
+install_samba="y"
+install_weechat="y"
+install_wireless="y"
+install_transmission="y"
+install_openbox="y"
+install_compton="y"
+install_web="y"
+disable_nginx="y"
+disable_mongodb="y"
+disable_mariadb="y"
+disable_phpfpm="y"
+
+# remote commands
+if which curl &> /dev/null
+then
+    dl_cmd="curl -Lo"
+    source_cmd="curl -s"
+elif which wget &> /dev/null
+then
+    dl_cmd="wget --no-check-certificate -O"
+    source_cmd="wget --no-check-certificate -qO-"
+fi
+
+# begin execution
+[ -f "scripts/dev.sh" ] && . "scripts/dev.sh" || eval "$($source_cmd ${remote_source}scripts/dev.sh)"
