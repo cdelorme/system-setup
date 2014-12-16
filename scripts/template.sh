@@ -112,7 +112,7 @@ $dl_cmd ~/.vim/tmp/vim-json.zip "https://github.com/elzr/vim-json/archive/master
 for f in ~/.vim/tmp/*.zip
 do
     unzip -d ~/.vim/tmp $f
-    rm $f
+    rm -f $f
 done
 for f in ~/.vim/tmp/*/*
 do
