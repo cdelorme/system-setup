@@ -46,6 +46,13 @@ then
     echo -n "enter a github password for the configuration (optional): "
     read github_password
 
+    # ask if they want to create a new id_rsa
+    while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
+    do
+        [ -f "/home/$username/.ssh/id_rsa" ] && echo -n "would you like to create a replacement ssh key (replaces ~/.ssh/id_rsa, y|n)? " || echo -n "would you like to generate an ssh key (y|n)? "
+        read create_ssh
+    done
+
     # verify whether they wish to upload their new key to github
     if [ "$create_ssh" = "y" ] && [ -n "$github_password" ]
     then
@@ -75,13 +82,6 @@ then
     do
         echo -n "enable jis locale (y|n)? "
         read jis
-    done
-
-    # ask if they want to create a new id_rsa
-    while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
-    do
-        [ -f "/home/$username/.ssh/id_rsa" ] && echo -n "would you like to create a replacement ssh key (replaces ~/.ssh/id_rsa, y|n)? " || echo -n "would you like to generate an ssh key (y|n)? "
-        read create_ssh
     done
 
     ##
@@ -350,7 +350,6 @@ fi
 ##
 
 remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
-[ -z "$service" ] && service="template"
 [ "$dot_files" = "y" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
 
 
