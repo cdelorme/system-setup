@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # install package
-aptitude install -ryq weechat-ncurses
+aptitude install -ryq weechat
 
 # prepare weechat directory
 mkdir -p "/home/${username}/.weechat"
