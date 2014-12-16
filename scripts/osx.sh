@@ -28,6 +28,10 @@
 #     echo -ne "\n# homebrew github token (remove rate-limiting)\nexport HOMEBREW_GITHUB_API_TOKEN=${token}" >> "$DOWNLOADS/.bashrc"
 # fi
 
+# @todo homebrew installation
+
+# @todo homebrew package installation
+
 # @todo download some bin tools
 mkdir -p ~/.bin
 $dl_cmd ~/.bin/brewgrade "${remote_source}/data/home/.bin/brewgrade"
@@ -39,3 +43,5 @@ crontab ~/.crontab
 
 # install golang vim plugin
 # which go 2>/dev/null && cp -R "$(go env GOROOT)/misc/vim/" "$DOWNLOADS/.vim"
+
+# @todo vim plugin installation (ctrlp, vim-json)
