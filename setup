@@ -167,16 +167,6 @@ then
             read install_processing_tools
         done
 
-        # confirm whether they want to disable nginx at boot time
-        if [ "$install_web" ]
-        then
-            while [ "$disable_nginx" != "n" ] && [ "$disable_nginx" != "y" ]
-            do
-                echo -n "do you want to disable nginx at boot time (y|n)? "
-                read disable_nginx
-            done
-        fi
-
         # mongodb questions
         while [ "$install_mongodb" != "n" ] && [ "$install_mongodb" != "y" ]
         do
@@ -190,16 +180,6 @@ then
                 echo -n "would you like to make mongodb publicly accessible (y|n)? "
                 read public_mongodb
             done
-
-            # confirm whether they want to disable mongodb at boot time
-            if [ "$install_web" ]
-            then
-                while [ "$disable_mongodb" != "n" ] && [ "$disable_mongodb" != "y" ]
-                do
-                    echo -n "do you want to disable mongodb at boot time (y|n)? "
-                    read disable_mongodb
-                done
-            fi
         fi
 
         # mariadb questions
@@ -215,16 +195,6 @@ then
                 echo -n "would you like to make mariadb publicly accessible (y|n)? "
                 read public_mariadb
             done
-
-            # confirm whether they want to disable at boot time
-            if [ "$install_web" ]
-            then
-                while [ "$disable_mariadb" != "n" ] && [ "$disable_mariadb" != "y" ]
-                do
-                    echo -n "do you want to disable mariadb at boot time (y|n)? "
-                    read disable_mariadb
-                done
-            fi
         fi
 
         # php-fpm questions
@@ -240,16 +210,6 @@ then
                 echo -n "would you like to make php-fpm publicly accessible (y|n)? "
                 read public_phpfpm
             done
-
-            # confirm whether they want to disable at boot time
-            if [ "$install_web" ]
-            then
-                while [ "$disable_phpfpm" != "n" ] && [ "$disable_phpfpm" != "y" ]
-                do
-                    echo -n "do you want to disable php-fpm at boot time (y|n)? "
-                    read disable_phpfpm
-                done
-            fi
         fi
 
         # mail server questions

@@ -37,10 +37,6 @@ install_transmission="y"
 install_openbox="y"
 install_compton="y"
 install_web="y"
-disable_nginx="y"
-disable_mongodb="y"
-disable_mariadb="y"
-disable_phpfpm="y"
 
 # remote commands
 if which curl &> /dev/null
