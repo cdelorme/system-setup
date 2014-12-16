@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# load template
-[ -f "scripts/template.sh" ] && . "scripts/template.sh" || . <($source_cmd "${remote_source}scripts/template.sh")
+# load template if only web
+if [ -z "$install_web" ]
+then
+    [ -f "scripts/template.sh" ] && . "scripts/template.sh" || . <($source_cmd "${remote_source}scripts/template.sh")
+fi
 
 ##
 # web-specific operations
