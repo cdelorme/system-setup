@@ -6,48 +6,6 @@
 # conditionall load web services
 [[ "$install_web" = "y" && -f "scripts/web.sh" ]] && . "scripts/web.sh" || . <($source_cmd "${remote_source}scripts/web.sh")
 
-# conditionally disable web-services at boot-time
-if [ "$disable_nginx" = "y" ]
-then
-    service nginx stop
-    update-rc.d -f nginx disable
-    update-rc.d -f nginx disable
-    update-rc.d -f nginx disable
-    update-rc.d -f nginx disable
-    update-rc.d -f nginx disable
-    service nginx stop
-fi
-if [ "$disable_mongodb" = "y" ]
-then
-    service mongod stop
-    update-rc.d -f mongod disable
-    update-rc.d -f mongod disable
-    update-rc.d -f mongod disable
-    update-rc.d -f mongod disable
-    update-rc.d -f mongod disable
-    service mongod stop
-fi
-if [ "$disable_mariadb" = "y" ]
-then
-    service mysql stop
-    update-rc.d -f mysql disable
-    update-rc.d -f mysql disable
-    update-rc.d -f mysql disable
-    update-rc.d -f mysql disable
-    update-rc.d -f mysql disable
-    service mysql stop
-fi
-if [ "$disable_phpfpm" = "y" ]
-then
-    service php5-fpm stop
-    update-rc.d -f php5-fpm disable
-    update-rc.d -f php5-fpm disable
-    update-rc.d -f php5-fpm disable
-    update-rc.d -f php5-fpm disable
-    update-rc.d -f php5-fpm disable
-    service php5-fpm stop
-fi
-
 # install basic dev packages
 aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime gvfs-fuse exfat-fuse exfat-utils fuse-utils sshfs fusesmb e2fsprogs parted os-prober lzop p7zip-full p7zip-rar zip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown lm-sensors cpufrequtils lame ffmpeg libfaac-dev libx264-dev imagemagick graphicsmagick libogg-dev libvorbis-dev vorbis-tools libavcodec-dev libavbin-dev libavfilter-dev libavdevice-dev libavutil-dev build-essential openjdk-7-jre pkg-config devscripts bpython python-dev python-pip python3-dev python3-pip libncurses5-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev
 
@@ -104,3 +62,45 @@ chmod +x /home/$username/.bin/*
 
 # reset user folder ownership
 chown -R $username:$username /home/$username
+
+# conditionally disable web-services at boot-time
+if [ "$disable_nginx" = "y" ]
+then
+    service nginx stop
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    update-rc.d -f nginx disable
+    service nginx stop
+fi
+if [ "$disable_mongodb" = "y" ]
+then
+    service mongod stop
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    update-rc.d -f mongod disable
+    service mongod stop
+fi
+if [ "$disable_mariadb" = "y" ]
+then
+    service mysql stop
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    update-rc.d -f mysql disable
+    service mysql stop
+fi
+if [ "$disable_phpfpm" = "y" ]
+then
+    service php5-fpm stop
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    update-rc.d -f php5-fpm disable
+    service php5-fpm stop
+fi
