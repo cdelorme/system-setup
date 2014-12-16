@@ -13,7 +13,7 @@ fi
 # conditionally install processing services
 if [ "$install_processing_tools" = "y" ]
 then
-    aptitude install -ryq graphicsmagick imagemagick libgd-tools ffmpeg lame libvorbis-dev libogg-dev
+    aptitude install -ryq graphicsmagick imagemagick libgd-tools ffmpeg libav-tools lame libvorbis-dev libogg-dev
 fi
 
 # add new groups, and to user
