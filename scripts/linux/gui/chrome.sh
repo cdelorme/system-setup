@@ -13,7 +13,7 @@ aptitde clean
 aptitude update
 
 # run installation
-aptitude install chromium google-chrome-stable google-talkplugin
+aptitude install -ryq chromium google-chrome-stable google-talkplugin
 
 # cleanup chrome sources
 rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
