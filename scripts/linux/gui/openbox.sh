@@ -39,18 +39,18 @@ then
 fi
 
 # conditionally remove framerate limit
-if which Xorg &>/dev/null
-then
-    Xorg -configure
-    mv /root/xorg.conf.new /etc/X11/xorg.conf
-    sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
-fi
+# if which Xorg &>/dev/null
+# then
+#     Xorg -configure
+#     mv /root/xorg.conf.new /etc/X11/xorg.conf
+#     sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
+# fi
 
 # install tabbedex for urxvt
 curl -o /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
 
 # download/install polkit usb mount permissions
-mkdir -p etc/polkit-1/localauthority/50-local.d/
+mkdir -p /etc/polkit-1/localauthority/50-local.d/
 [ -f "data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" ] && cp "data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" "/etc/polkit-1/localauthority/50-local.d/55-storage.pkla"  || $dl_cmd "/etc/polkit-1/localauthority/50-local.d/55-storage.pkla" "${remote_source}data/etc/polkit-1/localauthority/50-local.d/55-storage.pkla"
 
 # install custom fonts globally & rebuild cache
