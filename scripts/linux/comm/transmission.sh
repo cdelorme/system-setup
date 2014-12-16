@@ -13,6 +13,10 @@ service transmission-daemon stop
 service transmission-daemon start
 service transmission-daemon restart
 
+# enable peer traffic port, and web interface localhost only (feel free to expand to a subnet range eg. 192.168.0.0/24)
+sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules
+sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
+
 # download transmission monit
 [ -f "data/etc/monit/monitrc.d/transmission-daemon" ] && cp "data/etc/monit/monitrc.d/transmission-daemon" "/etc/monit/monitrc.d/transmission-daemon"  || $dl_cmd "/etc/monit/monitrc.d/transmission-daemon" "${remote_source}data/etc/monit/monitrc.d/transmission-daemon"
 ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
