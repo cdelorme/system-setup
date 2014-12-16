@@ -85,4 +85,9 @@ audio/midi=vlc.desktop;
 audio/mpeg=vlc.desktop;
 audio/x-wav=vlc.desktop;
 audio/x-ogg=vlc.desktop;
-
+image/gif=viewnior.desktop;
+image/bmp=viewnior.desktop;
+image/jpg=viewnior.desktop;
+image/jpeg=viewnior.desktop;
+image/png=viewnior.desktop;
+image/tiff=viewnior.desktop;
