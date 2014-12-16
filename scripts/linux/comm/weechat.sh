@@ -3,9 +3,6 @@
 # install package
 aptitude install -ryq weechat
 
-# prepare weechat directory
-mkdir -p "/home/${username}/.weechat"
-
 # generate weechat config with first-run
 su $username -s /bin/bash -c 'weechat-curses &>/dev/null & pid=$!; sleep 10; kill -9 $pid'
 
