@@ -84,6 +84,13 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 - libogg-dev
 - libvorbis-dev
 - vorbis-tools
+- libavcodec-dev
+- libavbin-dev
+- libavfilter-dev
+- libavdevice-dev
+- libavutil-dev
+
+_The `libfaac-dev` package exists on jessie, but not on wheezy._
 
 **Wireless utilities (_optional_):**
 
@@ -182,7 +189,7 @@ The volumeicon package gives us an icon in the tint2 menu bar that allows us to 
 - gimp-plugin-registry
 - evince
 
-These packages include base functionality such as a file browser, file search, elevated prompt, executable quick-launcher, clipboard management, system status & display, terminal emulator, and much more.  Effectively it's a set of loosely coupled packages that can be used within the `openbox` environment remaining as lightweight as possible, while still being packed with essential features.
+These packages include base functionality such as a file browser, file search, elevated prompt, executable quick-launcher, clipboard management, system status & display, terminal emulator, and much more.  Effectively it's a set of loosely coupled packages that can be used within the `openbox` environment remaining as lightweight as possible, while still being packed with essential features.  _Some of the packages in this list may only exist in jessie._
 
 **Font enhancements:**
 
@@ -426,6 +433,8 @@ The alternative is installing an ultra-complicated screensaver utility, which I 
 While I usually prefer the dev channel, even google chrome stable has caused my debian wheezy system to crash on occassion.  As such, while I still recommend chrome, I recommend the stable version to avoid problems.
 
 The easiest way to install it is to download a `.deb` from their site and manually install it with `dpkg -i`, but you can also add their repository manually as an alternative.
+
+The google talk plugin may depend on a newer libc6, which is not available to debian wheezy, but should work fine with jessie.
 
 
 #### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
