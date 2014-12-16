@@ -130,3 +130,7 @@ I have a lot of other projects on my to-do list, and this one generally receives
 - consider additional services for web/dev automation:
     - memcached
     - elasticsearch
+
+Unconfirmed:
+
+- xorg.conf auto-generation on VM does not contain the `SwapBuffer` value, guessing I'll need to test it on raw hardware to see if I have to manually append/prepend that value to the Device block.
