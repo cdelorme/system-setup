@@ -6,7 +6,7 @@ aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme
 # conditionally install wireless audio package
 if [ "$install_wireless" = "y" ]
 then
-    aptitude install -ryq pulseaudio-bluetooth
+    aptitude install -ryq pulseaudio-module-bluetooth
 fi
 
 # conditionally include compton
@@ -47,7 +47,8 @@ fi
 # conditionally remove framerate limit
 if which Xorg &>/dev/null
 then
-    (cd /etc/X11 && Xorg --configure)
+    Xorg --configure
+    mv /root/xorg.conf.new /etc/X11/xorg.conf
     sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
 fi
 
@@ -101,12 +102,14 @@ mkdir -p "/home/${username}/.config/clipit"
 # [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
 
 # download/install volumeicon config
+mkdir -p "/home/${username}/.config/volumeicon"
 [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
 
 # download/install conkyrc
 [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
 
 # @todo configure desktop mimetype defaults
+mkdir -p "/home/${username}/.local/share/applications"
 [ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
 [ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
 [ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
