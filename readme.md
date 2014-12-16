@@ -123,6 +123,7 @@ I have a lot of other projects on my to-do list, and this one generally receives
 
 - osx/windows modular scripts need to be written
 - create/add a customized tint2rc file
+- create an openbox theme
 - research finer tunings for transmission
     - paused items are a pain
     - _copying_ "done" downloads to another folder before seeding
@@ -134,3 +135,7 @@ I have a lot of other projects on my to-do list, and this one generally receives
 Unconfirmed:
 
 - xorg.conf auto-generation on VM does not contain the `SwapBuffer` value, guessing I'll need to test it on raw hardware to see if I have to manually append/prepend that value to the Device block.
+
+Documentation:
+
+- it would be beneficial to replace complicated lists of settings with screenshots from the actual OS, which I plan to do in the future.
