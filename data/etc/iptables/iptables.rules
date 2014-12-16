@@ -15,12 +15,12 @@
 # php-fpm traffic
 #-A INPUT -p tcp -m tcp --dport 9000 -m conntrack --ctstate NEW -j ACCEPT
 # samba traffic restricted-local-access
-#-A INPUT -s 10.0.0.0/24 -p udp -m multiport --dports 137,138 -j ACCEPT
-#-A INPUT -s 10.0.0.0/24 -p tcp -m multiport --dports 139,445 -j ACCEPT
+#-A INPUT -s 127.0.0.1 -p udp -m multiport --dports 137,138 -j ACCEPT
+#-A INPUT -s 127.0.0.1 -p tcp -m multiport --dports 139,445 -j ACCEPT
 # tranmission peer traffic (default port 51413)
 #-A INPUT -p udp -m udp --dport 51413 -j ACCEPT
 # transmission web interface restricted-local-access
-#-A INPUT -s 10.0.0.0/24 -p tcp -m tcp --dport 9091 -j ACCEPT
+#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT
 # accept ssh with rate limiting
 -N LOGREJECTSSH
 -A LOGREJECTSSH -j LOG --log-prefix "iptables deny: " --log-level 7
