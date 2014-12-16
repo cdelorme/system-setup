@@ -3,12 +3,6 @@
 # install gui packages
 aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils xinit xinput suckless-tools x11-utils desktop-base xdg-user-dirs shared-mime-info tint2 conky-all chromium zenity zenity-common pcmanfm feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fontconfig fontconfig-config fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
-# conditionally install wireless audio package
-if [ "$install_wireless" = "y" ]
-then
-    aptitude install -ryq pulseaudio-module-bluetooth
-fi
-
 # conditionally include compton
 if [ "$install_compton" = "y" ]
 then
@@ -47,7 +41,7 @@ fi
 # conditionally remove framerate limit
 if which Xorg &>/dev/null
 then
-    Xorg --configure
+    Xorg -configure
     mv /root/xorg.conf.new /etc/X11/xorg.conf
     sed -i "s/.*SwapbuffersWait.*/Option \"SwapbuffersWait\" \"false\"/" /etc/X11/xorg.conf
 fi
