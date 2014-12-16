@@ -191,6 +191,7 @@ The volumeicon package gives us an icon in the tint2 menu bar that allows us to 
 - gimp
 - gimp-plugin-registry
 - evince
+- viewnior
 
 These packages include base functionality such as a file browser, file search, elevated prompt, executable quick-launcher, clipboard management, system status & display, terminal emulator, and much more.  Effectively it's a set of loosely coupled packages that can be used within the `openbox` environment remaining as lightweight as possible, while still being packed with essential features.  _Some of the packages in this list may only exist in jessie._
 
