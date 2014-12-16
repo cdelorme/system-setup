@@ -111,7 +111,7 @@ $dl_cmd ~/.vim/tmp/ctrlp.zip "https://github.com/kien/ctrlp.vim/archive/master.z
 $dl_cmd ~/.vim/tmp/vim-json.zip "https://github.com/elzr/vim-json/archive/master.zip"
 for f in ~/.vim/tmp/*.zip
 do
-    unzip -d ~/.vim/tmp $f
+    unzip -od ~/.vim/tmp $f
     rm -f $f
 done
 for f in ~/.vim/tmp/*/*
