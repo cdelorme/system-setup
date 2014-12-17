@@ -3,11 +3,9 @@
 # requires root privileges
 [ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
 
-# allow username and password from current environment
+# template
 [ -z "$username" ] && username="banana"
 [ -z "$password" ] && password="hammock"
-
-# set required variables
 [ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
 [ -z "$github_username" ] && github_username=$username
 [ -z "$create_ssh" ] && create_ssh="y"
