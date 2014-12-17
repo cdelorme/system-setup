@@ -133,6 +133,7 @@ cp -R "$HOME/.vim" "/etc/skel/"
 # user customizations
 if [ -n "$username" ]
 then
+
     # conditionally create new user and add to core groups
     if [ -n "$username" ] && ! id "$username" &>/dev/null
     then
