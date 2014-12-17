@@ -1,4 +1,5 @@
 #!/bin/bash
+touch "${HOME}/.ssh/authorized_keys"
 keys=$(wget -qO- https://github.com/$(whoami).keys)
 echo "$keys" | while read -r key
 do
