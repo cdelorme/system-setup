@@ -121,6 +121,9 @@ To demonstrate a minimalistic install of each major linux type, I have created t
 
 I have a lot of other projects on my to-do list, and this one generally receives _bursts_ of attention.  However, here is a list of incomplete sections or improvements I'd like to make:
 
+- investigate adding ipv6 and ip6tables rules to web
+    - [reference](http://lowendbox.com/blog/iptables-ipv6-and-more-rules/)
+    - [manpage](http://manpages.ubuntu.com/manpages/saucy/en/man8/ip6tables.8.html)
 - osx/windows modular scripts need to be written
 - create/add a customized tint2rc file
 - create an openbox theme
