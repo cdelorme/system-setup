@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+[ -z "$ssh_port" ] && ssh_port=22
+[ -z "$system_hostname" ] && system_hostname="template"
+[ -z "$timezone" ] && timezone="US/Eastern"
+
 # install netselect-apt and find the best mirrors
 # then get the system updated before we go forward
 aptitude install -ryq netselect-apt
@@ -122,51 +130,58 @@ $dl_cmd "$HOME/.vim/colors/vividchalk.vim" "https://raw.githubusercontent.com/tp
 $dl_cmd "$HOME/.vim/colors/sunburst.vim" "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 cp -R "$HOME/.vim" "/etc/skel/"
 
-# conditionally create new user and add to core groups
-if [ -n "$username" ] && ! id "$username" &>/dev/null
+# user customizations
+if [ -n "$username" ]
 then
-    useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-fi
-usermod -aG sudo,adm $username
+    # conditionally create new user and add to core groups
+    if [ -n "$username" ] && ! id "$username" &>/dev/null
+    then
+        useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+    fi
+    usermod -aG sudo,adm $username
 
-# generate ssh key
-if [ "$create_ssh" = "y" ]
-then
-    mkdir -p "/home/$username/.ssh"
-    ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
-    chmod 600 /home/$username/.ssh/*
-fi
+    # generate ssh key
+    if [ "$create_ssh" = "y" ]
+    then
+        mkdir -p "/home/$username/.ssh"
+        ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
+        chmod 600 /home/$username/.ssh/*
+    fi
 
-# attempt to upload new ssh key to github account
-if [ -f "/home/$username/.ssh/id_rsa" ] && [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
-then
-    curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
-fi
+    # attempt to upload new ssh key to github account
+    if [ -f "/home/$username/.ssh/id_rsa" ] && [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
+    then
+        curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+    fi
 
-# download update-keys
-if ! [ -f /home/$username/.bin/update-keys ]
-then
-    mkdir -p /home/$username/.bin
-    [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
-    chmod +x /home/$username/.bin/*
+    # download update-keys
+    if ! [ -f /home/$username/.bin/update-keys ]
+    then
+        mkdir -p /home/$username/.bin
+        [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
+        chmod +x /home/$username/.bin/*
 
-    # if username != github username swap $(whoami) for supplied github username
-    [ "$username" != "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
-fi
+        # if username != github username swap $(whoami) for supplied github username
+        [ "$username" != "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
+    fi
 
-# add crontab to run `update-keys` (idempotently)
-[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
-[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
+    if [ -n "$cronfile" ]
+    then
+        # add crontab to run `update-keys` (idempotently)
+        [ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
+        [ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
+    fi
 
-# reset ownership on user files
-chown -R $username:$username /home/$username
+    # reset ownership on user files
+    chown -R $username:$username /home/$username
 
-# use github username to acquire name & email from github
-if [ -n "$github_username" ]
-then
-    tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
-    github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
-    github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
-    su $username -c "cd && git config --global user.name $github_username"
-    su $username -c "cd && git config --global user.email $github_email"
+    # use github username to acquire name & email from github
+    if [ -n "$github_username" ]
+    then
+        tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
+        github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+        github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+        su $username -c "cd && git config --global user.name $github_username"
+        su $username -c "cd && git config --global user.email $github_email"
+    fi
 fi

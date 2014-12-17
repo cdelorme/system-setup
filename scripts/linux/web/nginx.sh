@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # install nginx
 aptitude install -ryq nginx-full
 

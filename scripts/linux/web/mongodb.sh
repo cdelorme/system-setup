@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # add aptitude sources & update aptitude
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' > /etc/apt/sources.list.d/mongodb.list

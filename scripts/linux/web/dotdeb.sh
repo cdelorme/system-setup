@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+
 # add dotdeb repository
 $source_cmd http://www.dotdeb.org/dotdeb.gpg | apt-key add -
 

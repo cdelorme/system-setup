@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
+# exit if dependent variabls are not set
+[ -z "$username" ] && echo "no username..."; exit 1
+
 # load template if only web
 if [ -z "$install_web" ]
 then
@@ -20,7 +28,7 @@ fi
 groupadd -f www-data
 groupadd -f gitdev
 groupadd -f webdev
-usermod -aG webdev,gitdev $username
+[ -n "$username" ] && usermod -aG webdev,gitdev $username
 
 # create environment folders & set permissions /w sticky bits
 mkdir -p /srv/{www,git}

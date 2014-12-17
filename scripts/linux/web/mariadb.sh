@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # install key, add repository source, then reload
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
 echo "deb http://nyc2.mirrors.digitalocean.com/mariadb/repo/5.5/debian wheezy main" > /etc/apt/sources.list.d/mariadb.list

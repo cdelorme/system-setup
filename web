@@ -8,38 +8,31 @@
 [ -z "$password" ] && password="hammock"
 
 # set required variables
-dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
-github_username=$username
-create_ssh="y"
-ssh_port=22
-system_hostname="web"
-timezone="US/Eastern"
-jis="y"
-cronfile="/var/spool/cron/crontabs/${username}"
-remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
+[ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+[ -z "$github_username" ] && github_username=$username
+[ -z "$create_ssh" ] && create_ssh="y"
+[ -z "$ssh_port" ] && ssh_port=22
+[ -z "$system_hostname" ] && system_hostname="web"
+[ -z "$timezone" ] && timezone="US/Eastern"
+[ -z "$jis" ] && jis="y"
+[ -z "$cronfile" ] && cronfile="/var/spool/cron/crontabs/${username}"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
 
 # web
-install_processing_tools="y"
-install_mongodb="y"
-public_mongodb="n"
-install_mariadb="y"
-public_mariadb="n"
-install_phpfpm="y"
-public_phpfpm="n"
-install_msmtp="n"
-msmtp_username="$username"
-msmtp_password="$password"
+[ -z "$install_processing_tools" ] && install_processing_tools="y"
+[ -z "$install_mongodb" ] && install_mongodb="y"
+[ -z "$public_mongodb" ] && public_mongodb="n"
+[ -z "$install_mariadb" ] && install_mariadb="y"
+[ -z "$public_mariadb" ] && public_mariadb="n"
+[ -z "$install_phpfpm" ] && install_phpfpm="y"
+[ -z "$public_phpfpm" ] && public_phpfpm="n"
+[ -z "$install_msmtp" ] && install_msmtp="y"
+[ -z "$msmtp_username" ] && msmtp_username="$username"
+[ -z "$msmtp_password" ] && msmtp_password="$password"
 
-# remote commands
-if which curl &> /dev/null
-then
-    dl_cmd="curl -Lo"
-    source_cmd="curl -s"
-elif which wget &> /dev/null
-then
-    dl_cmd="wget --no-check-certificate -O"
-    source_cmd="wget --no-check-certificate -qO-"
-fi
+# remote commands (would use curl, but base debian does not come with curl)
+dl_cmd="wget --no-check-certificate -O"
+source_cmd="wget --no-check-certificate -qO-"
 
 # begin execution
 [ -f "scripts/web.sh" ] && . "scripts/web.sh" || eval "$($source_cmd ${remote_source}scripts/web.sh)"

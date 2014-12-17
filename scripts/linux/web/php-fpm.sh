@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # verify desire to install
 [ "$install_phpfpm" = "y" ] || exit 0
 

@@ -8,26 +8,19 @@
 [ -z "$password" ] && password="hammock"
 
 # set required variables
-dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
-github_username=$username
-create_ssh="y"
-ssh_port=22
-system_hostname="template"
-timezone="US/Eastern"
-jis="y"
-cronfile="/var/spool/cron/crontabs/${username}"
-remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
+[ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+[ -z "$github_username" ] && github_username=$username
+[ -z "$create_ssh" ] && create_ssh="y"
+[ -z "$ssh_port" ] && ssh_port=22
+[ -z "$system_hostname" ] && system_hostname="template"
+[ -z "$timezone" ] && timezone="US/Eastern"
+[ -z "$jis" ] && jis="y"
+[ -z "$cronfile" ] && cronfile="/var/spool/cron/crontabs/${username}"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
 
-# remote commands
-if which curl &> /dev/null
-then
-    dl_cmd="curl -Lo"
-    source_cmd="curl -s"
-elif which wget &> /dev/null
-then
-    dl_cmd="wget --no-check-certificate -O"
-    source_cmd="wget --no-check-certificate -qO-"
-fi
+# remote commands (would use curl, but base debian does not come with curl)
+dl_cmd="wget --no-check-certificate -O"
+source_cmd="wget --no-check-certificate -qO-"
 
 # begin execution
 [ -f "scripts/template.sh" ] && . "scripts/template.sh" || eval "$($source_cmd ${remote_source}scripts/template.sh)"

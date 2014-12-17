@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # install gui packages
 aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils xinit xinput suckless-tools x11-utils desktop-base xdg-user-dirs shared-mime-info tint2 conky-all chromium zenity zenity-common pcmanfm feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fontconfig fontconfig-config fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
@@ -59,60 +64,65 @@ $dl_cmd "/usr/share/fonts/ttf/jis/ForMateKonaVe.ttf" "${remote_source}data/home/
 $dl_cmd "/usr/share/fonts/ttf/jis/epkyouka.ttf" "${remote_source}data/home/.fonts/epkyouka.ttf"
 fc-cache -fr
 
-# add user to general gui groups
-usermod -aG fuse,scanner,bluetooth,netdev,audio,video,plugdev $username
+# user customizations
+if [ -n "$username" ]
+then
 
-# ensure user bin folder exists
-mkdir -p "/home/${username}/.bin"
+    # add user to general gui groups
+    usermod -aG fuse,scanner,bluetooth,netdev,audio,video,plugdev $username
 
-# add openbox to xinitrc
-echo "exec openbox-session" > "/home/${username}/.xinitrc"
+    # ensure user bin folder exists
+    mkdir -p "/home/${username}/.bin"
 
-# copy the defaults.pa into ~/.pulse, for audio control
-mkdir -p "/home/${username}/.pulse"
-cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
+    # add openbox to xinitrc
+    echo "exec openbox-session" > "/home/${username}/.xinitrc"
 
-# download/install .fehbg script
-[ -f "data/home/.fehbg" ] && cp "data/home/.fehbg" "/home/${username}/.fehbg"  || $dl_cmd "/home/${username}/.fehbg" "${remote_source}data/home/.fehbg"
+    # copy the defaults.pa into ~/.pulse, for audio control
+    mkdir -p "/home/${username}/.pulse"
+    cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
 
-# download/install ~/.Xdefaults & symlink to ~/.Xresources
-[ -f "data/home/.Xdefaults" ] && cp "data/home/.Xdefaults" "/home/${username}/.Xdefaults"  || $dl_cmd "/home/${username}/.Xdefaults" "${remote_source}data/home/.Xdefaults"
-ln -nsf ".Xdefaults" "/home/${username}/.Xresources"
+    # download/install .fehbg script
+    [ -f "data/home/.fehbg" ] && cp "data/home/.fehbg" "/home/${username}/.fehbg"  || $dl_cmd "/home/${username}/.fehbg" "${remote_source}data/home/.fehbg"
 
-# download/install urxvtq guake-like-launcher
-[ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
+    # download/install ~/.Xdefaults & symlink to ~/.Xresources
+    [ -f "data/home/.Xdefaults" ] && cp "data/home/.Xdefaults" "/home/${username}/.Xdefaults"  || $dl_cmd "/home/${username}/.Xdefaults" "${remote_source}data/home/.Xdefaults"
+    ln -nsf ".Xdefaults" "/home/${username}/.Xresources"
 
-# download/install various openbox config files
-mkdir -p "/home/${username}/.config/openbox"
-[ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
-[ -f "data/home/.config/openbox/menu.xml" ] && cp "data/.config/openbox/menu.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/menu.xml" "${remote_source}data/home/.config/openbox/menu.xml"
-[ -f "data/home/.config/openbox/rc.xml" ] && cp "data/.config/openbox/rc.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/rc.xml" "${remote_source}data/home/.config/openbox/rc.xml"
+    # download/install urxvtq guake-like-launcher
+    [ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
 
-# download/install clipitrc
-mkdir -p "/home/${username}/.config/clipit"
-[ -f "data/home/.config/clipit/clipitrc" ] && cp "data/.config/clipit/clipitrc" "/home/${username}/.config/clipit/clipitrc"  || $dl_cmd "/home/${username}/.config/clipit/clipitrc" "${remote_source}data/home/.config/clipit/clipitrc"
+    # download/install various openbox config files
+    mkdir -p "/home/${username}/.config/openbox"
+    [ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
+    [ -f "data/home/.config/openbox/menu.xml" ] && cp "data/.config/openbox/menu.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/menu.xml" "${remote_source}data/home/.config/openbox/menu.xml"
+    [ -f "data/home/.config/openbox/rc.xml" ] && cp "data/.config/openbox/rc.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/rc.xml" "${remote_source}data/home/.config/openbox/rc.xml"
 
-# @todo download/install tint2 config (not sure if this is necessary, I believe I use the default)
-# [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
+    # download/install clipitrc
+    mkdir -p "/home/${username}/.config/clipit"
+    [ -f "data/home/.config/clipit/clipitrc" ] && cp "data/.config/clipit/clipitrc" "/home/${username}/.config/clipit/clipitrc"  || $dl_cmd "/home/${username}/.config/clipit/clipitrc" "${remote_source}data/home/.config/clipit/clipitrc"
 
-# download/install volumeicon config
-mkdir -p "/home/${username}/.config/volumeicon"
-[ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
+    # @todo download/install tint2 config (not sure if this is necessary, I believe I use the default)
+    # [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
 
-# download/install conkyrc
-[ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
+    # download/install volumeicon config
+    mkdir -p "/home/${username}/.config/volumeicon"
+    [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
 
-# @todo configure desktop mimetype defaults
-mkdir -p "/home/${username}/.local/share/applications"
-[ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
-[ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
-[ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
-[ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
-update-desktop-database
+    # download/install conkyrc
+    [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
 
-# @todo install nosleep & daemon files
-[ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
-[ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
+    # @todo configure desktop mimetype defaults
+    mkdir -p "/home/${username}/.local/share/applications"
+    [ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
+    [ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
+    [ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
+    [ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
+    update-desktop-database
+
+    # @todo install nosleep & daemon files
+    [ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
+    [ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
+fi
 
 # include sublime-text-3.sh
 [ -f "scripts/linux/gui/sublime-text-3.sh" ] && . "scripts/linux/gui/sublime-text-3.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/sublime-text-3.sh")

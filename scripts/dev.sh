@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$source_cmd" ] && source_cmd="wget --no-check-certificate -qO-"
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # load template
 [ -f "scripts/template.sh" ] && . "scripts/template.sh" || . <($source_cmd "${remote_source}scripts/template.sh")
 
 # conditionall load web services
-[[ "$install_web" = "y" && -f "scripts/web.sh" ]] && . "scripts/web.sh" || . <($source_cmd "${remote_source}scripts/web.sh")
+if [ "$install_web" = "y" ]
+then
+    [ -f "scripts/web.sh" ] && . "scripts/web.sh" || . <($source_cmd "${remote_source}scripts/web.sh")
+fi
 
 # install basic dev packages
 aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime gvfs-fuse exfat-fuse exfat-utils fuse-utils sshfs fusesmb e2fsprogs parted os-prober lzop p7zip-full p7zip-rar zip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown lm-sensors cpufrequtils lame ffmpeg libfaac-dev libx264-dev imagemagick graphicsmagick libogg-dev libvorbis-dev vorbis-tools libavcodec-dev libavbin-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools build-essential openjdk-7-jre pkg-config devscripts bpython python-dev python-pip python3-dev python3-pip libncurses5-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev
@@ -54,11 +62,16 @@ then
     [ -f "scripts/linux/workstation/wireless.sh" ] && . "scripts/linux/workstation/wireless.sh" || . <($source_cmd "${remote_source}scripts/linux/workstation/wireless.sh")
 fi
 
-# grab additional custom-executables
-[ -f "data/home/.bin/7zw" ] && cp "data/home/.bin/7zw" "/etc/home/${username}/.bin/7zw"  || $dl_cmd "/home/${username}/.bin/7zw" "${remote_source}data/home/.bin/7zw"
+# only run if username is set
+if [ -n "$username" ]
+then
 
-# add executable flag to all files in user-bin
-chmod +x /home/$username/.bin/*
+    # grab additional custom-executables
+    [ -f "data/home/.bin/7zw" ] && cp "data/home/.bin/7zw" "/etc/home/${username}/.bin/7zw"  || $dl_cmd "/home/${username}/.bin/7zw" "${remote_source}data/home/.bin/7zw"
 
-# reset user folder ownership
-chown -R $username:$username /home/$username
+    # add executable flag to all files in user-bin
+    chmod +x /home/$username/.bin/*
+
+    # reset user folder ownership
+    chown -R $username:$username /home/$username
+fi

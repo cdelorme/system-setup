@@ -8,46 +8,41 @@
 [ -z "$password" ] && password="hammock"
 
 # set required variables
-dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
-github_username=$username
-create_ssh="y"
-ssh_port=22
-system_hostname="dev"
-timezone="US/Eastern"
-jis="y"
-cronfile="/var/spool/cron/crontabs/${username}"
-remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
+[ -z "$dot_files" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
+[ -z "$github_username" ] && github_username=$username
+[ -z "$create_ssh" ] && create_ssh="y"
+[ -z "$ssh_port" ] && ssh_port=22
+[ -z "$system_hostname" ] && system_hostname="dev"
+[ -z "$timezone" ] && timezone="US/Eastern"
+[ -z "$jis" ] && jis="y"
+[ -z "$cronfile" ] && cronfile="/var/spool/cron/crontabs/${username}"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
 
 # web
-install_processing_tools="y"
-install_mongodb="y"
-public_mongodb="n"
-install_mariadb="y"
-public_mariadb="n"
-install_phpfpm="y"
-public_phpfpm="n"
-install_msmtp="n"
+[ -z "$install_processing_tools" ] && install_processing_tools="y"
+[ -z "$install_mongodb" ] && install_mongodb="y"
+[ -z "$public_mongodb" ] && public_mongodb="n"
+[ -z "$install_mariadb" ] && install_mariadb="y"
+[ -z "$public_mariadb" ] && public_mariadb="n"
+[ -z "$install_phpfpm" ] && install_phpfpm="y"
+[ -z "$public_phpfpm" ] && public_phpfpm="n"
+[ -z "$install_msmtp" ] && install_msmtp="n"
+[ -z "$msmtp_username" ] && msmtp_username="$username"
+[ -z "$msmtp_password" ] && msmtp_password="$password"
 
 # dev
-install_mdadm="y"
-install_samba="y"
-install_weechat="y"
-install_wireless="y"
-install_transmission="y"
-install_openbox="y"
-install_compton="y"
-install_web="y"
+[ -z "$install_mdadm" ] && install_mdadm="y"
+[ -z "$install_samba" ] && install_samba="y"
+[ -z "$install_weechat" ] && install_weechat="y"
+[ -z "$install_wireless" ] && install_wireless="y"
+[ -z "$install_transmission" ] && install_transmission="y"
+[ -z "$install_openbox" ] && install_openbox="y"
+[ -z "$install_compton" ] && install_compton="y"
+[ -z "$install_web" ] && install_web="y"
 
-# remote commands
-if which curl &> /dev/null
-then
-    dl_cmd="curl -Lo"
-    source_cmd="curl -s"
-elif which wget &> /dev/null
-then
-    dl_cmd="wget --no-check-certificate -O"
-    source_cmd="wget --no-check-certificate -qO-"
-fi
+# remote commands (would use curl, but base debian does not come with curl)
+dl_cmd="wget --no-check-certificate -O"
+source_cmd="wget --no-check-certificate -qO-"
 
 # begin execution
 [ -f "scripts/dev.sh" ] && . "scripts/dev.sh" || eval "$($source_cmd ${remote_source}scripts/dev.sh)"

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# set dependent variables for stand-alone execution
+[ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
+[ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
+
 # install packages
 aptitude install -ryq samba samba-tools smbclient
 
@@ -7,10 +11,10 @@ aptitude install -ryq samba samba-tools smbclient
 [ -f "data/etc/samba/smb.conf" ] && cp "data/etc/samba/smb.conf" "/etc/samba/smb.conf"  || $dl_cmd "/etc/samba/smb.conf" "${remote_source}data/etc/samba/smb.conf"
 
 # add user
-usermod -aG sambashare $username
+[ -n "$username" ] && usermod -aG sambashare $username
 
 # add samba user
-yes "${password}" | smbpasswd -sa "${username}"
+[ -n "$username" ] && [ -n "$password" ] && yes "${password}" | smbpasswd -sa "${username}"
 
 # enable iptables rule but restrict to localhost (feel free to change -s 127.0.0.1 to -s 192.168.0.0/24 or similar)
 sed -i "s/#-A INPUT -s 127.0.0.1 -p udp -m multiport --dports 137,138 -j ACCEPT/-A INPUT -s 127.0.0.1 -p udp -m multiport --dports 137,138 -j ACCEPT/" /etc/iptables/iptables.rules

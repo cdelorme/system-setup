@@ -25,4 +25,4 @@ ln -sf /usr/lib/go/bin/gofmt /usr/local/bin/gofmt
 govim="$(go env GOROOT)/misc/vim/"
 cp -R "$govim"* /root/.vim/
 cp -R "$govim"* /etc/skel/.vim/
-cp -R "$govim"* /home/$username/.vim/
+[ -n "$username" ] && cp -R "$govim"* /home/$username/.vim/
