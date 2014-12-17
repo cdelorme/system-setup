@@ -13,10 +13,6 @@ aptitude install -ryq msmtp-mta
 # set restricted permissions (file will contain plain-text password)
 chmod 0600 /etc/msmtprc
 
-# exit if dependent variables are not set
-[ -z "$msmtp_username" ] && echo "no msmtp username..."; exit 1
-[ -z "$msmtp_password" ] && echo "no msmtp password..."; exit 1
-
 # set email & password & username as gmail
 [ -n "$msmtp_username" ] && sed -i "s/user username/user $msmtp_username/" /etc/msmtprc
 [ -n "$msmtp_password" ] && sed -i "s/password password/password $msmtp_password/" /etc/msmtprc
