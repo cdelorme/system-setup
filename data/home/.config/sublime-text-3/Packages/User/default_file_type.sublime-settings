@@ -1,3 +1,4 @@
 {
-    "default_new_file_syntax": "Packages/Markdown/Markdown.tmLanguage"
+    "default_new_file_syntax": "Packages/Markdown/Markdown.tmLanguage",
+    "use_current_file_syntax": false
 }
