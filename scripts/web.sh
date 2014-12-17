@@ -5,9 +5,6 @@
 [ -z "$dl_cmd" ] && dl_cmd="wget --no-check-certificate -O"
 [ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
 
-# exit if dependent variabls are not set
-[ -z "$username" ] && echo "no username..."; exit 1
-
 # load template if only web
 if [ -z "$install_web" ]
 then
