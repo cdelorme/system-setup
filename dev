@@ -42,5 +42,39 @@
 dl_cmd="wget --no-check-certificate -O"
 source_cmd="wget --no-check-certificate -qO-"
 
+# export & printenv
+export username
+export password
+export dot_files
+export github_username
+export create_ssh
+export ssh_port
+export system_hostname
+export timezone
+export jis
+export cronfile
+export remote_source
+export install_processing_tools
+export install_mongodb
+export public_mongodb
+export install_mariadb
+export public_mariadb
+export install_phpfpm
+export public_phpfpm
+export install_msmtp
+export msmtp_username
+export msmtp_password
+export install_mdadm
+export install_samba
+export install_weechat
+export install_wireless
+export install_transmission
+export install_openbox
+export install_compton
+export install_web
+export dl_cmd
+export source_cmd
+env
+
 # begin execution
 [ -f "scripts/dev.sh" ] && . "scripts/dev.sh" || eval "$($source_cmd ${remote_source}scripts/dev.sh)"

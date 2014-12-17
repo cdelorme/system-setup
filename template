@@ -20,5 +20,21 @@
 dl_cmd="wget --no-check-certificate -O"
 source_cmd="wget --no-check-certificate -qO-"
 
+# export & printenv
+export username
+export password
+export dot_files
+export github_username
+export create_ssh
+export ssh_port
+export system_hostname
+export timezone
+export jis
+export cronfile
+export remote_source
+export dl_cmd
+export source_cmd
+env
+
 # begin execution
 [ -f "scripts/template.sh" ] && . "scripts/template.sh" || eval "$($source_cmd ${remote_source}scripts/template.sh)"
