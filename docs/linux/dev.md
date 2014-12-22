@@ -81,6 +81,7 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 - libx264-dev
 - imagemagick
 - graphicsmagick
+- libexif-dev
 - libogg-dev
 - libvorbis-dev
 - vorbis-tools

@@ -15,7 +15,7 @@ then
 fi
 
 # install basic dev packages
-aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime gvfs-fuse exfat-fuse exfat-utils fuse-utils sshfs fusesmb e2fsprogs parted os-prober lzop p7zip-full p7zip-rar zip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown lm-sensors cpufrequtils lame ffmpeg libfaac-dev libx264-dev imagemagick graphicsmagick libogg-dev libvorbis-dev vorbis-tools libavcodec-dev libavbin-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools build-essential openjdk-7-jre pkg-config devscripts bpython python-dev python-pip python3-dev python3-pip libncurses5-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev
+aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree usbutils uuid-runtime gvfs-fuse exfat-fuse exfat-utils fuse-utils sshfs fusesmb e2fsprogs parted os-prober lzop p7zip-full p7zip-rar zip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown lm-sensors cpufrequtils lame ffmpeg libfaac-dev libx264-dev imagemagick graphicsmagick libexif-dev libogg-dev libvorbis-dev vorbis-tools libavcodec-dev libavbin-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools build-essential openjdk-7-jre pkg-config devscripts bpython python-dev python-pip python3-dev python3-pip libncurses5-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev
 
 # configure sensors
 which sensors-detect &>/dev/null && (yes "" | sensors-detect)
