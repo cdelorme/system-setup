@@ -20,6 +20,8 @@ Packages in each area may be grouped with supplemental information to describe t
 
 There will be explicitly labeled "optional" packages in each area as well, which is related to the automated installation scripts which this document exists to supplement.
 
+_I also have a file on [`gaming`](misc/gaming.md), which may be additional steps one could follow._
+
 
 ### workstation
 
