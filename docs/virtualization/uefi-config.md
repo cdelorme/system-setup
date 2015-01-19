@@ -1,23 +1,36 @@
 
-# vmware efi configuration
+# uefi configuration
 
-For whatever reason when installing debian with the EFI checkbox VMWare has a problem recognizing the EFI bootloader on subsequent boots.
+My experience with parallels desktop and virtualbox has been either non-existent eufi support, or broken implementation that does not retain its state on a fresh boot.  My assumption is the same applies to most virtualization software, although the changes here fix these concerns they may also improve bare-metal systems as well.
 
-I have not discerned whether this is a flaw in the debian installer, a flaw in VMWare's setup, or perhaps a conflict of configuration steps that creates this issue.
 
-A short-term solution is to run these commands after installation:
+## shell
 
-    grub-install
-    update-grub
+To begin with we can throw a uefi-shell into the file system.  Doing so will allow you to run commands in UEFI without loading the OS, which may be used to (for example) update firmware or modify the system.
 
-In most normal cases, this would be executed during the installation and you'd have been none-the-wiser, plus it'd work properly.  **I believe the problem is that virtualbox provides a stateless EFI BIOS, which upon complete shutdown will forget any of the EFI information set.**
+The uefi shell this links to is the Tianocore uefi x64 efi v2 shell, and this command will download it into the correct spot from a freshly booted system:
 
-Therefore, the actual solution is to create a file at `/boot/efi/startup.nsh` with the path to the bootloader for the EFI system to pickup:
+    wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi"
 
-    FS0:\EFI\debian\grubx64.efi
 
-**However**, if you forgot to do this before rebooting then you'll have to do it from inside the EFI terminal:
+## booting
+
+After installation if you fully shutdown the virtual machine and then attempt to boot it will likely fail.  The reason virtualbox gives is that it does not retain the state or "memory" of the uefi bios on shutdown, and because debian (by default) does not install the efi image into the "expected default" location the system fails to boot.
+
+If you run into this problem, virtualbox will throw you into an uefi shell from which you can create a script at `startup.nsh` to get yourself into the os:
 
     echo "FS0:\EFI\debian\grubx64.efi" > FS0:\startup.nsh
 
-There will be an extra 5 second delay during the countdown to load the efi startup script, but your system should now start correctly.
+While this script can solve the problem for virtualbox, it's slow by 5 more seconds of boot-time prior to running that script and not the ideal solution.  The correct solution is to create a copy of your efi image at the expected default location.  **This change should also work well on bare metal uefi systems.**
+
+I recommend running these commands from a freshly installed system, the `startup.nsh` script as a faillback, with the `boot/` efi image copy as the primary solution:
+
+    echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
+    mkdir -p /boot/efi/EFI/boot
+    cp /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+
+
+# references
+
+- [uefi shell notes](https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_Shell)
+
