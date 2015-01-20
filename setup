@@ -309,7 +309,7 @@ fi
 # set default values for scripted execution
 ##
 
-remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/develop/"
+remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/dev/"
 [ "$dot_files" = "y" ] && dot_files="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
 
 
