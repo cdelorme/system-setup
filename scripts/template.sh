@@ -23,7 +23,7 @@ fi
 aptitude upgrade -yq
 
 # silently install template packages /w recommends
-aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found bash-completion unzip monit ntp resolvconf watchdog ssh sudo whois rsync curl e2fsprogs parted os-prober
+aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found bash-completion unzip monit ntp resolvconf watchdog ssh sudo whois rsync curl e2fsprogs parted os-prober smartmontools
 
 # fix (current) dependency problem via downgrading libssl1.0.0 package
 if [ $(aptitude versions libssl1.0.0 | grep -c "deb7u13") -gt 0 ] && [ $(aptitude versions libssl1.0.0 | grep -c "deb7u12") -gt 0 ]
