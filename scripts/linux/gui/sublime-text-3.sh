@@ -28,13 +28,48 @@ then
 
     # download configuration files
     mkdir -p "/home/${username}/.config/sublime-text-3/Packages/User"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" ] && cp "data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" ] && cp "data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" ] && cp "data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" ] && cp "data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" ] && cp "data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" ] && cp "data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
-    [ -f "data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" ] && cp "data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"  || $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" "/home/${username}/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/Preferences.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings"
+    fi
+    if [ -f "data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" ]
+    then
+        cp "data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" "/home/${username}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
+    else
+        $dl_cmd "/home/${username}/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings" "${remote_source}data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings"
+    fi
 
     # installation of plugins is left to the user
 fi
