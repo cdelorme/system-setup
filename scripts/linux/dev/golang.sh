@@ -4,7 +4,8 @@
 aptitude install -ryq gcc libc6-dev libc6-dev-i386 mercurial git subversion bzr
 
 # download source
-hg clone -u go1.3.1 https://code.google.com/p/go /tmp/go
+git clone https://go.googlesource.com/go /tmp/go
+(cd /tmp/go && git checkout go1.4.1)
 
 # build source
 (cd /tmp/go/src && GOROOT_FINAL="/usr/lib/go" ./make.bash)
