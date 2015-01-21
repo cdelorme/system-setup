@@ -417,6 +417,8 @@ For whatever reason pulse-audio refuses to play nicely until you have copied the
 
 It is neither mentioned during the package installation, nor is it easy to find anything to explain the phenomina that happen when you don't, hence why this step is here.  It would be very nice if it would create a copy on first-execution for any user automatically, instead of just exhibiting unexpected behavior.
 
+**On bare hardware you may have to perform some additional steps to set the default audio device.  This varies by system, fortunately the `pactl` command is very easy to run from command line and get the system configured.**
+
 
 ##### drive mounting
 
