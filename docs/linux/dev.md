@@ -93,8 +93,11 @@ _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisab
 - libavdevice-dev
 - libavutil-dev
 - libav-tools
+- youtube-dl
 
 _The `libfaac-dev` package exists on jessie, but not on wheezy._
+
+_The `youtube-dl` package also only exists on jessie, but can be installed manually on wheezy._
 
 **Wireless utilities (_optional_):**
 
@@ -279,7 +282,7 @@ If you follow these instructions and `startx` does not load any visual for you, 
 
 This is a really cool command line utility that you can use to download (the highest quality) youtube videos without any GUI utilities.  It includes asynchronous processing and even spits out the percent status.
 
-It is a python package, and you will need to [download and build and install it](../../../scripts/linux/workstation/youtube-dl.sh).
+If you are using Wheezy it is a python package, and you will need to [download and build and install it](../../../scripts/linux/workstation/youtube-dl.sh).  With Jessie you can install it from the package manager.
 
 
 ## [custom fonts](shared/custom-fonts.md)
