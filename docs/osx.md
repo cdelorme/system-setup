@@ -98,6 +98,9 @@ Here are some suggested changes to `System Preferences`:
         - Accessibility
             - Disable "Turn VoiceOver on or off" (checkbox)
             - Disable "Show Accessibility controls" (checkbox)
+        - App Shortcuts
+            - All Applications: `Zoom` via `cmd+alt+m`
+            - Google Chrome: `Zoom` via `shift+cmd+m`
         - Select "All controls" at bottom (radio)
     - Input Sources
         - Add Kotoeri (for Japanese Inputs)
@@ -127,6 +130,8 @@ Here are some suggested changes to `System Preferences`:
     - Do not show menu bar icon
 
 Adding an additional desktop to Mission Control and setting the battery to display its percentage are also advisable changes.
+
+_The zoom hotkey comes from the [iterm2](http://iterm2.com/) shortcut, and is a very helpful addition for those who like applications to fill-the-screen.  However, google chrome's default assumption for `Zoom` is to adjust the height and not fill the screen.  However, they interpret shift as a desire to fill vs full-height, thus if the hotkey contains the shift key it will do a proper fill, and needs its own special-case._
 
 
 ## spotlight cache
