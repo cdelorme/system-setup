@@ -99,7 +99,11 @@ mkdir -p /etc/iptables
 chmod +x "/etc/network/if-up.d/iptables"
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
 
-#
+# "fix" udev so it doesn't break network device identification for changing hardware
+mkdir -p /etc/udev/backup/{rules.d,lib}
+mv /etc/udev/rules.d/70-persistent-net.rules /etc/udev/backup/rules.d/
+mv /lib/udev/rules.d/75-persistent-net-generator.rules /etc/udev/backup/lib/
+mkdir -p /etc/udev/rules.d/70-persistent-net.rules
 
 # optionally enable jis locale & rebuild
 if [ "$jis" = "y" ] && [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
