@@ -86,8 +86,10 @@ fi
 
 # secure ssh & restart service
 sed -i "s/Port\s*[0-9].*/Port ${ssh_port}/" /etc/ssh/sshd_config
-sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
 sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
+sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
+echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
+echo "UseDNS no" >> /etc/ssh/sshd_config
 service ssh restart
 
 # install iptables
@@ -96,6 +98,8 @@ mkdir -p /etc/iptables
 [ -f "/etc/network/if-up.d/iptables" ] || $dl_cmd "/etc/network/if-up.d/iptables" "${remote_source}data/etc/network/if-up.d/iptables"
 chmod +x "/etc/network/if-up.d/iptables"
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
+
+#
 
 # optionally enable jis locale & rebuild
 if [ "$jis" = "y" ] && [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
