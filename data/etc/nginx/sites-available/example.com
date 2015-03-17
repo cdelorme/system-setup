@@ -14,9 +14,8 @@ server {
 
 # define alpha api source(s)
 upstream alpha-api {
-    least_conn;
     server 127.0.0.1:8080;
-    keep_alive 300;
+    keepalive 300;
 }
 
 # HTTPS config
