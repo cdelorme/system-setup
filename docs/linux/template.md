@@ -48,6 +48,8 @@ Of course, following the `netselect-apt` execution I would move onto the rest of
 - parted
 - os-prober
 - smartmontools
+- htop
+- pv
 
 While debian comes with some of these, some are not included by default, and all of them are very useful regardless of the final intended purpose of your system.  All systems should have basic version control; at least the four core (`bazaar`, `subversion`, `git`, and `mercural`).  A good set of network utilities like `rsync`, `curl`, and `whois` are pretty commonly useful.
 
