@@ -12,6 +12,12 @@ server {
     return 301 https://www.example.com$request_uri;
 }
 
+# define alpha api source(s)
+upstream alpha-api {
+    server 127.0.0.1:8080;
+    keepalive 300;
+}
+
 # HTTPS config
 server {
     listen 443 default ssl;
@@ -29,4 +35,12 @@ server {
 
     # generic configuration
     #include scripts.d/*.conf;
+
+    # serve alpha api
+    location /api/alpha {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Host $host;
+        proxy_pass http://alpha-api;
+    }
 }
