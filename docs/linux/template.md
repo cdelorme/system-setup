@@ -50,10 +50,16 @@ Of course, following the `netselect-apt` execution I would move onto the rest of
 - smartmontools
 - htop
 - pv
+- nload
+- iptraf
+- nethogs
+- wireshark
 
 While debian comes with some of these, some are not included by default, and all of them are very useful regardless of the final intended purpose of your system.  All systems should have basic version control; at least the four core (`bazaar`, `subversion`, `git`, and `mercural`).  A good set of network utilities like `rsync`, `curl`, and `whois` are pretty commonly useful.
 
 While I aim for a lightweight system, too often I find that recommended packages are actually very necessary to do many of the things I had intended.  To avoid problems with missing dependencies in a deep path I always include the `-r` flag for automatically adding recommended packages to the install list.
+
+Wih recent demands on my own systems at at work I started adding more utilities including process management, file copying, hard-drive status checking, and network troubleshooting.
 
 
 ## cron jobs
