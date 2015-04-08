@@ -320,7 +320,7 @@ remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/dev/"
 if which curl &> /dev/null
 then
     dl_cmd="curl -Lo"
-    source_cmd="curl -s"
+    source_cmd="curl -Ls"
 elif which wget &> /dev/null
 then
     dl_cmd="wget --no-check-certificate -O"
