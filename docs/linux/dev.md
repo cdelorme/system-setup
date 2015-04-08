@@ -418,7 +418,28 @@ For whatever reason pulse-audio refuses to play nicely until you have copied the
 
 It is neither mentioned during the package installation, nor is it easy to find anything to explain the phenomina that happen when you don't, hence why this step is here.  It would be very nice if it would create a copy on first-execution for any user automatically, instead of just exhibiting unexpected behavior.
 
-**On bare hardware you may have to perform some additional steps to set the default audio device.  This varies by system, fortunately the `pactl` command is very easy to run from command line and get the system configured.**
+**On bare hardware you may have to perform some additional steps to set the default audio device.  This varies by system, fortunately the `pactl` command is very easy to run from command line and get the system configured.**  In particular, you will probably have to run `set-default-sink`.
+
+
+##### pcmanfm
+
+I set the following settings for my file browser:
+
+- pcmanfm preferences
+	- general
+		- don't move files to trash can (just erase them)
+		- default view mode: Thumbnail View (I wish this was extensible to allow classifying folder view by contents)
+	- display
+		- Size of Thumbnails: 256x256 (larger on big-screens would be nice)
+		- Show thumbnails for remote files as well
+		- increase size-limit on thumbnails (20k instead of 2k?), really we'd always want to generate a thumbnail
+		- always show full file names
+	- volume management
+		- change to home folder instead of closing tabs on ejected device
+	- advanced
+		- archiver integration: xarchiver (preferred)
+
+The `tumbler` and `ffmpegthumbnailer` packages are used to generate thumbnails; _unfortunately there is no folder-preview thumbnailer_.
 
 
 ##### drive mounting
