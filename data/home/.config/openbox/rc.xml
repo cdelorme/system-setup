@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openbox_config xmlns="http://openbox.org/3.4/rc" xmlns:xi="http://www.w3.org/2001/XInclude">
-    <resistance><strength>10</strength><screen_edge_strength>20</screen_edge_strength></resistance>
-    <focus><focusNew>yes</focusNew><followMouse>no</followMouse><focusLast>yes</focusLast><underMouse>no</underMouse><focusDelay>200</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>
-    <placement><policy>Smart</policy><center>yes</center><monitor>Primary</monitor><primaryMonitor>1</primaryMonitor></placement>
+    <resistance><strength>15</strength><screen_edge_strength>40</screen_edge_strength></resistance>
+    <focus><focusNew>yes</focusNew><followMouse>no</followMouse></focus>
+    <placement><policy>Smart</policy><center>yes</center><monitor>Active</monitor><primaryMonitor>Active</primaryMonitor></placement>
+    <desktops><number>3</number><firstdesk>1</firstdesk><popupTime>1000</popupTime></desktops>
+    <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition></resize>
+    <menu><file>/var/lib/openbox/debian-menu.xml</file><file>menu.xml</file><hideDelay>200</hideDelay><middle>no</middle><submenuShowDelay>100</submenuShowDelay><submenuHideDelay>400</submenuHideDelay><applicationIcons>yes</applicationIcons><manageDesktops>no</manageDesktops></menu>
+    <margins><top>0</top><bottom>0</bottom><left>0</left><right>0</right></margins>
+    <dock><position>TopLeft</position><floatingX>0</floatingX><floatingY>0</floatingY><noStrut>no</noStrut><stacking>Above</stacking><direction>Vertical</direction><autoHide>no</autoHide><hideDelay>300</hideDelay><showDelay>300</showDelay><moveButton>Middle</moveButton></dock>
     <theme>
-        <name>Mire_v2_orange</name>
+        <name>Onyx-Citrus</name>
         <titleLayout>NLIMC</titleLayout>
         <keepBorder>yes</keepBorder>
         <animateIconify>yes</animateIconify>
@@ -15,78 +20,73 @@
         <font place="ActiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>
         <font place="InactiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>
     </theme>
-    <desktops><number>3</number><firstdesk>1</firstdesk><names></names><popupTime>875</popupTime></desktops>
-    <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>10</x><y>10</y></popupFixedPosition></resize>
-    <margins><top>0</top><bottom>0</bottom><left>0</left><right>0</right></margins>
-    <dock><position>TopLeft</position><floatingX>0</floatingX><floatingY>0</floatingY><noStrut>no</noStrut><stacking>Above</stacking><direction>Vertical</direction><autoHide>no</autoHide><hideDelay>300</hideDelay><showDelay>300</showDelay><moveButton>Middle</moveButton></dock>
     <keyboard>
         <chainQuitKey>C-g</chainQuitKey>
-        <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
-        <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
-        <keybind key="C-A-Up"><action name="GoToDesktop"><to>up</to><wrap>no</wrap></action></keybind>
-        <keybind key="C-A-Down"><action name="GoToDesktop"><to>down</to><wrap>no</wrap></action></keybind>
-        <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
-        <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
-        <keybind key="S-A-Up"><action name="SendToDesktop"><to>up</to><wrap>no</wrap></action></keybind>
-        <keybind key="S-A-Down"><action name="SendToDesktop"><to>down</to><wrap>no</wrap></action></keybind>
-        <keybind key="C-1"><action name="GoToDesktop"><to>1</to></action></keybind>
-        <keybind key="C-2"><action name="GoToDesktop"><to>2</to></action></keybind>
-        <keybind key="C-3"><action name="GoToDesktop"><to>3</to></action></keybind>
-        <keybind key="W-d"><action name="ToggleShowDesktop"/></keybind>
-        <keybind key="A-F4"><action name="Close"/></keybind>
-        <keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>
-        <keybind key="A-space"><action name="ShowMenu"><menu>client-menu</menu></action></keybind>
         <keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
         <keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
-        <keybind key="C-A-Tab"><action name="NextWindow"><panels>yes</panels><desktop>yes</desktop><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
-        <keybind key="W-S-Right"><action name="DirectionalCycleWindows"><direction>right</direction></action></keybind>
-        <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>
-        <keybind key="W-S-Up"><action name="DirectionalCycleWindows"><direction>up</direction></action></keybind>
-        <keybind key="W-S-Down"><action name="DirectionalCycleWindows"><direction>down</direction></action></keybind>
+        <keybind key="W-Tab"><action name="NextWindow"><allDesktops>yes</allDesktops></action></keybind>
+        <keybind key="W-S-Tab"><action name="PreviousWindow"><allDesktops>yes</allDesktops></action></keybind>
+        <keybind key="W-Up"><action name="ToggleMaximizeFull"/></keybind>
+        <keybind key="W-Down"><action name="Iconify"/></keybind>
+        <keybind key="W-Left">  <action name="MoveResizeTo"><monitor>1</monitor></action></keybind>
+        <keybind key="W-Right"> <action name="MoveResizeTo"><monitor>2</monitor></action></keybind>
+        <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+        <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+        <keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>
+        <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>
+        <keybind key="A-space"><action name="ShowMenu"><menu>client-menu</menu></action></keybind>
+        <keybind key="A-F4"><action name="Close"/></keybind>
+        <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>
+        <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>
         <keybind key="W-w"><action name="Execute"><command>x-www-browser</command></action></keybind>
         <keybind key="W-t"><action name="Execute"><command>x-terminal-emulator</command></action></keybind>
-        <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>
         <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>
         <keybind key="W-b"><action name="Execute"><command>pcmanfm</command></action></keybind>
         <keybind key="W-m"><action name="Execute"><command>vlc</command></action></keybind>
-        <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>
-        <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>
         <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>
+        <keybind key="W-f"><action name="Execute"><command>catfish</command></action></keybind>
+        <keybind key="W-s"><action name="Execute"><command>bash -c "sleep 2; xset dpms force off"</command></action></keybind>
         <keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>amixer set Master 5%+</command></action></keybind>
         <keybind key="XF86AudioLowerVolume"><action name="Execute"><command>amixer set Master 5%-</command></action></keybind>
         <keybind key="XF86AudioMute"><action name="Execute"><command>amixer set Master toggle</command></action></keybind>
-        <keybind key="W-f"><action name="Execute"><command>catfish</command></action></keybind>
-        <keybind key="W-s"><action name="Execute"><command>bash -c "sleep 2; xset dpms force off"</command></action></keybind>
+        <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+        <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+        <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>
+        <keybind key="W-S-Right"><action name="DirectionalCycleWindows"><direction>right</direction></action></keybind>
+        <keybind key="W-KP_6"><action name="MaximizeVert"/><action name="MoveResizeTo"><x>-0</x></action></keybind>
+        <keybind key="W-KP_4"><action name="MaximizeVert"/><action name="MoveResizeTo"><x>0</x></action></keybind>
     </keyboard>
     <mouse>
         <dragThreshold>1</dragThreshold>
         <doubleClickTime>200</doubleClickTime>
         <screenEdgeWarpTime>400</screenEdgeWarpTime>
-        <screenEdgeWarpMouse>false</screenEdgeWarpMouse>
-        <context name="Frame">
-            <mousebind button="A-Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
-            <mousebind button="A-Left" action="Click"><action name="Unshade"/></mousebind>
-            <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
-            <mousebind button="A-Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
-            <mousebind button="A-Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
-            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
-            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
-            <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
-            <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
-            <mousebind button="A-S-Up" action="Click"><action name="SendToDesktop"><to>previous</to></action></mousebind>
-            <mousebind button="A-S-Down" action="Click"><action name="SendToDesktop"><to>next</to></action></mousebind>
+        <context name="Root">
+            <mousebind button="Middle" action="Press"><action name="ShowMenu"><menu>client-list-combined-menu</menu></action></mousebind>
+            <mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind>
+        </context>
+        <context name="Icon">
+            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+        </context>
+        <context name="Iconify">
+            <mousebind button="Left Middle Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+            <mousebind button="Left Middle Right" action="Click"><action name="Iconify"/></mousebind>
+        </context>
+        <context name="Maximize">
+            <mousebind button="Left Middle Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="Left Middle Right" action="Click"><action name="ToggleMaximize"/></mousebind>
+        </context>
+        <context name="Close">
+            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="Left" action="Click"><action name="Close"/></mousebind>
+        </context>
+        <context name="AllDesktops">
+            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="Left" action="Click"><action name="ToggleOmnipresent"/></mousebind>
         </context>
         <context name="Titlebar">
             <mousebind button="Left" action="Drag"><action name="Move"/></mousebind>
             <mousebind button="Left" action="DoubleClick"><action name="ToggleMaximize"/></mousebind>
-            <mousebind button="Up" action="Click"><action name="if"><shaded>no</shaded><then><action name="Shade"/><action name="FocusToBottom"/><action name="Unfocus"/><action name="Lower"/></then></action></mousebind>
-            <mousebind button="Down" action="Click"><action name="if"><shaded>yes</shaded><then><action name="Unshade"/><action name="Raise"/></then></action></mousebind>
-        </context>
-        <context name="Titlebar Top Right Bottom Left TLCorner TRCorner BRCorner BLCorner">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
-            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
         </context>
         <context name="Top">
             <mousebind button="Left" action="Drag"><action name="Resize"><edge>top</edge></action></mousebind>
@@ -99,44 +99,23 @@
         </context>
         <context name="Bottom">
             <mousebind button="Left" action="Drag"><action name="Resize"><edge>bottom</edge></action></mousebind>
-            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
-        </context>
-        <context name="TRCorner BRCorner TLCorner BLCorner">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Left" action="Drag"><action name="Resize"/></mousebind>
         </context>
         <context name="Client">
             <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
             <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
             <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
         </context>
-        <context name="Icon">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
-            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
-        </context>
-        <context name="AllDesktops">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Left" action="Click"><action name="ToggleOmnipresent"/></mousebind>
-        </context>
-        <context name="Shade">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
-            <mousebind button="Left" action="Click"><action name="ToggleShade"/></mousebind>
-        </context>
-        <context name="Iconify">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
-            <mousebind button="Left" action="Click"><action name="Iconify"/></mousebind>
-        </context>
-        <context name="Maximize">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Left" action="Click"><action name="ToggleMaximize"/></mousebind>
-            <mousebind button="Middle" action="Click"><action name="ToggleMaximize"><direction>vertical</direction></action></mousebind>
-            <mousebind button="Right" action="Click"><action name="ToggleMaximize"><direction>horizontal</direction></action></mousebind>
-        </context>
-        <context name="Close">
-            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="Left" action="Click"><action name="Close"/></mousebind>
+        <context name="Frame">
+            <mousebind button="A-Left A-Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
+            <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
+            <mousebind button="A-Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
+            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+            <mousebind button="C-A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
+            <mousebind button="C-A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+            <mousebind button="A-S-Up" action="Click"><action name="SendToDesktop"><to>previous</to></action></mousebind>
+            <mousebind button="A-S-Down" action="Click"><action name="SendToDesktop"><to>next</to></action></mousebind>
         </context>
         <context name="Desktop">
             <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
@@ -148,18 +127,16 @@
             <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
             <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
         </context>
-        <context name="Root">
-            <mousebind button="Middle" action="Press"><action name="ShowMenu"><menu>client-list-combined-menu</menu></action></mousebind>
-            <mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind>
+        <context name="Titlebar Top Right Bottom Left TLCorner TRCorner BRCorner BLCorner">
+            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
+            <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
         </context>
-        <context name="MoveResize">
-            <mousebind button="Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
-            <mousebind button="Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
-            <mousebind button="A-Up" action="Click"><action name="GoToDesktop"><to>previous</to></action></mousebind>
-            <mousebind button="A-Down" action="Click"><action name="GoToDesktop"><to>next</to></action></mousebind>
+        <context name="TRCorner BRCorner TLCorner BLCorner">
+            <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
+            <mousebind button="Left" action="Drag"><action name="Resize"/></mousebind>
         </context>
     </mouse>
-    <menu><file>/var/lib/openbox/debian-menu.xml</file><file>menu.xml</file><hideDelay>200</hideDelay><middle>no</middle><submenuShowDelay>100</submenuShowDelay><submenuHideDelay>400</submenuHideDelay><applicationIcons>yes</applicationIcons><manageDesktops>no</manageDesktops></menu>
     <applications>
         <application name="urxvtq"><decor>no</decor><position force="yes"><x>center</x><y>0</y></position><desktop>all</desktop><layer>above</layer><skip_pager>yes</skip_pager><skip_taskbar>yes</skip_taskbar><maximized>Horizontal</maximized></application>
     </applications>
