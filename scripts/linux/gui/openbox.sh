@@ -109,7 +109,7 @@ then
     [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
 
     # check for ethernet devices
-    if [ $(ifconfig | grep "eth1 ") -eq 0 ]
+    if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
     then
         # use eth0
         sed -i "s/eth1/eth0/" "/home/${username}/.conkyrc"
