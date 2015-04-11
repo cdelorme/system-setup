@@ -88,6 +88,16 @@ then
     # download/install urxvtq guake-like-launcher
     [ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
 
+    # download compton configuration
+    [ -f "data/home/.compton.conf" ] && cp "data/home/.compton.conf" "/home/${username}/.compton.conf"  || $dl_cmd "/home/${username}/.compton.conf" "${remote_source}data/home/.compton.conf"
+
+    # check graphics card and adjust compton configuration
+    if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
+    then
+        sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' "/home/${username}/.compton.conf"
+        sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' "/home/${username}/.compton.conf"
+    fi
+
     # download/install various openbox config files
     mkdir -p "/home/${username}/.config/openbox"
     [ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
