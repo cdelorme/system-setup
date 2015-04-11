@@ -111,11 +111,26 @@ then
     # check for ethernet devices
     if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
     then
-        # use eth0
         sed -i "s/eth1/eth0/" "/home/${username}/.conkyrc"
     fi
 
-    # @todo(casey): check for multihead to adjust conky
+    # check for multihead to adjust conky
+    if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
+    then
+
+        # create two configurations
+        mkdir -p "/home/${username}/.conky"
+        mv -f "/home/${username}/.conkyrc" "/home/${username}/.conky/rc1"
+        cp -f "/home/${username}/.conky/rc1" "/home/${username}/.conky/rc2"
+
+        # adjust settings for dual-screens (assuming 1920 display resolutions)
+        sed -i "s/gap_x 0/gap_x 960/" "/home/${username}/.conky/rc1"
+        sed -i "s/gap_x 0/gap_x -960/" "/home/${username}/.conky/rc2"
+
+        # patch openbox autostart
+        sed -i "s;conky -d -q;conky -d -q -c /home/${username}/.conky/rc1;" "/home/${username}/.config/openbox/autostart"
+        echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c /home/${username}/.conky/rc2) &" >> "/home/${username}/.config/openbox/autostart"
+    fi
 
     # @todo configure desktop mimetype defaults
     mkdir -p "/home/${username}/.local/share/applications"
