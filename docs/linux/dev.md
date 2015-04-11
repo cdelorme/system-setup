@@ -180,6 +180,7 @@ The volumeicon package gives us an icon in the tint2 menu bar that allows us to 
 - zenity
 - zenity-common
 - pcmanfm
+- consolekit
 - feh
 - hsetroot
 - rxvt-unicode
@@ -353,7 +354,7 @@ You can find a list of named themes available to your system in `/usr/share/them
 
 #### [startx](../../../data/home/.xinitrc)
 
-We want the `startx` command to load openbox, which means we have to tell startx what to do using the `~/.xinitrc` file.  Simply add `exec openbox-session` to `~/.xinitrc`.
+We want the `startx` command to load openbox, which means we have to tell startx what to do using the `~/.xinitrc` file.  Simply add `exec ck-launch-session dbus-launch openbox-session` to `~/.xinitrc`.
 
 It would be wise to use `update-alternatives` to set the default window manager and session manager as well.
 
@@ -527,5 +528,9 @@ Keyboard layouts are managed by xorg currently, and utilities like `fbxkb` may a
 - [slim themes and testing](https://wiki.archlinux.org/index.php/SLiM#Theming)
 - [inserting lines with sed](http://unix.stackexchange.com/questions/35201/how-to-insert-a-line-into-text-document-right-before-line-containing-some-text-i)
 - [inserting with sed or awk](http://www.theunixschool.com/2012/06/insert-line-before-or-after-pattern.html)
-- [usb device connection](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)
 - [openbox themes](http://capn-damo.deviantart.com/gallery/37736739/Openbox)
+- [good documentation on customizing openbox](http://melp.nl/2011/01/10-must-have-key-and-mouse-binding-configs-in-openbox/)
+- [another good resource](http://openbox.org/wiki/Help:Configuration)
+- [list of actions](http://openbox.org/wiki/Help:Actions)
+- [bindings for mouse](http://openbox.org/wiki/Help:Bindings#Mouse_bindings)
+- [usb device connection](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)

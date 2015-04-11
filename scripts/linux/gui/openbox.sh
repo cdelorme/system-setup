@@ -6,7 +6,7 @@
 [ -z "$remote_source" ] && remote_source="https://raw.githubusercontent.com/cdelorme/system-setup/master/"
 
 # install gui packages
-aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils xinit xinput suckless-tools x11-utils compton desktop-base xdg-user-dirs shared-mime-info tint2 conky-all chromium zenity zenity-common pcmanfm xarchiver feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fontconfig fontconfig-config fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
+aptitude install -ryq openbox obconf obmenu menu openbox-themes dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils xinit xinput suckless-tools x11-utils compton desktop-base xdg-user-dirs shared-mime-info tint2 conky-all chromium zenity zenity-common pcmanfm consolekit xarchiver feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fontconfig fontconfig-config fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
 # make sure compton installs
 [ -f "scripts/linux/gui/compton.sh" ] && . "scripts/linux/gui/compton.sh" || . <($source_cmd "${remote_source}scripts/linux/gui/compton.sh")
@@ -66,13 +66,13 @@ if [ -n "$username" ]
 then
 
     # add user to general gui groups
-    usermod -aG fuse,scanner,bluetooth,netdev,audio,video,plugdev $username
+    usermod -aG scanner,bluetooth,netdev,audio,video,plugdev $username
 
     # ensure user bin folder exists
     mkdir -p "/home/${username}/.bin"
 
     # add openbox to xinitrc
-    echo "exec openbox-session" > "/home/${username}/.xinitrc"
+    echo "exec ck-launch-session dbus-launch openbox-session" > "/home/${username}/.xinitrc"
 
     # copy the defaults.pa into ~/.pulse, for audio control
     mkdir -p "/home/${username}/.pulse"
