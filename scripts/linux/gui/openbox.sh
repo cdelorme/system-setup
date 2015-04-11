@@ -71,8 +71,8 @@ then
     # ensure user bin folder exists
     mkdir -p "/home/${username}/.bin"
 
-    # add openbox to xinitrc
-    echo "exec ck-launch-session dbus-launch openbox-session" > "/home/${username}/.xinitrc"
+    # download/install .xinitrc
+    [ -f "data/home/.xinitrc" ] && cp "data/home/.xinitrc" "/home/${username}/.xinitrc"  || $dl_cmd "/home/${username}/.xinitrc" "${remote_source}data/home/.xinitrc"
 
     # copy the defaults.pa into ~/.pulse, for audio control
     mkdir -p "/home/${username}/.pulse"
