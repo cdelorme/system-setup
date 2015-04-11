@@ -169,6 +169,7 @@ The volumeicon package gives us an icon in the tint2 menu bar that allows us to 
 
 **Window manager features:**
 
+- compton
 - desktop-base
 - xdg-user-dirs
 - shared-mime-info
@@ -231,7 +232,7 @@ _Check this list against the packages above to ensure I have no duplicates, and 
 - libxml2-utils
 - xsltproc
 
-These are _required_ to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.  If you don't care about a good transparency utility for interface-eye-candy then you are welcome to ignore these and not install compton.
+These are _required_ to build compton from source, but not really used for anything else in my particular configuration, so they are placed here.  If you have debian jessie then compton is available through the package manager.
 
 
 ### development

@@ -1,10 +1,9 @@
 #!/bin/sh
-#which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5 & xset s 0 0 && xset s noblank && xset s off && xset -dpms) &
 which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
 which nosleep-daemon &> /dev/null && (nosleep-daemon) &
 which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
 which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
-which compton &> /dev/null && (compton -c) &
+which compton &> /dev/null && (compton) &
 which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &
 [ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find $HOME/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
 which tint2 &> /dev/null && (sleep 3 && tint2) &

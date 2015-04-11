@@ -105,7 +105,6 @@ The automation scripts will be dependent on the following variables:
 - install_wireless
 - install_transmission
 - install_openbox
-- install_compton
 - install_web
 
 Obviously, some of these are conditionally dependent on what you want to do, so not all of them are necessary in all cases.

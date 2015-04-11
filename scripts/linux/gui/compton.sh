@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# install dependencies without "recommended" additions
-aptitude install -Ryq asciidoc
+# if compton was not installed via the package manager build it
+if ! which compton &>/dev/null
+then
 
-# dependencies:
-aptitude install -ryq build-essential libxdamage-dev libxcomposite-dev libx11-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libxinerama-dev pkg-config x11-utils libpcre3-dev libconfig-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev x11proto-core-dev libxml2-utils xsltproc
+    # install dependencies without "recommended" additions
+    aptitude install -Ryq asciidoc
 
-# download source
-git clone https://github.com/chjj/compton.git /tmp/compton
+    # dependencies:
+    aptitude install -ryq build-essential libxdamage-dev libxcomposite-dev libx11-dev libxfixes-dev libxext-dev libxrender-dev libxrandr-dev libxinerama-dev pkg-config x11-utils libpcre3-dev libconfig-dev libdrm-dev libdbus-1-dev libgl1-mesa-dev x11proto-core-dev libxml2-utils xsltproc
 
-# build & install
-(cd /tmp/compton && make && make install)
+    # download source
+    git clone https://github.com/chjj/compton.git /tmp/compton
+
+    # build & install
+    (cd /tmp/compton && make && make install)
+fi
