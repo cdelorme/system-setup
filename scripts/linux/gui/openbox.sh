@@ -108,6 +108,15 @@ then
     # download/install conkyrc
     [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
 
+    # check for ethernet devices
+    if [ $(ifconfig | grep "eth1 ") -eq 0 ]
+    then
+        # use eth0
+        sed -i "s/eth1/eth0/" "/home/${username}/.conkyrc"
+    fi
+
+    # @todo(casey): check for multihead to adjust conky
+
     # @todo configure desktop mimetype defaults
     mkdir -p "/home/${username}/.local/share/applications"
     [ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"

@@ -392,6 +392,8 @@ _To acheive transparency you will want a compositor, and while `xcompmgr` will d
 
 Whitespace in conky output matters, so be aware of that when modifying the configuration file.
 
+If you are using multiple monitors and want conky to display on each you will need to run two instances of conky, and will need two conky configuration files.
+
 
 #### [clipit](../../../data/home/.config/clipit/clipitrc)
 
