@@ -122,6 +122,13 @@ update-alternatives --set editor /usr/bin/vim.basic
 # attempt to run dot-files installer as root so it adds to /etc/skel
 [ "$dot_files" != "n" ] && . <($source_cmd "$dot_files") -q
 
+# if git version >= 2 then append new lines to .gitconfig
+if which git &>/dev/null && [ $(git --version | grep -c " 2.") -eq 1 ]
+then
+    echo -ne "[push]\n\tdefault = simple" >> ~/.gitconfig
+    echo -ne "[push]\n\tdefault = simple" >> /etc/skel/.gitconfig
+fi
+
 # install some basic vim plugins & color schemes & copy to /etc/skel/.vim
 mkdir -p ~/.vim/{colors,tmp}
 $dl_cmd ~/.vim/tmp/ctrlp.zip "https://github.com/kien/ctrlp.vim/archive/master.zip"
