@@ -30,7 +30,7 @@ then
     while [ -z "$password" ]
     do
         echo -n "enter a password for your (new) system user: "
-        read password
+        read -s password
     done
 
     # ask if they want to install dot files
@@ -44,7 +44,7 @@ then
     read github_username
 
     echo -n "enter a github password for the configuration (optional): "
-    read github_password
+    read -s github_password
 
     # ask if they want to create a new id_rsa
     while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
@@ -133,18 +133,6 @@ then
             read install_openbox
         done
 
-        # add questions for openbox options
-        if [ "$install_openbox" = "y" ]
-        then
-
-            # ask if they want to install compton
-            while [ "$install_compton" != "n" ] && [ "$install_compton" != "y" ]
-            do
-                echo -n "would you like to install the compton transparency compsitor (y|n)? "
-                read install_compton
-            done
-        fi
-
         # ask if they want to install web services
         while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
         do
@@ -228,7 +216,7 @@ then
             while [ -z "$msmtp_password" ]
             do
                 echo -n "please enter the password for that gmail: "
-                read msmtp_password
+                read -s msmtp_password
             done
         fi
     fi
@@ -355,11 +343,9 @@ export install_weechat
 export install_wireless
 export install_transmission
 export install_openbox
-export install_compton
 export install_web
 export dl_cmd
 export source_cmd
-env
 
 ##
 # load service script

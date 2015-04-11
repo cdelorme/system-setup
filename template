@@ -34,7 +34,6 @@ export cronfile
 export remote_source
 export dl_cmd
 export source_cmd
-env
 
 # begin execution
 [ -f "scripts/template.sh" ] && . "scripts/template.sh" || eval "$($source_cmd ${remote_source}scripts/template.sh)"

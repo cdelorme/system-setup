@@ -35,7 +35,6 @@
 [ -z "$install_wireless" ] && install_wireless="y"
 [ -z "$install_transmission" ] && install_transmission="y"
 [ -z "$install_openbox" ] && install_openbox="y"
-[ -z "$install_compton" ] && install_compton="y"
 [ -z "$install_web" ] && install_web="y"
 
 # remote commands (would use curl, but base debian does not come with curl)
@@ -70,11 +69,9 @@ export install_weechat
 export install_wireless
 export install_transmission
 export install_openbox
-export install_compton
 export install_web
 export dl_cmd
 export source_cmd
-env
 
 # begin execution
 [ -f "scripts/dev.sh" ] && . "scripts/dev.sh" || eval "$($source_cmd ${remote_source}scripts/dev.sh)"

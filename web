@@ -56,7 +56,6 @@ export msmtp_username
 export msmtp_password
 export dl_cmd
 export source_cmd
-env
 
 # begin execution
 [ -f "scripts/web.sh" ] && . "scripts/web.sh" || eval "$($source_cmd ${remote_source}scripts/web.sh)"
