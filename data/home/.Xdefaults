@@ -19,7 +19,7 @@ URxvt.cursorUnderline:      false
 URxvt.pointerBlank:         true
 URxvt*font:                 xft:ForMateKonaVe:pixelsize=14
 URxvt*letterSpace:          -1
-URxvt.perl-ext-common:      default,matcher,tabbedex
+URxvt.perl-ext-common:      default,matcher,tabbedex,selection-to-clipboard
 URxvt.tabbed.autohide:      true
 URxvt.matcher.button:       1
 URxvt.urlLauncher:          x-www-browser
