@@ -1,0 +1,4 @@
+#!/bin/sh
+[ -d ~/Pictures/Screenshots ] || mkdir -p ~/Pictures/Screenshots
+import -window "$(xdotool getwindowfocus -f)" ~/Pictures/Screenshots/$(date +%F_%H%M%S_%N).png
+

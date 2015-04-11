@@ -55,6 +55,8 @@
         <keybind key="W-S-Right"><action name="DirectionalCycleWindows"><direction>right</direction></action></keybind>
         <keybind key="W-KP_6"><action name="MaximizeVert"/><action name="MoveResizeTo"><x>-0</x></action></keybind>
         <keybind key="W-KP_4"><action name="MaximizeVert"/><action name="MoveResizeTo"><x>0</x></action></keybind>
+        <keybind key="W-S-3"><action name="Execute"><command>screenshot</command></action></keybind>
+        <keybind key="W-S-4"><action name="Execute"><command>screenshot-active-application</command></action></keybind>
     </keyboard>
     <mouse>
         <dragThreshold>1</dragThreshold>

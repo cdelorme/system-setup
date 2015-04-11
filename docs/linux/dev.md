@@ -534,3 +534,5 @@ Keyboard layouts are managed by xorg currently, and utilities like `fbxkb` may a
 - [list of actions](http://openbox.org/wiki/Help:Actions)
 - [bindings for mouse](http://openbox.org/wiki/Help:Bindings#Mouse_bindings)
 - [usb device connection](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)
+- [adding screenshot scripts](https://wiki.archlinux.org/index.php/Taking_a_screenshot)
+- [getting active window coordinates](http://unix.stackexchange.com/questions/14159/how-do-i-find-the-window-dimensions-and-position-accurately-including-decoration)
