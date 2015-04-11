@@ -50,6 +50,13 @@ then
     [ -f "scripts/linux/comm/transmission.sh" ] && . "scripts/linux/comm/transmission.sh" || . <($source_cmd "${remote_source}scripts/linux/comm/transmission.sh")
 fi
 
+# check for and install nvidia drivers
+if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ]
+then
+    $dl_cmd "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
+    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+fi
+
 # conditionally install openbox
 if [ "$install_openbox" = "y" ]
 then
