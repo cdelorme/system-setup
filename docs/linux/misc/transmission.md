@@ -72,7 +72,6 @@ The configuration file can be found in `/etc/transmission-daemon/settings.json`,
         "rpc-bind-address": "0.0.0.0",
         "rpc-enabled": true,
         "rpc-password": "anything-turns-into-hash-on-first-run",
-        "rpc-port": 9010,
         "rpc-url": "/bt/",
         "rpc-username": "username",
         "rpc-whitelist": "*",
@@ -108,8 +107,8 @@ You will want to add these rules to your iptables to allow traffic:
     # tranmission peer traffic
     -A INPUT -p udp -dport 51413 -j ACCEPT
 
-    # secured transmission web interface
-    -A INPUT -p tcp -s 10.0.1.0/24 -dport 9010 -j ACCEPT
+    # secured transmission web interface (9091 default)
+    -A INPUT -p tcp -s 10.0.1.0/24 -dport 9091 -j ACCEPT
 
 _The second rule is optional, and dependent on your choice of transmission web interface port and whether you want to restrict access to the local network only, by restricting the range (in my case 10.0.1.0)._
 
@@ -124,4 +123,4 @@ If you intend to run transmission as a daemon, you will probably want to add a m
         if cpu usage > 80% for 15 cycles then restart
         if mem usage > 80% for 30 cycles then restart
 
-_You may also consider changing the group that transmission runs as, as a daemon, so that access privileges remain sane.  In my case I have an mdadm samba share and add `group sambashare` to my monit configuration._
+_You may also consider adding the `debian-transmission` user to any additional groups for files it may need to access, such as a shared drive._
