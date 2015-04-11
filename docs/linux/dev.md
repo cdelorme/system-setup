@@ -66,6 +66,7 @@ These are packages that should enhance your system as a terminal-based workstati
 - anacron
 - miscfiles
 - markdown
+- checkinstall
 - asciidoc
 
 _The `asciidoc` package has a 1GB "recommended" package, so it is highly advisable **not** to install it with recommended packages included._
