@@ -1,7 +1,7 @@
 
 # osx documentation
 
-This document is an aid to follow when configuring a fresh copy of OSX for development.
+My documentation to creating a great osx development environment, including all the tools and configuration I recommend.
 
 
 ## during installation
@@ -11,9 +11,9 @@ This document is an aid to follow when configuring a fresh copy of OSX for devel
 - use a Case Sensative HFS+
 - encrypt your drive with File Vault
 
-Case Sensative HFS+ partitions break loads of software and is an unnecessary change.
+Using a case sensative HFS+ partition will break a large amount of software (for example, adobe).
 
-Using File Vault prior to downloading the latest updates after installing can lead to having to unencrypt, update, then re-encrypt the drive, which is a huge time sink.
+If you encrypt your drive prior to downloading the latest updates, you may need to unencrypt, update, then re-encrypt the drive.  This is quite time consuming, so to avoid that don't encrypt during installation.  Additionally, if you use a modern osx laptop, the hard drive is soldered onto the motherboard, making it much less desirable as a target for physical hijacking.
 
 **Which leads us to the first post-install step:**
 
@@ -22,7 +22,12 @@ Using File Vault prior to downloading the latest updates after installing can le
 
 ## firewall
 
-The latest updates to the firewall have made it such that any application which updates may need to be approved again when launched.
+I highly recommend turning the firewall on by default, and setting stealth mode.
+
+![firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/firewall-system-preferences.png)
+![advanced firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/advanced-firewall-system-preferences.png)
+
+In certain cases, when software self-updates it may ask for permissions again from the firewall.  This is a fairly new feature, and may be improved as time passes.
 
 
 ## system preferences
@@ -32,6 +37,8 @@ Here are some suggested changes to `System Preferences`:
 - General
     - Graphite Color-scheme
     - Recent Items: None
+
+![general system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/general-system-preferences.png)
 
 - Dock
     - Smaller Size (slider)
@@ -45,6 +52,8 @@ Here are some suggested changes to `System Preferences`:
         - Autmatically hide and show the dock
         - Show indicator lights for open applications
 
+![dock system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/dock-system-preferences.png)
+
 - Mission Control
     - Do Not "Show Dashboard from F12" (checkbox)
     - Do Not "Automatically rearrange Spaces based on most recent use" (checkbox)
@@ -52,8 +61,15 @@ Here are some suggested changes to `System Preferences`:
     - Hot Corners
         - Show Desktop (top right)
 
+_I generally activate mission control and manually add one desktop for a total of 2 available by default._
+
+![mission control system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/mission-control-system-preferences.png)
+![mission control hot corners system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/hot-corners-mission-control-system-preferences.png)
+
 - Language & Region
     - 24-Hour Time (checkbox)
+
+![language & region system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/region-and-language-system-preferences.png)
 
 - Security & Privacy
     - General
@@ -63,17 +79,29 @@ Here are some suggested changes to `System Preferences`:
         - Firewall Options:
             - Stealth Mode
 
+![general security & privacy system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/general-security-and-privacy-system-preferences.png)
+![firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/firewall-system-preferences.png)
+![advanced firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/advanced-firewall-system-preferences.png)
+
 - Spotlight
     - Uncheck all but `Applications` and `System Preferences`
     - Privacy tab: Add user home folder (you will have a dialog to confirm)
 
+![spotlight system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/spotlight-system-preferences.png)
+![spotlight privacy system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/spotlight-privacy-system-preferences.png)
+
 - Display
     - Disable "Automatically adjust brightness"
+
+![display system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/display-system-preferences.png)
 
 - Energy Saver
     - Battery Display Sleep after 5 Minutes (slider)
     - Computer sleep after 10 minutes (slider)
-    - Do Not "Put hard disks to sleep when possible" (checkbox)
+
+_I usually select the battery from the top menu to change it to display its percent._
+
+![energy saver system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/energy-saver-system-preferences.png)
 
 - Keyboard
     - Keyboard
@@ -103,8 +131,19 @@ Here are some suggested changes to `System Preferences`:
             - Google Chrome: `Zoom` via `shift+cmd+m`
         - Select "All controls" at bottom (radio)
     - Input Sources
-        - Add Kotoeri (for Japanese Inputs)
+        - Add Japanese
         - Show in menu bar (checkbox)
+
+_The zoom hotkey comes from the [iterm2](http://iterm2.com/) shortcut, and is a very helpful addition for those who like applications to fill-the-screen.  However, google chrome's default assumption for `Zoom` is to adjust the height and not fill the screen.  However, they interpret shift as a desire to fill vs full-height, thus if the hotkey contains the shift key it will do a proper fill, and needs its own special-case._
+
+![keyboard system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-system-preferences.png)
+![keyboard modifiers system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keymoard-modifiers-system-preferences.png)
+![keyboard shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-system-preferences.png)
+![keyboard mission control shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-mission-control-system-preferences.png)
+![keyboard input source shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-input-system-preferences.png)
+![keyboard launchpad & dock shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-launchpad-system-preferences.png)
+![keyboard application shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-custom-system-preferences.png)
+![input sources system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-input-sources-system-preferences.png)
 
 - Trackpad
     - Point & Click
@@ -115,35 +154,40 @@ Here are some suggested changes to `System Preferences`:
         - Enable App Expose (three finger down)
         - Disable Launchpad
 
+![point & click trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-point-and-click-system-preferences.png)
+![Scroll & Zoom trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-scroll-and-zoom-system-preferences.png)
+![More Gestures trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-more-gestures-system-preferences.png)
+
 - Sound
     - Tink (Alert Sound)
     - Reduced Alert Volume
     - Disable "Play feedback when volume is changed" (checkbox)
 
+![sound system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/sound-effects-system-preferences.png)
+
 - Bluetooth
     - "Turn Bluetooth Off" (conserves battery)
+
+![bluetooth system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/bluetooth-system-preferences.png)
 
 - Sharing
     - Set your hostname to something less obnoxiously long (usually "full first & lastname's macbook")
 
+![sharing system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/sharing-system-preferences.png)
+
 - Time Machine
     - Do not show menu bar icon
 
-Adding an additional desktop to Mission Control and setting the battery to display its percentage are also advisable changes.
-
-_The zoom hotkey comes from the [iterm2](http://iterm2.com/) shortcut, and is a very helpful addition for those who like applications to fill-the-screen.  However, google chrome's default assumption for `Zoom` is to adjust the height and not fill the screen.  However, they interpret shift as a desire to fill vs full-height, thus if the hotkey contains the shift key it will do a proper fill, and needs its own special-case._
+![time machine system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/time-machine-system-preferences.png)
 
 
 ## spotlight cache
 
-If you end up with a problem with spotlight you can clear it's cache from command line.
-
-
-##### commands
-
-_Run this to clear all cache and rebuild (rebuilding can take quite a while):_
+If you end up with a problem with spotlight you can clear it's cache from command line:
 
     sudo mdutil -E /
+
+_Be aware, this can take quite a while to rebuild._
 
 
 ## [custom fonts](shared/custom-fonts.md)
@@ -157,13 +201,12 @@ Installing fonts can be done by opening them and clicking the install button, or
 
 I think the dashboard is a waste of space and resources and elect to disable it.  Applications load fast enough on SSD's that micro-applications are not nearly as useful as they may have been years back.
 
-
-##### commands
-
-_To stop the dashboard from starting by default:_
+To stop the dashboard from starting by default:
 
     defaults write com.apple.dashboard mcx-disabled -boolean YES
     killall Dock
+
+_This may not even be necessary with the latest release, yosemite._
 
 
 ## finder settings
@@ -190,7 +233,15 @@ Finder has two sections for configuration.  Starting with preferences (accessed 
     - Check all boxes
     - Search using current folder
 
+![general finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-general-settings.png)
+![tags finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-tags-settings.png)
+![sidebar finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-sidebar-settings.png)
+![advanced finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-advanced-settings.png)
+
 You can open the finder settings menu with "command + j".  _The desktop has a separate menu, so be sure you have opened a finder window and that it is in focus before using the hotkey._
+
+![folder finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-folder-settings.png)
+![desktop finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-desktop-settings.png)
 
 I generally check the box to force `List View` as the default.  I make sure to check all four of these options:
 
@@ -199,41 +250,26 @@ I generally check the box to force `List View` as the default.  I make sure to c
 - Show icon preview
 - Show Library Folder
 
-_I was rather happy when they added the library folder checkbox, though there is a command line method that still works as well._
+While it was wonderful that this is now a setting, you can always use the `chflags nohidden ~/Library` command from terminal as well.
 
 **Be sure you select "Use as Defaults" at the bottom or it won't take globally.**  Afterwards you'll want to remove saved view settings (the `.DS_Store` hidden files) recursively and globally to ensure the new settings take and are not overwritten locally per directory.
 
-
-##### commands
-
-_Run this to remove saved view settings and reload finder:_
+After making all of these changes to settings you can wipe out the previously cached view settings with two commands:
 
     sudo find / -name ".DS_Store" -depth -exec rm {} \;
     killall Finder
-
-_To fix the hidden `~/Library` via terminal, run this:_
-
-    chflags nohidden ~/Library
 
 
 ## set hostname & domain name
 
 You will want to set the machines host name, by default it will be your full name, which is often obnoxiously long for a network name.  You can set your hostname in `System Settings` under `Sharing`.  It can also be done via command line, but may not take affect globally until a reboot.
 
-You can set your domain name via command line as well.
-
-
-##### commands
-
-_Run this command to set your hostname via terminal:_
+You can set your hostname and domain name via command line as well:
 
     sudo scutil --set HostName mypc
-
-_Full affects may not take place until rebooting._
-
-_To set your domain name:_
-
     domainname example.loc
+
+_Effects may not be complete until rebooting, so the gui is preferred._
 
 
 ## configure terminal
@@ -441,23 +477,24 @@ _This will install homebrew and my list of packages:_
     brew install wget
     brew install tmux
     brew install openssl
-    brew install --with-gettext --with-pcre git
+    brew install --with-gettext --with-pcre --with-blk-sha1 git
     brew install git-flow
     brew install mercurial
     brew install bzr
     brew install --with-python svn
-    brew install --cross-compile-all go
+    brew install --with-cc-all go
     brew install --with-rtmpdump youtube-dl
     brew install awscli
-    brew install --with-fftw --with-jpeg --with-giflib --with-lame --with-xpdf swftools
+    brew install --with-fftw --with-jpeg --with-giflib --with-lame swftools
     brew install --with-lua --with-python3 --override-system-vi vim
-    brew install --with-aspell --with-lua --with-python --with-guile --with-perl weechat
+    brew install --with-lua --with-python --with-guile --with-perl weechat
+    brew install Caskroom/cask/osxfuse
     brew install sshfs
-    brew install --with-tools ffmpeg
+    brew install --with-faac --with-fdk-aac --with-ffplay --with-fontconfig --with-freetype --with-libass --with-libbluray --with-libcaca --with-libvorbis --with-libssh --with-libvidstab --with-libvpx --with-openjpeg --with-openssl --with-rtmpdump --with-speex --with-theora --with-tools --with-webp --with-x265 ffmpeg
     brew install sfml
     brew install --static glfw3
     brew install sdl2
-    brew install --with-ghostscript --with-libtiff --with-jasper --with-libwmf --with-little-cms2 --with-perl graphicsmagick
+    brew install --with-libtiff --with-libwmf --with-little-cms2 --with-webp graphicsmagick
     sudo /bin/cp -RfX /usr/local/opt/osxfuse/Library/Filesystems/osxfusefs.fs /Library/Filesystems/
     sudo chmod +s /Library/Filesystems/osxfusefs.fs/Support/load_osxfusefs
     aws configure
@@ -572,7 +609,7 @@ _Add this to your `~/.bashrc` or `~/.profile`:_
 _This is another configuration that I include in my dot-files repository._
 
 
-### [sublime text](https://github.com/cdelorme/system-setup/tree/master/shared_config/sublime_text.md)
+### [sublime text](shared/sublime_text.md)
 
 Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
 
