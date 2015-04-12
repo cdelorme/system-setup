@@ -1,14 +1,20 @@
 #!/bin/bash
-# search and destroy mac/windows garbage files
+# search and destroy garbage files
 if [ -d /media ]
 then
-    find /media -iname "thumbs.db" -exec rm -rf {} \;
-    find /media -iname ".ds_store" -exec rm -rf {} \;
+    find /media -iname "thumbs.db" -exec rm {} \;
+    find /media -iname ".ds_store" -exec rm {} \;
     find /media -name '._*' -exec rm -rf {} \;
 fi
-# defragment ext4 devices, and reduce stress by running condensed fstrim operations
-for DEVICE in $(mount | grep ext4 | awk '{print $1}')
+# defragment and fstrim ext4 weekly
+for filesystem in $(mount -t ext4 | awk '{print $3}' )
 do
-    e4defrag "${DEVICE}"
-    fstrim "${DEVICE}"
+	e4defrag "$filesystem"
+	fstrim "$filesystem"
+done
+# defragment and rebalance btrfs weekly
+for filesystem in $(mount -t btrfs | awk '{print $3}' )
+do
+    btrfs filesystem defragment -r -clzo "$filesystem"
+    btrfs balance start "$filesystem"
 done

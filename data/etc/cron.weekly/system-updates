@@ -1,4 +1,7 @@
 #!/bin/bash
+# execute btrfs snapshot prior to running updates
+# set headless flags for debian package updates
+
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
 netselect-apt -sn -o /etc/apt/sources.list $(lsb_release -c | cut -f2)
 aptitude clean

@@ -259,6 +259,14 @@ If you want to mount a subvolume without mounting the entire pool or "root" subv
 **Almost all of the btrfs commands accept "shortest match", so if `btrfs subvolume list /` seems too long, you can also use `btrfs su l /` to get the same output.**
 
 
+## known bugs
+
+**debian jessie is on kernel 3.16 which unfortunately suffers from two major bugs:**
+
+- deletion of subvolumes can crash the kernel
+- quota's are borked (don't use them, such as to limit size of folder(s))
+
+
 # references
 
 - [guide part 1](http://www.linux.com/learn/tutorials/767332-howto-manage-btrfs-storage-pools-subvolumes-and-snapshots-on-linux-part-1)
@@ -270,3 +278,5 @@ If you want to mount a subvolume without mounting the entire pool or "root" subv
 - [incremental backups](https://btrfs.wiki.kernel.org/index.php/Incremental_Backup)
 - [send & receive](http://marc.merlins.org/perso/btrfs/post_2014-03-22_Btrfs-Tips_-Doing-Fast-Incremental-Backups-With-Btrfs-Send-and-Receive.html)
 - [btrfs fun](http://www.funtoo.org/BTRFS_Fun)
+- [superb resource](http://codepoets.co.uk/2014/btrfs-gotchas-balance-scrub-snapshots-quota/)
+- [another excellent resource](http://blog.kourim.net/installing-debian-on-btrfs-subvolume)
