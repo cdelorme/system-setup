@@ -1,7 +1,13 @@
 #!/bin/bash
-# execute btrfs snapshot prior to running updates
-# set headless flags for debian package updates
 
+# @todo(casey): execute btrfs snapshot prior to running updates
+
+# set headless flags for debian package updates
+unset UCF_FORCE_CONFOLD
+export UCF_FORCE_CONFNEW=true
+export DEBIAN_FRONTEND=noninteractive
+
+# update best mirror (fallback to old config on failure)
 mv /etc/apt/sources.list /etc/apt/sources.list.bak
 netselect-apt -sn -o /etc/apt/sources.list $(lsb_release -c | cut -f2)
 aptitude clean
@@ -11,5 +17,5 @@ then
     aptitude clean
     aptitude update
 fi
-aptitude upgrade -yq
+aptitude upgrade -yq -o Dpkg::Options::="--force-confnew" -o Dpkg::Options::="--force-confold"
 update-command-not-found
