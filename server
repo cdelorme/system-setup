@@ -1,0 +1,298 @@
+#!/bin/bash
+set -eufxo pipefail
+IFS=$'\n\t'
+
+##
+# fail if not running as root
+##
+#[ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
+
+##
+# define reusable functions
+##
+
+grab_or_fallback()
+{
+    TMPIN=""
+    read -p "${1:-}: " TMPIN
+    [ -z "${TMPIN:-}" ] && TMPIN="${2:-}"
+    return 0
+}
+
+grab_acceptable_input()
+{
+    TMPIN=""
+    # while [ -z "$password" ]
+    # do
+    #     echo -n "enter a password for your (new) system user: "
+    #     read -s password
+    # done
+
+    # read -p "${1:-}: " TMPIN
+    # [ -z "${TMPIN:-}" ] && TMPIN="${2:-}"
+    return 0
+}
+
+grab_acceptable_secret_input()
+{
+    return 0
+}
+
+#grab_or_fallback "message" "default"
+#echo "value: $TMPIN"
+
+# function accepts message & fallback value
+# function accepts message & acceptable values (must equal before continuing)
+
+
+##
+# gather user defined configuration
+##
+
+# ask for username (optional)
+# ask for password (optional - depends on non-empty username)
+# ask whether to install my dot files (y/n)
+# ask for github username (optional)
+# ask for github password (optional - depends on non-empty github username)
+
+# ssh port (optional)
+# timezone (optional)
+# custom (monospace/jis) fonts (optional)
+
+# create ssh key (y/n)
+# ssh key password (optional if `password` exists as fallback)
+
+
+value="banana"
+arr=("one" "two" "three")
+
+echo ${arr[*]/$value//}
+
+
+username="root"
+[ -z "${ssh_port:-}" ] && ssh_port=22
+[ -z "${timezone:-}" ] && timezone="US/Eastern"
+[ -z "${system_hostname:-}" ] && system_hostname=server
+cronfile="/var/spool/cron/crontabs/${username}"
+github_https="https://github.com/cdelorme/system-setup.git"
+
+# can probably do away with:
+# dl_cmd
+# source_cmd
+
+
+
+
+    # # new user credentials
+    # while [ -z "$username" ]
+    # do
+    #     echo -n "enter a username for your (new) system user: "
+    #     read username
+    # done
+    # while [ -z "$password" ]
+    # do
+    #     echo -n "enter a password for your (new) system user: "
+    #     read -s password
+    # done
+
+    # # ask if they want to install dot files
+    # while [ "$dot_files" != "n" ] && [ "$dot_files" != "y" ]
+    # do
+    #     echo -n "install dot-files (y|n)? "
+    #     read dot_files
+    # done
+
+    # echo -n "enter a github username for the configuration (optional): "
+    # read github_username
+
+    # echo -n "enter a github password for the configuration (optional): "
+    # read -s github_password
+
+    # # ask if they want to create a new id_rsa
+    # while [ "$create_ssh" != "n" ] && [ "$create_ssh" != "y" ]
+    # do
+    #     [ -f "/home/$username/.ssh/id_rsa" ] && echo -n "would you like to create a replacement ssh key (replaces ~/.ssh/id_rsa, y|n)? " || echo -n "would you like to generate an ssh key (y|n)? "
+    #     read create_ssh
+    # done
+
+    # # verify whether they wish to upload their new key to github
+    # if [ "$create_ssh" = "y" ] && [ -n "$github_password" ]
+    # then
+    #     while [ "$send_ssh_to_github" != "n" ] && [ "$send_ssh_to_github" != "y" ]
+    #     do
+    #         echo -n "do you want your new ssh key to be sent to github (y|n)? "
+    #         read send_ssh_to_github
+    #     done
+    # fi
+
+    # # verify whether default port is "ok"
+    # echo -n "enter an ssh port (default: 22): "
+    # read ssh_port
+
+    # # ask for a host & domain name
+    # echo -n "enter a hostname (default: $service): "
+    # read system_hostname
+    # echo -n "enter a domain name (optional): "
+    # read domainname
+
+    # # verify timezone
+    # echo -n "enter a timezone path (default: US/Eastern): "
+    # read timezone
+
+    # # as if they want to enable jis locale
+    # while [ "$jis" != "n" ] && [ "$jis" != "y" ]
+    # do
+    #     echo -n "enable jis locale (y|n)? "
+    #     read jis
+    # done
+
+    # ##
+    # # request service specific settings
+    # ##
+
+    # if [ "$service" = "dev" ]
+    # then
+
+    #     # ask if they want to install mdadm raid software
+    #     while [ "$install_mdadm" != "n" ] && [ "$install_mdadm" != "y" ]
+    #     do
+    #         echo -n "would you like to install the mdadm software raid package (y|n)? "
+    #         read install_mdadm
+    #     done
+
+    #     # ask if they want to install samba
+    #     while [ "$install_samba" != "n" ] && [ "$install_samba" != "y" ]
+    #     do
+    #         echo -n "would you like to install samba file sharing (y|n)? "
+    #         read install_samba
+    #     done
+
+    #     # ask if they want weechat
+    #     while [ "$install_weechat" != "n" ] && [ "$install_weechat" != "y" ]
+    #     do
+    #         echo -n "would you like to install the weechat irc client (y|n)? "
+    #         read install_weechat
+    #     done
+
+    #     # ask if they want to install wireless utilities
+    #     while [ "$install_wireless" != "n" ] && [ "$install_wireless" != "y" ]
+    #     do
+    #         echo -n "would you like to install wireless & bluetooth utilities (y|n)? "
+    #         read install_wireless
+    #     done
+
+    #     # ask if they want to install transmission
+    #     while [ "$install_transmission" != "n" ] && [ "$install_transmission" != "y" ]
+    #     do
+    #         echo -n "would you like to install the transmission bittorrent client (y|n)? "
+    #         read install_transmission
+    #     done
+
+    #     # ask if they want openbox
+    #     while [ "$install_openbox" != "n" ] && [ "$install_openbox" != "y" ]
+    #     do
+    #         echo -n "would you like to install the openbox graphical environment (y|n)? "
+    #         read install_openbox
+    #     done
+
+    #     # ask if they want to install web services
+    #     while [ "$install_web" != "n" ] && [ "$install_web" != "y" ]
+    #     do
+    #         echo -n "would you like to install web services (y|n)? "
+    #         read install_web
+    #     done
+
+    #     # assume processing tools (may include duplicates of some packages...)
+    #     [ "$install_web" = "y" ] && install_processing_tools="y"
+    # fi
+
+    # # for web/dev ask server-service installation questions
+    # if [ "$service" = "web" ] || [[ "$service" = "dev" && "$install_web" = "y" ]]
+    # then
+
+    #     # ask about processing tools
+    #     while [ "$install_processing_tools" != "n" ] && [ "$install_processing_tools" != "y" ]
+    #     do
+    #         echo -n "would you like to install video, audio, and graphics processing utilities (y|n)? "
+    #         read install_processing_tools
+    #     done
+
+    #     # mongodb questions
+    #     while [ "$install_mongodb" != "n" ] && [ "$install_mongodb" != "y" ]
+    #     do
+    #         echo -n "would you like to install mongodb (y|n)? "
+    #         read install_mongodb
+    #     done
+    #     if [ "$install_mongodb" = "y" ]
+    #     then
+    #         while [ "$public_mongodb" != "n" ] && [ "$public_mongodb" != "y" ]
+    #         do
+    #             echo -n "would you like to make mongodb publicly accessible (y|n)? "
+    #             read public_mongodb
+    #         done
+    #     fi
+
+    #     # mariadb questions
+    #     while [ "$install_mariadb" != "n" ] && [ "$install_mariadb" != "y" ]
+    #     do
+    #         echo -n "would you like to install mariadb (y|n)? "
+    #         read install_mariadb
+    #     done
+    #     if [ "$install_mariadb" = "y" ]
+    #     then
+    #         while [ "$public_mariadb" != "n" ] && [ "$public_mariadb" != "y" ]
+    #         do
+    #             echo -n "would you like to make mariadb publicly accessible (y|n)? "
+    #             read public_mariadb
+    #         done
+    #     fi
+
+    #     # php-fpm questions
+    #     while [ "$install_phpfpm" != "n" ] && [ "$install_phpfpm" != "y" ]
+    #     do
+    #         echo -n "would you like to install php-fpm (y|n)? "
+    #         read install_phpfpm
+    #     done
+    #     if [ "$install_phpfpm" = "y" ]
+    #     then
+    #         while [ "$public_phpfpm" != "n" ] && [ "$public_phpfpm" != "y" ]
+    #         do
+    #             echo -n "would you like to make php-fpm publicly accessible (y|n)? "
+    #             read public_phpfpm
+    #         done
+    #     fi
+
+    #     # mail server questions
+    #     while [ "$install_msmtp" != "n" ] && [ "$install_msmtp" != "y" ]
+    #     do
+    #         echo -n "would you like to install the msmtp mail server (y|n)? "
+    #         read install_msmtp
+    #     done
+    #     if [ "$install_msmtp" = "y" ]
+    #     then
+    #         while [ -z "$msmtp_username" ]
+    #         do
+    #             echo -n "please enter a valid gmail username for msmtp: "
+    #             read msmtp_username
+    #         done
+    #         while [ -z "$msmtp_password" ]
+    #         do
+    #             echo -n "please enter the password for that gmail: "
+    #             read -s msmtp_password
+    #         done
+    #     fi
+    # fi
+
+    # ##
+    # # set platform defaults
+    # ##
+
+    # [ -z "$ssh_port" ] && ssh_port=22
+    # [ -z "$timezone" ] && timezone="US/Eastern"
+    # [ -z "$system_hostname" ] && system_hostname=$service
+    # cronfile="/var/spool/cron/crontabs/${username}"
+
+
+
+
+echo "done!"
