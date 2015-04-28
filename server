@@ -21,10 +21,10 @@ IFS=$'\n\t'
 ##
 grab_or_fallback()
 {
-    export ${1}=""
-    read -p "${3:-input}: " ${1}
-    [ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-    return 0
+	export ${1}=""
+	read -p "${3:-input}: " ${1}
+	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
+	return 0
 }
 
 ##
@@ -35,11 +35,11 @@ grab_or_fallback()
 ##
 grab_secret_or_fallback()
 {
-    export ${1}=""
-    read -p "${3:-input}: " -s ${1}
-    echo "" # move to nextline
-    [ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-    return 0
+	export ${1}=""
+	read -p "${3:-input}: " -s ${1}
+	echo "" # move to nextline
+	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
+	return 0
 }
 
 ##
@@ -49,12 +49,12 @@ grab_secret_or_fallback()
 ##
 grab_yes_no()
 {
-    export ${1}=""
-    until [[ "$(eval echo \$$1)" == *"y"* ]] || [[ "$(eval echo \$$1)" == *"n"* ]]
-    do
-        read -p "${2:-} (yn)? " ${1}
-    done
-    return 0
+	export ${1}=""
+	until [[ "$(eval echo \$$1)" == *"y"* ]] || [[ "$(eval echo \$$1)" == *"n"* ]]
+	do
+		read -p "${2:-} (yn)? " ${1}
+	done
+	return 0
 }
 
 
@@ -74,7 +74,7 @@ grab_or_fallback "github_username" "" "enter your github username"
 [ -n "$github_password" ] && grab_yes_no "github_ssh_key" "upload ssh key to github"
 
 # various settings
-grab_or_fallback "ssh_port" "22" "enter your preferred ssh port"
+grab_or_fallback "ssh_port" "22" "enter your preferred ssh port (22)"
 grab_or_fallback "ssh_port" "US/Eastern" "enter your preferred timezone (eg. US/Eastern)"
 grab_or_fallback "system_hostname" "" "enter a system hostname"
 grab_or_fallback "system_domainname" "" "enter a system domain name"
@@ -93,8 +93,8 @@ grab_yes_no "install_mongodb" "install mongodb"
 #grab_yes_no "install_postgresql" "install postgres"
 # [ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
 grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
-grab_or_fallback "mail_server_username" "$username" "mail server username"
-grab_or_fallback "mail_server_password" "$password" "mail server password"
+[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
+[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
 
 
 ##
