@@ -13,7 +13,7 @@ There are two major concerns with templates:
 
 ## snapshots
 
-Snapshots in a virtual environment consume a significant amount of space.  While they are easily the most convenient tools, you may be better served created multiple independent templates.  Systems like Parallels Desktop cannot compress the drives once you have created a snapshot either.
+Snapshots in a virtual environment consume a significant amount of space.  While they are easily the most convenient tools, you may be better served creating multiple independent templates.  Systems like Parallels Desktop cannot compress the drives once you have created a snapshot either.
 
 
 ## udev and network adapters
