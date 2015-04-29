@@ -89,7 +89,7 @@ grab_yes_no "install_transmission" "install transmission bittorrent server"
 grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 
 # web service questions
-grab_yes_no "for_web_or_dev" "is this a web or development server"
+grab_yes_no "for_web_or_dev" "is this a web server"
 if [ "$for_web_or_dev" = "y" ]
 then
 	grab_yes_no "install_nginx" "do you want to install nginx web & proxy server"
@@ -111,6 +111,14 @@ then
 
 	# as if we want development tools
 	grab_yes_no "install_development_tools" "do you want to install development tools"
+	if [ "$install_development_tools" = "y" ]
+	then
+
+		# languages for development
+		grab_yes_no "install_golang" "do you want to install golang"
+		grab_yes_no "install_nodejs" "do you want to install nodejs"
+		grab_yes_no "install_openjdk" "do you want to install openjdk for java development"
+	fi
 
 	# desktop questions
 	grab_yes_no "install_openbox" "would you like to install the openbox desktop environment"
@@ -126,11 +134,6 @@ then
 		# game packages
 		grab_yes_no "install_gaming_software" "would you like to install gaming software like steam and playonlinux"
 	fi
-
-	# languages for development
-	grab_yes_no "install_golang" "do you want to install golang"
-	grab_yes_no "install_nodejs" "do you want to install nodejs"
-	grab_yes_no "install_openjdk" "do you want to install openjdk for java development"
 fi
 
 
@@ -150,9 +153,9 @@ export dotfiles_https="https://raw.githubusercontent.com/cdelorme/dot-files/mast
 
 if [ -d "/boot/efi" ]
 then
-	mkdir -p /boot/efi/boot
+	mkdir -p /boot/efi/EFI/boot
 	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
-	cp -f /boot/efi/debian/grubx64.efi /boot/efi/boot/bootx64.efi
+	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
 	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi"
 fi
 
@@ -180,11 +183,11 @@ then
 	then
 
 		# create /home subvolume if it is not already a subvolume
-		if [ "(btrfs subvol list / | awk '{print $9}')" != "home" ]
+		if [ "$(btrfs subvol list / | awk '{print $9}')" != "home" ]
 		then
 			mv -f /home /home.bak
 			btrfs subvol create /home
-			find /home.bak/* -maxdepth 0 -type d -exec cp -R {} /home/ \;
+			find /home.bak -mindepth 1 -maxdepth 1 -exec cp -R {} /home/ \;
 			rm -rf /home.bak/
 		fi
 
@@ -335,13 +338,32 @@ then
 	if [ "$install_development_tools" = "y" ]
 	then
 		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsmfl-dev
-	fi
 
-	# check for and install nvidia drivers
-	if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ]
-	then
-	    curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
-	    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+		# conditionally install global gvm
+		if [ "$install_golang" = "y" ]
+		then
+			git clone https://github.com/moovweb/gvm /etc/skel/.gvm
+
+			# add lines to load gvm in .bashrc
+			echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
+			echo '[ -s "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
+		fi
+
+		# conditionally install global nvm
+		if [ "$install_nodejs" = "y" ]
+		then
+			curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
+
+			# add lines to load nvm in .bashrc
+			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
+			echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
+		fi
+
+		# conditionally install global openjdk
+		if [ "$install_openjdk" = "y" ]
+		then
+			aptitude install -ryq openjdk-7-jre
+		fi
 	fi
 
 	# conditionally install openbox desktop environment
@@ -384,6 +406,13 @@ then
 	    mkdir -p /etc/skel/.config/sublime-text-3/Installed Packages/
 	    curl -Lso /etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package "https://sublime.wbond.net/Package%20Control.sublime-package"
 
+		# check for and install nvidia drivers
+		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ]
+		then
+		    curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
+		    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+		fi
+
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
@@ -391,32 +420,6 @@ then
 
 			# @todo(casey): xboxdrv configuration
 		fi
-	fi
-
-	# conditionally install global gvm
-	if [ "$install_golang" = "y" ]
-	then
-		git clone https://github.com/moovweb/gvm /etc/skel/.gvm
-
-		# add lines to load gvm in .bashrc
-		echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
-		echo '[ -s "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
-	fi
-
-	# conditionally install global nvm
-	if [ "$install_nodejs" = "y" ]
-	then
-		curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
-
-		# add lines to load nvm in .bashrc
-		echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
-		echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
-	fi
-
-	# conditionally install global openjdk
-	if [ "$install_openjdk" = "y" ]
-	then
-		aptitude install -ryq openjdk-7-jre
 	fi
 fi
 
@@ -592,6 +595,13 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 ##
 # create user account
 ##
+
+# create the user & add to basic groups
+useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+usermod -aG sudo,adm $username
+
+
+
 
 # # user customizations
 # if [ -n "$username" ]
