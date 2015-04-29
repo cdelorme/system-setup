@@ -3,6 +3,8 @@
 
 A software raid solution available on linux.  I will cover installation, and some tips on managing software raid configurations.
 
+_While I may still use mdadm, I have been using btrfs for handling all disk management tasks, and so this document may not be kept up to date._
+
 
 ## installation
 
@@ -116,3 +118,18 @@ To go back to idle:
 
     echo idle > /sys/block/md0/md/sync_action
 
+
+## automated installation
+
+On debian, installing mdadm will ask you a few questions.  These can be bypassed by supplying debconf options:
+
+    # pre-emptive responses to mdadm package installation
+    echo "mdadm   mdadm/autostart boolean true" | debconf-set-selections
+    echo "mdadm   mdadm/autocheck boolean true" | debconf-set-selections
+    echo "mdadm   mdadm/mail_to   string  root" | debconf-set-selections
+    echo "mdadm   mdadm/initrdstart   string  all" | debconf-set-selections
+    echo "mdadm   mdadm/initrdstart_notinconf boolean false" | debconf-set-selections
+    echo "mdadm   mdadm/start_daemon  boolean true" | debconf-set-selections
+
+    # install package
+    aptitude install -ryq mdadm

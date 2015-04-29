@@ -16,6 +16,13 @@ Then we have to add them sources to `/etc/apt/sources.list.d/dotdeb.list`:
     deb http://packages.dotdeb.org wheezy all
     deb-src http://packages.dotdeb.org wheezy all
 
+Don't forget to update aptitude after setting the new source file:
+
+	aptitude clean
+	aptitude update
+
+Now you can freely search for and install packages from the dotdeb repository.
+
 
 # references
 

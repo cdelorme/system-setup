@@ -30,11 +30,20 @@ If you are attempting an unattended install you will need to modify debconf sele
     echo 'mariadb-server-5.5 mysql-server/root_password password ""' | debconf-set-selections
     echo 'mariadb-server-5.5 mysql-server/root_password_again password ""' | debconf-set-selections
 
+_In recent attempts I found that an empty string may fail, so to work around this the alternative is to set it to something, like this:_
+
+    echo "mariadb-server-5.5 mysql-server/root_password password root" | debconf-set-selections
+    echo "mariadb-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
+
 **Installation:**
 
     aptitude install mariadb-server
 
 Post install you may want to tune it, but I don't have any documentation or advice in that area.
+
+If you used the debconf settings but could not use an empty string you can change the password to an empty string via:
+
+    mysql -uroot -proot -e "SET PASSWORD = PASSWORD('');"
 
 
 ## monit
@@ -50,11 +59,30 @@ You may want to add this to your monit scripts at `/etc/monit/monitrc.d/mariadb`
         if 3 restarts within 8 cycles then timeout
 
 
+## securing post-installation
+
+The following lines roughly reproduce the steps of running `mysql_secure_installation` after installing:
+
+    mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+    mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
+    mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
+    mysql -u root -e "FLUSH PRIVILEGES;"
+
+_I am not as concerned about login access as I am about table and remote access security._  By restricting access to local only for root, then the same barrier they have to accessing your code is in place (usually ssh).
+
+
 ## personal bias
 
 Recent history of experience with both mariadb and mysql have shown both to be somewhat unstable and resource hungry, even under moderately small loads, and in spite of every attempt to tune them.
 
 With the advent of databases that store any content and organize it by page instead of a type-restricted normalized form, I haven't had a need for relational databases in recent projects.
+
+
+## iptables
+
+Like `mysql`, the `mariadb` package runs on port 3306, so this line will enable external access to the dbms if you wanted to host it separately or grant access to it over the network:
+
+    -A INPUT -p tcp -m tcp --dport 3306 -m conntrack --ctstate NEW -j ACCEPT
 
 
 # references

@@ -5,9 +5,13 @@ _If you want to give the [dotdeb repository](dotdeb.md) a try it can be pretty d
 
 To install the packages:
 
-    aptitude install -ryq php5 php5-fpm php5-cli php5-mcrypt php5-gd php5-mysqlnd php5-curl php5-xmlrpc php5-dev php5-intl php-pear php-apc php5-imagick php5-xsl
+    aptitude install -ryq php5 php5-fpm php5-cli php5-mcrypt php5-curl php5-xmlrpc php5-dev php5-intl php5-xsl php-pear php-apc
 
 This installs php5, plus a number of dependent packages we may use for a number of other purposes.
+
+_There have been known conflicts with the libssl version and the php-dev package, so be aware that if that comes up you may have to attempt to rollback to an earlier libssl to install it._
+
+I no-longer develop using php, so this document will no-longer be maintained.
 
 
 ## configuring php-fpm
@@ -62,6 +66,11 @@ Finally we can symlink these into `/etc/php5/conf.d`, and reboot php-fpm for the
     service php5-fpm restart
 
 
+## permissions
+
+By default php-fpm will launch with the `www-data` user, but you can modify both the user and group it uses to access files by changing `/etc/php5/fpm/pool.d/www.conf`.
+
+
 ## optimization
 
 Optimization can be tricky, and ideally you should optimize late instead of make it the focus of your build.  Further, optimization should match the services you are delivering.  There are two approaches you can take.
@@ -114,6 +123,15 @@ This tends to be plenty for development and testing, but obviously I would do th
 Finally, after all of the above changes, we can try rebooting php-fpm, if it works we are all set, and we can verify the changes with phpinfo from nginx.
 
     service php5-fpm restart
+
+
+## externally accessible
+
+If you wanted to completely separate the server that runs the php scripts, you can open the default port (9000) and set a proxy up to run data through that instead.
+
+For the iptables rules you will want to add something like this:
+
+    -A INPUT -p tcp -m tcp --dport 9000 -m conntrack --ctstate NEW -j ACCEPT
 
 
 ## nginx script
