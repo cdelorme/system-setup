@@ -89,27 +89,31 @@ grab_yes_no "install_weechat" "install weechat irc client"
 grab_yes_no "install_transmission" "install transmission bittorrent server"
 grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 
-# is this a web server? (y/n)
-# configure /srv for development
+# web service questions
+grab_yes_no "for_web_or_dev" "is this a web or development server"
+if [ "$for_web_or_dev" = "y" ]
+then
+	grab_yes_no "install_nginx" "do you want to install nginx web & proxy server"
+	[ "$install_nginx" = "y" ] && grab_yes_no "public_nginx" "do you want to open web ports 80 & 443 publicly"
+	grab_yes_no "setup_srv_permissions" "do you want to setup /srv permissions"
+	grab_yes_no "install_mongodb" "install mongodb"
+	[ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
+	# @todo(casey): add postgres to optional packages
+	#grab_yes_no "install_postgresql" "install postgres"
+	# [ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
+	grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
+	[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
+	[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
+fi
+
+# development & workstation questions
 
 
-# ask for the below only if web server = y
-grab_yes_no "install_mongodb" "install mongodb"
-[ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
 
-# @todo(casey): add postgres to optional packages
-#grab_yes_no "install_postgresql" "install postgres"
-# [ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
-
-grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
-[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
-[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
-
+# desktop questions
 grab_yes_no "install_openbox" "would you like to install the openbox desktop environment"
 if [ "$install_openbox" = "y" ]
 then
-	# workstation packages
-	# dev packages
 	# gui packages
 	# game packages / configuration
 fi
@@ -225,7 +229,7 @@ update-command-not-found
 
 
 ##
-# copy/install global configuration files
+# copy/install global configuration/dot files
 ##
 
 # install global dot-files
@@ -242,6 +246,17 @@ else
 	cp -fR /tmp/system-setup/data/etc/* /etc/
 fi
 
+# install some vim plugins & color schemes
+mkdir -p /etc/skel/.vim/colors
+git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
+find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+git clone "https://github.com/elzr/vim-json" /tmp/vim-json
+find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+git clone "https://github.com/fatih/vim-go" /tmp/vim-go
+find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+curl -Lo /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+curl -Lo /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
+
 # rebuild root directory using the new /etc/skel files
 rm -rf /root && cp -R /etc/skel/ /root
 
@@ -250,12 +265,42 @@ rm -rf /root && cp -R /etc/skel/ /root
 # install conditional software
 ##
 
+# conditionally install transmission
 if [ "$install_transmission" = "y" ]
 then
 	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
 	systemctl stop transmission-daemon
 fi
 
+# conditionally install nginx
+if [ "${install_nginx:-}" = "y" ]
+then
+
+	# install nginx
+	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx-full
+
+	# configure nginx folder layout
+	rm -f /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+	mkdir -p /etc/nginx/ssl
+fi
+
+# conditionally install mongodb
+[ "${install_mongodb:-}" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" mongodb
+
+# install msmtp mail server
+if [ "${install_mail_server:-}" = "y" ]
+then
+	# install msmtp-mta and all related/useful components
+	aptitude install -ryq msmtp-mta
+
+	# ensure permissions on the msmtprc file are strict (will contain password in plain-text)
+	chmod 0600 /etc/msmtprc
+
+	# set email & password & username (assumes gmail)
+	sed -i "s/from username@gmail.com/from ${mail_server_username}@gmail.com/" /etc/msmtprc
+	sed -i "s/user username/user $mail_server_username/" /etc/msmtprc
+	sed -i "s/password password/password $mail_server_password/" /etc/msmtprc
+fi
 
 # install conditional processing utilities
 # if [ "$install_processing_tools" = "y" ]
@@ -274,13 +319,20 @@ fi
 
 # fi
 
+
+##
 # "fix" udev so it doesn't break network device identification for changing hardware
+##
+
 mkdir -p /etc/udev/backup/{rules.d,lib}
 mv -f /etc/udev/rules.d/70-persistent-net.rules /etc/udev/backup/rules.d/
 mv -f /lib/udev/rules.d/75-persistent-net-generator.rules /etc/udev/backup/lib/
 mkdir -p /etc/udev/rules.d/70-persistent-net.rules
 
+##
 # enable watchdog if supported
+##
+
 if [ -f /dev/watchdog ]
 then
 	update-rc.d watchdog defaults
@@ -290,24 +342,37 @@ else
 	update-rc.d wd_keepalive disable
 fi
 
+##
 # secure ssh & restart service
+##
+
 sed -i "s/Port\s*[0-9].*/Port ${ssh_port:-22}/" /etc/ssh/sshd_config
 sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
 sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
 echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
 echo "UseDNS no" >> /etc/ssh/sshd_config
 
+##
 # optimize lvm
+##
+
 sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
 
+
+##
 # fix default permissions (secure by group)
+##
+
 sed -i 's/UMASK\s*022/UMASK           002/' /etc/login.defs
 if [ $(grep -c "umask=002" /etc/pam.d/common-session) -eq 0 ]
 then
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 fi
 
+##
 # add handler for kernel panics to grub
+##
+
 if [ $(grep -c "panic = 10" /etc/sysctl.conf) -lt 1 ]
 then
 	echo "kernel.panic = 10" >> /etc/sysctl.conf
@@ -318,14 +383,20 @@ then
     update-grub
 fi
 
+##
 # conditionally set system timezone
+##
+
 if [ -f "/usr/share/zoneinfo/${timezone}" ]
 then
 	echo "$timezone" > /etc/timezone
 	ln -nsf "/usr/share/zoneinfo/${timezone}" /etc/localtime
 fi
 
+##
 # conditionally update hostname & domain name
+##
+
 if [ -n "system_hostname" ]
 then
     echo "$system_hostname" > /etc/hostname
@@ -336,41 +407,47 @@ then
     sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
 fi
 
+
+##
 # enable custom fonts
+##
+
 if [ "$enable_custom_fonts" = "y" ] && [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
 then
     sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
     locale-gen
 fi
 
+
+##
 # set vim as the default editor
+##
+
 update-alternatives --set editor /usr/bin/vim.basic
 
+
+##
 # activate monit services via symlinks
+##
+
 ln -nsf "../monitrc.d/system" "/etc/monit/conf.d/system"
 ln -nsf "../monitrc.d/ssh" "/etc/monit/conf.d/ssh"
 ln -nsf "../monitrc.d/web" "/etc/monit/conf.d/web"
 which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
 [ "$install_transmission" = "y" ] && ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
-[ "$install_mongodb" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
+[ "${install_nginx:-}" = "y" ] && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
+[ "${install_mongodb:-}" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
 
-# install some vim plugins & color schemes
-mkdir -p /etc/skel/.vim/colors
-git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
-find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-git clone "https://github.com/elzr/vim-json" /tmp/vim-json
-find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-git clone "https://github.com/fatih/vim-go" /tmp/vim-go
-find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-curl -Lo /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
-curl -Lo /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
+##
 # configure iptables
+##
+
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
 [ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules
 [ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
-# [ "$webserver" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
-
+[ "${public_nginx:-}" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
+[ "$public_mongodb" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 
 
 
@@ -384,11 +461,6 @@ curl -Lo /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/t
 # investigate xboxdrv configuration?
 # I have it using systemd on my home system, and need to replace the init.d version in my data folder
 ##
-
-# restart services whose configuration has been modified
-monit -t && systemctl restart monit
-systemctl restart ssh
-
 
 
 # create user account
@@ -450,6 +522,33 @@ systemctl restart ssh
 #     fi
 # fi
 
+##
+# setup web server folder permissions
+##
+
+if [ "$setup_srv_permissions" = "y" ]
+then
+
+	# add new groups, and to user
+	groupadd -f www-data
+	groupadd -f gitdev
+	groupadd -f webdev
+	[ -n "$username" ] && usermod -aG webdev,gitdev $username
+
+	# create environment folders & set permissions /w sticky bits
+	mkdir -p /srv/{www,git}
+	chown -R www-data:www-data /srv
+	chown -R www-data:webdev /srv/www
+	chown -R www-data:gitdev /srv/git
+	chmod -R 6775 /srv
+fi
+
+
+# restart services whose configuration has been modified
+monit -t && systemctl restart monit
+systemctl restart ssh
+[ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
+#[ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
 
 # load iptables (could disconnect remote sessions!)
 /etc/network/if-up.d/iptables
