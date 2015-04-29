@@ -3,6 +3,8 @@
 
 A file sharing solution that is cross-platform compatible, and very easy to both setup and secure.
 
+_I no-longer use `samba` for file sharing, and so this document may no longer be maintained.  Follow it at your own risk._
+
 
 ## installation
 
@@ -58,7 +60,6 @@ My samba configuration (`/etc/smb/smb.conf`) looks like this:
 
     # Optimizations
         bind interfaces only = yes
-        interfaces = eth0
         socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536 SO_KEEPALIVE
         deadtime = 15
         getwd cache = yes
