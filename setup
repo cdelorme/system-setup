@@ -211,7 +211,9 @@ then
 		fi
 
 		# ensure encryption has been applied
-		btrfs filesystem defragment -r -clzo /
+		# async so we don't crash our setup script
+		# redirected because it may encounter system files it cannot compress
+		btrfs filesystem defragment -rfclzo / &>/dev/null &
 
 		# rebalance after changes
 		btrfs balance start /
