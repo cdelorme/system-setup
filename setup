@@ -369,6 +369,7 @@ then
     echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 fi
 
+
 ##
 # add handler for kernel panics to grub
 ##
@@ -383,6 +384,7 @@ then
     update-grub
 fi
 
+
 ##
 # conditionally set system timezone
 ##
@@ -392,6 +394,7 @@ then
 	echo "$timezone" > /etc/timezone
 	ln -nsf "/usr/share/zoneinfo/${timezone}" /etc/localtime
 fi
+
 
 ##
 # conditionally update hostname & domain name
@@ -548,9 +551,9 @@ fi
 monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
-#[ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
+[ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
 
-# load iptables (could disconnect remote sessions!)
+# load iptables (could disconnect a remote session!)
 /etc/network/if-up.d/iptables
 
 echo "done!"
