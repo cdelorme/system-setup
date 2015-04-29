@@ -6,7 +6,7 @@ IFS=$'\n\t'
 ##
 # fail if not running as root
 ##
-#[ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
+[ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
 
 
 ##
@@ -75,38 +75,378 @@ grab_or_fallback "github_username" "" "enter your github username"
 
 # various settings
 grab_or_fallback "ssh_port" "22" "enter your preferred ssh port (22)"
-grab_or_fallback "ssh_port" "US/Eastern" "enter your preferred timezone (eg. US/Eastern)"
+grab_or_fallback "timezone" "US/Eastern" "enter your preferred timezone (eg. US/Eastern)"
 grab_or_fallback "system_hostname" "" "enter a system hostname"
 grab_or_fallback "system_domainname" "" "enter a system domain name"
 
 # additional customization packages
 grab_yes_no "install_dotfiles" "install dot files"
-grab_yes_no "install_custom_fonts" "install custom fonts"
+grab_yes_no "enable_custom_fonts" "enable custom fonts"
 
 # conditional services
 grab_yes_no "install_wireless_drivers" "install wireless & bluetooth drivers"
 grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 grab_yes_no "install_weechat" "install weechat irc client"
-grab_yes_no "install_wireless_drivers" "install transmission bittorrent server"
+grab_yes_no "install_transmission" "install transmission bittorrent server"
+
+# is this a web server? (y/n)
+# configure /srv for development
+
+# ask for the below only if web server = y
 grab_yes_no "install_mongodb" "install mongodb"
 [ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
+
+# @todo(casey): add postgres to optional packages
 #grab_yes_no "install_postgresql" "install postgres"
 # [ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
+
 grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
 [ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
 [ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
+
+# workstation packages
+# dev packages
+# gui packages
+# game packages / configuration
 
 
 ##
 # set dependent default variables
 ##
+
 export cronfile="/var/spool/cron/crontabs/${username}"
 export github_https="https://github.com/cdelorme/system-setup"
+export dotfiles_https="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
 
 
 ##
-# @todo(casey) begin installation...
+# fixup uefi
 ##
 
+if [ -d "/boot/efi" ]
+then
+	mkdir -p /boot/efi/boot
+	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
+	cp -f /boot/efi/debian/grubx64.efi /boot/efi/boot/bootx64.efi
+	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi"
+fi
+
+
+##
+# btrfs optimizations
+##
+
+# @todo(casey): if they are using ext file system ask if they want to upgrade to btrfs
+# if [ "$(mount | grep ext | awk '{print $3}' | grep -c '/')" -eq 0 ]
+# then
+# 	grab_yes_no "upgrade_to_btrfs" "do you want to upgrade from ext to btrfs"
+# 	if [ "$upgrade_to_btrfs" = "y" ]
+# 	then
+# 		# still working on this
+# 	fi
+# fi
+
+# if they have btrfs, ask if they want to optimize
+if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ]
+then
+	grab_yes_no "optimize_btrfs" "do you want to optimize your btrfs"
+
+	if [ "$optimize_btrfs" = "y" ]
+	then
+
+		# create /home subvolume if it is not already a subvolume
+		if [ "(btrfs subvol list / | awk '{print $9}')" != "home" ]
+		then
+			mv -f /home /home.bak
+			btrfs subvol create /home
+			find /home.bak/* -maxdepth 0 -type d -exec cp -R {} /home/ \;
+			rm -rf /home.bak/
+		fi
+
+		# set optimizations to be applied to the disk
+		local btrfs_optimizations="noatime,compress=lzo,space_cache,autodefrag"
+
+		# check whether fstab already contains optimizations
+		if [ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 ]
+		then
+
+			# are we using an ssd?
+			local root_partition="$(mount | awk -v dev='/' '$3==dev {print $1}')"
+			local root_disk="${root_partition:5:3}"
+			if [ $(cat /sys/block/${root_disk}/queue/rotational) -eq 0 ]
+			then
+				btrfs_optimizations="${btrfs_optimizations},ssd"
+			fi
+
+			# add optimizations
+			sed -i "s;/.*btrfs.*;/\tbtrfs\t${btrfs_optimizations}\t0\t1;" /etc/fstab
+		fi
+
+		# ensure encryption has been applied
+		btrfs filesystem defragment -r -clzo /
+
+		# rebalance after changes
+		btrfs balance start /
+
+		# @todo(casey): create initial snapshot for restoration and future iterative backups
+	fi
+fi
+
+
+##
+# package installation
+##
+
+# set best mirrors and upgrade existing packages
+unset UCF_FORCE_CONFNEW
+export UCF_FORCE_CONFOLD=true
+export DEBIAN_FRONTEND=noninteractive
+aptitude install -ryq netselect-apt
+cp -f /etc/apt/sources.list /etc/apt/sources.list.original
+mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
+netselect-apt -c US -fsno /etc/apt/sources.list stable
+aptitude clean
+if ! aptitude update
+then
+	mv -f /etc/apt/sources.list.bak /etc/apt/sources.list
+	aptitude clean
+	aptitude update
+fi
+aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+
+# install all useful system utilities & initialize command-not-found
+aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip monit ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs
+update-command-not-found
+
+
+##
+# copy/install global configuration files
+##
+
+# install global dot-files
+[ "$install_dotfiles" = "y" ] && curl -L "$dot_files" | bash -s -- -q
+
+# install template configuration files
+if [ -d "data/etc/" ]
+then
+	cp -fR data/etc/* /etc/
+else
+
+	# download system-setup git repository
+	git clone $github_https /tmp/system-setup
+	cp -fR /tmp/system-setup/data/etc/* /etc/
+fi
+
+# rebuild root directory using the new /etc/skel files
+rm -rf /root && cp -R /etc/skel/ /root
+
+
+##
+# install conditional software
+##
+
+if [ "$install_transmission" = "y" ]
+then
+	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
+	systemctl stop transmission-daemon
+fi
+
+
+# install conditional processing utilities
+# if [ "$install_processing_tools" = "y" ]
+# then
+#     aptitude install -ryq graphicsmagick imagemagick libgd-tools ffmpeg libav-tools lame libvorbis-dev libogg-dev libexif12
+# fi
+
+# workstation packages
+# if [ "$install_workstation" = "y" ]
+# then
+
+# 	# install major desktop packages
+
+
+# 	# install
+
+# fi
+
+# "fix" udev so it doesn't break network device identification for changing hardware
+mkdir -p /etc/udev/backup/{rules.d,lib}
+mv -f /etc/udev/rules.d/70-persistent-net.rules /etc/udev/backup/rules.d/
+mv -f /lib/udev/rules.d/75-persistent-net-generator.rules /etc/udev/backup/lib/
+mkdir -p /etc/udev/rules.d/70-persistent-net.rules
+
+# enable watchdog if supported
+if [ -f /dev/watchdog ]
+then
+	update-rc.d watchdog defaults
+	update-rc.d wd_keepalive defaults
+else
+	update-rc.d watchdog disable
+	update-rc.d wd_keepalive disable
+fi
+
+# secure ssh & restart service
+sed -i "s/Port\s*[0-9].*/Port ${ssh_port:-22}/" /etc/ssh/sshd_config
+sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
+sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
+echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
+echo "UseDNS no" >> /etc/ssh/sshd_config
+
+# optimize lvm
+sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+
+# fix default permissions (secure by group)
+sed -i 's/UMASK\s*022/UMASK           002/' /etc/login.defs
+if [ $(grep -c "umask=002" /etc/pam.d/common-session) -eq 0 ]
+then
+    echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
+fi
+
+# add handler for kernel panics to grub
+if [ $(grep -c "panic = 10" /etc/sysctl.conf) -lt 1 ]
+then
+	echo "kernel.panic = 10" >> /etc/sysctl.conf
+fi
+if [ $(grep -c "panic=10" /etc/default/grub) -lt 1 ]
+then
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet panic=10"/' /etc/default/grub
+    update-grub
+fi
+
+# conditionally set system timezone
+if [ -f "/usr/share/zoneinfo/${timezone}" ]
+then
+	echo "$timezone" > /etc/timezone
+	ln -nsf "/usr/share/zoneinfo/${timezone}" /etc/localtime
+fi
+
+# conditionally update hostname & domain name
+if [ -n "system_hostname" ]
+then
+    echo "$system_hostname" > /etc/hostname
+    hostname -F /etc/hostname
+fi
+if [ -n "$system_domainname" ]
+then
+    sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
+fi
+
+# enable custom fonts
+if [ "$enable_custom_fonts" = "y" ] && [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
+then
+    sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
+    locale-gen
+fi
+
+# set vim as the default editor
+update-alternatives --set editor /usr/bin/vim.basic
+
+# activate monit services via symlinks
+ln -nsf "../monitrc.d/system" "/etc/monit/conf.d/system"
+ln -nsf "../monitrc.d/ssh" "/etc/monit/conf.d/ssh"
+ln -nsf "../monitrc.d/web" "/etc/monit/conf.d/web"
+which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
+[ "$install_transmission" = "y" ] && ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
+[ "$install_mongodb" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
+
+# install some vim plugins & color schemes
+mkdir -p /etc/skel/.vim/colors
+git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
+find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+git clone "https://github.com/elzr/vim-json" /tmp/vim-json
+find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+git clone "https://github.com/fatih/vim-go" /tmp/vim-go
+find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+curl -Lo /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+curl -Lo /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
+
+# configure iptables
+[ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
+[ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules
+[ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
+# [ "$webserver" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
+
+
+
+
+
+
+
+
+
+
+##
+# investigate xboxdrv configuration?
+# I have it using systemd on my home system, and need to replace the init.d version in my data folder
+##
+
+# restart services whose configuration has been modified
+monit -t && systemctl restart monit
+systemctl restart ssh
+
+
+
+# create user account
+
+# # user customizations
+# if [ -n "$username" ]
+# then
+
+#     # conditionally create new user and add to core groups
+#     if [ -n "$username" ] && ! id "$username" &>/dev/null
+#     then
+#         useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+#     fi
+#     usermod -aG sudo,adm $username
+
+#     # generate ssh key
+#     if [ "$create_ssh" = "y" ]
+#     then
+#         mkdir -p "/home/$username/.ssh"
+#         ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
+#         chmod 600 /home/$username/.ssh/*
+#     fi
+
+#     # attempt to upload new ssh key to github account
+#     if [ -f "/home/$username/.ssh/id_rsa" ] && [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
+#     then
+#         curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+#     fi
+
+#     # download update-keys
+#     if ! [ -f /home/$username/.bin/update-keys ]
+#     then
+#         mkdir -p /home/$username/.bin
+#         [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
+#         chmod +x /home/$username/.bin/*
+
+#         # if username != github username swap $(whoami) for supplied github username
+#         [ "$username" != "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
+#     fi
+
+#     if [ -n "$cronfile" ]
+#     then
+#         # add crontab to run `update-keys` (idempotently)
+#         [ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
+#         [ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
+#     fi
+
+#     # reset ownership on user files
+#     chown -R $username:$username /home/$username
+
+#     # use github username to acquire name & email from github
+#     if [ -n "$github_username" ]
+#     then
+#         tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
+#         github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+#         github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+#         su $username -c "cd && git config --global user.name $github_username"
+#         su $username -c "cd && git config --global user.email $github_email"
+#     fi
+# fi
+
+
+# load iptables (could disconnect remote sessions!)
+/etc/network/if-up.d/iptables
 
 echo "done!"
