@@ -265,6 +265,9 @@ rm -rf /root && cp -R /etc/skel/ /root
 # install conditional software
 ##
 
+# conditionally install weechat
+if [ "$install_weechat" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" weechat
+
 # conditionally install transmission
 if [ "$install_transmission" = "y" ]
 then
@@ -523,6 +526,19 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 #         su $username -c "cd && git config --global user.name $github_username"
 #         su $username -c "cd && git config --global user.email $github_email"
 #     fi
+
+	# weechat configuration for user
+	# # try to setup some values for our user
+	# if [ -n "$username" ]
+	# then
+
+	#     # generate weechat config with first-run
+	#     su $username -s /bin/bash -c 'weechat-curses &>/dev/null & pid=$!; sleep 10; kill -9 $pid'
+
+	#     # configure weechat
+	#     sed -i 's/max_buffer_lines_number.*/max_buffer_lines_number = 0/' "/home/${username}/.weechat/weechat.conf"
+	#     sed -i 's/freenode\.autoconnect.*/freenode\.autoconnect = on/' "/home/${username}/.weechat/irc.conf"
+	# fi
 # fi
 
 ##
