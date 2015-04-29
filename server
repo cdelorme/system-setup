@@ -85,12 +85,13 @@ grab_yes_no "enable_custom_fonts" "enable custom fonts"
 
 # conditional services
 grab_yes_no "install_wireless_drivers" "install wireless & bluetooth drivers"
-grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 grab_yes_no "install_weechat" "install weechat irc client"
 grab_yes_no "install_transmission" "install transmission bittorrent server"
+grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 
 # is this a web server? (y/n)
 # configure /srv for development
+
 
 # ask for the below only if web server = y
 grab_yes_no "install_mongodb" "install mongodb"
@@ -104,10 +105,14 @@ grab_yes_no "install_mail_server" "would you like to install the msmtp mail serv
 [ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
 [ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
 
-# workstation packages
-# dev packages
-# gui packages
-# game packages / configuration
+grab_yes_no "install_openbox" "would you like to install the openbox desktop environment"
+if [ "$install_openbox" = "y" ]
+then
+	# workstation packages
+	# dev packages
+	# gui packages
+	# game packages / configuration
+fi
 
 
 ##
