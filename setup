@@ -254,7 +254,7 @@ update-command-not-found
 ##
 
 # install global dot-files
-[ "$install_dotfiles" = "y" ] && curl -Ls "$dot_files" | bash -s -- -q
+[ "$install_dotfiles" = "y" ] && curl -Ls "$dotfiles_https" | bash -s -- -q
 
 # install template configuration files
 if [ -d "data/" ]
