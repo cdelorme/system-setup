@@ -107,16 +107,31 @@ then
 fi
 
 # development & workstation questions
-
-
-
-# desktop questions
-grab_yes_no "install_openbox" "would you like to install the openbox desktop environment"
-if [ "$install_openbox" = "y" ]
+grab_yes_no "is_a_workstation" "is this a local workstation"
+if [ "$is_a_workstation" = "y" ]
 then
-	# gui packages
-	# game packages / configuration
+
+	# as if we want development tools
+	grab_yes_no "install_development_tools" "do you want to install development tools"
+
+	# desktop questions
+	grab_yes_no "install_openbox" "would you like to install the openbox desktop environment"
+	if [ "$install_openbox" = "y" ]
+	then
+
+		# we want processing tools
+		install_processing_tools="y"
+
+		# game packages
+		grab_yes_no "install_gaming_software" "would you like to install gaming software like steam and playonlinux"
+	fi
+
+	# languages for development
+	grab_yes_no "install_golang" "do you want to install golang"
+	grab_yes_no "install_nodejs" "do you want to install nodejs"
+	grab_yes_no "install_openjdk" "do you want to install openjdk for java development"
 fi
+
 
 
 ##
@@ -233,7 +248,7 @@ update-command-not-found
 ##
 
 # install global dot-files
-[ "$install_dotfiles" = "y" ] && curl -L "$dot_files" | bash -s -- -q
+[ "$install_dotfiles" = "y" ] && curl -Ls "$dot_files" | bash -s -- -q
 
 # install template configuration files
 if [ -d "data/etc/" ]
@@ -254,11 +269,8 @@ git clone "https://github.com/elzr/vim-json" /tmp/vim-json
 find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
 git clone "https://github.com/fatih/vim-go" /tmp/vim-go
 find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-curl -Lo /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
-curl -Lo /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
-
-# rebuild root directory using the new /etc/skel files
-rm -rf /root && cp -R /etc/skel/ /root
+curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
 
 ##
@@ -274,6 +286,9 @@ then
 	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
 	systemctl stop transmission-daemon
 fi
+
+# conditionally install video, audio, and graphics processing utilities
+[ "$install_processing_tools" = "y" ] && aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools youtube-dl
 
 # conditionally install nginx
 if [ "${install_nginx:-}" = "y" ]
@@ -305,11 +320,80 @@ then
 	sed -i "s/password password/password $mail_server_password/" /etc/msmtprc
 fi
 
-# install conditional processing utilities
-# if [ "$install_processing_tools" = "y" ]
-# then
-#     aptitude install -ryq graphicsmagick imagemagick libgd-tools ffmpeg libav-tools lame libvorbis-dev libogg-dev libexif12
-# fi
+# development & workstation packages
+if [ "$is_a_workstation" = "y" ]
+then
+
+	# install workstation packages
+	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown checkinstall lm-sensors cpufrequtils
+
+	# conditionally install development tools
+	if [ "$install_development_tools" = "y" ]
+	then
+		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsmfl-dev
+	fi
+
+	# check for and install nvidia drivers
+	if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ]
+	then
+	    curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
+	    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+	fi
+
+
+	# conditionally install openbox desktop environment
+	if [ "$install_openbox" = "y" ]
+	then
+		# aptitude install -ryq
+
+		# google chrome installation
+		wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+		echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google.list
+		echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+		echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+		echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+		echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+		aptitude clean
+		aptitude update
+		aptitude install -ryq chromium google-chrome-stable google-talkplugin
+		rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
+
+		# sublime text?
+
+		# game packages?
+		if [ "$install_gaming_software" = "y" ]
+		then
+			# steam & playonlinux & initialization (if possible?)
+		fi
+	fi
+
+	# conditionally install global gvm
+	if [ "$install_golang" = "y" ]
+	then
+		git clone https://github.com/moovweb/gvm /etc/skel/.gvm
+
+		# add lines to load gvm in .bashrc
+		echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
+		echo '[ -s "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
+	fi
+
+	# conditionally install global nvm
+	if [ "$install_nodejs" = "y" ]
+	then
+		curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
+
+		# add lines to load nvm in .bashrc
+		echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
+		echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
+	fi
+
+	# conditionally install global openjdk
+	if [ "$install_openjdk" = "y" ]
+	then
+		aptitude install -ryq openjdk-7-jre
+	fi
+fi
+
 
 # workstation packages
 # if [ "$install_workstation" = "y" ]
@@ -331,6 +415,14 @@ mkdir -p /etc/udev/backup/{rules.d,lib}
 mv -f /etc/udev/rules.d/70-persistent-net.rules /etc/udev/backup/rules.d/
 mv -f /lib/udev/rules.d/75-persistent-net-generator.rules /etc/udev/backup/lib/
 mkdir -p /etc/udev/rules.d/70-persistent-net.rules
+
+
+##
+# configure sensors
+##
+
+which sensors-detect &>/dev/null && (yes "" | sensors-detect)
+
 
 ##
 # enable watchdog if supported
@@ -568,6 +660,9 @@ monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
+
+# rebuild root directory using the new /etc/skel files
+rm -rf /root && cp -R /etc/skel/ /root
 
 # load iptables (could disconnect a remote session!)
 /etc/network/if-up.d/iptables
