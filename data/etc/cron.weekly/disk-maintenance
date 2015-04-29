@@ -2,15 +2,18 @@
 # search and destroy garbage files
 if [ -d /media ]
 then
-	find /media -iname "thumbs.db" -exec rm {} \;
-	find /media -iname ".ds_store" -exec rm {} \;
-	find /media -name '._*' -exec rm -rf {} \;
+	find / -iname "thumbs.db" -exec rm {} \;
+	find / -iname ".ds_store" -exec rm {} \;
+	find / -name '._*' -exec rm -rf {} \;
 fi
 # defragment and fstrim ext4 weekly
 for filesystem in $(mount -t ext4 | awk '{print $3}' )
 do
 	e4defrag "$filesystem"
+
+	# verify file system is on ssh and run fstrim
 	fstrim "$filesystem"
+
 done
 # defragment and rebalance btrfs weekly
 for filesystem in $(mount -t btrfs | awk '{print $3}' )
