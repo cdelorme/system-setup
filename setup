@@ -81,7 +81,6 @@ grab_or_fallback "system_domainname" "" "enter a system domain name"
 
 # additional customization packages
 grab_yes_no "install_dotfiles" "install dot files"
-grab_yes_no "enable_custom_fonts" "enable custom fonts"
 
 # conditional services
 grab_yes_no "install_wireless_drivers" "install wireless & bluetooth drivers"
@@ -98,9 +97,8 @@ then
 	grab_yes_no "setup_srv_permissions" "do you want to setup /srv permissions"
 	grab_yes_no "install_mongodb" "install mongodb"
 	[ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
-	# @todo(casey): add postgres to optional packages
-	#grab_yes_no "install_postgresql" "install postgres"
-	# [ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
+	grab_yes_no "install_postgresql" "install postgres"
+	[ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
 	grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
 	[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
 	[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_password" "$password" "mail server password"
@@ -121,6 +119,9 @@ then
 
 		# we want processing tools
 		install_processing_tools="y"
+
+		# flash projector
+		grab_yes_no "install_flashprojector" "would you like to install a flash projector"
 
 		# game packages
 		grab_yes_no "install_gaming_software" "would you like to install gaming software like steam and playonlinux"
@@ -144,7 +145,7 @@ export dotfiles_https="https://raw.githubusercontent.com/cdelorme/dot-files/mast
 
 
 ##
-# fixup uefi
+# clean up uefi configuration
 ##
 
 if [ -d "/boot/efi" ]
@@ -194,7 +195,7 @@ then
 		if [ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 ]
 		then
 
-			# are we using an ssd?
+			# verify if ssd is being used
 			local root_partition="$(mount | awk -v dev='/' '$3==dev {print $1}')"
 			local root_disk="${root_partition:5:3}"
 			if [ $(cat /sys/block/${root_disk}/queue/rotational) -eq 0 ]
@@ -251,14 +252,14 @@ update-command-not-found
 [ "$install_dotfiles" = "y" ] && curl -Ls "$dot_files" | bash -s -- -q
 
 # install template configuration files
-if [ -d "data/etc/" ]
+if [ -d "data/" ]
 then
-	cp -fR data/etc/* /etc/
+	cp -fR data/* /
 else
 
 	# download system-setup git repository
 	git clone $github_https /tmp/system-setup
-	cp -fR /tmp/system-setup/data/etc/* /etc/
+	cp -fR /tmp/system-setup/data/* /
 fi
 
 # install some vim plugins & color schemes
@@ -305,6 +306,9 @@ fi
 # conditionally install mongodb
 [ "${install_mongodb:-}" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" mongodb
 
+# conditionally install postgresql
+[ "${install_postgresql:-}" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql
+
 # install msmtp mail server
 if [ "${install_mail_server:-}" = "y" ]
 then
@@ -340,11 +344,24 @@ then
 	    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
 	fi
 
-
 	# conditionally install openbox desktop environment
 	if [ "$install_openbox" = "y" ]
 	then
-		# aptitude install -ryq
+		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
+
+		# install tabbedex for urxvt
+		curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
+
+		# conditionally install flash projector
+		if [ "$install_flashprojector" = "y" ]
+		then
+			dpkg --add-architecture i386
+			aptitude install -ryq ia32-lib libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386
+			curl -Lso /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
+			tar xf /tmp/flash.tar.gz -C /tmp
+			rm /tmp/flash.tar.gz
+			mv /tmp/flashplayer /usr/sbin/flashplayer
+		fi
 
 		# google chrome installation
 		wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -358,12 +375,21 @@ then
 		aptitude install -ryq chromium google-chrome-stable google-talkplugin
 		rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
 
-		# sublime text?
+		# sublime text 3 installation
+		curl -Lso /tmp/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2
+		tar xf /tmp/sublime.tar.bz2 -C /tmp
+		rm /tmp/sublime.tar.bz2
+		cp -R /tmp/sublime_text_3 /usr/local/sublime-text
+		ln -nsf /usr/local/sublime-text/sublime_text /usr/sbin/subl
+	    mkdir -p /etc/skel/.config/sublime-text-3/Installed Packages/
+	    curl -Lso /etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package "https://sublime.wbond.net/Package%20Control.sublime-package"
 
-		# game packages?
+		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
-			# steam & playonlinux & initialization (if possible?)
+			aptitude install -ryq steam playonlinux xboxdrv
+
+			# @todo(casey): xboxdrv configuration
 		fi
 	fi
 
@@ -510,18 +536,32 @@ fi
 # enable custom fonts
 ##
 
-if [ "$enable_custom_fonts" = "y" ] && [ $(grep -c "ja_JP.UTF-8" /etc/locale.gen) -eq 1 ]
-then
-    sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
-    locale-gen
-fi
+sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
+locale-gen
+fc-cache -fr
 
 
 ##
-# set vim as the default editor
+# update alternative default softwares
 ##
 
 update-alternatives --set editor /usr/bin/vim.basic
+if which google-chrome-stable &> /dev/null
+then
+    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+fi
+if which openbox-session &> /dev/null
+then
+    update-alternatives --set x-session-manager /usr/bin/openbox-session
+fi
+if which openbox &> /dev/null
+then
+    update-alternatives --set x-window-manager /usr/bin/openbox
+fi
+if which urxvt &> /dev/null
+then
+    update-alternatives --set x-terminal-emulator /usr/bin/urxvt
+fi
 
 
 ##
@@ -545,23 +585,13 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 [ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules
 [ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
 [ "${public_nginx:-}" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
-[ "$public_mongodb" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
-
-
-
-
-
-
-
+[ "${public_mongodb:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
+[ "${public_postgresql:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 
 
 ##
-# investigate xboxdrv configuration?
-# I have it using systemd on my home system, and need to replace the init.d version in my data folder
-##
-
-
 # create user account
+##
 
 # # user customizations
 # if [ -n "$username" ]
@@ -633,6 +663,102 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 	# fi
 # fi
 
+# # user customizations
+# if [ -n "$username" ]
+# then
+
+#     # add user to general gui groups
+#     usermod -aG scanner,bluetooth,netdev,audio,video,plugdev $username
+
+#     # ensure user bin folder exists
+#     mkdir -p "/home/${username}/.bin"
+
+#     # download/install .xinitrc
+#     [ -f "data/home/.xinitrc" ] && cp "data/home/.xinitrc" "/home/${username}/.xinitrc"  || $dl_cmd "/home/${username}/.xinitrc" "${remote_source}data/home/.xinitrc"
+
+#     # copy the defaults.pa into ~/.pulse, for audio control
+#     mkdir -p "/home/${username}/.pulse"
+#     cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
+
+#     # download/install .fehbg script
+#     [ -f "data/home/.fehbg" ] && cp "data/home/.fehbg" "/home/${username}/.fehbg"  || $dl_cmd "/home/${username}/.fehbg" "${remote_source}data/home/.fehbg"
+
+#     # download/install ~/.Xdefaults & symlink to ~/.Xresources
+#     [ -f "data/home/.Xdefaults" ] && cp "data/home/.Xdefaults" "/home/${username}/.Xdefaults"  || $dl_cmd "/home/${username}/.Xdefaults" "${remote_source}data/home/.Xdefaults"
+#     ln -nsf ".Xdefaults" "/home/${username}/.Xresources"
+
+#     # download/install urxvtq guake-like-launcher
+#     [ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
+
+#     # download compton configuration
+#     [ -f "data/home/.compton.conf" ] && cp "data/home/.compton.conf" "/home/${username}/.compton.conf"  || $dl_cmd "/home/${username}/.compton.conf" "${remote_source}data/home/.compton.conf"
+
+#     # check graphics card and adjust compton configuration
+#     if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
+#     then
+#         sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' "/home/${username}/.compton.conf"
+#         sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' "/home/${username}/.compton.conf"
+#     fi
+
+#     # download/install various openbox config files
+#     mkdir -p "/home/${username}/.config/openbox"
+#     [ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
+#     [ -f "data/home/.config/openbox/menu.xml" ] && cp "data/.config/openbox/menu.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/menu.xml" "${remote_source}data/home/.config/openbox/menu.xml"
+#     [ -f "data/home/.config/openbox/rc.xml" ] && cp "data/.config/openbox/rc.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/rc.xml" "${remote_source}data/home/.config/openbox/rc.xml"
+
+#     # download/install clipitrc
+#     mkdir -p "/home/${username}/.config/clipit"
+#     [ -f "data/home/.config/clipit/clipitrc" ] && cp "data/.config/clipit/clipitrc" "/home/${username}/.config/clipit/clipitrc"  || $dl_cmd "/home/${username}/.config/clipit/clipitrc" "${remote_source}data/home/.config/clipit/clipitrc"
+
+#     # @todo download/install tint2 config (not sure if this is necessary, I believe I use the default)
+#     # [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
+
+#     # download/install volumeicon config
+#     mkdir -p "/home/${username}/.config/volumeicon"
+#     [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
+
+#     # download/install conkyrc
+#     [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
+
+#     # check for ethernet devices
+#     if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
+#     then
+#         sed -i "s/eth1/eth0/" "/home/${username}/.conkyrc"
+#     fi
+
+#     # check for multihead to adjust conky
+#     if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
+#     then
+
+#         # create two configurations
+#         mkdir -p "/home/${username}/.conky"
+#         mv -f "/home/${username}/.conkyrc" "/home/${username}/.conky/rc1"
+#         cp -f "/home/${username}/.conky/rc1" "/home/${username}/.conky/rc2"
+
+#         # adjust settings for dual-screens (assuming 1920 display resolutions)
+#         sed -i "s/gap_x 0/gap_x 960/" "/home/${username}/.conky/rc1"
+#         sed -i "s/gap_x 0/gap_x -960/" "/home/${username}/.conky/rc2"
+
+#         # patch openbox autostart
+#         sed -i "s;conky -d -q;conky -d -q -c /home/${username}/.conky/rc1;" "/home/${username}/.config/openbox/autostart"
+#         echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c /home/${username}/.conky/rc2) &" >> "/home/${username}/.config/openbox/autostart"
+#     fi
+
+#     # @todo configure desktop mimetype defaults
+#     mkdir -p "/home/${username}/.local/share/applications"
+#     [ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
+#     [ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
+#     [ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
+#     [ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
+#     update-desktop-database
+
+#     # @todo install nosleep & daemon files
+#     [ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
+#     [ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
+# fi
+
+
+
 ##
 # setup web server folder permissions
 ##
@@ -644,7 +770,7 @@ then
 	groupadd -f www-data
 	groupadd -f gitdev
 	groupadd -f webdev
-	[ -n "$username" ] && usermod -aG webdev,gitdev $username
+	usermod -aG webdev,gitdev $username
 
 	# create environment folders & set permissions /w sticky bits
 	mkdir -p /srv/{www,git}
@@ -655,16 +781,27 @@ then
 fi
 
 
+##
 # restart services whose configuration has been modified
+##
+
 monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
 
+
+##
 # rebuild root directory using the new /etc/skel files
+##
+
 rm -rf /root && cp -R /etc/skel/ /root
 
+
+##
 # load iptables (could disconnect a remote session!)
+##
+
 /etc/network/if-up.d/iptables
 
 echo "done!"

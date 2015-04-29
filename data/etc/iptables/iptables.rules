@@ -10,6 +10,8 @@
 #-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT
 # mongodb traffic
 #-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT
+# postgresql traffic
+#-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT
 # tranmission peer traffic (default port 51413)
 #-A INPUT -p udp -m udp --dport 51413 -j ACCEPT
 # transmission web interface restricted-local-access
