@@ -6,6 +6,7 @@ IFS=$'\n\t'
 ##
 # fail if not running as root
 ##
+
 [ $(id -u) -ne 0 ] && echo "must be executed with root permissions..." && exit 1
 
 
@@ -208,9 +209,8 @@ then
 			# add optimizations
 			sed -i "s;/.*btrfs.*;/\tbtrfs\t${btrfs_optimizations}\t0\t1;" /etc/fstab
 
-
-			# defragment, compress, and rebalance asynchronously so inaccessible files do not crash the script
-			(btrfs filesystem defragment -rfclzo /; btrfs balance start /) &
+			# defragment, compress silently, and rebalance asynchronously so inaccessible files do not crash the script
+			(btrfs filesystem defragment -rfclzo / &>/dev/null; btrfs balance start /) &
 		fi
 
 		# @todo(casey): create initial snapshot for restoration and future iterative backups
@@ -229,6 +229,7 @@ export DEBIAN_FRONTEND=noninteractive
 aptitude clean
 aptitude update
 if ! which netselect-apt &>/dev/null
+then
 	aptitude install -ryq netselect-apt
 	cp -f /etc/apt/sources.list /etc/apt/sources.list.original
 	mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
@@ -278,10 +279,15 @@ then
 	git clone "https://github.com/elzr/vim-json" /tmp/vim-json
 	find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
 fi
-if [ ! -d /tmp/vim-go ]
+if [ ! -d /tmp/vim-go ] && [ "$install_golang" = "y" ]
 then
 	git clone "https://github.com/fatih/vim-go" /tmp/vim-go
 	find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+fi
+if [ ! -d /tmp/vim-node ] && [ "$install_nodejs" = "y" ]
+then
+	git clone "https://github.com/moll/vim-node" /tmp/vim-node
+	find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
 fi
 [ ! -f /etc/skel/.vim/colors/vividchalk.vim ] && curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
@@ -316,7 +322,6 @@ then
 	groupadd -f www-data
 	groupadd -f gitdev
 	groupadd -f webdev
-	usermod -aG webdev,gitdev $username
 
 	# create environment folders & set permissions /w sticky bits
 	mkdir -p /srv/{www,git}
@@ -426,42 +431,33 @@ then
 		rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
 
 		# sublime text 3 installation
-		curl -Lso /tmp/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2
-		tar xf /tmp/sublime.tar.bz2 -C /tmp
-		rm /tmp/sublime.tar.bz2
-		cp -R /tmp/sublime_text_3 /usr/local/sublime-text
-		ln -nsf /usr/local/sublime-text/sublime_text /usr/sbin/subl
-	    mkdir -p /etc/skel/.config/sublime-text-3/Installed Packages/
-	    curl -Lso /etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package "https://sublime.wbond.net/Package%20Control.sublime-package"
+		if ! which subl
+		then
+			curl -Lso /tmp/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2
+			tar xf /tmp/sublime.tar.bz2 -C /tmp
+			rm /tmp/sublime.tar.bz2
+			cp -R /tmp/sublime_text_3 /usr/local/sublime-text
+			ln -nsf /usr/local/sublime-text/sublime_text /usr/sbin/subl
+			mkdir -p /etc/skel/.config/sublime-text-3/Installed Packages/
+			curl -Lso /etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package "https://sublime.wbond.net/Package%20Control.sublime-package"
+		fi
 
 		# check for and install nvidia drivers
-		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ]
+		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer
 		then
-		    curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
-		    /bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
+			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
 		fi
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
-			aptitude install -ryq steam playonlinux xboxdrv
+			aptitude install -ryq xboxdrv steam playonlinux
 
 			# @todo(casey): xboxdrv configuration
 		fi
 	fi
 fi
-
-
-# workstation packages
-# if [ "$install_workstation" = "y" ]
-# then
-
-# 	# install major desktop packages
-
-
-# 	# install
-
-# fi
 
 
 ##
@@ -494,6 +490,7 @@ else
 	update-rc.d wd_keepalive disable
 fi
 
+
 ##
 # secure ssh & restart service
 ##
@@ -503,6 +500,7 @@ sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
 sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
 echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
 echo "UseDNS no" >> /etc/ssh/sshd_config
+
 
 ##
 # optimize lvm
@@ -518,7 +516,7 @@ sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
 sed -i 's/UMASK\s*022/UMASK           002/' /etc/login.defs
 if [ $(grep -c "umask=002" /etc/pam.d/common-session) -eq 0 ]
 then
-    echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
+	echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
 fi
 
 
@@ -532,8 +530,8 @@ then
 fi
 if [ $(grep -c "panic=10" /etc/default/grub) -lt 1 ]
 then
-    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet panic=10"/' /etc/default/grub
-    update-grub
+	sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet panic=10"/' /etc/default/grub
+	update-grub
 fi
 
 
@@ -554,12 +552,12 @@ fi
 
 if [ -n "system_hostname" ]
 then
-    echo "$system_hostname" > /etc/hostname
-    hostname -F /etc/hostname
+	echo "$system_hostname" > /etc/hostname
+	hostname -F /etc/hostname
 fi
 if [ -n "$system_domainname" ]
 then
-    sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
+	sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
 fi
 
 
@@ -579,19 +577,19 @@ fc-cache -fr
 update-alternatives --set editor /usr/bin/vim.basic
 if which google-chrome-stable &> /dev/null
 then
-    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+	update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
 fi
 if which openbox-session &> /dev/null
 then
-    update-alternatives --set x-session-manager /usr/bin/openbox-session
+	update-alternatives --set x-session-manager /usr/bin/openbox-session
 fi
 if which openbox &> /dev/null
 then
-    update-alternatives --set x-window-manager /usr/bin/openbox
+	update-alternatives --set x-window-manager /usr/bin/openbox
 fi
 if which urxvt &> /dev/null
 then
-    update-alternatives --set x-terminal-emulator /usr/bin/urxvt
+	update-alternatives --set x-terminal-emulator /usr/bin/urxvt
 fi
 
 
@@ -627,6 +625,7 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 # create the user & add to basic groups
 useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm $username
+[ "$install_nginx" = "y" ] && usermod -aG webdev,gitdev $username
 
 
 
@@ -819,4 +818,6 @@ rm -rf /root && cp -R /etc/skel/ /root
 
 /etc/network/if-up.d/iptables
 
-echo "done!"
+
+# finish with a positive exit code
+exit 0
