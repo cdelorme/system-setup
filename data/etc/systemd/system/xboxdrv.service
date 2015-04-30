@@ -5,7 +5,7 @@ Description=Xbox controller driver daemon
 Type=forking
 User=root
 PIDFile=/var/run/xboxdrv.pid
-ExecStart=/usr/bin/xboxdrv --daemon --detach --pid-file /var/run/xboxdrv.pid --dbus disabled --silent --dpad-as-button --trigger-as-zaxis --deadzone 6000 --deadzone-trigger 19% --next-controller
+ExecStart=/usr/bin/xboxdrv --daemon --detach-kernel-driver --detach --pid-file /var/run/xboxdrv.pid --dbus disabled --silent --dpad-as-button --trigger-as-zaxis --deadzone 6000 --deadzone-trigger 15% -i 0 -l 2 --next-controller -i 1 -l 3 --next-controller -i 2 -l 4 --next-controller -i 3 -l 5
 
 [Install]
 WantedBy=multi-user.target
