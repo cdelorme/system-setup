@@ -410,6 +410,7 @@ then
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]
 		then
+			# @todo(casey): troubleshoot the steps to getting this working (we are missing something to do with libXt.so.6)
 			dpkg --add-architecture i386
 			aptitude install -ryq ia32-lib libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386
 			curl -Lso /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
@@ -464,10 +465,11 @@ fi
 # "fix" udev so it doesn't break network device identification for changing hardware
 ##
 
-mkdir -p /etc/udev/backup/{rules.d,lib}
-mv -f /etc/udev/rules.d/70-persistent-net.rules /etc/udev/backup/rules.d/
-mv -f /lib/udev/rules.d/75-persistent-net-generator.rules /etc/udev/backup/lib/
-mkdir -p /etc/udev/rules.d/70-persistent-net.rules
+if [ ! -d /etc/udev/rules.d/70-persistent-net.rules ]
+then
+	rm -f /etc/udev/rules.d/70-persistent-net.rules
+	mkdir -p /etc/udev/rules.d/70-persistent-net.rules
+fi
 
 
 ##
