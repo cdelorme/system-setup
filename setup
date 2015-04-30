@@ -222,6 +222,9 @@ fi
 # package installation
 ##
 
+# enable multiarch
+dpkg --add-architecture i386
+
 # set best mirrors and upgrade existing packages
 unset UCF_FORCE_CONFNEW
 export UCF_FORCE_CONFOLD=true
@@ -375,7 +378,7 @@ then
 		# conditionally install global gvm
 		if [ "$install_golang" = "y" ]
 		then
-			git clone https://github.com/moovweb/gvm /etc/skel/.gvm
+			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
 
 			# add lines to load gvm in .bashrc
 			echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
@@ -385,7 +388,7 @@ then
 		# conditionally install global nvm
 		if [ "$install_nodejs" = "y" ]
 		then
-			curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
+			[ ! -d /etc/skel/.nvm ] && curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
 
 			# add lines to load nvm in .bashrc
 			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
@@ -453,9 +456,8 @@ then
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
-			aptitude install -ryq xboxdrv steam playonlinux
-
-			# @todo(casey): xboxdrv configuration
+			aptitude install -ryq xboxdrv playonlinux
+			# @todo(casey): figure out how to get `steam` installed unattended (seems impossible currently)
 		fi
 	fi
 fi
@@ -485,11 +487,8 @@ which sensors-detect &>/dev/null && (yes "" | sensors-detect)
 
 if [ -f /dev/watchdog ]
 then
-	update-rc.d watchdog defaults
-	update-rc.d wd_keepalive defaults
-else
-	update-rc.d watchdog disable
-	update-rc.d wd_keepalive disable
+	systemctl enable watchdog
+	systemctl start watchdog
 fi
 
 
@@ -500,8 +499,8 @@ fi
 sed -i "s/Port\s*[0-9].*/Port ${ssh_port:-22}/" /etc/ssh/sshd_config
 sed -i "s/^#\?PermitRootLogin.*[yn].*/PermitRootLogin no/" /etc/ssh/sshd_config
 sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/ssh/sshd_config
-echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
-echo "UseDNS no" >> /etc/ssh/sshd_config
+[ $(grep -c 'GSSAPIAuthentication no' /etc/ssh/sshd_config) -eq 0 ] && echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
+[ $(grep -c 'UseDNS no' /etc/ssh/sshd_config) -eq 0 ] && echo "UseDNS no" >> /etc/ssh/sshd_config
 
 
 ##
@@ -515,7 +514,7 @@ sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
 # fix default permissions (secure by group)
 ##
 
-sed -i 's/UMASK\s*022/UMASK           002/' /etc/login.defs
+sed -i 's/UMASK\s*022/UMASK\t\t002/' /etc/login.defs
 if [ $(grep -c "umask=002" /etc/pam.d/common-session) -eq 0 ]
 then
 	echo "session optional pam_umask.so umask=002" >> /etc/pam.d/common-session
@@ -556,10 +555,10 @@ if [ -n "system_hostname" ]
 then
 	echo "$system_hostname" > /etc/hostname
 	hostname -F /etc/hostname
-fi
-if [ -n "$system_domainname" ]
-then
-	sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
+	if [ -n "$system_domainname" ]
+	then
+		sed -i "s/127.0.1.1.*/127.0.1.1 ${system_hostname}.${system_domainname} ${system_hostname}/" /etc/hosts
+	fi
 fi
 
 
