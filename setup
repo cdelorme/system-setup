@@ -94,7 +94,6 @@ if [ "$for_web_or_dev" = "y" ]
 then
 	grab_yes_no "install_nginx" "do you want to install nginx web & proxy server"
 	[ "$install_nginx" = "y" ] && grab_yes_no "public_nginx" "do you want to open web ports 80 & 443 publicly"
-	grab_yes_no "setup_srv_permissions" "do you want to setup /srv permissions"
 	grab_yes_no "install_mongodb" "install mongodb"
 	[ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
 	grab_yes_no "install_postgresql" "install postgres"
@@ -208,15 +207,11 @@ then
 
 			# add optimizations
 			sed -i "s;/.*btrfs.*;/\tbtrfs\t${btrfs_optimizations}\t0\t1;" /etc/fstab
+
+
+			# defragment, compress, and rebalance asynchronously so inaccessible files do not crash the script
+			(btrfs filesystem defragment -rfclzo /; btrfs balance start /) &
 		fi
-
-		# ensure encryption has been applied
-		# async so we don't crash our setup script
-		# redirected because it may encounter system files it cannot compress
-		btrfs filesystem defragment -rfclzo / &>/dev/null &
-
-		# rebalance after changes
-		btrfs balance start /
 
 		# @todo(casey): create initial snapshot for restoration and future iterative backups
 	fi
@@ -231,18 +226,22 @@ fi
 unset UCF_FORCE_CONFNEW
 export UCF_FORCE_CONFOLD=true
 export DEBIAN_FRONTEND=noninteractive
-aptitude install -ryq netselect-apt
-cp -f /etc/apt/sources.list /etc/apt/sources.list.original
-mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
-netselect-apt -c US -fsno /etc/apt/sources.list stable
 aptitude clean
-if ! aptitude update
-then
-	mv -f /etc/apt/sources.list.bak /etc/apt/sources.list
+aptitude update
+if ! which netselect-apt &>/dev/null
+	aptitude install -ryq netselect-apt
+	cp -f /etc/apt/sources.list /etc/apt/sources.list.original
+	mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
+	netselect-apt -c US -fsno /etc/apt/sources.list stable
 	aptitude clean
-	aptitude update
+	if ! aptitude update
+	then
+		mv -f /etc/apt/sources.list.bak /etc/apt/sources.list
+		aptitude clean
+		aptitude update
+	fi
+	aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 fi
-aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
 # install all useful system utilities & initialize command-not-found
 aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip monit ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs
@@ -269,14 +268,23 @@ fi
 
 # install some vim plugins & color schemes
 mkdir -p /etc/skel/.vim/colors
-git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
-find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-git clone "https://github.com/elzr/vim-json" /tmp/vim-json
-find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-git clone "https://github.com/fatih/vim-go" /tmp/vim-go
-find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
-curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
+if [ ! -d /tmp/vim-ctrlp ]
+then
+	git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
+	find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+fi
+if [ ! -d /tmp/vim-json ]
+then
+	git clone "https://github.com/elzr/vim-json" /tmp/vim-json
+	find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+fi
+if [ ! -d /tmp/vim-go ]
+then
+	git clone "https://github.com/fatih/vim-go" /tmp/vim-go
+	find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+fi
+[ ! -f /etc/skel/.vim/colors/vividchalk.vim ] && curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+[ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
 
 ##
@@ -284,7 +292,7 @@ curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/
 ##
 
 # conditionally install weechat
-if [ "$install_weechat" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" weechat
+[ "$install_weechat" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" weechat
 
 # conditionally install transmission
 if [ "$install_transmission" = "y" ]
@@ -299,6 +307,24 @@ fi
 # conditionally install nginx
 if [ "${install_nginx:-}" = "y" ]
 then
+
+	##
+	# setup web server folder permissions
+	##
+
+	# add new groups, and to user
+	groupadd -f www-data
+	groupadd -f gitdev
+	groupadd -f webdev
+	usermod -aG webdev,gitdev $username
+
+	# create environment folders & set permissions /w sticky bits
+	mkdir -p /srv/{www,git}
+	chown -R www-data:www-data /srv
+	chown -R www-data:webdev /srv/www
+	chown -R www-data:gitdev /srv/git
+	chmod -R 6775 /srv
+
 
 	# install nginx
 	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx-full
@@ -768,29 +794,6 @@ usermod -aG sudo,adm $username
 #     [ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
 #     [ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
 # fi
-
-
-
-##
-# setup web server folder permissions
-##
-
-if [ "$setup_srv_permissions" = "y" ]
-then
-
-	# add new groups, and to user
-	groupadd -f www-data
-	groupadd -f gitdev
-	groupadd -f webdev
-	usermod -aG webdev,gitdev $username
-
-	# create environment folders & set permissions /w sticky bits
-	mkdir -p /srv/{www,git}
-	chown -R www-data:www-data /srv
-	chown -R www-data:webdev /srv/www
-	chown -R www-data:gitdev /srv/git
-	chmod -R 6775 /srv
-fi
 
 
 ##
