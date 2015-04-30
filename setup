@@ -222,9 +222,6 @@ fi
 # package installation
 ##
 
-# enable multiarch
-dpkg --add-architecture i386
-
 # set best mirrors and upgrade existing packages
 unset UCF_FORCE_CONFNEW
 export UCF_FORCE_CONFOLD=true
