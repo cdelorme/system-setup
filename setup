@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eufo pipefail
+set -euo pipefail
 IFS=$'\n\t'
 
 
@@ -257,7 +257,7 @@ update-command-not-found
 [ "$install_dotfiles" = "y" ] && curl -Ls "$dotfiles_https" | bash -s -- -q
 
 # install template configuration files
-if [ -d "data/" ]
+if [ -d data/ ]
 then
 	cp -fR data/* /
 else
