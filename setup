@@ -373,7 +373,7 @@ then
 	# conditionally install development tools
 	if [ "$install_development_tools" = "y" ]
 	then
-		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsmfl-dev
+		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install global gvm
 		if [ "$install_golang" = "y" ]
@@ -398,13 +398,15 @@ then
 		# conditionally install global openjdk
 		if [ "$install_openjdk" = "y" ]
 		then
-			aptitude install -ryq openjdk-7-jre
+			aptitude install -ryq openjdk-7-jdk openjdk-7-jre
 		fi
 	fi
 
 	# conditionally install openbox desktop environment
 	if [ "$install_openbox" = "y" ]
 	then
+		aptitude clean
+		aptitude update
 		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
 		# install tabbedex for urxvt
@@ -413,9 +415,7 @@ then
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]
 		then
-			# @todo(casey): troubleshoot the steps to getting this working (we are missing something to do with libXt.so.6)
-			dpkg --add-architecture i386
-			aptitude install -ryq ia32-lib libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386
+			aptitude install -ryq libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386
 			curl -Lso /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
 			tar xf /tmp/flash.tar.gz -C /tmp
 			rm /tmp/flash.tar.gz
@@ -478,7 +478,7 @@ fi
 # configure sensors
 ##
 
-which sensors-detect &>/dev/null && (yes "" | sensors-detect)
+which sensors-detect &>/dev/null && (yes "" | sensors-detect) &
 
 
 ##
@@ -507,7 +507,7 @@ sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/s
 # optimize lvm
 ##
 
-sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+[ -f /etc/lvm/lvm.conf ] && sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
 
 
 ##
@@ -551,7 +551,7 @@ fi
 # conditionally update hostname & domain name
 ##
 
-if [ -n "system_hostname" ]
+if [ -n "$system_hostname" ]
 then
 	echo "$system_hostname" > /etc/hostname
 	hostname -F /etc/hostname
@@ -803,7 +803,7 @@ usermod -aG sudo,adm $username
 monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
-[ "${install_nginx:-}" = "y" ] nginx -t && systemctl restart nginx
+[ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
 
 
 ##
