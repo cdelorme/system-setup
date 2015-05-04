@@ -457,9 +457,9 @@ then
 		if [ "$install_gaming_software" = "y" ]
 		then
 			aptitude install -ryq xboxdrv playonlinux
-			# @todo(casey): figure out how to get `steam` installed unattended (seems impossible currently)
 
-			# try downloading the package supplied by steam themselves
+			# download steam directly, install it's dependencies (the only one missing is xterm), and install from .deb directly
+			aptitude install -ryq xterm
 			curl -Lo steam.deb steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
 			dpkg -i steam.deb
 			aptitude install -f
