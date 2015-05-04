@@ -460,7 +460,7 @@ then
 
 			# download steam directly, install it's dependencies (the only one missing is xterm), and install from .deb directly
 			aptitude install -ryq xterm
-			curl -Lo steam.deb steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
+			curl -Lo steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
 			dpkg -i steam.deb
 			aptitude install -f
 		fi
