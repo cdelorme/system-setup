@@ -629,7 +629,7 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 ##
 
 # create the user & add to basic groups
-useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm $username
 [ "$install_nginx" = "y" ] && usermod -aG webdev,gitdev $username
 
