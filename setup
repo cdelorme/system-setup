@@ -292,6 +292,9 @@ fi
 [ ! -f /etc/skel/.vim/colors/vividchalk.vim ] && curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
+# download ~/.git-completion
+curl -Lso "$dlpath/.git-completion" "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
+
 
 ##
 # install conditional software
@@ -388,7 +391,7 @@ then
 		# conditionally install global nvm
 		if [ "$install_nodejs" = "y" ]
 		then
-			[ ! -d /etc/skel/.nvm ] && curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
+			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
 
 			# add lines to load nvm in .bashrc
 			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
@@ -407,7 +410,7 @@ then
 	then
 		aptitude clean
 		aptitude update
-		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
+		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer
 
 		# install tabbedex for urxvt
 		[ ! -f /usr/lib/urxvt/perl/tabbedex ] && curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
@@ -513,6 +516,14 @@ sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/s
 ##
 
 [ -f /etc/lvm/lvm.conf ] && sed -i 's/issue_discards = 0/issue_discards = 1/' /etc/lvm/lvm.conf
+
+
+##
+# add pam tally locking
+##
+
+[ $(grep -c "pam_tally2" /etc/pam.d/common-auth) -eq 0 ] && echo "auth required pam_tally2.so deny=4 even_deny_root onerr=fail unlock_time=600 root_unlock_time=60" >> /etc/pam.d/common-auth
+[ $(grep -c "pam_tally2" /etc/pam.d/common-account) -eq 0 ] && echo "account required pam_tally2.so" >> /etc/pam.d/common-account
 
 
 ##
@@ -795,9 +806,6 @@ usermod -aG sudo,adm $username
 #     [ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
 #     update-desktop-database
 
-#     # @todo install nosleep & daemon files
-#     [ -f "data/home/.bin/nosleep" ] && cp "data/.bin/nosleep" "/home/${username}/.bin/nosleep"  || $dl_cmd "/home/${username}/.bin/nosleep" "${remote_source}data/home/.bin/nosleep"
-#     [ -f "data/home/.bin/nosleep-daemon" ] && cp "data/.bin/nosleep-daemon" "/home/${username}/.bin/nosleep-daemon"  || $dl_cmd "/home/${username}/.bin/nosleep-daemon" "${remote_source}data/home/.bin/nosleep-daemon"
 # fi
 
 
