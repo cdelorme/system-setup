@@ -137,16 +137,6 @@ then
 fi
 
 
-
-##
-# set dependent default variables
-##
-
-export cronfile="/var/spool/cron/crontabs/${username}"
-export github_https="https://github.com/cdelorme/system-setup"
-export dotfiles_https="https://raw.githubusercontent.com/cdelorme/dot-files/master/install"
-
-
 ##
 # clean up uefi configuration
 ##
@@ -253,19 +243,17 @@ update-command-not-found
 # copy/install global configuration/dot files
 ##
 
-# install global dot-files
-[ "$install_dotfiles" = "y" ] && curl -Ls "$dotfiles_https" | bash -s -- -q
-
-# install template configuration files
+# install local files or clone from git
 if [ -d data/ ]
 then
 	cp -fR data/* /
 else
-
-	# download system-setup git repository
-	git clone $github_https /tmp/system-setup
+	git clone https://github.com/cdelorme/system-setup /tmp/system-setup
 	cp -fR /tmp/system-setup/data/* /
 fi
+
+# install global dot-files
+[ "$install_dotfiles" = "y" ] && curl -Ls https://raw.githubusercontent.com/cdelorme/dot-files/master/install | bash -s -- -q
 
 # install some vim plugins & color schemes
 mkdir -p /etc/skel/.vim/colors
@@ -372,6 +360,38 @@ then
 
 	# install workstation packages
 	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown checkinstall lm-sensors cpufrequtils
+
+	# check ethernet devices
+	if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
+	then
+		sed -i "s/eth1/eth0/" /etc/skel/.conkyrc
+	fi
+
+	# detect & configure multi-head conky (assume dual-head 1080p)
+	if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
+	then
+		mkdir -p /etc/skel/.conky
+		mv -f /etc/skel/.conkyrc /etc/skel/.conky/rc1
+		cp -f /etc/skel/.conky/rc1 /etc/skel/.conky/rc2
+		sed -i "s/gap_x 0/gap_x 960/" /etc/skel/.conky/rc1
+		sed -i "s/gap_x 0/gap_x -960/" /etc/skel/.conky/rc2
+		sed -i "s;conky -d -q;conky -d -q -c ~/.conky/rc1;" /etc/skel/.config/openbox/autostart
+		[ $(grep rc2 /etc/skel/.config/openbox/autostart) -eq 0 ] && echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &" >> /etc/skel/.config/openbox/autostart
+	fi
+
+	# grab pulse config
+	if [ -f /etc/pulse/default.pa ]
+	then
+		mkdir -p /etc/skel/.pulse
+		cp /etc/pulse/default.pa /etc/skel/.pulse/default.pa
+	fi
+
+	# check graphics card and adjust compton configuration
+	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
+	then
+		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.compton.conf
+		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.compton.conf
+	fi
 
 	# conditionally install development tools
 	if [ "$install_development_tools" = "y" ]
@@ -614,10 +634,6 @@ fi
 # activate monit services via symlinks
 ##
 
-ln -nsf "../monitrc.d/system" "/etc/monit/conf.d/system"
-ln -nsf "../monitrc.d/ssh" "/etc/monit/conf.d/ssh"
-ln -nsf "../monitrc.d/web" "/etc/monit/conf.d/web"
-which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
 [ "$install_transmission" = "y" ] && ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
 [ "${install_nginx:-}" = "y" ] && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
 [ "${install_mongodb:-}" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
@@ -636,177 +652,62 @@ which nginx &>/dev/null && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx
 
 
 ##
-# create user account
+# install dot-files for root
+##
+
+find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
+
+
+##
+# configure user
 ##
 
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-usermod -aG sudo,adm $username
+usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
 [ "$install_nginx" = "y" ] && usermod -aG webdev,gitdev $username
 
+# generate ssh key
+if [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
+then
+    ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
+    chmod 600 /home/$username/.ssh/*
+fi
 
+# attempt to upload new ssh key to github account
+if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
+then
+    curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+fi
 
+# configure update-keys & setup as runtime default
+[ "$username" != "$github_username" ] && [ -n "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
 
-# # user customizations
-# if [ -n "$username" ]
-# then
+# add crontab to run `update-keys`
+export cronfile="/var/spool/cron/crontabs/${username}"
+[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
+[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
 
-#     # conditionally create new user and add to core groups
-#     if [ -n "$username" ] && ! id "$username" &>/dev/null
-#     then
-#         useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-#     fi
-#     usermod -aG sudo,adm $username
+# use github username to acquire name & email from github
+if [ -n "$github_username" ]
+then
+    tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
+    github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+    github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+    su $username -c "cd && git config --global user.name $github_username"
+    su $username -c "cd && git config --global user.email $github_email"
+fi
 
-#     # generate ssh key
-#     if [ "$create_ssh" = "y" ]
-#     then
-#         mkdir -p "/home/$username/.ssh"
-#         ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
-#         chmod 600 /home/$username/.ssh/*
-#     fi
+# first-run generate config & modify settings
+if which weechat-curses &> /dev/null
+then
+	su $username -s /bin/bash -c 'weechat-curses &>/dev/null & pid=$!; sleep 10; kill -9 $pid'
+	sed -i 's/max_buffer_lines_number.*/max_buffer_lines_number = 0/' "/home/${username}/.weechat/weechat.conf"
+	sed -i 's/freenode\.autoconnect.*/freenode\.autoconnect = on/' "/home/${username}/.weechat/irc.conf"
+fi
 
-#     # attempt to upload new ssh key to github account
-#     if [ -f "/home/$username/.ssh/id_rsa" ] && [ "$send_ssh_to_github" = "y" ] && [ -n "$github_username" ] && [ -n "$github_password" ]
-#     then
-#         curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
-#     fi
-
-#     # download update-keys
-#     if ! [ -f /home/$username/.bin/update-keys ]
-#     then
-#         mkdir -p /home/$username/.bin
-#         [ -f "data/home/.bin/update-keys" ] && cp "data/home/.bin/update-keys" "/home/${username}/.bin/update-keys"  || $dl_cmd "/home/${username}/.bin/update-keys" "${remote_source}data/home/.bin/update-keys"
-#         chmod +x /home/$username/.bin/*
-
-#         # if username != github username swap $(whoami) for supplied github username
-#         [ "$username" != "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
-#     fi
-
-#     if [ -n "$cronfile" ]
-#     then
-#         # add crontab to run `update-keys` (idempotently)
-#         [ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
-#         [ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
-#     fi
-
-#     # reset ownership on user files
-#     chown -R $username:$username /home/$username
-
-#     # use github username to acquire name & email from github
-#     if [ -n "$github_username" ]
-#     then
-#         tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
-#         github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
-#         github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
-#         su $username -c "cd && git config --global user.name $github_username"
-#         su $username -c "cd && git config --global user.email $github_email"
-#     fi
-
-	# weechat configuration for user
-	# # try to setup some values for our user
-	# if [ -n "$username" ]
-	# then
-
-	#     # generate weechat config with first-run
-	#     su $username -s /bin/bash -c 'weechat-curses &>/dev/null & pid=$!; sleep 10; kill -9 $pid'
-
-	#     # configure weechat
-	#     sed -i 's/max_buffer_lines_number.*/max_buffer_lines_number = 0/' "/home/${username}/.weechat/weechat.conf"
-	#     sed -i 's/freenode\.autoconnect.*/freenode\.autoconnect = on/' "/home/${username}/.weechat/irc.conf"
-	# fi
-# fi
-
-# # user customizations
-# if [ -n "$username" ]
-# then
-
-#     # add user to general gui groups
-#     usermod -aG scanner,bluetooth,netdev,audio,video,plugdev $username
-
-#     # ensure user bin folder exists
-#     mkdir -p "/home/${username}/.bin"
-
-#     # download/install .xinitrc
-#     [ -f "data/home/.xinitrc" ] && cp "data/home/.xinitrc" "/home/${username}/.xinitrc"  || $dl_cmd "/home/${username}/.xinitrc" "${remote_source}data/home/.xinitrc"
-
-#     # copy the defaults.pa into ~/.pulse, for audio control
-#     mkdir -p "/home/${username}/.pulse"
-#     cp "/etc/pulse/default.pa" "/home/${username}/.pulse"
-
-#     # download/install .fehbg script
-#     [ -f "data/home/.fehbg" ] && cp "data/home/.fehbg" "/home/${username}/.fehbg"  || $dl_cmd "/home/${username}/.fehbg" "${remote_source}data/home/.fehbg"
-
-#     # download/install ~/.Xdefaults & symlink to ~/.Xresources
-#     [ -f "data/home/.Xdefaults" ] && cp "data/home/.Xdefaults" "/home/${username}/.Xdefaults"  || $dl_cmd "/home/${username}/.Xdefaults" "${remote_source}data/home/.Xdefaults"
-#     ln -nsf ".Xdefaults" "/home/${username}/.Xresources"
-
-#     # download/install urxvtq guake-like-launcher
-#     [ -f "data/home/.bin/urxvtq" ] && cp "data/.bin/urxvtq" "/home/${username}/.bin/urxvtq"  || $dl_cmd "/home/${username}/.bin/urxvtq" "${remote_source}data/home/.bin/urxvtq"
-
-#     # download compton configuration
-#     [ -f "data/home/.compton.conf" ] && cp "data/home/.compton.conf" "/home/${username}/.compton.conf"  || $dl_cmd "/home/${username}/.compton.conf" "${remote_source}data/home/.compton.conf"
-
-#     # check graphics card and adjust compton configuration
-#     if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
-#     then
-#         sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' "/home/${username}/.compton.conf"
-#         sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' "/home/${username}/.compton.conf"
-#     fi
-
-#     # download/install various openbox config files
-#     mkdir -p "/home/${username}/.config/openbox"
-#     [ -f "data/home/.config/openbox/autostart" ] && cp "data/.config/openbox/autostart" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/autostart" "${remote_source}data/home/.config/openbox/autostart"
-#     [ -f "data/home/.config/openbox/menu.xml" ] && cp "data/.config/openbox/menu.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/menu.xml" "${remote_source}data/home/.config/openbox/menu.xml"
-#     [ -f "data/home/.config/openbox/rc.xml" ] && cp "data/.config/openbox/rc.xml" "/home/${username}/.config/openbox/autostart"  || $dl_cmd "/home/${username}/.config/openbox/rc.xml" "${remote_source}data/home/.config/openbox/rc.xml"
-
-#     # download/install clipitrc
-#     mkdir -p "/home/${username}/.config/clipit"
-#     [ -f "data/home/.config/clipit/clipitrc" ] && cp "data/.config/clipit/clipitrc" "/home/${username}/.config/clipit/clipitrc"  || $dl_cmd "/home/${username}/.config/clipit/clipitrc" "${remote_source}data/home/.config/clipit/clipitrc"
-
-#     # @todo download/install tint2 config (not sure if this is necessary, I believe I use the default)
-#     # [ -f "data/home/.config/tint2/tint2rc" ] && cp "data/.config/tint2/tint2rc" "/home/${username}/.config/tint2/tint2rc"  || $dl_cmd "/home/${username}/.config/tint2/tint2rc" "${remote_source}data/home/.config/tint2/tint2rc"
-
-#     # download/install volumeicon config
-#     mkdir -p "/home/${username}/.config/volumeicon"
-#     [ -f "data/home/.config/volumeicon/volumeicon" ] && cp "data/.config/volumeicon/volumeicon" "/home/${username}/.config/volumeicon/volumeicon"  || $dl_cmd "/home/${username}/.config/volumeicon/volumeicon" "${remote_source}data/home/.config/volumeicon/volumeicon"
-
-#     # download/install conkyrc
-#     [ -f "data/home/.conkyrc" ] && cp "data/.conkyrc" "/home/${username}/.conkyrc"  || $dl_cmd "/home/${username}/.conkyrc" "${remote_source}data/home/.conkyrc"
-
-#     # check for ethernet devices
-#     if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
-#     then
-#         sed -i "s/eth1/eth0/" "/home/${username}/.conkyrc"
-#     fi
-
-#     # check for multihead to adjust conky
-#     if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
-#     then
-
-#         # create two configurations
-#         mkdir -p "/home/${username}/.conky"
-#         mv -f "/home/${username}/.conkyrc" "/home/${username}/.conky/rc1"
-#         cp -f "/home/${username}/.conky/rc1" "/home/${username}/.conky/rc2"
-
-#         # adjust settings for dual-screens (assuming 1920 display resolutions)
-#         sed -i "s/gap_x 0/gap_x 960/" "/home/${username}/.conky/rc1"
-#         sed -i "s/gap_x 0/gap_x -960/" "/home/${username}/.conky/rc2"
-
-#         # patch openbox autostart
-#         sed -i "s;conky -d -q;conky -d -q -c /home/${username}/.conky/rc1;" "/home/${username}/.config/openbox/autostart"
-#         echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c /home/${username}/.conky/rc2) &" >> "/home/${username}/.config/openbox/autostart"
-#     fi
-
-#     # @todo configure desktop mimetype defaults
-#     mkdir -p "/home/${username}/.local/share/applications"
-#     [ -f "data/home/.local/share/applications/animate.desktop" ] && cp "data/home/.local/share/applications/animate.desktop" "/home/${username}/.local/share/applications/animate.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/animate.desktop" "${remote_source}data/home/.local/share/applications/animate.desktop"
-#     [ -f "data/home/.local/share/applications/flash.desktop" ] && cp "data/home/.local/share/applications/flash.desktop" "/home/${username}/.local/share/applications/flash.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/flash.desktop" "${remote_source}data/home/.local/share/applications/flash.desktop"
-#     [ -f "data/home/.local/share/applications/subl.desktop" ] && cp "data/home/.local/share/applications/subl.desktop" "/home/${username}/.local/share/applications/subl.desktop"  || $dl_cmd "/home/${username}/.local/share/applications/subl.desktop" "${remote_source}data/home/.local/share/applications/subl.desktop"
-#     [ -f "data/home/.local/share/applications/mimeapps.list" ] && cp "data/home/.local/share/applications/mimeapps.list" "/home/${username}/.local/share/applications/mimeapps.list"  || $dl_cmd "/home/${username}/.local/share/applications/mimeapps.list" "${remote_source}data/home/.local/share/applications/mimeapps.list"
-#     update-desktop-database
-
-# fi
+# ensure ownership for users folder
+chown -R $username:$username /home/$username/.ssh/
 
 
 ##
@@ -817,13 +718,6 @@ monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
-
-
-##
-# rebuild root directory using the new /etc/skel files
-##
-
-rm -rf /root && cp -R /etc/skel/ /root
 
 
 ##
