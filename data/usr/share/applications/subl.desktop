@@ -3,6 +3,6 @@ Name=Sublime Text
 Comment=The World's best text editor!
 TryExec=subl
 Exec=subl
-Icon=~/applications/sublime_text/Icon/256x256/sublime_text.png
+Icon=/usr/local/sublime-text/Icon/256x256/sublime-text.png
 Type=Application
 Categories=Utility;TerminalEmulator;Office;
