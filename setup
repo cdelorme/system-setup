@@ -281,7 +281,7 @@ fi
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
 # download ~/.git-completion
-curl -Lso "$dlpath/.git-completion" "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
+curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
 
 
 ##
