@@ -72,7 +72,7 @@ grab_yes_no "generate_ssh_key" "create an ssh key"
 # github configuration
 grab_or_fallback "github_username" "" "enter your github username"
 [ -n "$github_username" ] && grab_secret_or_fallback "github_password" "" "enter your github password"
-[ -n "$github_password" ] && grab_yes_no "github_ssh_key" "upload ssh key to github"
+[ -n "${github_password:-}" ] && grab_yes_no "github_ssh_key" "upload ssh key to github"
 
 # various settings
 grab_or_fallback "ssh_port" "22" "enter your preferred ssh port (22)"
@@ -483,8 +483,8 @@ then
 
 			# download steam directly, install it's dependencies (the only one missing is xterm), and install from .deb directly
 			aptitude install -ryq xterm
-			curl -Lo steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
-			dpkg -i steam.deb
+			[ ! -f /tmp/steam.deb ] && curl -Lo /tmp/steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
+			[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
 			aptitude install -f
 		fi
 	fi
@@ -691,7 +691,7 @@ export cronfile="/var/spool/cron/crontabs/${username}"
 # use github username to acquire name & email from github
 if [ -n "$github_username" ]
 then
-    tmpdata=$($source_cmd "https://api.github.com/users/${github_username}")
+    tmpdata=$(curl -Ls "https://api.github.com/users/${github_username}")
     github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
     github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
     su $username -c "cd && git config --global user.name $github_username"
