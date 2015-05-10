@@ -240,6 +240,27 @@ update-command-not-found
 
 
 ##
+# detect virtualbox & install guest additions
+##
+if [ $() -gt 0 ]
+then
+	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
+	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
+	then
+
+		# run the installation
+		mkdir -p /media/vbox
+		mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
+		/media/vbox/VBoxLinuxAdditions.run
+		umount /media/vbox
+		rmdir /media/vbox -p
+
+		# run the setup
+		/etc/init.d/vboxadd setup
+	fi
+fi
+
+##
 # copy/install global configuration/dot files
 ##
 
@@ -475,6 +496,10 @@ then
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
 		fi
+
+		# rerun vboxadd setup, and try to startup x11 additions (not sure if this works as intended)
+		[ -x /etc/init.d/vboxadd ] && /etc/init.d/vboxadd setup
+		[ -x /etc/init.d/vboxadd-x11 ] && systemctl start vboxadd-x11.service
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
