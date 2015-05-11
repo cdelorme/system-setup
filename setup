@@ -695,7 +695,7 @@ usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
 [ "$install_nginx" = "y" ] && usermod -aG webdev,gitdev $username
 
 # generate ssh key
-if [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
+if [ "$username" != "root" ] && [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
 then
     ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
     chmod 600 /home/$username/.ssh/*
