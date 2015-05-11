@@ -423,10 +423,12 @@ then
 		if [ "$install_golang" = "y" ]
 		then
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
+			echo 'export GVM_ROOT="$HOME/.gvm"' > /etc/skel/.gvm/scripts/gvm
+			echo '. $GVM_ROOT/scripts/gvm-default' >> /etc/skel/.gvm/scripts/gvm
 
 			# add lines to load gvm in .bashrc
 			echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
-			echo '[ -s "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
+			echo '[ -f "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
 		fi
 
 		# conditionally install global nvm
@@ -436,7 +438,7 @@ then
 
 			# add lines to load nvm in .bashrc
 			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
-			echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
+			echo '[ -f "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use stable' >> /etc/skel/.bashrc
 		fi
 
 		# conditionally install global openjdk
@@ -705,14 +707,6 @@ then
     curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 fi
 
-# configure update-keys & setup as runtime default
-[ "$username" != "$github_username" ] && [ -n "$github_username" ] && "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
-
-# add crontab to run `update-keys`
-export cronfile="/var/spool/cron/crontabs/${username}"
-[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
-[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
-
 # use github username to acquire name & email from github
 if [ -n "$github_username" ]
 then
@@ -722,6 +716,24 @@ then
     su $username -c "cd && git config --global user.name $github_username"
     su $username -c "cd && git config --global user.email $github_email"
 fi
+
+# configure update-keys & setup as runtime default
+[ "$username" != "$github_username" ] && [ -n "$github_username" ] && sed -i "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
+
+# add crontab to run `update-keys`
+if [ "$username" != "root" ]
+then
+	export cronfile="/var/spool/cron/crontabs/${username}"
+	[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
+	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
+	su $username -c "cd && .bin/update-keys"
+fi
+
+# initialize golang
+[ "$install_golang" = "y" ] && su $username -c "cd && . .gvm/ && gvm install go1.4.2 && echo 'gvm use go1.4.2 --default' >> .bashrc"
+
+# initialize nodejs
+[ "$install_nodejs" = "y" ] && su $username -c "cd && . .nvm/ && nvm install stable && echo 'nvm use stable' >> .bashrc"
 
 # ensure ownership for users folder
 chown -R $username:$username /home/$username/.ssh/
