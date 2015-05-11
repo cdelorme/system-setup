@@ -77,7 +77,7 @@ grab_or_fallback "github_username" "" "enter your github username"
 # various settings
 grab_or_fallback "ssh_port" "22" "enter your preferred ssh port (22)"
 grab_or_fallback "timezone" "US/Eastern" "enter your preferred timezone (eg. US/Eastern)"
-grab_or_fallback "system_hostname" "" "enter a system hostname"
+grab_or_fallback "system_hostname" "$(hostname -s)" "enter a system hostname"
 grab_or_fallback "system_domainname" "" "enter a system domain name"
 
 # additional customization packages
