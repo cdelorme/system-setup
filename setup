@@ -240,27 +240,6 @@ update-command-not-found
 
 
 ##
-# detect virtualbox & install guest additions
-##
-if [ $(lspci | grep -ci 'virtualbox') -gt 0 ]
-then
-	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
-	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
-	then
-
-		# run the installation
-		mkdir -p /media/vbox
-		mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
-		/media/vbox/VBoxLinuxAdditions.run
-		umount /media/vbox
-		rmdir /media/vbox -p
-
-		# run the setup
-		/etc/init.d/vboxadd setup
-	fi
-fi
-
-##
 # copy/install global configuration/dot files
 ##
 
@@ -499,10 +478,6 @@ then
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
 		fi
 
-		# rerun vboxadd setup, and try to startup x11 additions (not sure if this works as intended)
-		[ -x /etc/init.d/vboxadd ] && /etc/init.d/vboxadd setup
-		[ -x /etc/init.d/vboxadd-x11 ] && systemctl start vboxadd-x11.service
-
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
@@ -514,6 +489,27 @@ then
 			[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
 			aptitude install -f
 		fi
+	fi
+fi
+
+
+##
+# detect virtualbox & install guest additions
+##
+
+if [ $(lspci | grep -ci 'virtualbox') -gt 0 ]
+then
+	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
+	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
+	then
+
+		# install dependencies
+		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant
+
+		# run the installation & setup (async to prevent crash on no x11 installed)
+		mkdir -p /media/vbox
+		[ $(mount && grep -c vbox) -eq 0 ] && mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
+		(/media/vbox/VBoxLinuxAdditions.run; umount /media/vbox; rmdir /media/vbox -p; /etc/init.d/vboxadd setup; /etc/init.d/vboxadd-x11 start) &
 	fi
 fi
 
