@@ -242,7 +242,7 @@ update-command-not-found
 ##
 # detect virtualbox & install guest additions
 ##
-if [ $() -gt 0 ]
+if [ $(lspci | grep -ci 'virtualbox') -gt 0 ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
 	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
@@ -699,12 +699,12 @@ if [ "$username" != "root" ] && [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$u
 then
     ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
     chmod 600 /home/$username/.ssh/*
-fi
 
-# attempt to upload new ssh key to github account
-if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
-then
-    curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+	# attempt to upload new ssh key to github account
+	if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
+	then
+	    curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+	fi
 fi
 
 # use github username to acquire name & email from github
