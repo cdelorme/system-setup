@@ -394,7 +394,7 @@ then
 	fi
 
 	# conditionally install development tools
-	if [ "$install_development_tools" = "y" ]
+	if [ "${install_development_tools:-}" = "y" ]
 	then
 		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
@@ -421,14 +421,14 @@ then
 		fi
 
 		# conditionally install global openjdk
-		if [ "$install_openjdk" = "y" ]
+		if [ "${install_openjdk:-}" = "y" ]
 		then
 			aptitude install -ryq openjdk-7-jdk openjdk-7-jre
 		fi
 	fi
 
 	# conditionally install openbox desktop environment
-	if [ "$install_openbox" = "y" ]
+	if [ "${install_openbox:-}" = "y" ]
 	then
 		aptitude clean
 		aptitude update
@@ -694,7 +694,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
-[ "$install_nginx" = "y" ] && usermod -aG webdev,gitdev $username
+[ "${install_nginx:-}" = "y" ] && usermod -aG webdev,gitdev $username
 
 # generate ssh key
 if [ "$username" != "root" ] && [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
