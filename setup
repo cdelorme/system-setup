@@ -504,7 +504,7 @@ then
 	then
 
 		# install dependencies
-		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant
+		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant linux-headers-amd64
 
 		# run the installation & setup (async to prevent crash on no x11 installed)
 		mkdir -p /media/vbox
