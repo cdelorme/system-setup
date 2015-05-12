@@ -510,12 +510,9 @@ then
 		mkdir -p /media/vbox
 		if [ $(mount | grep -c '/media/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
 		then
-			/media/vbox/VBoxLinuxAdditions.run
-			umount /media/vbox
-			[ -x /etc/init.d/vboxadd ] && /etc/init.d/vboxadd setup
-			[ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start
+			trap "umount /media/vbox && rmdir -p /media/vbox" EXIT
+			(/media/vbox/VBoxLinuxAdditions.run && /etc/init.d/vboxadd setup && [ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start) &
 		fi
-		rmdir /media/vbox -p
 	fi
 fi
 
