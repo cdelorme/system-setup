@@ -507,11 +507,11 @@ then
 		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant linux-headers-amd64
 
 		# run the installation & setup (async to prevent crash on no x11 installed)
-		mkdir -p /media/vbox
-		if [ $(mount | grep -c '/media/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
+		mkdir -p /tmp/vbox
+		[ $(mount | grep -c '/tmp/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /tmp/vbox
+		if [ -x /tmp/vbox/VBoxLinuxAdditions.run ]
 		then
-			trap "umount /media/vbox && rmdir -p /media/vbox" EXIT
-			(/media/vbox/VBoxLinuxAdditions.run && /etc/init.d/vboxadd setup && [ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start) &
+			(/tmp/vbox/VBoxLinuxAdditions.run && /etc/init.d/vboxadd setup && [ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start) &
 		fi
 	fi
 fi
