@@ -731,6 +731,10 @@ fi
 # ensure ownership for users folder
 chown -R $username:$username /home/$username/.ssh/
 
+# launch terminal as root and as user to initialize nvm & gvm
+su -c "PS1=y . /home/$username/.bashrc"
+[ -f ~/.bashrc ] && PS1=y . ~/.bashrc
+
 
 ##
 # restart services whose configuration has been modified
