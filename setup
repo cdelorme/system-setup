@@ -508,8 +508,14 @@ then
 
 		# run the installation & setup (async to prevent crash on no x11 installed)
 		mkdir -p /media/vbox
-		[ $(mount && grep -c vbox) -eq 0 ] && mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
-		(/media/vbox/VBoxLinuxAdditions.run; umount /media/vbox; rmdir /media/vbox -p; /etc/init.d/vboxadd setup; /etc/init.d/vboxadd-x11 start) &
+		if [ $(mount | grep -c '/media/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /media/vbox
+		then
+			/media/vbox/VBoxLinuxAdditions.run
+			umount /media/vbox
+			[ -x /etc/init.d/vboxadd ] && /etc/init.d/vboxadd setup
+			[ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start
+		fi
+		rmdir /media/vbox -p
 	fi
 fi
 
