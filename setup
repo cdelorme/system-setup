@@ -474,6 +474,7 @@ then
 		# check for and install nvidia drivers
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer
 		then
+			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
 		fi
@@ -732,7 +733,7 @@ fi
 chown -R $username:$username /home/$username/.ssh/
 
 # launch terminal as root and as user to initialize nvm & gvm
-su -c "PS1=y . /home/$username/.bashrc"
+su $username -c "PS1=y . /home/$username/.bashrc"
 [ -f ~/.bashrc ] && PS1=y . ~/.bashrc
 
 
