@@ -703,7 +703,7 @@ then
 	# attempt to upload new ssh key to github account
 	if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
 	then
-	    curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+	    curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 	fi
 fi
 
@@ -733,8 +733,16 @@ fi
 chown -R $username:$username /home/$username/.ssh/
 
 # launch terminal as root and as user to initialize nvm & gvm
-su $username -c "PS1=y . /home/$username/.bashrc"
-[ -f ~/.bashrc ] && PS1=y . ~/.bashrc
+if [ "${install_golang:-}" = "y" ]
+then
+	su $username -c ". /home/$username/.gvm/scripts/gvm && gvm install go1.4.2 && go use go1.4.2 --default"
+	. ~.gvm/scripts/gvm && gvm install go1.4.2 && go use go1.4.2 --default
+fi
+if [ "${install_nodejs:-}" = "y" ]
+then
+	su $username -c ". /home/$username/.nvm/nvm.sh && nvm install stable"
+	. /home/$username/.nvm/nvm.sh && nvm install stable
+fi
 
 
 ##
