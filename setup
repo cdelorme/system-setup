@@ -267,12 +267,12 @@ then
 	git clone "https://github.com/elzr/vim-json" /tmp/vim-json
 	find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
 fi
-if [ ! -d /tmp/vim-go ] && [ "$install_golang" = "y" ]
+if [ ! -d /tmp/vim-go ] && [ "${install_golang:-}" = "y" ]
 then
 	git clone "https://github.com/fatih/vim-go" /tmp/vim-go
 	find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
 fi
-if [ ! -d /tmp/vim-node ] && [ "$install_nodejs" = "y" ]
+if [ ! -d /tmp/vim-node ] && [ "${install_nodejs:-}" = "y" ]
 then
 	git clone "https://github.com/moll/vim-node" /tmp/vim-node
 	find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
@@ -399,7 +399,7 @@ then
 		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install global gvm
-		if [ "$install_golang" = "y" ]
+		if [ "${install_golang:-}" = "y" ]
 		then
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
 			echo 'export GVM_ROOT="$HOME/.gvm"' > /etc/skel/.gvm/scripts/gvm
@@ -411,7 +411,7 @@ then
 		fi
 
 		# conditionally install global nvm
-		if [ "$install_nodejs" = "y" ]
+		if [ "${install_nodejs:-}" = "y" ]
 		then
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
 
