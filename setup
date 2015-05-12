@@ -407,7 +407,7 @@ then
 
 			# add lines to load gvm in .bashrc
 			echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
-			echo '[ -f "$GVM_DIR/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bashrc
+			echo 'if [ -f "$GVM_DIR/scripts/gvm" ]; then . "$GVM_DIR/scripts/gvm"; which go &>/dev/null || gvm install go1.4.2 &>/dev/null && gvm use go1.4.2 --default &>/dev/null; fi' >> /etc/skel/.bashrc
 		fi
 
 		# conditionally install global nvm
@@ -417,7 +417,7 @@ then
 
 			# add lines to load nvm in .bashrc
 			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
-			echo '[ -f "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use stable' >> /etc/skel/.bashrc
+			echo '[ -f "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use stable &>/dev/null || nvm install stable &>/dev/null && nvm use stable &>/dev/null' >> /etc/skel/.bashrc
 		fi
 
 		# conditionally install global openjdk
@@ -724,12 +724,6 @@ then
 	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
 	su $username -c "cd && .bin/update-keys"
 fi
-
-# initialize golang
-[ "$install_golang" = "y" ] && su $username -c "cd && . .gvm/scripts/gvm && gvm install go1.4.2 && echo 'gvm use go1.4.2 --default' >> .bashrc"
-
-# initialize nodejs
-[ "$install_nodejs" = "y" ] && su $username -c "cd && . .nvm/nvm.sh && nvm install stable && echo 'nvm use stable' >> .bashrc"
 
 # ensure ownership for users folder
 chown -R $username:$username /home/$username/.ssh/
