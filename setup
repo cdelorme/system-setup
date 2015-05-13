@@ -736,12 +736,12 @@ chown -R $username:$username /home/$username/.ssh/
 if [ "${install_golang:-}" = "y" ]
 then
 	export GVM_ROOT=$HOME/.gvm && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 --default
-	su $username -c 'cd && export GVM_ROOT=$HOME/.gvm && . .gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 --default'
+	[ "$username" != "root" ] && su $username -c 'cd && export GVM_ROOT=$HOME/.gvm && . .gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 --default'
 fi
 if [ "${install_nodejs:-}" = "y" ]
 then
 	export NVM_DIR=$HOME/.nvm && . ~/.nvm/nvm.sh && nvm install stable
-	su $username -c 'cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable'
+	[ "$username" != "root" ] && su $username -c 'cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable'
 fi
 
 
