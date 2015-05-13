@@ -462,7 +462,7 @@ then
 		# sublime text 3 installation
 		if ! which subl
 		then
-			curl -Lso /tmp/sublime.tar.bz2 http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2
+			curl -Lso /tmp/sublime.tar.bz2 "http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2"
 			tar xf /tmp/sublime.tar.bz2 -C /tmp
 			rm /tmp/sublime.tar.bz2
 			cp -R /tmp/sublime_text_3 /usr/local/sublime-text
