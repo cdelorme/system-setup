@@ -66,13 +66,16 @@ grab_yes_no()
 # user & key information
 grab_or_fallback "username" "root" "enter your username"
 grab_secret_or_fallback "password" "" "enter your user password"
-grab_yes_no "generate_ssh_key" "create an ssh key"
-[ "$generate_ssh_key" = "y" ] && [ ! -f "/home/$username/.ssh/id_rsa" ] && grab_secret_or_fallback "ssh_key_password" "$password" "alternative password for ssh key (defaults to user password)"
+[ ! -f "/home/$username/.ssh/id_rsa" ] && grab_yes_no "generate_ssh_key" "create an ssh key"
+[ "${generate_ssh_key:-}" = "y" ] && grab_secret_or_fallback "ssh_key_password" "$password" "alternative password for ssh key (defaults to user password)"
 
 # github configuration
 grab_or_fallback "github_username" "" "enter your github username"
 [ -n "$github_username" ] && grab_secret_or_fallback "github_password" "" "enter your github password"
-[ -n "${github_password:-}" ] && grab_yes_no "github_ssh_key" "upload ssh key to github"
+if [ -f "/home/$username/.ssh/id_rsa" ] || [ "${generate_ssh_key:-}" = "y" ]
+then
+	[ -n "${github_password:-}" ] && grab_yes_no "github_ssh_key" "upload ssh key to github"
+fi
 
 # various settings
 grab_or_fallback "ssh_port" "22" "enter your preferred ssh port (22)"
@@ -695,7 +698,7 @@ usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG webdev,gitdev $username
 
 # generate ssh key
-if [ "$username" != "root" ] && [ "$generate_ssh_key" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
+if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
 then
     ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
     chmod 600 /home/$username/.ssh/*
