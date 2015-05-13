@@ -466,7 +466,7 @@ then
 			tar xf /tmp/sublime.tar.bz2 -C /tmp
 			rm /tmp/sublime.tar.bz2
 			cp -R /tmp/sublime_text_3 /usr/local/sublime-text
-			ln -nsf /usr/local/sublime-text/sublime_text /usr/sbin/subl
+			ln -nsf /usr/local/sublime-text/sublime_text /usr/local/bin/subl
 			mkdir -p /etc/skel/.config/sublime-text-3/Installed Packages/
 			curl -Lso /etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package "https://sublime.wbond.net/Package%20Control.sublime-package"
 		fi
