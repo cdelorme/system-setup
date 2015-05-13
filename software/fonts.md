@@ -1,5 +1,5 @@
 
-# custom fonts
+# fonts
 
 I generally install two additional fonts to any machine I setup.  One for textbook japanese characters and the other is a monospaced font with japanese character support, which in general is just really clean for coding.  The original sources were here, but they may no longer be hosted:
 
