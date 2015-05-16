@@ -1,1 +1,0 @@
-(while true; do feh -q --no-fehbg --bg-fill $(find "${HOME}/.wallpaper" -type f | sort -R | tail -1) && sleep 300; done;) &

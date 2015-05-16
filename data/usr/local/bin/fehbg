@@ -1,0 +1,13 @@
+#!/bin/bash
+wallpaper_path="${HOME}/.wallpaper"
+if [ -n "$1" ] && [ -d "$1" ]
+then
+	wallpaper_path="$1"
+fi
+[ ! -d "$wallpaper_path" ] && exit 1
+[ $(find "$wallpaper_path" -type f | wc -l) -gt 0 ] || exit 1
+while true;
+do
+	feh -q --no-fehbg --bg-fill $(find "$wallpaper_path" -type f | sort -R | tail -1)
+	sleep 300
+done

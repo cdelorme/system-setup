@@ -5,7 +5,7 @@ which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources
 which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
 which compton &> /dev/null && (compton) &
 which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &
-[ -f "$HOME/.fehbg" ] && [ -d "$HOME/.wallpaper/" ] && [ $(find $HOME/.wallpaper/ -type f | wc -l) -gt 0 ] && . "$HOME/.fehbg"
+which fehbg &> /dev/null && (fehbg) &
 which tint2 &> /dev/null && (sleep 3 && tint2) &
 which volumeicon &> /dev/null && (sleep 5 && volumeicon) &
 which clipit &> /dev/null && (sleep 5 && clipit) &
