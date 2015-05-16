@@ -93,8 +93,8 @@ grab_yes_no "install_transmission" "install transmission bittorrent server"
 grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
 
 # web service questions
-grab_yes_no "for_web_or_dev" "is this a web server"
-if [ "$for_web_or_dev" = "y" ]
+grab_yes_no "is_webserver" "is this a web server"
+if [ "$is_webserver" = "y" ]
 then
 	grab_yes_no "install_nginx" "do you want to install nginx web & proxy server"
 	[ "$install_nginx" = "y" ] && grab_yes_no "public_nginx" "do you want to open web ports 80 & 443 publicly"
@@ -279,6 +279,10 @@ if [ ! -d /tmp/vim-node ] && [ "${install_nodejs:-}" = "y" ]
 then
 	git clone "https://github.com/moll/vim-node" /tmp/vim-node
 	find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
+	if [ "$is_webserver" = "y" ]
+	then
+		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nodejs
+	fi
 fi
 [ ! -f /etc/skel/.vim/colors/vividchalk.vim ] && curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
@@ -382,11 +386,18 @@ then
 		[ $(grep rc2 /etc/skel/.config/openbox/autostart) -eq 0 ] && echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &" >> /etc/skel/.config/openbox/autostart
 	fi
 
-	# grab pulse config
-	if [ -f /etc/pulse/default.pa ]
+	# configure pulseaudio and ensure user config exists
+	if [ -d /etc/pulse ]
 	then
-		mkdir -p /etc/skel/.pulse
-		cp /etc/pulse/default.pa /etc/skel/.pulse/default.pa
+		if which alsactl &>/dev/null
+		then
+			alsactl store
+		fi
+		cp -R /etc/pulse /etc/skel/.pulse
+		if which pactl &>/dev/null
+		then
+			pactl set-default-sink 0
+		fi
 	fi
 
 	# check graphics card and adjust compton configuration
@@ -696,6 +707,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG webdev,gitdev $username
+[ "$install_transmission" = "y" ] && usermod -aG transmission-daemon $username
 
 # generate ssh key
 if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
@@ -754,8 +766,8 @@ fi
 
 monit -t && systemctl restart monit
 systemctl restart ssh
-[ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
+[ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 
 
 ##
