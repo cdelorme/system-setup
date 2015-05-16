@@ -724,7 +724,7 @@ fi
 [ "$username" != "$github_username" ] && [ -n "$github_username" ] && sed -i "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
 
 # add crontab to run `update-keys`
-if [ "$username" != "root" ]
+if [ "$username" != "root" ] && [ -n "$github_username" ]
 then
 	export cronfile="/var/spool/cron/crontabs/${username}"
 	[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
