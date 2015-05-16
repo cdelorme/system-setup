@@ -447,7 +447,7 @@ then
 			curl -Lso /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
 			tar xf /tmp/flash.tar.gz -C /tmp
 			rm /tmp/flash.tar.gz
-			mv /tmp/flashplayer /usr/sbin/flashplayer
+			mv /tmp/flashplayer /usr/local/bin/flashplayer
 		fi
 
 		# google chrome installation
