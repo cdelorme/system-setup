@@ -374,18 +374,6 @@ then
 		sed -i "s/eth1/eth0/" /etc/skel/.conkyrc
 	fi
 
-	# detect & configure multi-head conky (assume dual-head 1080p)
-	if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
-	then
-		mkdir -p /etc/skel/.conky
-		mv -f /etc/skel/.conkyrc /etc/skel/.conky/rc1
-		cp -f /etc/skel/.conky/rc1 /etc/skel/.conky/rc2
-		sed -i "s/gap_x 0/gap_x 960/" /etc/skel/.conky/rc1
-		sed -i "s/gap_x 0/gap_x -960/" /etc/skel/.conky/rc2
-		sed -i "s;conky -d -q;conky -d -q -c ~/.conky/rc1;" /etc/skel/.config/openbox/autostart
-		[ $(grep rc2 /etc/skel/.config/openbox/autostart) -eq 0 ] && echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &" >> /etc/skel/.config/openbox/autostart
-	fi
-
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
 	then
