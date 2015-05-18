@@ -2,7 +2,7 @@
 touch "${HOME}/.ssh/authorized_keys"
 user=$(whoami)
 [ -n $1 ] && user="$1"
-if [ $(id -u) -eq 0 ] || [ "$user" = "root" ]; then exit 0; fi
+if [ $(id -u) -eq 0 ] || [ "$user" != "root" ]; then exit 0; fi
 keys=$(wget -qO- "https://github.com/${user}.keys")
 echo "$keys" | while read -r key
 do
