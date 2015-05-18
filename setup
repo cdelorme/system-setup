@@ -585,7 +585,7 @@ fi
 
 
 ##
-# add handler for kernel panics to grub
+# add handler for kernel panics to grub & nomodeset for nvidia
 ##
 
 if [ $(grep -c "panic = 10" /etc/sysctl.conf) -lt 1 ]
@@ -594,7 +594,12 @@ then
 fi
 if [ $(grep -c "panic=10" /etc/default/grub) -lt 1 ]
 then
-	sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet panic=10"/' /etc/default/grub
+	if [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
+	then
+		sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet nomodeset panic=10"/' /etc/default/grub
+	else
+		sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet panic=10"/' /etc/default/grub
+	fi
 	update-grub
 fi
 
