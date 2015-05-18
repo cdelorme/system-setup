@@ -1,7 +1,9 @@
 #!/bin/bash
-if [ $(id -u) -eq 0 ]; then exit 0; fi
 touch "${HOME}/.ssh/authorized_keys"
-keys=$(wget -qO- https://github.com/$(whoami).keys)
+user=$(whoami)
+[ -n $1 ] && user="$1"
+if [ $(id -u) -eq 0 ] || [ "$user" = "root" ]; then exit 0; fi
+keys=$(wget -qO- "https://github.com/${user}.keys")
 echo "$keys" | while read -r key
 do
     if [ -f "${HOME}/.ssh/authorized_keys" ] && ! grep "$key" "${HOME}/.ssh/authorized_keys" &> /dev/null

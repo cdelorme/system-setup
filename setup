@@ -87,7 +87,6 @@ grab_or_fallback "system_domainname" "" "enter a system domain name"
 grab_yes_no "install_dotfiles" "install dot files"
 
 # conditional services
-grab_yes_no "install_wireless_drivers" "install wireless & bluetooth drivers"
 grab_yes_no "install_weechat" "install weechat irc client"
 grab_yes_no "install_transmission" "install transmission bittorrent server"
 grab_yes_no "install_processing_tools" "install graphics, audio, and video processing utilities"
@@ -251,6 +250,7 @@ if [ -d data/ ]
 then
 	cp -fR data/* /
 else
+	rm -rf /tmp/system-setup
 	git clone https://github.com/cdelorme/system-setup /tmp/system-setup
 	cp -fR /tmp/system-setup/data/* /
 fi
@@ -366,7 +366,7 @@ then
 	dpkg --add-architecture i386
 
 	# install workstation packages
-	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown checkinstall lm-sensors cpufrequtils
+	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown checkinstall lm-sensors cpufrequtils bluez
 
 	# check ethernet devices
 	if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
@@ -386,20 +386,6 @@ then
 		[ $(grep rc2 /etc/skel/.config/openbox/autostart) -eq 0 ] && echo "which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &" >> /etc/skel/.config/openbox/autostart
 	fi
 
-	# configure pulseaudio and ensure user config exists
-	if [ -d /etc/pulse ]
-	then
-		if which alsactl &>/dev/null
-		then
-			alsactl store
-		fi
-		cp -R /etc/pulse /etc/skel/.pulse
-		if which pactl &>/dev/null
-		then
-			pactl set-default-sink 0
-		fi
-	fi
-
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
 	then
@@ -410,7 +396,7 @@ then
 	# conditionally install development tools
 	if [ "${install_development_tools:-}" = "y" ]
 	then
-		aptitude install -ryq build-essential cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
+		aptitude install -ryq build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install global gvm
 		if [ "${install_golang:-}" = "y" ]
@@ -488,9 +474,9 @@ then
 		# check for and install nvidia drivers
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer
 		then
-			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64
+			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/346.59/NVIDIA-Linux-x86_64-346.59.run"
-			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --dkms -X -Z
+			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
 
 		# conditionally install gaming software
@@ -504,6 +490,24 @@ then
 			[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
 			aptitude install -f
 		fi
+	fi
+fi
+
+
+##
+# configure pulseaudio and ensure user config exists
+##
+
+if [ -d /etc/pulse ]
+then
+	if which alsactl &>/dev/null
+	then
+		alsactl store
+	fi
+	cp -R /etc/pulse /etc/skel/.pulse
+	if which pactl &>/dev/null
+	then
+		pactl set-default-sink 0
 	fi
 fi
 
@@ -732,16 +736,15 @@ then
     su $username -c "cd && git config --global user.email $github_email"
 fi
 
-# configure update-keys & setup as runtime default
-[ "$username" != "$github_username" ] && [ -n "$github_username" ] && sed -i "s/\$(whoami)/$github_username/" /home/$username/.bin/update-keys
-
-# add crontab to run `update-keys`
+# update keys
 if [ "$username" != "root" ] && [ -n "$github_username" ]
 then
 	export cronfile="/var/spool/cron/crontabs/${username}"
-	[ -f "$cronfile" ] || touch "$cronfile" && chown $username:crontab /var/spool/cron/crontabs/$username && chmod 600 /var/spool/cron/crontabs/$username
-	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * ~/.bin/update-keys" >> /var/spool/cron/crontabs/$username
-	su $username -c "cd && .bin/update-keys"
+	[ -f "$cronfile" ] || touch "$cronfile"
+	chown $username:crontab $cronfile
+	chmod 600 $cronfile
+	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * update-keys $github_username" >> /var/spool/cron/crontabs/$username
+	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
 fi
 
 # ensure ownership for users folder
