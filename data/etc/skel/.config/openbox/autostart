@@ -9,4 +9,10 @@ which fehbg &> /dev/null && (fehbg) &
 which tint2 &> /dev/null && (sleep 3 && tint2) &
 which volumeicon &> /dev/null && (sleep 5 && volumeicon) &
 which clipit &> /dev/null && (sleep 5 && clipit) &
-which conky &> /dev/null && (sleep 10 && conky -d -q) &
+if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
+then
+	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc1) &
+	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &
+else
+	which conky &> /dev/null && (sleep 10 && conky -d -q) &
+fi
