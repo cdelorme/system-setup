@@ -4,12 +4,12 @@ nosleep_apps=("vlc" "flash" "chrom" "firefox" "subl" "mplayer")
 which nosleep &> /dev/null || exit 1
 while [ true ]
 do
-    for app in ${nosleep_apps[*]}
-    do
-        if [ $(ps aux | grep -v "grep" | grep -c "${app}") -gt 0 ]
-        then
-            nosleep
-        fi
-    done
-    sleep 300
+	for app in ${nosleep_apps[*]}
+	do
+		if [ $(ps aux | grep -v "grep" | grep -c "${app}") -gt 0 ]
+		then
+			nosleep
+		fi
+	done
+	sleep 300
 done
