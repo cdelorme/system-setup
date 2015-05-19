@@ -1,143 +1,57 @@
 
 # system setup
 
-This repository serves dual-purpose as reference documentation storage and automation scripts.
+This repository serves a dual-purpose as a home for automated configuration and reference documentation.
 
-The documentation, and subsequently automation scripts, will be updated as I continue to refine any environment I work in regularly, including but not limited to new software releases and distros.
-
-
-## history
-
-This repository has a pretty crazy history; as the commits will indicate it flip-flopped between being for scripts to being for documentation and back again.
-
-To maintain automated scripts as well as documenting the steps that led to their creation is time consuming.
-
-I also began experimenting heavily with virtualization, and so I have a large number of documents that were specifically for special test cases.
+The documentation will, usually, mirror the automation scripts, and will supplement them where automation cannot complete the process.  Documentation will be modular, while the scripted installation is intended to be simply one script.
 
 
-## [documentation](docs/)
+## history & purpose
 
-Currently I try to maintain three main configurations of linux, as well as one Windows and one OSX.
+This repository originated for automation, but has flopped back and forth between documentation and which to prioritize.  In previous iterations it also covered the same steps across multiple distributions, and more coverage for special cases, such as [xen](http://www.xen.org).
 
-I use linux as a server environment, and as a development workstation.  I try to upkeep a set of template instructions that sets the basis for any system I use to go either way, then steps to produce a development or server environment are separated.
-
-Due to the lack of automation tools, there are no Windows scripts.  I may at some point add one to run in git-scm's git-bash on windows, but it will be super lightweight.
-
-While not complete, I do intend to add osx support to the automation scripts in the future, to the extent that it is feasible.
-
-Despite my love of linux, I use an osx laptop primarily for work and development.  At the time of writing this I have had only half as many years experience using osx or linux over windows.
-
-My first real deep dive into linux occurred on the `debian` distro, and it has been preference since.  This is due to a combination of familiarity and experienced instability in other comparable distros.  For a short while I did attempt to upkeep documentation for various other distros, but I have since ceased to do so.
-
-**If you are looking for a great platform that is already configured and do not have any particular preferences I highly recommend [crunchbang](http://crunchbang.org/) as an alternative.**
+As a repository the history may be very useful, but the intended purpose today is to keep up to date with my preferred environments and configurations only.
 
 
-## [automation](scripts/)
+### documentation
 
-All of my scripts are written in `bash`, and use standard cross-platform tools where able.
+As of todays iteration, I only maintain documentation for [osx](osx.md) and [debian linux](debian.md).  Each contains a list of referenced steps in the order you should execute them.  **Steps not covered by the automation will be highlighted as follow-up steps that require manual intervention.**
 
-I originally had all of my automation code in a single `setup` file, but this became difficult to read and maintain.
+My configuration is written to scratch my own itch, and may not suit all-needs.  The automation is purely for debian linux, and while written to my own needs it does prepare an optimal "initial state" that should work fine for all-purpose system configuration.
 
-I am now using modular scripts for ease of maintenance and individual function reference.  This is both more readable, and more maintainable.
+Referenced documentation is broken down by categories, such as:
 
-I still offer a `setup` script with interactive prompt for configuration, which will execute a series of modular scripts.
+- [virtualization](virtualization/)
+- [software](software/)
+- [gaming](gaming/)
 
-You can run my setup script remotely via `wget`:
+Where applicable, documentation on services that exist cross platform will be covered in a single "shared" document.  While the automation is written for debian specifically, it is possible to translate most steps into other distributions.
+
+
+### [automation](setup)
+
+The automation script is written in bash, and is intended to work on any debian system installed with only "system utilities".  It will use the best available tools during all steps in under 450 lines of bash (800~ including comments and spacing).
+
+The setup script is explicitly for [debian jessie](https://wiki.debian.org/DebianJessie), the current stable release (at time of writing), and provides a myriad of input options to decide what _additional_ software is expected to be installed.
+
+A brief summary of options include user creation, ssh keys creation, upload, and trust, obscuring the ssh port, setting or changing the hostname and domainname, installing a variety of independent communication tools, installing web services such as nginx, mongodb, postgresql, and an smtp mail forwarding server, options for iptable public accessibility of services, workstation services, development services, and graphical desktop environment and services specifically tailored to the openbox window manager.
+
+**For details on services, I highly recommend viewing the source!**
+
+
+#### usage
+
+To use the automation script, you can use a subshell:
 
     bash <(wget --no-check-certificate -qO- "https://raw.githubusercontent.com/cdelorme/system-setup/master/setup")
 
-Or the `curl` alternative:
+Then answer the questions as it runs.
 
-    bash <(curl -s "https://raw.githubusercontent.com/cdelorme/system-setup/master/setup")
-
-_A fresh `debian` install does not have `curl` by default._
-
-It will ask you for the configuration options as necessary to execute, downloading remote resources as needed.
-
-You can also clone or download the repository and run it locally.  However, it is assumed that you will have a network connection since many steps involve downloading software via the distro package manager...
+_Alternatives include downloading or cloning the repository, but those may require additional tools to be installed beyond a post-install state._
 
 
-## [data](data/)
+#### [data](data/)
 
-I created a data folder to store any number of configuration files, and special binaries.  Some of the binaries do not belong to me, but are no-longer available for download anywhere on the internet.
+The data folder contains **debian linux** configuration files, with the correct permissions to be copied and pasted as an installation process.  These will evolve alongside my automated configuration script.
 
-The files are organized in a linux-friendly way, such that they can be copied and pasted directly onto a system for installation.
-
-
-## setup variables
-
-The automation scripts will be dependent on the following variables:
-
-
-- username
-- password
-
-**Template:**
-
-- dot_files
-- github_username
-- create_ssh
-- ssh_port
-- system_hostname
-- timezone
-- jis
-- cronfile
-- remote_source
-
-**Web:**
-
-- install_processing_tools
-- install_mongodb
-- public_mongodb
-- install_mariadb
-- public_mariadb
-- install_phpfpm
-- public_phpfpm
-- install_msmtp
-- msmtp_username
-- msmtp_password
-
-**Dev:**
-
-- install_mdadm
-- install_samba
-- install_weechat
-- install_wireless
-- install_transmission
-- install_openbox
-- install_web
-
-Obviously, some of these are conditionally dependent on what you want to do, so not all of them are necessary in all cases.
-
-To demonstrate a minimalistic install of each major linux type, I have created three alternatives to [`setup`](setup) that are non-interactive:
-
-- [`template`](template)
-- [`web`](web)
-- [`dev`](dev)
-
-
-## future plans
-
-I have a lot of other projects on my to-do list, and this one generally receives _bursts_ of attention.  However, here is a list of incomplete sections or improvements I'd like to make:
-
-- investigate adding ipv6 and ip6tables rules to web
-    - [reference](http://lowendbox.com/blog/iptables-ipv6-and-more-rules/)
-    - [manpage](http://manpages.ubuntu.com/manpages/saucy/en/man8/ip6tables.8.html)
-- osx/windows modular scripts need to be written
-- create/add a customized tint2rc file
-- create an openbox theme
-- research finer tunings for transmission
-    - paused items are a pain
-    - _copying_ "done" downloads to another folder before seeding
-    - auto-removal of torrent & seed-files upon seed completion
-- consider additional services for web/dev automation:
-    - memcached
-    - elasticsearch
-
-Unconfirmed:
-
-- xorg.conf auto-generation on VM does not contain the `SwapBuffer` value, guessing I'll need to test it on raw hardware to see if I have to manually append/prepend that value to the Device block.
-
-Documentation:
-
-- it would be beneficial to replace complicated lists of settings with screenshots from the actual OS, which I plan to do in the future.
+_Some of the included files are binaries that do not belong to me, but are no-longer available for download on the internet due to missing or aging websites._
