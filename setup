@@ -366,7 +366,7 @@ then
 	dpkg --add-architecture i386
 
 	# install workstation packages
-	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj pastebinit anacron miscfiles markdown checkinstall lm-sensors cpufrequtils bluez
+	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors cpufrequtils bluez
 
 	# check ethernet devices
 	if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
