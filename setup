@@ -390,12 +390,13 @@ then
 		if [ "${install_golang:-}" = "y" ]
 		then
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
+
+			# create gvm script manually
 			echo 'export GVM_ROOT="$HOME/.gvm"' > /etc/skel/.gvm/scripts/gvm
 			echo '. $GVM_ROOT/scripts/gvm-default' >> /etc/skel/.gvm/scripts/gvm
 
-			# add lines to load gvm in .bashrc
-			echo 'export GVM_DIR="$HOME/.gvm"' >> /etc/skel/.bashrc
-			echo 'if [ -f "$GVM_DIR/scripts/gvm" ]; then . "$GVM_DIR/scripts/gvm"; which go &>/dev/null || gvm install go1.4.2 &>/dev/null && gvm use go1.4.2 --default &>/dev/null; fi' >> /etc/skel/.bashrc
+			# add lines to load gvm in .bash_profile
+			echo '[ -s "${GVM_DIR}/scripts/gvm" ] && export GVM_DIR=~/.gvm && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bash_profile
 		fi
 
 		# conditionally install global nvm
@@ -403,9 +404,8 @@ then
 		then
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
 
-			# add lines to load nvm in .bashrc
-			echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/skel/.bashrc
-			echo '[ -f "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use stable &>/dev/null || nvm install stable &>/dev/null && nvm use stable &>/dev/null' >> /etc/skel/.bashrc
+			# add lines to load nvm in .bash_profile
+			echo '[ -s "$NVM_DIR/nvm.sh" ] && export NVM_DIR=~/.nvm && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bash_profile
 		fi
 
 		# conditionally install global openjdk
@@ -733,8 +733,8 @@ then
 fi
 if [ "${install_nodejs:-}" = "y" ]
 then
-	(export NVM_DIR=$HOME/.nvm && . ~/.nvm/nvm.sh && nvm install stable) &
-	[ "$username" != "root" ] && su $username -c '(cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable) &'
+	(export NVM_DIR=$HOME/.nvm && . ~/.nvm/nvm.sh && nvm install stable && nvm alias default stable) &
+	[ "$username" != "root" ] && su $username -c '(cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable && nvm alias default stable) &'
 fi
 
 # configure audio
