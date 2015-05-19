@@ -1,56 +1,53 @@
 
 # bare git repositories
 
-**Creating/Cloning a Bare Repo:**
+In my case I have sometimes wanted to use my own server to store a copy of my projects and act as an intermediary to pushing changes out.  Using a bare repository and post-receive hooks this is not only possible but super useful when you need a locally deployed development copy of your project in a shared environment.
 
-Usually you will be cloning a work repository, this makes things a bit easier:
 
-    git --bare clone <remote> --shared=group
+## creating a clone
 
-_The use of `--shared=group` will allow others with access to your vm to commit changes, which makes it possible to share a bare repository with a team on a development server, something worth adding._
+In my case I start by cloning a remote repository as a bare repository, and set group sharing to alleviate permissions for multiple contributors:
 
-If you are creating a brand new repository, you can do so (preferably from the `/srv/git` directory we created) via:
+    git clone --bare --shared <remote>
+
+
+## creating fresh
+
+If you happen to be starting your own project then you can create one instead like this:
 
     mkdir project_name.git
     cd project_name.git
-    git --bare init --shared=group
+    git init --bare --shared
 
-Then from your local machine you can clone it, or add it as a remote via:
+
+## connecting to a bare repository
+
+To connect your local repository to the new remote, you just need to supply your username, the address, and the path like so:
 
     git remote add dev username@remote_ip:/srv/git/project_name.git
 
-_Personally, I prefer making the `origin` remote my local dev repo, and creating github or bitbucket remotes._
+This of course depends on your having access to the remote, which also makes it inherently secure!
 
-**Adjusted Workflow:**
+It is also a matter of preference, but if you set the remote to `origin`, you can easily chain from there to another public remote (eg. github/bitbucket/gitorous etc) using a post-receive hook.
 
-With the bare repository in place you can now set a remote origin to push to without having to worry.
 
-Ideally you should rename the internet remotes according to their host (eg. github or bitbucket):
+### renaming remotes
 
-    git remote rename origin internet
+You can easily rename your remotes, such as to keep the current `origin`:
 
-Then add the bare repository as origin:
+    git remote rename origin github
+    git remote rename dev origin
 
-    git remote add origin username@remote_ip:/srv/git/project_name.git
 
-You can now test on a local box by pushing changes there first:
+## the power of post-receive hooks
 
-    git push origin
+You'll find that your bare repository has a `hooks/` directory, and you can create a `post-receive` shell script which will execute anytime a change has been pushed to that copy.
 
-Which should automate via a post-receive hook on that server, and once tested you can easily push and pull to the other remote (usually the public or shared repository):
-
-    git pull internet
-    git push internet
-
-**Adding a post-receive hook:**
-
-If you want to perform a specific action when new content has been received, you can do so by creating an executable file at the relative path `.git/hooks/post-receive`.
-
-For example, assuming you serve your site from `/srv/www/` using nginx, you can checkout the latest source via:
+For example, if you had a `/srv/git/site.com.git` bare repository, then the `/srv/git/site.com.git/hooks/post-receve` file might look like this:
 
     #!/bin/bash
     git --git-dir=/srv/git/site.com.git --work-tree=/srv/www/site.com checkout -f
 
-_Obviously this example does not take into account alternative branches, since you'd need folders for each branch configured as well, but it is possible._
+Anytime changes are pushed to that repository, a fresh copy of just the source code is placed into `/srv/www/site.com`.  In the event that the code was a compiled project you can begin a build process.  If the file changes require a service to be restarted, that could also be executed from this script.
 
-Alternatively you can have the server execute unit and integration tests as part of an entire deployment process.
+_There is a bit more work to detecting the branch in the post-receive hook, but as you can imagine that is also quite valuable._
