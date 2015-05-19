@@ -290,6 +290,9 @@ fi
 # download ~/.git-completion
 curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
 
+# download ~/.githelpers
+curl -Lso /etc/skel/.githelpers "https://raw.githubusercontent.com/garybernhardt/dotfiles/master/.githelpers"
+
 
 ##
 # install conditional software
