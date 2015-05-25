@@ -304,7 +304,6 @@ Here is a list of software I install:
 - [iTerm2](http://www.iterm2.com/#/section/home)
 - [VirtualBox](https://www.virtualbox.org/)
 - [Transmission](http://www.transmissionbt.com/download/)
-- [VLC](http://www.videolan.org/vlc/download-macosx.html)
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
 - [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 
@@ -452,6 +451,15 @@ For a well-rounded terminal experience with plenty of options, these are the pac
 - sfml
 - sdl2
 - graphicsmagick
+- mplayer
+- node
+- sdl2_image
+- sdl2_mixer
+- sdl2_ttf
+- sdl
+- sdl_image
+- sdl_mixer
+- sdl_ttf
 
 Some of these packages have special flags for installation.  They should automatically install dependencies, but depending on the package there may be more to it than that.
 
@@ -494,7 +502,16 @@ _This will install homebrew and my list of packages:_
     brew install sfml
     brew install --static glfw3
     brew install sdl2
+    brew install sdl2_image
+    brew install sdl2_mixer
+    brew install sdl2_ttf
+    brew install sdl
+    brew install sdl_image
+    brew install sdl_mixer
+    brew install sdl_ttf
     brew install --with-libtiff --with-libwmf --with-little-cms2 --with-webp graphicsmagick
+    brew install mplayer
+    brew install node
     sudo /bin/cp -RfX /usr/local/opt/osxfuse/Library/Filesystems/osxfusefs.fs /Library/Filesystems/
     sudo chmod +s /Library/Filesystems/osxfusefs.fs/Support/load_osxfusefs
     aws configure
@@ -525,93 +542,34 @@ _OSX effectively stopped supporting crontab and is pushing towards its own ctl-s
 Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
 
 
-### path modifications
-
-Many of the packages you install with homebrew will already exist on the machine.  When you run a command it checks the paths in the order they appear in the PATH variable and stops as soon as it finds the command.  To use the new versions of same-named commands you have to change the `PATH` global variable to include the local bin first.  Be sure to add this to your `~/.bashrc`:
-
-    export PATH=/usr/local/bin:/usr/local/sbin:$HOME/bin:$PATH
-
-_This is one of the many modifications that is handled by my dot-files automatically._
-
-
 ### ssh key generation
 
 It is recommended that you generate an ssh key, which can be used for ssh tunneling, numerous encryption services, and version control software.
 
-**OS X should automatically remember and reload any keys you have added at reboot.**
+You can easily generate one with the following command:
 
-
-##### commands
-
-_Create SSH key and add to ssh-agent:_
-
-    ssh-keygen -t rsa -b 4096 -C "<youremail>"
+    ssh-keygen -t rsa -b 4096
     ssh-add -K ~/.ssh/id_rsa
 
-_You will have to follow prompts when creating the key, and your email is an optional flag._
+**OS X should automatically remember and reload any keys you have added at reboot.**
 
 
 ### git configuration
 
-I usually set a number of defaults in my `~/.gitconfig`:
+You will want to set your name, email, and keychain helper using git's global configuration commands:
 
-- username
-- email
-- editor
-- auto-correction
-- color ui
-- push auto-match branch
-- several aliases
-
-The `~/.githelpers` file was written by [Gary Bernhardt](https://github.com/garybernhardt/dotfiles/blob/master/.githelpers), and is also included with my dot-files repo.
+    git config --global credential.helper osxkeychain
+    git config --global user.name <name>
+    git config --global user.email <email>
 
 I generally create a `~/git/` folder to store my projects.
 
-I highly recommend [Ralph Bean's Awesome Git Flow Tutorial](http://threebean.org/presentations/gitflow/#/step-1) and the [Git Bash Completion](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) script (included with my `dot-files`).
+I highly recommend [Ralph Bean's Awesome Git Flow Tutorial](http://threebean.org/presentations/gitflow/#/step-1) and the [Git Bash Completion](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) script as well.  You may also want to download and install `~/.githelpers`, written by [Gary Bernhardt](https://github.com/garybernhardt/dotfiles/blob/master/.githelpers).
 
 
-##### commands
+### [sublime text](software/sublime_text.md)
 
-_Run these and optionally fill in the blanks:_
-
-    git config --global user.name "<yourname>"
-    git config --global user.email "<youremail>"
-    git config --global core.editor "vim"
-    git config --global help.autocorrect 1
-    git config --global color.ui true
-    git config --global push.default matching
-    git config --global alias.a add
-    git config --global alias.s 'status -suall'
-    git config --global alias.c commit
-    git config --global alias.st stash
-    git config --global alias.sa 'stash apply'
-    git config --global alias.l '!. ~/.githelpers && pretty_git_log'
-    git config --global alias.pp '!git pull && git push'
-
-
-### activate bash-completion
-
-Even after installing it with homebrew, you may have to add a symlink for it to be loaded.  Additionally you may need to load it from command line by running that symlink.
-
-
-##### commands
-
-_Run this to create the symlink:_
-
-    ln -s "/usr/local/Library/Contributions/brew_bash_completion.sh" "/usr/local/etc/bash_completion"
-
-_Add this to your `~/.bashrc` or `~/.profile`:_
-
-    if [ -f $(brew --prefix)/etc/bash_completion ]; then
-      . $(brew --prefix)/etc/bash_completion
-    fi
-
-_This is another configuration that I include in my dot-files repository._
-
-
-### [sublime text](shared/sublime_text.md)
-
-Since installing and configuring sublime text is nearly identical between platforms I've moved its instructions to a more centralized location.  Click the header link to read it!
+Visit the shared document for steps and configuration file templates.
 
 
 ## markdown quicklook
