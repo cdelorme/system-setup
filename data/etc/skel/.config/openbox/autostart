@@ -1,14 +1,15 @@
 #!/bin/sh
-which xset &> /dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
-which nosleep-daemon &> /dev/null && (nosleep-daemon) &
-which xrdb &> /dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
-which xdg-user-dirs-update &> /dev/null && (xdg-user-dirs-update) &
-which compton &> /dev/null && (compton) &
-which hsetroot &> /dev/null && (hsetroot -solid "#001E27") &
-which fehbg &> /dev/null && (fehbg) &
-which tint2 &> /dev/null && (sleep 3 && tint2) &
-which volumeicon &> /dev/null && (sleep 5 && volumeicon) &
-which clipit &> /dev/null && (sleep 5 && clipit) &
+which xset &>/dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
+which nosleep-daemon &>/dev/null && (nosleep-daemon) &
+which xrdb &>/dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
+which xdg-user-dirs-update &>/dev/null && (xdg-user-dirs-update) &
+which compton &>/dev/null && (compton) &
+which hsetroot &>/dev/null && (hsetroot -solid "#001E27") &
+which fehbg &>/dev/null && (fehbg) &
+which tint2 &>/dev/null && (sleep 3 && tint2) &
+which volumeicon &>/dev/null && (sleep 5 && volumeicon) &
+which clipit &>/dev/null && (sleep 5 && clipit) &
+which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -d) &
 if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
 then
 	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc1) &
