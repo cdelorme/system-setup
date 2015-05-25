@@ -473,14 +473,22 @@ then
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
-			# @todo(casey): add emulators
-			aptitude install -ryq xboxdrv playonlinux
+			aptitude install -ryq xboxdrv playonlinux mednafen
 
 			# enable xbox drv
 			systemctl enable /etc/systemd/system/xboxdrv.service
 			systemctl start /etc/systemd/system/xboxdrv.service
 
-			# @todo(casey): build ppsspp
+			# build & install ppsspp
+			git clone https://github.com/hrydgard/ppsspp.git /tmp/ppsspp
+			pushd /tmp/ppsspp
+			git submodule update --init
+			./b.sh
+			mkdir /usr/local/ppsspp
+			cp -R build/assets /usr/local/ppsspp/
+			cp -R build/PPSSPPSDL /usr/local/ppsspp/
+			ln -s /usr/local/ppsspp/PPSSPPSDL /usr/local/bin/psp
+			popd
 
 			# install steam dependencies, then download & install steam directly
 			aptitude install -ryq xterm
