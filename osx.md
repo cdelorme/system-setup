@@ -57,6 +57,7 @@ Here are some suggested changes to `System Preferences`:
 - Mission Control
     - Do Not "Show Dashboard from F12" (checkbox)
     - Do Not "Automatically rearrange Spaces based on most recent use" (checkbox)
+    - _I prefer not to switch to a Space with open windows, but most users will probably find that helpful_
     - Check the remaining boxes
     - Hot Corners
         - Show Desktop (top right)
@@ -153,6 +154,7 @@ _The zoom hotkey comes from the [iterm2](http://iterm2.com/) shortcut, and is a 
     - More Gestures
         - Enable App Expose (three finger down)
         - Disable Launchpad
+        - Disable "Swipe between pages"
 
 ![point & click trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-point-and-click-system-preferences.png)
 ![Scroll & Zoom trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-scroll-and-zoom-system-preferences.png)
