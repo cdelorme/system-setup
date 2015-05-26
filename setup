@@ -736,7 +736,7 @@ then
 	[ -f "$cronfile" ] || touch "$cronfile"
 	chown $username:crontab $cronfile
 	chmod 600 $cronfile
-	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "*/5 * * * * update-keys $github_username" >> /var/spool/cron/crontabs/$username
+	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
 	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
 fi
 
