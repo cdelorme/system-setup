@@ -10,5 +10,5 @@ _I did have to modify the EPSON Kyoukashoutai font, because the file was uploade
 
 To avoid problems with either host going down, or needing to modify fonts during the install, I include a copy of them:
 
-- [ForMateKonaVe](https://github.com/cdelorme/system-setup/master/data/ForMateKonaVe.ttf)
-- [EPSON Kyoukashoutai](https://github.com/cdelorme/system-setup/master/data/epkyouka.ttf)
+- [ForMateKonaVe](../data/usr/share/fonts/truetype/jis/ForMateKonaVe.ttf)
+- [EPSON Kyoukashoutai](../data/usr/share/fonts/truetype/jis/epkyouka.ttf)
