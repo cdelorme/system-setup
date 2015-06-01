@@ -192,7 +192,7 @@ If you end up with a problem with spotlight you can clear it's cache from comman
 _Be aware, this can take quite a while to rebuild._
 
 
-## [custom fonts](shared/custom-fonts.md)
+## [custom fonts](software/fonts.md)
 
 Review the referenced document, and you can optionally download and install them onto OSX.
 
@@ -309,7 +309,7 @@ Here is a list of software I install:
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
 - [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 
-VirtualBox is a free Virtual Machine software with better linux guest support than leading commercial software such as Parallels and VMWare.  It is also cross platform, allowing you to create a virtual machine and transfer it anywhere with no major changes to interface or drivers.  _If you need 3D capabilities you will want to look at [Parallels Desktop]()._
+VirtualBox is a free Virtual Machine software with better linux guest support than leading commercial software such as Parallels and VMWare.  It is also cross platform, allowing you to create a virtual machine and transfer it anywhere with no major changes to interface or drivers.  _If you need 3D capabilities you will want to look at [Parallels Desktop](http://www.parallels.com/products/desktop/)._
 
 In spite of the fact that flash is a dying industry, I often find myself in need of the ability to run an swf file, and the Flash Projector comes in a debug flavor, which makes it super easy to have a tiny executable that can run and test flash files without browser concerns.
 
@@ -569,7 +569,7 @@ I generally create a `~/git/` folder to store my projects.
 I highly recommend [Ralph Bean's Awesome Git Flow Tutorial](http://threebean.org/presentations/gitflow/#/step-1) and the [Git Bash Completion](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) script as well.  You may also want to download and install `~/.githelpers`, written by [Gary Bernhardt](https://github.com/garybernhardt/dotfiles/blob/master/.githelpers).
 
 
-### [sublime text](software/sublime_text.md)
+### [sublime text](software/sublime-text.md)
 
 Visit the shared document for steps and configuration file templates.
 
