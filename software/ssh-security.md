@@ -5,7 +5,7 @@ In some of my previous documentation and scripts I had specified settings that i
 
 Part of the reason for this is I use these documents to generate development machines which often run automated scripts.
 
-Fortunately SSH can be told to use certain insecure features per commnad, such as:
+Fortunately SSH can be told to use certain insecure features per command, such as:
 
     ssh -o StrictHostKeyChecking=no example.com
 
