@@ -41,14 +41,6 @@ You will want to add these rules to your iptables to allow traffic:
 _The second rule is optional, and dependent on your choice of transmission web interface port and whether you want to restrict access to the local network only, by restricting the range (in my case 10.0.1.0)._
 
 
-## monit
+## [monit](../data/etc/monit/monitrc.d/transmission-daemon)
 
-If you intend to run transmission as a daemon, you will probably want to add a monit configuration file at `/etc/monit/conf.d/transmission-daemon` with:
-
-    check process transmission-daemon match transmission-daemon
-        start program = "/etc/init.d/transmission-daemon start"
-        stop program = "/etc/init.d/transmission-daemon stop"
-        if cpu usage > 80% for 15 cycles then restart
-        if mem usage > 80% for 30 cycles then restart
-
-_You may also consider adding the `debian-transmission` user to any additional groups for files it may need to access, such as a shared drive._
+_While I love monit, the transition to systemd will eventually phase out the need for these files._

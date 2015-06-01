@@ -7,35 +7,13 @@ However if you need a mail service, then msmtp is likely your best option.  Here
 
     aptitude install -ryq msmtp-mta
 
-Now we want to create a file at `/etc/msmtprc`, and add configuration data similar to:
-
-    # Set default values for all following accounts.
-    defaults
-    tls on
-    tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-    # Default Account
-    account gmail
-    host smtp.gmail.com
-    port 587
-    auth on
-    user username
-    password password
-    from username@gmail.com
-
-    # Set a default account
-    account default : gmail
-
-Since this file will need to contain a plain-text password you will want to secure it by adjusting permissions:
-
-    chmod 0600 /etc/msmtprc
+To configure it, create a file at [`/etc/msmtprc`](../data/etc/msmtprc), and replace the usernames.  To secure it make sure this file has `0600` permissions, since it will store passwords in plain text.
 
 _You can create multiple accounts and are not limited to just one, this allows you to change sender data accordingly._
 
-By default installing msmtp will add a symlink to `/usr/sbin/sendmail` for the local mail protocol, meaning you should not need to change anything else.  However, you can also symlink `/usr/sbin/msmtp` to `/usr/bin/msmtp` if you want to be able to access it on normal user accounts.
+By default installing msmtp will add a symlink to `/usr/sbin/sendmail` for the local mail protocol, meaning you should not need to change anything else.
 
 
 # references
 
-- [msmtp.sh](../../../scripts/linux/web/msmtp.sh)
 - [msmtp configuration](http://www.serverwatch.com/tutorials/article.php/3923871/Using-msmtp-as-a-Lightweight-SMTP-Client.htm)
