@@ -1,35 +1,31 @@
 
 # btrfs
 
-I've begun to experiment with btrfs as an alternative to ext4 for the primary file system for my personal machines as well as for my file server storage.
+I began using btrfs six months ago, and have been quite pleased with both its performance and feature-set.  Thus far it has shown to be very stable as a primary file system, and reliable for file storage as well.
 
-With the recent stabilization of the btrfs file system the number of reasons to use btrfs continues to grow.  Data checksums and reliability as well as raw raid10 performance are improving, the option to use builtin compression reduces the space consumed on disk while having the reverse effect of improving read and write speeds by data being smaller (because compression) and increasing lifespan (because less io) meaning a heavy-win all around for the file system.
+There are specific features, such as snapshots and time-slices that I would like to eventually take advantage of.
 
-This document aims to compile a bunch of useful information from various resources around the web.  Unfortunately there are not many good video tutorials, so I may follow-up by creating a few.  I started with a virtual machine to get a feel for out it worked and how to implement it in debian, my preferred distro.
-
-All examples in this document assume the root of the btrfs file system is `/`, but if you are using a separate storage disk with a different mount point, use that mount point in place of `/`.
-
-_As a forenote, I use the debian expert installer, no graphical interface.  It is possible that some of the steps I was unable to perform are available in the gui installer._
+I will describe a basic root partition configuration, optimizations, and maintenance for using btrfs.
 
 
-## schema
+## root partition schema
 
-Starting with the disk schema, when installing I used to use lvm, but with btrfs we can create a single root partition.  We still need a 250 megabyte partition for the for uefi support, and for performance reasons the swap drive should be a separate partition.  However, we only need one btrfs file system for the remainder, and it is grub2 compatible reducing boot complexity.
+_With btrfs you can use qgroups to assign disk quota's without creating separated partitions._
 
-The new layout I'll use is as follows:
+Here is my latest approach to partitioning:
 
 - 250M efi boot partition
 - 2-8G swap file partition
 - remainder btrfs
 
-We will have the ability to take the single btrfs partition and create subvolumes that are treated like folders but act as sub-partitions to btrfs, upon which we can enable quota's and apply limits just like we had used lvm to do previously.
 
-Unfortunately we are not given many options to configure or improve the performance of btrfs at install time, but once the system has finished installing we can play around with optimizing it, creating subvolumes, snapshots, and regularly scheduled maintenance.
+## optimizations
 
+These optimizations should be added to the `/etc/fstab` so they are kept on subsequent reboots of the system:
 
-## fstab configuration
+    noatime,compress=lzo,ssd,space_cache,autodefrag
 
-Key optimizations need to be added after the installation to the `fstab`.  Here is a list of options:
+Here is a breakdown of what each flag offers:
 
 - `noatime`: reduce io by not updating access times
 - `compress=lzo`: apply compression to all _new_ files going forward, using lzo is best for performance
@@ -38,145 +34,160 @@ Key optimizations need to be added after the installation to the `fstab`.  Here 
 - `inode_cache`: caches groups of inodes, improving performance when very large inode values are reached (eg .**only good for very large file systems, such as storage, not ideal for a boot partition**)
 - `ssd`: treat the drive as a solid state drive, various optimizations are made (best results with kernel 3.14 or newer).
 
-Your updated fstab record should look like this:
 
-    noatime,compress=lzo,ssd,space_cache,autodefrag
+### about compression
 
-We will need to reboot to remount root and take advantage of these flags, but we also have some commands to run first.
+Initially it may sound counter-productive to compress the root partition, but in truth it is exceptionally useful.
 
-**A word on compression:**
+For the same reason the kernel is often compressed, the time it takes to read from the disk is always going to be slower than the speed of your CPU, therefore even with the fastest hard disk if the amount of data that needs to be loaded into memory is smaller, then you can gain performance by loading compressed data into memory and decompressing it from there.
 
-If you are like any logical person you're probably wondering why someone would want to use compression on anything other than a storage drive, and even then question whether compression would harm performance.
-
-In truth, compression is trading the amount of disk IO for cpu cycles.  Because the CPU is so much faster than the hard disk, this is _almost always_ going to be a pro-compression result.  You can find benchmarks have shown significant performance gains.
-
-If that's not enough to convince you, realize that uncompressed data means more disk IO, which means your disks lifespan is actually reduced by choosing to write uncompressed data.
-
-Couple that with the fact that modern CPU's are already outrageously powerful and you should have almost no reason not to take advantage of compression and btrfs.
+In otherwords, compression increases both the performance of your drive, and its longevity due to the reduced amount of actual IO happening on-disk.
 
 
-## optimizations
+## maintenance
 
-To compress the contents on disk run this command (which may take several minutes to complete):
+While the auto-defragment option works wonderfully, you may want to run this at least once after setting the `/etc/fstab` compression to recompress the root file system (and possibly weekly afterwards just in case):
 
     btrfs filesystem defragment -r -clzo /
 
-_If you run this command and reboot prior to adding the appropriate mount flag (`compress=lzo`) your system may not boot._  Because the debian installer does not provide you the opportunity to heavily modify the `/etc/fstab` or the btrfs partition at install time you cannot run compression automatically during the installation and need to run a command to fix it.
-
-Given the system just installed this command may not be required, but it may help with the placement of data across the drive:
+On a weekly basis it is also wise to rebalance the data on disk:
 
     btrfs balance start /
 
-_After this finishes the dynamic size of the btrfs file system should shrink along with the total space consumed._  This can be run on a schedule to improve overall performance as a part of maintenance.
+_This can take some time, so it may not be wise to do daily, or in the middle of anything important._
 
-Assuming you made fstab changes you will also want to reboot the system now to take advantage of those changes.  **The first reboot after making these changes may be slow, this is to be expected, subsequent reboots will likely be faster.**
+Finally, you should try to run a scrub daily:
+
+        btrfs scrub start /
 
 
-## subvolumes
+### checking the status
 
-Let's start by explaining what a subvolume is.  With btrfs, a subvolume is effectively its own separate file system structure.  When created you define a mount point.  Doing so allows the main system to treat subvolumes as regular folders, while in truth the data is separated just like using multiple partitions.  This seamless integration is what really defines btrfs's subvolume system.
+To display the file system size and details:
 
-_While in my experience subvolumes have mounted automatically, many documents claim that this is not the case._  I will update my documentation if I find any situations where this does not happen for me.
+    btrfs filesystem show /
 
-**Unfortunately, we are once-again burned by the debian installer not giving us the flexibility to configure our btrfs partitioning.**  We cannot create subvolumes where existing folders lay.  Therefore to create `/var/log/` and `/home/` subvolumes we have to move or delete the existing folders.  For those two folders this is hardly a concern, but imagine how this might impact things like `/lib/` or `/etc/`.  Anything in runtime paths will be very difficult to relocate without breaking.
+Because btrfs dynamically allocates space and grows in actual size, the `df` command itself may not accurately reflect the actual free space, and so this command is recommended instead:
 
-**Some commands:**
+    btrfs filesystem df /
 
-You can display subvolumes and their ids with:
+
+### repairing
+
+Fortunately it is very easy to repair damaged btrfs systems, **but the disk must not be connected while doing so**:
+
+    btrfs check --repair /dev/sdX
+
+_The device name must be a btrfs partition._
+
+If the repair says there were unrecoverable files you can try to run this operation to find the broken files:
+
+    find / -type f -exec cp {} /dev/null \;
+
+
+## features
+
+**The latest debian kernel version has known problems with subvolume management and quotas which can lead to kernel panics, so it may be ill-advised to utilize some of the features described here currently.**
+
+- subvolumes
+- qgroups and quotas
+- snapshots
+- data migration
+- raid
+
+
+### subvolumes
+
+A subvolume is treated like a folder, but given a logical volume id inside btrfs and a mount-point inside of its root file system.  Parent btrfs partitions will automatically mount their child partitions, so a subvolume is extremely transparent in both appearance and management.
+
+Subvolumes are required to use other features, such a snapshots, qgroups and quotas, and data migration.  They allow you to organize formless partitions underneath a root btrfs partition.
+
+You can easily find subvolumes and their ids with:
 
     btrfs subvolume list /
 
-_If you have no subvolumes, no results will be listed._
+_Most of the other commands expect the subvolume id and not its mount point._
 
-Creating a subvolume is incredibly simple:
+Creating a subvolume is simple:
 
-    btrfs subvolume create /path/of/your/choice
-
-_The only catch is the final folder cannot already exist._  It will fail if it does.
-
-You can delete a subvolume with:
-
-    btrfs subvolume delete /path/to/subvolume
-
-You can swap any subvolume in as the "root" subvolume via:
-
-    btrfs subvolume set-default 261 /
-
-_Upon rebooting the alternative subvolume will be used as the new "root"._  By default the actual root of the system has an id of 0, which you can use with the same command to "reset" the change.
-
-
-**Fixing `/var/log/` and `/home/`:**
-
-Fortunately the steps to work-around our problem with the folders already existing are simple.  We move the folders first, create the subvolumes, then copy the contents with original reflinks back into the new "folder":
-
-    mv /var/log /var/logt
-    btrfs subvolume create /var/log
-    cp -a --reflink /var/logt/* /var/log/
-    rm -rf /var/logt
-    mv /home /homet
     btrfs subvolume create /home
-    cp -a --reflink /homet/* /home/
-    rm -rf /homet
 
-_While this should work immediately, it may be beneficial to reboot to ensure no log files got disconnected from their services._
+_If `/home` exists already then the subvolume creation will fail; therefore creating subvolumes after-the-fact requires a bit of manipulation._
 
-_I have not tested the above command on `/home/` with existing users in the `/home/` path.  For obvious reasons they should not be connected while this change is happening, and you may want to verify they can still access afterwards._
+You can delete a subvolume in the same way you create it:
 
-
-## snapshots
-
-With btrfs you can use the snapshot feature to create another subvolume with a mirror of the contents.
-
-A snapshot ignores the contents of layered subvolumes, so if you have `/home/` as a subvolume to root (`/`) and you create a snapshot of root, you will not have a copy of `/home/`.  This approach allows you to easily manage backups without needing additional partitions!
-
-Further, because even the root of a btrfs file system is treated like a subvolume, you can easily swap any other subvolume for the root, allowing you to restore or swap states very quickly.  _For example, one good option after installing the system and configuring it to a desired state, is creating a snapshot of your root, then switching places with that snapshot._  Doing this will allow you to restore your original configured state when rebooted in the event of a serious problem.
-
-To create a snapshot:
-
-    btrfs subvolume snapshot -r / /backup
-
-_This will create a new subvolume and mount it, duplicating the contents of the root file system._  The contents do not stay in-sync after they are copied, so it is _not_ a single-command to process.
-
-**It is very important that after creating a snapshot you run the `sync` command before interacting with it.**  While the files and file system will appear to exist the operation to duplicate them may still be running in the background and can take a while depending on the size of the volume.
-
-Just like a subvolume, you can use the `btrfs subvolume delete` command to remove old snapshots.
-
-There are also more complicated methods of creating snapshots incrementally so as to both backup changes quickly and frequently, without taking up lots of space.  _I will eventually document those once I've had a chance to try them out._
+    btrfs subvolume delete /home
 
 
-## quotas
+### qgroups and quotas
 
-**Support for quota features may not be available until kernel 3.14.**
+A qgroup is used to define restrictions, such as quotas or "size limits" on a subvolume.
 
-The primary objective of using quotas is to impose size restrictions on subvolumes, much like using partitions of a specific size.  While the restrictions themselves are applied via `qgroups` the quota feature must first be enabled via:
-
-    btrfs quota enable /
-
-
-### qgroups
-
-By default each subvolume created will have a quota-group.  These can be displayed via:
+Listing them is as simple as:
 
     btrfs qgroup show /
 
-To apply a limit follow this format:
+To begin using quotas you must enable them:
+
+    btrfs quota enable /
+
+If you had a `/var/log` subvolume, you could restrict it to 2 gigabytes by running:
 
     btrfs qgroup limit 2g /var/log
 
-To remove a limit you use the same command but replace the size with the word "none":
+To remove a limit, replace the size with `none`:
 
     btrfs qgroup limit none /var/log
 
-The easiest way to test your quota is to create a file of the appropriate size via `dd` and move it into that space.  If the file exceeds the disk quota it will fail.  _There may be a problem getting rid of that file afterwards._  When data is copied or moved onto the system the limit may not trigger before filling up or exceeding the limit.  When this happens you cannot `rm -f`, `echo "" > `, `cat /dev/null >`, or `cp /dev/null ` to delete the file(s) taking up all the space.  The solution is to increase or remove the limit first, remove the files, then reset the limit.
-
-In most cases this additional step is not a barrier because you should never "normally" run into that problem.  The point of having the restriction is still upheld, which is why this was not a "deal-breaker" for my use-cases.
-
-A quota limit can only be assigned to a subvolume and will not work when pointed at any other paths.
-
-_I have not confirmed whether limits include layered subvolumes, but given that snapshots and other components treat them independently, we can assume it will not restrict them._
+The easiest way to test whether your quota is working is to create a file using `dd` of the size you expect, and attempt to copy it into that space.  The operation should fail if the size exceeds the quota space.  _Due to bugs in debian you may need to remove the quota to make space or delete files again._
 
 
-## migrating data
+### snapshots
+
+A basic snapshot grabs the current state of a subvolume excluding child subvolumes.
+
+For example, to create a root snapshot is as simple as:
+
+    btrfs subvolume snapshot -r / /backup
+    sync
+
+This will create a `/backup` subvolume.  If you had a `/home` subvolume behind `/` (the root), its contents will **not** be a part of `/backup`.
+
+**It is very important to run `sync` afterwards to ensure the snapshot is finished before moving onto any other steps that may manipulate the file system.**
+
+When a new btrfs file system is created, it starts with a default root subvolume, which means you can actually switch the subvolume id used for the default-root.  Assuming `/backup` has an id of _261_ we could do this:
+
+    btrfs subvolume set-default 261 /
+
+The next time you boot the system it will load `/backup` where `/` was previously.  _This may have unexpected effects on child subvolumes that belong to `/` and not `/backup`, so there are quirks to this._
+
+Taking this a step further, you can use the `send` and `receive` operations to create incremental snapshots.  This is very useful if you wanted to `diff` the state before running software updates, such that you can quickly restore to that state, but without keeping a complete copy of that state.
+
+_Unfortunately you cannot use `send` to create incremental snapshots without a read-only copy of the current state, which means you do need enough space to take a complete snapshot to create the incremental one._
+
+In our previous example we created a root backup at `/backup`.  Assuming a week later we wanted to install a number of peices of software, but we wanted to be able to restore to the point just before that, we would start by creating a new read-only snapshot, like this:
+
+    btrfs subvolume snapshot -r / /backup.$(date +%Y-%m-%d)
+    sync
+
+Next, to create the incremental snapshot, we use `send` against the two states:
+
+    btrfs send -p /backup /backup.$(date +%Y-%m-%d)
+
+Ideally you would pipe this to `btrfs receive` which can be run either locally or remotely, and against a different btrfs file system.  For example:
+
+    btrfs send -p /backup /backup.$(date +%Y-%m-%d) | btrfs receive /backup.partial.$(date +%Y-%m-%d)
+
+**This means that incremental snapshots require at least enough space for the original state, current state, and incremental states in between.**  If you want to keep a complete history, this will consume at least as much as the total size of the subvolume you are making backups of, and at least enough for the original state, and double the current state, to create the backup.
+
+_I am still struggling with the means of restoring from these snapshots._
+
+While you can use `btrfs send` to restore a complete copy of the data against something like `/home`, it won't work very well if you attempt to do it against an active volume, such as root (`/`).  Instead you would have to change `default-root`, reboot, run the restore against the original root, then change default-root back and reboot.
+
+Alternatively you can run `cp -ax --reflink=always` to copy from the backup to the destination, but that won't necessarily delete files because it will merge folder contents recursively.
+
+
+### migrating data
 
 If you have more than one btrfs file system you can use the `send` and `receive` commands to pass around the data.  You can also create snapshots across systems.  This can be especially useful if you want to store a snapshot someplace else or relocate a snapshot after creating it such as a backup to an external drive.
 
@@ -189,65 +200,25 @@ Here is an example of sending from root and receiving at any other path:
 _Because a subvolume is created with the receive command it will infer the parent volume._
 
 
-## general maintenance
-
-To display the file system size and details:
-
-    btrfs filesystem show /
-
-_This command is how you verify the maxium file system size, as by default btrfs expands-to-fill, and the `btrfs filesystem df /` command only shows the total as the space filled by the expanding system._  Until your system actually uses all of your disk, that makes `df` an innaccurate source for partition/file-system size.
-
-You can see how much of your btrfs file system is in use with:
-
-    btrfs filesystem df /
-
-_This will not display quota limitations, and until your disk fills up it may not accurately reflect the partition size._  You still have to subtract the usage from the `btrfs filesystem show /` total to get the available disk space.  **The older `df` command will not accurately reflect disk space.**
-
-You can force the file system to defragment, as well as compress, via:
-
-    btrfs filesystem defragment -r -clzo /
-
-_Depending on the amount of data this can take quite a while._
-
-Because of the nature of its dynamic expansion at some point you may need to rebalance the disk, which can be done via:
-
-    btrfs balance start /
-
-_If you do not rebalance regularly you may end up having your disk fill up prematurely, by rebalancing you can reorganize the segmentation of the data.  This process can also be time consuming._
-
-It is highly recommended **not** to use the `discard` flag, same as with the ext4 file system.  Instead you should regularly use the `fstrim` command, on a weekly or monthly schedule.  This reduces the io levels on the disk, and can improve performance and longevity of the disk.
-
-
-## crontab
-
-These commands will help retain optimal performance and disk space availability:
-
-    #!/bin/bash
-    fstrim /
-    btrfs filesystem defragment -r -clzo /
-    btrfs balance start /
-    # insert incremental snapshot logic here
-    sync
-
-At your discretion this can be run once a week or once a month for regular disk maintenance.
-
-
 ## raid10
 
 **I plan to test out ext4 on mdadm raid10 with 8 disks and compare the performance against btrfs.  I will likely choose btrfs because of its compression, improved inode handling, and copy-on-write sanity checking, all of which greatly improve the reliability of a raid.**  It is also much simpler to create the same effect of multiple partitions without the same performance problems as lvm or restrictions as raw ext4 partitions.
 
-    TODO~
+Creating a raid 10 configuration with both metadata and data spread across all disks:
 
-Creating a raid configuration:
-
-    # Use raid10 for both data and metadata
     mkfs.btrfs -m raid10 -d raid10 /dev/sdb /dev/sdc /dev/sdd /dev/sde
-    # mkfs.btrfs -d raid10 -m raid10 /dev/sd[fghijk]
-    # mount /dev/sdf /raid10_mountpoint
 
-You can specify any disk in a btrfs raid configuration to mount the entire file system.  While this may be concerning, if the disk that you usually mount fails you can use `btrfs dev scan` to find the information you need to mount dynamically.
+A shorthand version of the same:
 
-_I still have to test and verify the `btrfs dev scan` logic._
+    mkfs.btrfs -m raid10 -d raid10 /dev/sd[fghijk]
+
+You can specify other raid types, as well as different options for where to store the metadata, which says how to read the spread of contents on those disks.  This gives you a lot of flexibility.
+
+Finally, you can mount the entire group by specifying _any_ of the disks in the array:
+
+    mount /dev/sdf /raid10_mountpoint
+
+Alternatively you can use `btrfs dev scan` to find the optimal disk to use to mount the disks.
 
 
 # tips and tricks
@@ -257,14 +228,6 @@ If you want to mount a subvolume without mounting the entire pool or "root" subv
     mount -o suvolid=260 /mount/path
 
 **Almost all of the btrfs commands accept "shortest match", so if `btrfs subvolume list /` seems too long, you can also use `btrfs su l /` to get the same output.**
-
-
-## known bugs
-
-**debian jessie is on kernel 3.16 which unfortunately suffers from two major bugs:**
-
-- deletion of subvolumes can crash the kernel
-- quota's are borked (don't use them, such as to limit size of folder(s))
 
 
 # references
@@ -280,3 +243,4 @@ If you want to mount a subvolume without mounting the entire pool or "root" subv
 - [btrfs fun](http://www.funtoo.org/BTRFS_Fun)
 - [superb resource](http://codepoets.co.uk/2014/btrfs-gotchas-balance-scrub-snapshots-quota/)
 - [another excellent resource](http://blog.kourim.net/installing-debian-on-btrfs-subvolume)
+- [btrfs fun comprehensive step-through features](http://www.funtoo.org/BTRFS_Fun)
