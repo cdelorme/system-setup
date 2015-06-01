@@ -446,15 +446,13 @@ For a well-rounded terminal experience with plenty of options, these are the pac
 - youtube-dl
 - awscli
 - swftools
+- graphicsmagick
 - vim
 - weechat
 - sshfs
 - ffmpeg
 - sfml
 - sdl2
-- graphicsmagick
-- mplayer
-- node
 - sdl2_image
 - sdl2_mixer
 - sdl2_ttf
@@ -462,6 +460,8 @@ For a well-rounded terminal experience with plenty of options, these are the pac
 - sdl_image
 - sdl_mixer
 - sdl_ttf
+- mplayer
+- node
 
 Some of these packages have special flags for installation.  They should automatically install dependencies, but depending on the package there may be more to it than that.
 
