@@ -572,6 +572,17 @@ sed -i "s/^#\?PasswordAuthentication\s*[yn].*/PasswordAuthentication no/" /etc/s
 
 
 ##
+# disable capslock forever in favor of ctrl
+##
+
+if [ $(grep "XKBOPTIONS" /etc/default/keyboard | grep -c "ctrl:nocaps") -eq 0 ]
+then
+	sed -i 's/XKBOPTIONS.*/XKBOPTIONS="ctrl:nocaps"/' /etc/default/keyboard
+	dpkg-reconfigure -phigh console-setup
+fi
+
+
+##
 # add pam tally locking
 ##
 

@@ -197,11 +197,7 @@ First-run of google chrome and synchronizing your account is another post-instal
 - [usb device connection](https://www.ab9il.net/linux/pcmanfm-usb-mount.html)
 - [adding screenshot scripts](https://wiki.archlinux.org/index.php/Taking_a_screenshot)
 - [getting active window coordinates](http://unix.stackexchange.com/questions/14159/how-do-i-find-the-window-dimensions-and-position-accurately-including-decoration)
-
-
-
-
-
+- [disable capslock globally](http://emacswiki.org/emacs/MovingTheCtrlKey#toc9)
 
 
 
