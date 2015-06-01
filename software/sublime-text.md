@@ -1,7 +1,7 @@
 
 # [sublime text](http://www.sublimetext.com/)
 
-Sublime Text is a fabulous editor with plugins that support nearly everything any IDE can do.  It loads lightning fast, renders near-identically cross all major operating systems, and is one of the first **good** light-weight editors I've found with font anti-aliasing, even on windows.  It is "nagware" so if you want to avoid an occasional popup then buy it, it is well worth the cost.
+Sublime Text is a fabulous editor with plugins that support nearly everything any IDE can do.  It loads lightning fast, renders near-identically cross all major operating systems, and is one of the first **good** light-weight editors I've found with font anti-aliasing (even on windows).  It is "nagware" so if you want to avoid an occasional popup then buy it, it is well worth the cost.
 
 _Worth noting, the Sublime Text 2 keys work for Sublime Text 3 while it is in beta, and also Sublime Text 3 encrypts the keys now so you cannot simply copy them to the install folder in an automated fashion._
 
@@ -39,7 +39,6 @@ Here is a set of configuration files, assuming a starting at the parent paths by
 
 - [`Packages/User/Preferences.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings)
 - [`Packages/User/Default (Linux).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap)
-- [`Packages/User/Default (Windows).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (Windows).sublime-keymap)
 - [`Packages/User/Default (OSX).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap)
 - [`Packages/User/default_file_type.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings)
 - [`Packages/User/MarkdownPreview.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings)
