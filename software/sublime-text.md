@@ -37,12 +37,12 @@ While all platforms share sublime text configurations, the install path varies:
 
 Here is a set of configuration files, assuming a starting at the parent paths by platform above, which link to my preferenced configurations:
 
-- [`Packages/User/Preferences.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/Preferences.sublime-settings)
-- [`Packages/User/Default (Linux).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap)
-- [`Packages/User/Default (OSX).sublime-keymap`](../../data/home/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap)
-- [`Packages/User/default_file_type.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings)
-- [`Packages/User/MarkdownPreview.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings)
-- [`Packages/User/GoSublime.sublime-settings`](../../data/home/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings)
+- [`Packages/User/Preferences.sublime-settings`](../data/etc/skel/.config/sublime-text-3/Packages/User/Preferences.sublime-settings)
+- [`Packages/User/Default (Linux).sublime-keymap`](../data/etc/skel/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap)
+- [`Packages/User/Default (OSX).sublime-keymap`](../data/etc/skel/.config/sublime-text-3/Packages/User/Default (OSX).sublime-keymap)
+- [`Packages/User/default_file_type.sublime-settings`](../data/etc/skel/.config/sublime-text-3/Packages/User/default_file_type.sublime-settings)
+- [`Packages/User/MarkdownPreview.sublime-settings`](../data/etc/skel/.config/sublime-text-3/Packages/User/MarkdownPreview.sublime-settings)
+- [`Packages/User/GoSublime.sublime-settings`](../data/etc/skel/.config/sublime-text-3/Packages/User/GoSublime.sublime-settings)
 
 
 ## platform specific tuning
@@ -61,4 +61,4 @@ You can add a symbolic link to the sublime text application container:
 
 For linux, you get to choose where to install sublime text, and can simply create a symbolic link to the executable path for short-hand access (to match the `subl` osx command).
 
-You can also create a `.desktop` launcher at [`~/.local/share/application/subl.desktop`](../../data/home/.local/share/application/subl.desktop).  _My example assumes an install path for grabbing the sublime text icons._
+You can also create a `.desktop` launcher at [`~/.local/share/application/subl.desktop`](../data/etc/skel/.local/share/application/subl.desktop).  _My example assumes an install path for grabbing the sublime text icons._
