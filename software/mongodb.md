@@ -51,26 +51,12 @@ The configuration file is `/etc/mongodb.conf`, and the default storage path is `
 _If you have concerns about version pinning, I recommend you check the official documentation for details._
 
 
-## monit
+## [monit](../data/etc/monit/monitrc.d/mongod)
 
-A monit file can keep the mongodb daemon running.  Add this to `/etc/monit/monitrc.d/mongod`:
-
-    check process mongod with pidfile /var/run/mongod.pid
-        start program = "/etc/init.d/mongod start"
-        stop program  = "/etc/init.d/mongod stop"
-        group www-data
-        if cpu > 80% for 5 cycles then restart
-        if memory > 80% for 5 cycles then restart
-        if 3 restarts within 8 cycles then timeout
-
-Then symlink it to `/etc/monit/conf.d` and restart monit:
-
-    ln -nsf ../mongorc.d/mongod /etc/monit/conf.d/mongod
-    monit -t && service monit restart
+As always, a monit file goes a long ways.  Don't forget the symlink in `/etc/monit/conf.d/` to activate it.
 
 
 # references
 
-- [mongodb.sh](../../../scripts/linux/web/mongodb.sh)
 - [mongodb instructions](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-debian/)
 - [mongodb ports](http://docs.mongodb.org/manual/reference/default-mongodb-port/)
