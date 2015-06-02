@@ -2,12 +2,8 @@
 user="$1"
 if [ -n "$user" ] && [ "$user" != "root" ]
 then
-	keys=$(wget -qO- "https://github.com/${user}.keys")
-	echo "$keys" | while read -r key
-	do
-		if [ -f "${HOME}/.ssh/authorized_keys" ] && ! grep "$key" "${HOME}/.ssh/authorized_keys" &> /dev/null
-		then
-			echo "$key" >> "${HOME}/.ssh/authorized_keys"
-		fi
-	done
+	if curl -Lso /tmp/authorized_keys "https://github.com/${user}.keys"
+	then
+		mv /tmp/authorized_keys ~/.ssh/authorized_keys
+	fi
 fi
