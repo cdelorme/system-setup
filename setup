@@ -697,6 +697,19 @@ fi
 [ "${public_mongodb:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 [ "${public_postgresql:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 
+##
+# configure audio
+##
+
+if [ -d /etc/pulse ]
+then
+	if which alsactl &>/dev/null
+	then
+		alsactl store
+	fi
+	cp -R /etc/pulse /etc/skel/.pulse
+fi
+
 
 ##
 # install dot-files for root
@@ -713,7 +726,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username
-[ "$install_transmission" = "y" ] && usermod -aG transmission-daemon $username
+[ "$install_transmission" = "y" ] && usermod -aG debian-transmission $username
 
 # generate ssh key
 if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
@@ -762,20 +775,6 @@ if [ "${install_nodejs:-}" = "y" ]
 then
 	(export NVM_DIR=$HOME/.nvm && . ~/.nvm/nvm.sh && nvm install stable && nvm alias default stable) &
 	[ "$username" != "root" ] && su $username -c '(cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable && nvm alias default stable) &'
-fi
-
-# configure audio
-if [ -d /etc/pulse ]
-then
-	if which alsactl &>/dev/null
-	then
-		alsactl store
-	fi
-	cp -R /etc/pulse /etc/skel/.pulse
-	if which pactl &>/dev/null
-	then
-		[ "$username" != "root" ] && su $username -c "pactl set-default-sink 0"
-	fi
 fi
 
 
