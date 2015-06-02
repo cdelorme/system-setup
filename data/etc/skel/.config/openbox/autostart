@@ -4,8 +4,8 @@ which nosleep-daemon &>/dev/null && (nosleep-daemon) &
 which xrdb &>/dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
 which xdg-user-dirs-update &>/dev/null && (xdg-user-dirs-update) &
 which compton &>/dev/null && (compton) &
-which hsetroot &>/dev/null && (hsetroot -solid "#001E27") &
-which fehbg &>/dev/null && (fehbg) &
+which hsetroot &>/dev/null && (sleep 1 && hsetroot -solid "#001E27") &
+which fehbg &>/dev/null && (sleep 2 && fehbg) &
 which tint2 &>/dev/null && (sleep 3 && tint2) &
 which volumeicon &>/dev/null && (sleep 5 && volumeicon) &
 which clipit &>/dev/null && (sleep 5 && clipit) &
