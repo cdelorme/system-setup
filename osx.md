@@ -308,6 +308,7 @@ Here is a list of software I install:
 - [Transmission](http://www.transmissionbt.com/download/)
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
 - [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
+[Radiant Player](http://www.sajidanwar.me/radiant-player-mac/)
 
 VirtualBox is a free Virtual Machine software with better linux guest support than leading commercial software such as Parallels and VMWare.  It is also cross platform, allowing you to create a virtual machine and transfer it anywhere with no major changes to interface or drivers.  _If you need 3D capabilities you will want to look at [Parallels Desktop](http://www.parallels.com/products/desktop/)._
 
