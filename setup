@@ -395,9 +395,11 @@ then
 			# create gvm script manually
 			echo 'export GVM_ROOT="$HOME/.gvm"' > /etc/skel/.gvm/scripts/gvm
 			echo '. $GVM_ROOT/scripts/gvm-default' >> /etc/skel/.gvm/scripts/gvm
+			chmod +x /etc/skel/.gvm/scripts/gvm
 
 			# add lines to load gvm in .bash_profile
-			echo '[ -s "${GVM_DIR}/scripts/gvm" ] && export GVM_DIR=~/.gvm && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bash_profile
+			echo 'export GVM_DIR=~/.gvm' > /etc/skel/.bash_profile
+			echo '[ -s "${GVM_DIR}/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bash_profile
 		fi
 
 		# conditionally install global nvm
@@ -406,7 +408,8 @@ then
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
 
 			# add lines to load nvm in .bash_profile
-			echo '[ -s "$NVM_DIR/nvm.sh" ] && export NVM_DIR=~/.nvm && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bash_profile
+			echo 'export NVM_DIR=~/.nvm' >> /etc/skel/.bash_profile
+			echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bash_profile
 		fi
 
 		# conditionally install global openjdk
