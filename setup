@@ -309,7 +309,7 @@ then
 fi
 
 # conditionally install video, audio, and graphics processing utilities
-[ "$install_processing_tools" = "y" ] && aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools youtube-dl
+[ "$install_processing_tools" = "y" ] && aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools youtube-dl id3
 
 # conditionally install nginx
 if [ "${install_nginx:-}" = "y" ]
