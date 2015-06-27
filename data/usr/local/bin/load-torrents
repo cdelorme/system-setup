@@ -2,5 +2,6 @@
 # load torrents (custom for my system)
 for file in "$HOME/Downloads/"*.torrent
 do
-	[ -f "$file" ] && cp "$file" "/media/samba/torrent/torrents/${file##*/}" && rm "$file"
+	[ -f "$file" ] && cp "$file" "${1}/${file##*/}" && rm "$file"
 done
+
