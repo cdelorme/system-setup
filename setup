@@ -478,7 +478,7 @@ then
 
 			# enable xbox drv
 			systemctl enable /etc/systemd/system/xboxdrv.service
-			systemctl start /etc/systemd/system/xboxdrv.service
+			systemctl start xboxdrv.service
 
 			# build & install ppsspp
 			git clone https://github.com/hrydgard/ppsspp.git /tmp/ppsspp
