@@ -398,7 +398,7 @@ then
 			chmod +x /etc/skel/.gvm/scripts/gvm
 
 			# add lines to load gvm in .bash_profile
-			echo 'export GVM_DIR=~/.gvm' > /etc/skel/.bash_profile
+			echo 'export GVM_DIR=~/.gvm' >> /etc/skel/.bash_profile
 			echo '[ -s "${GVM_DIR}/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bash_profile
 		fi
 
