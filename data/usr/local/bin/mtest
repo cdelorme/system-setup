@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# test multimedia files and fix formats
+# requires bash >=4.0
+
+music="mp3"
+goodvid="mkv"
+images=("gif" "bmp" "jpg" "png")
+badvids=("rmvp" "mp4" "avi" "wmv" "flv" "mov" "mpg")
+
+echo "scanning $1"
+
+find "$1" -type f -print0 | while IFS= read -r -d $'\0' line
+do
+	ext="${line##*.}"
+
+	if [ "${ext,,}" = "$music" ] || [ "${ext,,}" = "$goodvid" ]
+	then
+		o=$(avconv -v error -i "$line" -f null -)
+		if [ -n "$o" ]
+		then
+			echo "$line" >>"$2"
+			echo "$o" >>"$2"
+		fi
+	fi
+
+	for t in ${images[*]}
+	do
+		if [ "${ext,,}" = "$t" ]
+		then
+			if ! gm identify "$line" &>/dev/null
+			then
+				echo "$line" >>"$2"
+			fi
+		fi
+	done
+
+	for t in ${badvids[*]}
+	do
+		if [ "${ext,,}" = "$t" ]
+		then
+			echo "re-encoding $line" >>"$2"
+			avconv -i "$line" -c:v libx264 -c:s copy -strict experimental -c:a aac "${line%.*}.mkv" 1>>"$2" 2>&1
+		fi
+	done
+done
+
+echo "scan complete"
