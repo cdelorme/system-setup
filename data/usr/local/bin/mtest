@@ -5,8 +5,8 @@
 
 music="mp3"
 goodvid="mkv"
-images=("gif" "bmp" "jpg" "png")
-badvids=("rmvp" "mp4" "avi" "wmv" "flv" "mov" "mpg")
+images=("gif" "bmp" "jpg" "png" "jpeg" "ico")
+badvids=("rm" "rmvp" "mp4" "m4v" "avi" "wmv" "flv" "mov" "mpg" "mpeg" "ogg" "ogm" "webm" "xvid" "wpl")
 
 echo "scanning $1"
 
