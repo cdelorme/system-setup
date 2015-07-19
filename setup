@@ -488,6 +488,7 @@ then
 			# build & install ppsspp
 			git clone https://github.com/hrydgard/ppsspp.git /tmp/ppsspp
 			pushd /tmp/ppsspp
+			git checkout v1.0.1
 			git submodule update --init
 			./b.sh
 			mkdir /usr/local/ppsspp
