@@ -252,6 +252,10 @@ then
 else
 	rm -rf /tmp/system-setup
 	git clone https://github.com/cdelorme/system-setup /tmp/system-setup
+
+	# temporary checkout until merged /w stable
+	(cd /tmp/system-setup && git checkout -b dev origin/dev)
+
 	cp -fR /tmp/system-setup/data/* /
 fi
 
@@ -727,7 +731,8 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-usermod -aG sudo,adm,bluetooth,netdev,plugdev,audio,video $username
+usermod -aG sudo,adm,netdev,plugdev,audio,video $username
+[ "$is_a_workstation" = "y" ] && usermod -aG bluetooth $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username
 [ "$install_transmission" = "y" ] && usermod -aG debian-transmission $username
 
