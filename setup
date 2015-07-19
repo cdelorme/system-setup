@@ -481,7 +481,8 @@ then
 			aptitude install -ryq xboxdrv playonlinux mednafen
 
 			# enable xbox drv
-			systemctl enable /etc/systemd/system/xboxdrv.service
+			echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
+			systemctl enable xboxdrv.service
 			systemctl start xboxdrv.service
 
 			# build & install ppsspp
@@ -732,7 +733,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,adm,netdev,plugdev,audio,video $username
-[ "$is_a_workstation" = "y" ] && usermod -aG bluetooth $username
+[ "$is_a_workstation" = "y" ] && usermod -aG bluetooth,input $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username
 [ "$install_transmission" = "y" ] && usermod -aG debian-transmission $username
 
