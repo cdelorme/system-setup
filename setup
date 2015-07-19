@@ -313,7 +313,12 @@ then
 fi
 
 # conditionally install video, audio, and graphics processing utilities
-[ "$install_processing_tools" = "y" ] && aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools youtube-dl id3
+if [ "$install_processing_tools" = "y" ]
+then
+	aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools id3
+	curl https://yt-dl.org/downloads/2015.07.18/youtube-dl -o /usr/local/bin/youtube-dl
+	chmod a+rx /usr/local/bin/youtube-dl
+fi
 
 # conditionally install nginx
 if [ "${install_nginx:-}" = "y" ]
