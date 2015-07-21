@@ -515,7 +515,7 @@ fi
 ##
 # detect virtualbox & install guest additions
 ##
-
+set +e
 if [ $(lspci | grep -ci 'virtualbox') -gt 0 ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
@@ -530,10 +530,11 @@ then
 		[ $(mount | grep -c '/tmp/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /tmp/vbox
 		if [ -x /tmp/vbox/VBoxLinuxAdditions.run ]
 		then
-			(/tmp/vbox/VBoxLinuxAdditions.run && /etc/init.d/vboxadd setup && [ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start) &
+			(/tmp/vbox/VBoxLinuxAdditions.run && /etc/init.d/vboxadd setup && [ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start)
 		fi
 	fi
 fi
+set -e
 
 
 ##
@@ -747,7 +748,7 @@ usermod -aG sudo,adm,netdev,plugdev,audio,video $username
 if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
 then
     ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
-    chmod 600 /home/$username/.ssh/*
+    [ -d /home/$username/.ssh ] && chmod 600 /home/$username/.ssh/*
 
 	# attempt to upload new ssh key to github account
 	if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
@@ -778,7 +779,7 @@ then
 fi
 
 # ensure ownership for users folder
-chown -R $username:$username /home/$username/.ssh/
+[ -d /home/$username/.ssh ] && chown -R $username:$username /home/$username/.ssh/
 
 # launch terminal as root and as user to initialize nvm & gvm (async since gvm/nvm are not error-free)
 set +e
