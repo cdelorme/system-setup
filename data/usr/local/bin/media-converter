@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# convert video files to preferred format
+# requires bash >=4.0
+
+[ -z "$1" ] && echo "enter a path" && exit 1
+
+# default output to second arg
+if [ -n "$2" ]
+then
+	output="$2"
+else
+	output="/dev/stdout"
+fi
+
+# define unaccepted types
+cvlist=("rm" "rmvp" "mp4" "m4v" "avi" "wmv" "flv" "mov" "mpg" "mpeg" "ogg" "ogm" "webm" "xvid" "wpl")
+
+find "$1" -type f -print0 | while IFS= read -r -d $'\0' line
+do
+
+	# look for names in file (to identify already converted from previous run)
+	[ -n "$2" ] && [ -f "$2" ] && [ $(grep -c "$line" -F "$2") -gt 0 ] && continue
+
+	# parse extension
+	ext="${line##*.}"
+
+	# check against type-list
+	for t in ${cvlist[*]}
+	do
+		if [ "${ext,,}" = "$t" ]
+		then
+			avconv -n -i "$line" -c:v libx264 -c:s copy -strict experimental -c:a aac "${line%.*}.mkv" >> "$output" 2>&1
+		fi
+	done
+
+	# track scanned files via output
+	echo "$line" >> "$output"
+done
+
+echo "scan complete"
