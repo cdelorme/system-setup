@@ -184,7 +184,7 @@ then
 		fi
 
 		# set optimizations to be applied to the disk
-		export btrfs_optimizations="noatime,compress=lzo,space_cache,autodefrag"
+		export btrfs_optimizations="noatime,autodefrag"
 
 		# check whether fstab already contains optimizations
 		if [ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 ]
@@ -201,8 +201,11 @@ then
 			# add optimizations
 			sed -i "s;/.*btrfs.*;/\tbtrfs\t${btrfs_optimizations}\t0\t1;" /etc/fstab
 
-			# defragment, compress silently, and rebalance asynchronously so inaccessible files do not crash the script
-			(btrfs filesystem defragment -rfclzo / &>/dev/null; btrfs balance start /) &
+			# defragment and rebalance
+			set +e
+			btrfs filesystem defragment -rf / &>/dev/null
+			btrfs balance start /
+			set -e
 		fi
 
 		# @todo(casey): create initial snapshot for restoration and future iterative backups
