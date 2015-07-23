@@ -713,6 +713,8 @@ fi
 [ "$install_transmission" = "y" ] && ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
 [ "${install_nginx:-}" = "y" ] && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
 [ "${install_mongodb:-}" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
+# @todo(casey): add postgres monit file
+#[ "${install_postgres:-}" = "y" ] && ln -nsf "../monitrc.d/postgres" "/etc/monit/conf.d/postgres"
 
 
 ##
@@ -720,23 +722,23 @@ fi
 ##
 
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
-[ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules
-[ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
+[ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
 [ "${public_nginx:-}" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
 [ "${public_mongodb:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 [ "${public_postgresql:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
+
 
 ##
 # configure audio
 ##
 
+if which alsactl &>/dev/null
+then
+	alsactl store
+fi
 if [ -d /etc/pulse ]
 then
 	[ -f /etc/pulse/daemon.conf ] && echo "default-fragments = 128" >> /etc/pulse/daemon.conf
-	if which alsactl &>/dev/null
-	then
-		alsactl store
-	fi
 	[ ! -e /etc/skel/.pulse ] && cp -R /etc/pulse /etc/skel/.pulse
 fi
 
@@ -754,8 +756,8 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-usermod -aG sudo,adm,netdev,plugdev,audio,video $username
-[ "$is_a_workstation" = "y" ] && usermod -aG bluetooth,input $username
+usermod -aG sudo,adm,netdev,plugdev $username
+[ "$is_a_workstation" = "y" ] && usermod -aG bluetooth,input,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username
 [ "$install_transmission" = "y" ] && usermod -aG debian-transmission $username
 
@@ -782,15 +784,20 @@ then
     su $username -c "cd && git config --global user.email $github_email"
 fi
 
-# update keys
-if [ "$username" != "root" ] && [ -n "$github_username" ]
+# prepare crontab for non-root user
+if [ "$username" != "root" ]
 then
 	export cronfile="/var/spool/cron/crontabs/${username}"
 	[ -f "$cronfile" ] || touch "$cronfile"
 	chown $username:crontab $cronfile
 	chmod 600 $cronfile
-	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
-	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
+
+	# update ssh keys using github account
+	if [ -n "$github_username" ]
+	then
+		[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
+		su $username -c "which update-keys &>/dev/null && update-keys $github_username"
+	fi
 
 	# setup load-torrents logic for every 5 minutes
 	[ "$install_transmission" = "y" ] && echo "*/5 * * * * /usr/local/bin/load-torrents" >> /var/spool/cron/crontabs/$username
@@ -820,8 +827,8 @@ set -e
 
 monit -t && systemctl restart monit
 systemctl restart ssh
-[ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
+[ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
 
 
 ##
