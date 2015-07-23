@@ -246,7 +246,7 @@ then
 fi
 
 # install all useful system utilities & initialize command-not-found
-aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip monit ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs
+aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs
 update-command-not-found
 
 
@@ -532,7 +532,7 @@ fi
 # detect virtualbox & install guest additions
 ##
 set +e
-if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ ! -x /etc/init.d/vboxadd ]
+if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ $(lsmod | grep -c vbox) -gt 0 ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
 	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
@@ -542,13 +542,16 @@ then
 		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant linux-headers-amd64
 
 		# run the installation & setup
-		mkdir -p /tmp/vbox
-		[ $(mount | grep -c '/tmp/vbox') -gt 0 ] || mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /tmp/vbox
-		if [ -x /tmp/vbox/VBoxLinuxAdditions.run ]
+		if [ $(mount | grep -c '/tmp/vbox') -eq 0 ]
 		then
-			/tmp/vbox/VBoxLinuxAdditions.run
-			/etc/init.d/vboxadd setup
-			[ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start
+			mkdir -p /tmp/vbox
+			mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /tmp/vbox
+			if [ -x /tmp/vbox/VBoxLinuxAdditions.run ]
+			then
+				/tmp/vbox/VBoxLinuxAdditions.run
+				systemctl start vboxadd.service || /etc/init.d/vboxadd start
+				[ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start
+			fi
 		fi
 	fi
 fi
@@ -712,17 +715,6 @@ fi
 
 
 ##
-# activate monit services via symlinks
-##
-
-[ "$install_transmission" = "y" ] && ln -nsf "../monitrc.d/transmission-daemon" "/etc/monit/conf.d/transmission-daemon"
-[ "${install_nginx:-}" = "y" ] && ln -nsf "../monitrc.d/nginx" "/etc/monit/conf.d/nginx"
-[ "${install_mongodb:-}" = "y" ] && ln -nsf "../monitrc.d/mongodb" "/etc/monit/conf.d/mongodb"
-# @todo(casey): add postgres monit file
-#[ "${install_postgres:-}" = "y" ] && ln -nsf "../monitrc.d/postgres" "/etc/monit/conf.d/postgres"
-
-
-##
 # configure iptables
 ##
 
@@ -830,7 +822,6 @@ set -e
 # restart services whose configuration has been modified
 ##
 
-monit -t && systemctl restart monit
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
