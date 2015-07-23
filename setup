@@ -532,7 +532,7 @@ fi
 # detect virtualbox & install guest additions
 ##
 set +e
-if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ $(lsmod | grep -c vbox) -gt 0 ]
+if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ $(lsmod | grep -c vbox) -eq 0 ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
 	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
