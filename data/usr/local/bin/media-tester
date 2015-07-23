@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# tests multimedia files via encoding
+# scan output for errors to identify "potentially bad files"
+# requires bash >=4.0
+
+[ -z "$1" ] && echo "enter a path" && exit 1
+
+# default output to second arg
+if [ -n "$2" ]
+then
+	output="$2"
+else
+	output="/dev/stdout"
+fi
+
+
+# set type to be scanned
+graphics=("gif" "bmp" "jpg" "png" "jpeg" "ico")
+av=("mkv" "mp3" "rm" "rmvp" "mp4" "m4v" "avi" "wmv" "flv" "mov" "mpg" "mpeg" "ogg" "ogm" "webm" "xvid" "wpl")
+
+
+find "$1" -type f -print0 | while IFS= read -r -d $'\0' line
+do
+
+	# look for files in output (if output is a file)
+	[ -n "$2" ] && [ -f "$2" ] && [ $(grep -c "$line" -F "$2") -gt 0 ] && continue
+
+	# parse extension
+	ext="${line##*.}"
+
+	# scan graphics files using gm
+	for t in ${graphics[*]}
+	do
+		if [ "${ext,,}" = "$t" ]
+		then
+			o=$(gm identify "$line")
+			if $?
+			then
+				echo "$o" >> "$output"
+				o=""
+			fi
+		fi
+	done
+
+	# scan video files using avconv/ffmpeg
+	for t in ${av[*]}
+	do
+		o=$(avconv -v error -i "$line" -f null - 2>&1)
+		if [ -n "$o" ]
+		then
+			echo "$o" >> "$output"
+			o=""
+		fi
+	done
+
+	# track scanned files via output
+	echo "$line" >> "$output"
+done
+
+echo "scan complete"
