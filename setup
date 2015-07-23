@@ -76,7 +76,7 @@ then
 	if [ -f "/home/$username/.ssh/id_rsa" ] || [ "${generate_ssh_key:-}" = "y" ]
 	then
 		grab_yes_no "github_ssh_key" "upload ssh key to github"
-		[ -n "${github_ssh_key:-}" ] && grab_secret_or_fallback "github_password" "" "enter your github password"
+		[ "$github_ssh_key" = "y" ] && grab_secret_or_fallback "github_password" "" "enter your github password"
 	fi
 fi
 
