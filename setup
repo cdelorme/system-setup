@@ -116,6 +116,9 @@ then
 	if [ "$install_development_tools" = "y" ]
 	then
 
+		# we want processing tools
+		install_processing_tools="y"
+
 		# languages for development
 		grab_yes_no "install_golang" "do you want to install golang"
 		grab_yes_no "install_nodejs" "do you want to install nodejs"
@@ -313,6 +316,11 @@ if [ "$install_transmission" = "y" ]
 then
 	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
 	systemctl stop transmission-daemon
+
+	# configure transmission directory
+	mkdir /media/transmission/{torrents,,incomplete,downloads}
+	chown -R debian-transmission:debian-transmission /media/transmission
+	chmod -R 6775 /media/transmission
 fi
 
 # conditionally install video, audio, and graphics processing utilities
@@ -519,7 +527,7 @@ fi
 # detect virtualbox & install guest additions
 ##
 set +e
-if [ $(lspci | grep -ci 'virtualbox') -gt 0 ]
+if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ ! -x /etc/init.d/vboxadd ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
 	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]
@@ -783,6 +791,9 @@ then
 	chmod 600 $cronfile
 	[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
 	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
+
+	# setup load-torrents logic for every 5 minutes
+	[ "$install_transmission" = "y" ] && echo "*/5 * * * * /usr/local/bin/load-torrents" >> /var/spool/cron/crontabs/$username
 fi
 
 # ensure ownership for users folder

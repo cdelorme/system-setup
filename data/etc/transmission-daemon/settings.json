@@ -12,7 +12,7 @@
     "blocklist-url": "http://www.example.com/blocklist",
     "cache-size-mb": 16,
     "dht-enabled": true,
-    "download-dir": "/tmp",
+    "download-dir": "/media/transmission/downloads",
     "download-limit": 100,
     "download-limit-enabled": 0,
     "download-queue-enabled": false,
@@ -20,7 +20,7 @@
     "encryption": 2,
     "idle-seeding-limit": 300,
     "idle-seeding-limit-enabled": true,
-    "incomplete-dir": "/tmp",
+    "incomplete-dir": "/media/transmission/incomplete",
     "incomplete-dir-enabled": true,
     "lazy-bitfield-enabled": true,
     "lpd-enabled": false,
@@ -69,6 +69,6 @@
     "upload-limit-enabled": 0,
     "upload-slots-per-torrent": 14,
     "utp-enabled": true,
-    "watch-dir": "/tmp",
+    "watch-dir": "/media/transmission/torrents",
     "watch-dir-enabled": true
 }
