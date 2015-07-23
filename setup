@@ -331,13 +331,9 @@ then
 	chmod a+rx /usr/local/bin/youtube-dl
 fi
 
-# conditionally install nginx
-if [ "${install_nginx:-}" = "y" ]
+# conditionally setup web server folder permissions
+if [ "$is_webserver" = "y" ]
 then
-
-	##
-	# setup web server folder permissions
-	##
 
 	# add new groups, and to user
 	groupadd -f www-data
@@ -348,7 +344,11 @@ then
 	chown -R www-data:www-data /srv
 	chown -R www-data:gitdev /srv/git
 	chmod -R 6775 /srv
+fi
 
+# conditionally install nginx
+if [ "${install_nginx:-}" = "y" ]
+then
 
 	# install nginx
 	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx-full
@@ -472,7 +472,7 @@ then
 		rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
 
 		# sublime text 3 installation
-		if ! which subl
+		if ! which subl &>/dev/null
 		then
 			curl -Lso /tmp/sublime.tar.bz2 "http://c758482.r82.cf2.rackcdn.com/sublime_text_3_build_3083_x64.tar.bz2"
 			tar xf /tmp/sublime.tar.bz2 -C /tmp
@@ -484,7 +484,7 @@ then
 		fi
 
 		# check for and install nvidia drivers
-		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer
+		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null
 		then
 			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.21/NVIDIA-Linux-x86_64-352.21.run"
