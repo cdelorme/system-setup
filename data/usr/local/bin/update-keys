@@ -4,6 +4,7 @@ if [ -n "$user" ] && [ "$user" != "root" ]
 then
 	if curl -Lso /tmp/authorized_keys "https://github.com/${user}.keys"
 	then
+		[ ! -d ~/.ssh ] && mkdir ~/.ssh && chmod 700 ~/.ssh
 		mv /tmp/authorized_keys ~/.ssh/authorized_keys
 	fi
 fi
