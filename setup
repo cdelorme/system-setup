@@ -484,12 +484,14 @@ then
 		fi
 
 		# check for and install nvidia drivers
+		set +e
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null
 		then
 			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.21/NVIDIA-Linux-x86_64-352.21.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
+		set -e
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
