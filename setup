@@ -729,7 +729,7 @@ then
 	then
 		alsactl store
 	fi
-	cp -R /etc/pulse /etc/skel/.pulse
+	[ ! -e /etc/skel/.pulse ] && cp -R /etc/pulse /etc/skel/.pulse
 fi
 
 
