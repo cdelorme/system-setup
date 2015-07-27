@@ -154,7 +154,8 @@ then
 	mkdir -p /boot/efi/EFI/boot
 	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
 	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
-	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi"
+	# @link: https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi
+	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://d2xxklvztqk0jd.cloudfront.net/github/Shell.efi" || true
 fi
 
 
