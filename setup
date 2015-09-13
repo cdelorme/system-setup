@@ -247,7 +247,7 @@ then
 fi
 
 # install all useful system utilities & initialize command-not-found
-aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs
+aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
 update-command-not-found
 
 
@@ -456,7 +456,7 @@ then
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]
 		then
-			aptitude install -ryq libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386
+			aptitude install -ryq libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386
 			curl -Lso /tmp/flash.tar.gz https://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
 			tar xf /tmp/flash.tar.gz -C /tmp
 			rm /tmp/flash.tar.gz
