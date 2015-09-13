@@ -411,29 +411,34 @@ then
 	then
 		aptitude install -ryq build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
-		# conditionally install global gvm
+		# conditionally install gvm
 		if [ "${install_golang:-}" = "y" ]
 		then
+			[ ! -d $HOME/.gvm ] && curl -Lo- https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
+			. ~/.gvm/scripts/gvm
+			gvm install go1.4.2
+			gvm use go1.4.2
+			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.5
+			gvm use go1.5 --default
+
+			# install go for all users
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
-
-			# create gvm script manually
-			echo 'export GVM_ROOT="$HOME/.gvm"' > /etc/skel/.gvm/scripts/gvm
-			echo '. $GVM_ROOT/scripts/gvm-default' >> /etc/skel/.gvm/scripts/gvm
-			chmod +x /etc/skel/.gvm/scripts/gvm
-
-			# add lines to load gvm in .bash_profile
-			echo 'export GVM_DIR=~/.gvm' >> /etc/skel/.bash_profile
-			echo '[ -s "${GVM_DIR}/scripts/gvm" ] && . "$GVM_DIR/scripts/gvm"' >> /etc/skel/.bash_profile
+			echo -e 'export GVM_DIR=~/.gvm\n. $GVM_ROOT/scripts/gvm-default' > /etc/skel/.gvm/scripts/gvm
+			echo -e '\n# load go version manager\n[[ -s "$HOME/.gvm/scripts/gvm" ]] && . "$HOME/.gvm/scripts/gvm"' >> /etc/skel/.bashrc
 		fi
 
-		# conditionally install global nvm
+		# conditionally install nvm
 		if [ "${install_nodejs:-}" = "y" ]
 		then
-			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | NVM_DIR=/etc/skel/.nvm bash
+			[ ! -d ~/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+			export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+			nvm install v4.0.0
+			nvm use v4.0.0
+			nvm alias default v4.0.0
 
-			# add lines to load nvm in .bash_profile
-			echo 'export NVM_DIR=~/.nvm' >> /etc/skel/.bash_profile
-			echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bash_profile
+			# install node for all users
+			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | NVM_DIR=/etc/skel/.nvm bash
+			echo -e '\n# load node version manager\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
 		fi
 
 		# conditionally install global openjdk
@@ -804,17 +809,17 @@ fi
 # ensure ownership for users folder
 [ -d /home/$username/.ssh ] && chown -R $username:$username /home/$username/.ssh/
 
-# launch terminal as root and as user to initialize nvm & gvm
+# install go & node with user gvm/nvm
 set +e
-if [ "${install_golang:-}" = "y" ]
-then
-	(export GVM_ROOT=$HOME/.gvm && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 --default)
-	[ "$username" != "root" ] && su $username -c '(cd && export GVM_ROOT=$HOME/.gvm && . .gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 --default)'
-fi
-if [ "${install_nodejs:-}" = "y" ]
-then
-	(export NVM_DIR=$HOME/.nvm && . ~/.nvm/nvm.sh && nvm install stable && nvm alias default stable)
-	[ "$username" != "root" ] && su $username -c '(cd && export NVM_DIR=$HOME/.nvm && . .nvm/nvm.sh && nvm install stable && nvm alias default stable)'
+if [ "$username" != "root" ]
+	if [ "${install_golang:-}" = "y" ]
+	then
+		yes | su $username -c 'cd && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.5 && gvm use go1.5 --default'
+	fi
+	if [ "${install_nodejs:-}" = "y" ]
+	then
+		yes | su $username -c 'cd && export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm install v4.0.0 && nvm alias default v4.0.0'
+	fi
 fi
 set -e
 
