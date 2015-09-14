@@ -60,6 +60,15 @@ Start by grabbing the source & checking out the last stable tag:
 
 _Assuming this is as root._
 
+Due to the lack of XDG compatible directories, you have to do this to be able to launch it:
+
+	echo -e '#!/bin/bash\n(cd /usr/local/pcsx2/bin && ./launch_pcsx2_linux.sh' > /usr/local/bin/ps2
+	chmod +x /usr/local/bin/ps2
+	usermod -aG games username
+	chown -R games:games /usr/local/pcsx2
+
+_The rules may change again once we get chroot figured out._
+
 
 ## conclusion
 
