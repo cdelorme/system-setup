@@ -209,10 +209,10 @@ then
 			sed -i "s;/.*btrfs.*;/\tbtrfs\t${btrfs_optimizations}\t0\t1;" /etc/fstab
 
 			# defragment and rebalance
-			set +e
+			set +eu
 			btrfs filesystem defragment -rf / &>/dev/null
 			btrfs balance start /
-			set -e
+			set -eu
 		fi
 
 		# @todo(casey): create initial snapshot for restoration and future iterative backups
@@ -412,7 +412,7 @@ then
 		aptitude install -ryq build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install gvm
-		set +e
+		set +eu
 		if [ "${install_golang:-}" = "y" ]
 		then
 			[ ! -d $HOME/.gvm ] && curl -Lo- https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
@@ -424,7 +424,7 @@ then
 
 			# install go for all users
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
-			echo -e 'export GVM_DIR=~/.gvm\n. $GVM_ROOT/scripts/gvm-default' > /etc/skel/.gvm/scripts/gvm
+			echo -e 'export GVM_ROOT=~/.gvm\n. $GVM_ROOT/scripts/gvm-default' > /etc/skel/.gvm/scripts/gvm
 			echo -e '\n# load go version manager\n[[ -s "$HOME/.gvm/scripts/gvm" ]] && . "$HOME/.gvm/scripts/gvm"' >> /etc/skel/.bashrc
 		fi
 
@@ -441,7 +441,7 @@ then
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | NVM_DIR=/etc/skel/.nvm bash
 			echo -e '\n# load node version manager\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
 		fi
-		set -e
+		set -eu
 
 		# conditionally install global openjdk
 		if [ "${install_openjdk:-}" = "y" ]
@@ -495,14 +495,14 @@ then
 		fi
 
 		# check for and install nvidia drivers
-		set +e
+		set +eu
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null
 		then
 			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.21/NVIDIA-Linux-x86_64-352.21.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
-		set -e
+		set -eu
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
@@ -539,7 +539,7 @@ fi
 ##
 # detect virtualbox & install guest additions
 ##
-set +e
+set +eu
 if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ $(lsmod | grep -c vbox) -eq 0 ]
 then
 	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
@@ -563,7 +563,7 @@ then
 		fi
 	fi
 fi
-set -e
+set -eu
 
 
 ##
@@ -580,9 +580,9 @@ fi
 ##
 # configure sensors
 ##
-set +e
+set +eu
 which sensors-detect &>/dev/null && (yes "" | sensors-detect)
-set -e
+set -eu
 
 
 ##
@@ -798,11 +798,13 @@ then
 	chmod 600 $cronfile
 
 	# update ssh keys using github account
+	set +eu
 	if [ -n "$github_username" ]
 	then
 		[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
 		su $username -c "which update-keys &>/dev/null && update-keys $github_username"
 	fi
+	set -eu
 
 	# setup load-torrents logic for every 5 minutes
 	[ "$install_transmission" = "y" ] && echo "*/5 * * * * /usr/local/bin/load-torrents" >> /var/spool/cron/crontabs/$username
@@ -812,8 +814,9 @@ fi
 [ -d /home/$username/.ssh ] && chown -R $username:$username /home/$username/.ssh/
 
 # install go & node with user gvm/nvm
-set +e
+set +eu
 if [ "$username" != "root" ]
+then
 	if [ "${install_golang:-}" = "y" ]
 	then
 		yes | su $username -c 'cd && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.5 && gvm use go1.5 --default'
@@ -823,7 +826,7 @@ if [ "$username" != "root" ]
 		yes | su $username -c 'cd && export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm install v4.0.0 && nvm alias default v4.0.0'
 	fi
 fi
-set -e
+set -eu
 
 
 ##
