@@ -293,10 +293,6 @@ if [ ! -d /tmp/vim-node ] && [ "${install_nodejs:-}" = "y" ]
 then
 	git clone "https://github.com/moll/vim-node" /tmp/vim-node
 	find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} /etc/skel/.vim/ \;
-	if [ "$is_webserver" = "y" ]
-	then
-		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nodejs
-	fi
 fi
 [ ! -f /etc/skel/.vim/colors/vividchalk.vim ] && curl -Lso /etc/skel/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
