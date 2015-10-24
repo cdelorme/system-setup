@@ -1,13 +1,32 @@
 #!/bin/bash
+
+# set sane defaults
 wallpaper_path="${HOME}/.wallpaper"
-if [ -n "$1" ] && [ -d "$1" ]
-then
-	wallpaper_path="$1"
-fi
-[ ! -d "$wallpaper_path" ] && exit 1
+fehbg_sleep_for="180"
+
+# grab parameters
+[ -n "$1" ] && [ -d "$1" ] && wallpaper_path="$1"
+[ -n "$2" ] && [[ "$2" =~ ^[0-9]+$ ]] && fehbg_sleep_for="$2"
+
+# validate wallpaper path
 [ $(find "$wallpaper_path" -type f | wc -l) -gt 0 ] || exit 1
+
+# there can be only one
+while [ $(ps aux | grep -v 'grep' | grep -c 'fehbg') -gt 2 ]
+do
+	kill $(ps aux | grep -v 'grep' | grep -v $$ | grep 'fehbg' | awk '{print $2}') &> /dev/null
+done
+
+# infinitely change wallpaper
 while true;
 do
-	feh -q --no-fehbg --bg-max $(find "$wallpaper_path" -type f | sort -R | tail -1)
-	sleep 300
+	fehcmd="feh --no-fehbg"
+	monitor_count=$(xrandr -d :0 -q | grep -c " connected")
+	while [ $monitor_count -gt 0 ]
+	do
+		fehcmd="$fehcmd --bg-max \"$(find $wallpaper_path -type f | sort -R | tail -1)\""
+		let monitor_count=monitor_count-1
+	done
+	eval "${fehcmd}"
+	sleep $fehbg_sleep_for
 done
