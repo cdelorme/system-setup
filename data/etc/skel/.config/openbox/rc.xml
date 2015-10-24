@@ -38,6 +38,7 @@
         <keybind key="A-F4"><action name="Close"/></keybind>
         <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>
         <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>
+        <keybind key="A-F2"><action name="Execute"><command>gmrun</command></action></keybind>
         <keybind key="W-w"><action name="Execute"><command>x-www-browser</command></action></keybind>
         <keybind key="W-t"><action name="Execute"><command>x-terminal-emulator</command></action></keybind>
         <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>
