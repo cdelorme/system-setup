@@ -1,5 +1,5 @@
 background yes
-update_interval 1.0
+update_interval 2.0
 cpu_avg_samples 5
 net_avg_samples 5
 diskio_avg_samples 5
@@ -7,7 +7,7 @@ alignment tm
 gap_y 0
 gap_x -960
 use_xft yes
-xftalpha 0.2
+xftalpha 0.8
 xftfont ForMateKonaVe:size=9
 uppercase no
 override_utf8_locale yes
@@ -16,12 +16,7 @@ own_window yes
 own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 own_window_transparent no
 own_window_argb_visual yes
-own_window_argb_value 30
+own_window_argb_value 80
 double_buffer yes
 TEXT
-cpu ${cpu cpu0}% ${cpubar cpu0 8,120}           ${alignc}mem (${memperc}%) ${mem}/${memmax} ${membar 5,120}          ${alignr}/     (${fs_used_perc /}%) ${fs_bar 5,120 /}
-uptime ${uptime}${alignc}         network address ${addr eth1}${alignr}/home  (${fs_used_perc /home}%) ${fs_bar 5,120 /home}
-
-/var/log/messages:
-${exec tail -n15 /var/log/messages}
-
+${addr eth1}    uptime ${uptime}    cpu ${cpu cpu0}% ${cpubar cpu0 8,120}    mem (${memperc}%) ${mem}/${memmax} ${membar 5,120}    / (${fs_used_perc /}%) ${fs_bar 5,120 /}
