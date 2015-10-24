@@ -262,10 +262,6 @@ then
 else
 	rm -rf /tmp/system-setup
 	git clone https://github.com/cdelorme/system-setup /tmp/system-setup
-
-	# temporary checkout until merged /w stable
-	(cd /tmp/system-setup && git checkout -b dev origin/dev)
-
 	cp -fR /tmp/system-setup/data/* /
 fi
 
