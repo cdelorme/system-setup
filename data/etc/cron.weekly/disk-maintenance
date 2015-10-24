@@ -19,5 +19,6 @@ done
 for filesystem in $(mount -t btrfs | awk '{print $3}' )
 do
 	btrfs filesystem defragment -rf "$filesystem"
-	btrfs balance start "$filesystem"
+	btrfs balance start -dusage=0 "$filesystem"
+	btrfs balance start -dusage=15 "$filesystem"
 done
