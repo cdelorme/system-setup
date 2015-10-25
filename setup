@@ -358,7 +358,14 @@ fi
 [ "${install_mongodb:-}" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" mongodb
 
 # conditionally install postgresql
-[ "${install_postgresql:-}" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql
+if [ "${install_postgresql:-}" = "y" ]
+then
+	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+	echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list
+	aptitude clean
+	aptitude update
+	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql-9.4
+fi
 
 # install msmtp mail server
 if [ "${install_mail_server:-}" = "y" ]
