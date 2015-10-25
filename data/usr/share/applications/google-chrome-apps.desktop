@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Google Chrome
-TryExec=/usr/bin/google-chrome-stable --show-app-list
+TryExec=/usr/bin/google-chrome-stable
 Exec=/usr/bin/google-chrome-stable --show-app-list
 Terminal=false
 Icon=google-chrome
