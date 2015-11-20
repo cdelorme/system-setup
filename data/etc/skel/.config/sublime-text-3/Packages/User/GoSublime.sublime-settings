@@ -1,5 +1,6 @@
 {
 	"env": {
-		"GOPATH": "$GOPATH"
+		"GOPATH": "$GOPATH",
+		"GOROOT": "$GOROOT"
 	}
 }
