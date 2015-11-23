@@ -805,9 +805,6 @@ then
 		su $username -c "which update-keys &>/dev/null && update-keys $github_username"
 	fi
 	set -eu
-
-	# setup load-torrents logic for every 5 minutes
-	[ "$install_transmission" = "y" ] && echo "*/5 * * * * /usr/local/bin/load-torrents" >> /var/spool/cron/crontabs/$username
 fi
 
 # ensure ownership for users folder

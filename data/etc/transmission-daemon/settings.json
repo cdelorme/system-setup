@@ -70,5 +70,5 @@
     "upload-slots-per-torrent": 14,
     "utp-enabled": true,
     "watch-dir": "/media/transmission/torrents",
-    "watch-dir-enabled": true
+    "watch-dir-enabled": false
 }
