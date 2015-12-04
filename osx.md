@@ -508,7 +508,7 @@ _This will install homebrew and my list of packages:_
     brew install --with-lua --with-python --with-guile --with-perl weechat
     brew install Caskroom/cask/osxfuse
     brew install sshfs
-    brew install --with-faac --with-fdk-aac --with-ffplay --with-fontconfig --with-freetype --with-libass --with-libbluray --with-libcaca --with-libvorbis --with-libssh --with-libvidstab --with-libvpx --with-openjpeg --with-openssl --with-rtmpdump --with-speex --with-theora --with-tools --with-webp --with-x265 ffmpeg
+    brew install ffmpeg --with-faac --with-fdk-aac --with-freetype --with-libass --with-libvorbis --with-speex --with-theora --with-tools --with-x265 --with-libbluray --with-libcaca --with-libssh --with-libvidstab --with-libvpx --with-openjpeg --with-openssl --with-rtmpdump --with-webp --with-x265
     brew install sfml
     brew install --static glfw3
     brew install sdl2
