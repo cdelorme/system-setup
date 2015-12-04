@@ -420,7 +420,14 @@ Under the "Transfers" tab I tell it to autoload `.torrent` files from `~/Downloa
 
 I setup a schedule under the "Bandwidth" tab to accomodate my access times.
 
-Finally under the "Peers" tab I tell it to prefer encrypted peers **and** ignore unencrypted peers.  _This is a weak stop-gap against torrent scanners._
+Finally under the "Peers" tab I tell it to prefer encrypted peers **and** ignore unencrypted peers.  _This is a decent stop-gap against torrent scanners but won't protect you from bad peers._
+
+
+## dot-files
+
+**Next I recommend using my [dot-files repository](https://github.com/cdelorme/dot-files/) to enhance your prompt, vim configuration, and set a bunch of useful configuration defaults.**
+
+Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
 
 
 ## [homebrew](http://brew.sh/)
@@ -473,7 +480,7 @@ _The first time you attempt to use `sshfs` you will get a warning popup notifyin
 
 ##### commands
 
-_Let's start by adding this line (with your own token) to your dot-files such as `~/.profile` or `~/.bashrc` or `~/.bash_profile` to bypass github API traffic limits:_
+_Let's start by adding this line (with your own token) to your `~/.bash_profile` to bypass github API traffic limits:_
 
     export HOMEBREW_GITHUB_API_TOKEN=YOURTOKEN
 
@@ -524,10 +531,11 @@ _This will install homebrew and my list of packages:_
 _I recommend creating a file at `/usr/local/bin/brewgrade` with these lines:_
 
     #!/bin/bash
-    brew clean
-    brew update
-    brew upgrade
-    brew doctor
+    [ ! -x /usr/local/bin/brew ] && exit 1
+    /usr/local/bin/brew update
+    /usr/local/bin/brew upgrade
+    /usr/local/bin/brew cleanup
+    /usr/local/bin/brew doctor
 
 _Then adding a command to a crontab to automate running it:_
 
@@ -536,13 +544,6 @@ _Then adding a command to a crontab to automate running it:_
     crontab ~/.crontab
 
 _OSX effectively stopped supporting crontab and is pushing towards its own ctl-style configs with 20+ lines of XML instead of a single line to run a scheduled operation.  As a result it won't let you easily modify the crontab; thus far my experience shows that if you want to change the file you will have to edit it manually with `vim` (or any editor), then reload the file via `crontab ~/.crontab`.  If you attempt to use `crontab -e` it will not save changes or throw errors to indicate why._
-
-
-## dot-files
-
-**Next I recommend using my [dot-files repository](https://github.com/cdelorme/dot-files/) to enhance your prompt, vim configuration, and set a bunch of useful configuration defaults.**
-
-Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
 
 
 ### ssh key generation
