@@ -2,9 +2,10 @@
 Description=Xbox controller driver daemon
 
 [Service]
-Type=simple
-User=root
-ExecStart=/usr/bin/xboxdrv --detach-kernel-driver -c /etc/default/xboxdrv
+Type=forking
+ExecStart=/usr/local/bin/xboxdrv --daemon --detach --pid-file=/var/run/xboxdrv.pid --dbus disabled --config=/etc/default/xboxdrv
+PIDFile=/var/run/xboxdrv.pid
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
