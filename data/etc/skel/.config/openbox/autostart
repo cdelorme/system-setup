@@ -10,6 +10,7 @@ which fehbg &>/dev/null && (sleep 4 && fehbg) &
 which volumeicon &>/dev/null && (sleep 5 && volumeicon) &
 which clipit &>/dev/null && (sleep 5 && clipit) &
 which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -d) &
+which connman-ui-gtk &>/dev/null && (sleep 5 && connman-ui-gtk) &
 if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
 then
 	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc1) &
