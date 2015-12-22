@@ -9,5 +9,6 @@
 	"match_brackets_angle": true,
 	"scroll_past_end": true,
 	"scroll_speed": 2.0,
+	"show_encoding": true,
 	"trim_trailing_white_space_on_save": true
 }

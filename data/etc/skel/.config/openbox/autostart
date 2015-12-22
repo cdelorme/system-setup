@@ -1,12 +1,12 @@
 #!/bin/sh
-which xset &>/dev/null && (xset r rate 250 25 & xset b off & xset m 7 5) &
-which nosleep-daemon &>/dev/null && (nosleep-daemon) &
+which xset &>/dev/null && (xset r rate 250 25 & xset b off & xset m 7 5)
 which xrdb &>/dev/null && [ -f "$HOME/.Xresources" ] || [ -L "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
-which xdg-user-dirs-update &>/dev/null && (xdg-user-dirs-update) &
+which xdg-user-dirs-update &>/dev/null && (xdg-user-dirs-update)
+which nosleep-daemon &>/dev/null && (nosleep-daemon) &
 which compton &>/dev/null && (compton) &
 which hsetroot &>/dev/null && (sleep 1 && hsetroot -solid "#001E27") &
-which fehbg &>/dev/null && (sleep 2 && fehbg) &
 which tint2 &>/dev/null && (sleep 3 && tint2) &
+which fehbg &>/dev/null && (sleep 4 && fehbg) &
 which volumeicon &>/dev/null && (sleep 5 && volumeicon) &
 which clipit &>/dev/null && (sleep 5 && clipit) &
 which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -d) &

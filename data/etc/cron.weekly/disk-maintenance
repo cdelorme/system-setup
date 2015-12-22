@@ -18,7 +18,7 @@ done
 # defragment and rebalance btrfs weekly
 for filesystem in $(mount -t btrfs | awk '{print $3}' )
 do
-	btrfs filesystem defragment -rf "$filesystem"
+	btrfs filesystem defragment -r -clzo "$filesystem"
 	btrfs balance start -dusage=0 "$filesystem"
 	btrfs balance start -dusage=15 "$filesystem"
 done
