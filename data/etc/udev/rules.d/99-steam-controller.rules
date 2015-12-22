@@ -1,0 +1,7 @@
+# steam controller
+
+# keyboard & mouse support
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+
+# gamepad emulation
+KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"

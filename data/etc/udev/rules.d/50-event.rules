@@ -1,1 +1,8 @@
-KERNEL=="event*", GROUP="games", MODE="660"
+# xboxdrv
+
+# enable permission overrides at subsystem
+SUBSYSTEM=="input", ATTRS{name}=="Microsoft X-Box 360 pad", MODE="0660"
+
+# grant access at device-level
+KERNEL=="event*", GROUP="input", MODE="660"
+KERNEL=="js*", GROUP="input", MODE="660"
