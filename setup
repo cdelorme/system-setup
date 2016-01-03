@@ -392,12 +392,6 @@ then
 	# install workstation packages
 	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez connman-ui
 
-	# check ethernet devices
-	if [ $(ifconfig | grep -c "eth1 ") -eq 0 ]
-	then
-		sed -i "s/eth1/eth0/" /etc/skel/.conkyrc
-	fi
-
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
 	then
