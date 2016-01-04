@@ -89,6 +89,9 @@ grab_or_fallback "system_domainname" "" "enter a system domain name"
 # additional customization packages
 grab_yes_no "install_dotfiles" "install dot files"
 
+# ask if it is a laptop
+grab_yes_no "is_laptop" "is this a laptop"
+
 # conditional services
 grab_yes_no "install_weechat" "install weechat irc client"
 grab_yes_no "install_transmission" "install transmission bittorrent server"
@@ -135,6 +138,9 @@ then
 
 		# we want processing tools
 		install_processing_tools="y"
+
+		# login manager
+		grab_yes_no "install_login_manager" "would you like to install a graphical login manager"
 
 		# flash projector
 		grab_yes_no "install_flashprojector" "would you like to install a flash projector"
@@ -249,6 +255,13 @@ fi
 # install all useful system utilities & initialize command-not-found
 aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
 update-command-not-found
+
+# handle laptop packages & configuration
+if [ "$is_laptop" = "y" ]
+then
+	aptitude install laptop-mode-tools
+	sed -i 's/battery = 0/battery = 1/' /etc/skel/.config/tint2/tint2rc
+fi
 
 # detect & install firmware (primarily for networking devices)
 if [ $(lspci | grep -ci "realtek") -gt 0 ]
@@ -476,6 +489,12 @@ then
 		aptitude clean
 		aptitude update
 		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc
+
+		# install slim login manager
+		if [ "$install_login_manager" = "y" ]
+		then
+			aptitude install -ryq slim
+		fi
 
 		# install tabbedex for urxvt
 		[ ! -f /usr/lib/urxvt/perl/tabbedex ] && curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
