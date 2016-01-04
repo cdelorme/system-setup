@@ -161,7 +161,7 @@ then
 	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
 	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
 	# @link: https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi
-	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -O "/boot/efi/shellx64.efi" "https://d2xxklvztqk0jd.cloudfront.net/github/Shell.efi" || true
+	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -qO- "/boot/efi/shellx64.efi" "https://d2xxklvztqk0jd.cloudfront.net/github/Shell.efi" || true
 fi
 
 
@@ -390,7 +390,7 @@ fi
 # conditionally install postgresql
 if [ "${install_postgresql:-}" = "y" ]
 then
-	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+	wget --no-check-certificate -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 	echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list
 	aptitude clean
 	aptitude update
@@ -511,7 +511,7 @@ then
 		fi
 
 		# google chrome installation
-		wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+		wget --no-check-certificate -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 		echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google.list
 		echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
 		echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google.list
