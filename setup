@@ -252,6 +252,9 @@ then
 	aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 fi
 
+# uninstall avahi-autoipd if it exists
+which avahi-autoipd &>/dev/null && aptitude remove -yq avahi-autoipd
+
 # install all useful system utilities & initialize command-not-found
 aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
 update-command-not-found
