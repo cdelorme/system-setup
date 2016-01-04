@@ -14,7 +14,6 @@ border_color = #ffffff 20
 
 # panel
 
-panel_items = LTSC
 panel_monitor = all
 panel_position = bottom center
 panel_size = 85% 28
@@ -69,10 +68,21 @@ mouse_scroll_down = iconify
 # systray
 
 systray = 1
-systray_monitor = 2
 systray_padding = 4 2 3
 systray_background_id = 1
 systray_icon_size = 16
+
+
+# battery
+
+battery = 0
+battery_low_status = 7
+battery_low_cmd = zenity --warning --title="Battery" --text="Low power, please plug into the nearest outlet."
+bat1_font = ForMateKonaVe bold 8
+bat2_font = ForMateKonaVe 7
+battery_font_color = #ffffff 70
+battery_padding = 4 16
+battery_background_id = 1
 
 
 # clock
