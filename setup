@@ -17,11 +17,12 @@ IFS=$'\n\t'
 ##
 # @description request input and optionally apply a fallback/default value
 # @param $1 variable name
-# @param $2 description
-# @param $3 default value
+# @param $2 default value
+# @param $3 description
 ##
 grab_or_fallback()
 {
+	[ -n "$(eval echo \${$1:-})" ] && return 0
 	export ${1}=""
 	read -p "${3:-input}: " ${1}
 	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
@@ -31,15 +32,18 @@ grab_or_fallback()
 ##
 # @description request secret input (eg. passwords) and optionally apply a fallback/default value
 # @param $1 variable name
-# @param $2 description
-# @param $3 default value
+# @param $2 default value
+# @param $3 description
 ##
 grab_secret_or_fallback()
 {
+	set +x
+	[ -n "$(eval echo \${$1:-})" ] && set -x && return 0
 	export ${1}=""
 	read -p "${3:-input}: " -s ${1}
 	echo "" # move to nextline
 	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
+	set -x
 	return 0
 }
 
@@ -50,8 +54,9 @@ grab_secret_or_fallback()
 ##
 grab_yes_no()
 {
+	[[ "$(eval echo \${$1:-})" = "y" || "$(eval echo \${$1:-})" = "n" ]] && return 0
 	export ${1}=""
-	until [[ "$(eval echo \$$1)" == *"y"* ]] || [[ "$(eval echo \$$1)" == *"n"* ]]
+	until [[ "$(eval echo \$$1)" = "y" || "$(eval echo \$$1)" = "n" ]]
 	do
 		read -p "${2:-} (yn)? " ${1}
 	done
@@ -830,7 +835,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 
 # create the user & add to basic groups
 id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-usermod -aG users,sudo,adm,netdev,plugdev $username
+usermod -aG sudo,users,disk,adm,netdev,plugdev $username
 [ "$is_a_workstation" = "y" ] && usermod -aG bluetooth,input,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username
 [ "$install_transmission" = "y" ] && usermod -aG debian-transmission $username
