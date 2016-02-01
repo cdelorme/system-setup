@@ -262,7 +262,7 @@ update-command-not-found
 # handle laptop packages & configuration
 if [ "$is_laptop" = "y" ]
 then
-	aptitude install laptop-mode-tools
+	aptitude install -ryq laptop-mode-tools
 	sed -i 's/battery = 0/battery = 1/' /etc/skel/.config/tint2/tint2rc
 fi
 
@@ -423,17 +423,7 @@ then
 	dpkg --add-architecture i386
 
 	# install workstation packages
-	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez connman dh-autoreconf intltool libgtk-3-dev
-
-	# build connman-ui
-	rm -rf /tmp/connman-ui
-	git clone https://github.com/tbursztyka/connman-ui.git /tmp/connman-ui
-	pushd /tmp/connman-ui
-	./autogen.sh
-	./configure --prefix=/usr
-	make
-	make install
-	popd
+	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
@@ -499,12 +489,39 @@ then
 		# install core desktop packages
 		aptitude clean
 		aptitude update
-		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra
+		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
+
+		# build connman-ui
+		rm -rf /tmp/connman-ui
+		git clone https://github.com/tbursztyka/connman-ui.git /tmp/connman-ui
+		pushd /tmp/connman-ui
+		./autogen.sh
+		./configure --prefix=/usr
+		make
+		make install
+		popd
+
+		# build playerctl
+		git clone https://github.com/acrisci/playerctl /tmp/playerctl
+		pushd /tmp/playerctl
+		./autogen.py --prefix=/usr
+		make
+		make install
+		popd
 
 		# install slim login manager
 		if [ "$install_login_manager" = "y" ]
 		then
 			aptitude install -ryq slim
+		fi
+
+		# remove auto-mounted items from fstab
+		sed -i '/auto/d' /etc/fstab
+
+		# handle workstation laptop packages
+		if [ "$is_laptop" = "y" ]
+		then
+			aptitude install -ryq xbacklight
 		fi
 
 		# install tabbedex for urxvt
@@ -821,24 +838,24 @@ usermod -aG users,sudo,adm,netdev,plugdev $username
 # generate ssh key
 if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]
 then
-    ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
-    [ -d /home/$username/.ssh ] && chmod 600 /home/$username/.ssh/*
+	ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f "/home/$username/.ssh/id_rsa"
+	[ -d /home/$username/.ssh ] && chmod 600 /home/$username/.ssh/*
 
 	# attempt to upload new ssh key to github account
 	if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]
 	then
-	    curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+		curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 	fi
 fi
 
 # use github username to acquire name & email from github
 if [ -n "$github_username" ]
 then
-    tmpdata=$(curl -Ls "https://api.github.com/users/${github_username}")
-    github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
-    github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
-    su $username -c "cd && git config --global user.name $github_username"
-    su $username -c "cd && git config --global user.email $github_email"
+	tmpdata=$(curl -Ls "https://api.github.com/users/${github_username}")
+	github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+	github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+	su $username -c "cd && git config --global user.name $github_username"
+	su $username -c "cd && git config --global user.email $github_email"
 fi
 
 # prepare crontab for non-root user
