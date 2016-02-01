@@ -22,10 +22,15 @@
     </theme>
     <keyboard>
         <chainQuitKey>C-g</chainQuitKey>
+        <keybind key="W-d">
+            <keybind key="1"><action name="GoToDesktop"><to>1</to><wrap>no</wrap></action></keybind>
+            <keybind key="2"><action name="GoToDesktop"><to>2</to><wrap>no</wrap></action></keybind>
+            <keybind key="3"><action name="GoToDesktop"><to>3</to><wrap>no</wrap></action></keybind>
+        </keybind>
         <keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
         <keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
-        <keybind key="W-Tab"><action name="NextWindow"><allDesktops>yes</allDesktops></action></keybind>
-        <keybind key="W-S-Tab"><action name="PreviousWindow"><allDesktops>yes</allDesktops></action></keybind>
+        <keybind key="W-A-Tab"><action name="NextWindow"><allDesktops>yes</allDesktops></action></keybind>
+        <keybind key="W-A-S-Tab"><action name="PreviousWindow"><allDesktops>yes</allDesktops></action></keybind>
         <keybind key="W-Up"><action name="ToggleMaximizeFull"/></keybind>
         <keybind key="W-Down"><action name="Iconify"/></keybind>
         <keybind key="W-Left">  <action name="MoveResizeTo"><monitor>1</monitor></action></keybind>
@@ -36,6 +41,14 @@
         <keybind key="W-Tab"><action name="ShowMenu"><menu>root-menu</menu></action></keybind>
         <keybind key="A-space"><action name="ShowMenu"><menu>client-menu</menu></action></keybind>
         <keybind key="A-F4"><action name="Close"/></keybind>
+        <keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>amixer set Master 5%+</command></action></keybind>
+        <keybind key="XF86AudioLowerVolume"><action name="Execute"><command>amixer set Master 5%-</command></action></keybind>
+        <keybind key="XF86AudioMute"><action name="Execute"><command>amixer set Master toggle</command></action></keybind>
+        <keybind key="XF86AudioPrev"><action name="Execute"><command>playerctl previous</command></action></keybind>
+        <keybind key="XF86AudioPlay"><action name="Execute"><command>playerctl play-pause</command></action></keybind>
+        <keybind key="XF86AudioNext"><action name="Execute"><command>playerctl next</command></action></keybind>
+        <keybind key="XF86MonBrightnessUp"><action name="Execute"><command>xbacklight +10</command></action></keybind>
+        <keybind key="XF86MonBrightnessDown"><action name="Execute"><command>xbacklight -10</command></action></keybind>
         <keybind key="W-grave"><action name="Execute"><execute>urxvtq</execute></action></keybind>
         <keybind key="W-space"><action name="Execute"><command>gmrun</command></action></keybind>
         <keybind key="A-F2"><action name="Execute"><command>gmrun</command></action></keybind>
@@ -44,18 +57,8 @@
         <keybind key="W-e"><action name="Execute"><command>subl</command></action></keybind>
         <keybind key="W-b"><action name="Execute"><command>pcmanfm</command></action></keybind>
         <keybind key="W-m"><action name="Execute"><command>vlc</command></action></keybind>
-        <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>
         <keybind key="W-f"><action name="Execute"><command>catfish</command></action></keybind>
         <keybind key="W-s"><action name="Execute"><command>bash -c "sleep 2; xset dpms force off"</command></action></keybind>
-        <keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>amixer set Master 5%+</command></action></keybind>
-        <keybind key="XF86AudioLowerVolume"><action name="Execute"><command>amixer set Master 5%-</command></action></keybind>
-        <keybind key="XF86AudioMute"><action name="Execute"><command>amixer set Master toggle</command></action></keybind>
-        <keybind key="XF86AudioPlay"><action name="Execute"><command>playerctl play</command></action></keybind>
-        <keybind key="XF86AudioPause"><action name="Execute"><command>playerctl pause</command></action></keybind>
-        <keybind key="XF86AudioNext"><action name="Execute"><command>playerctl next</command></action></keybind>
-        <keybind key="XF86AudioPrev"><action name="Execute"><command>playerctl previous</command></action></keybind>
-        <keybind key="XF86MonBrightnessUp"><action name="Execute"><command>xbacklight +10</command></action></keybind>
-        <keybind key="XF86MonBrightnessDown"><action name="Execute"><command>xbacklight -10</command></action></keybind>
         <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
         <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
         <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>
@@ -64,6 +67,7 @@
         <keybind key="W-KP_4"><action name="MaximizeVert"/><action name="MoveResizeTo"><x>0</x></action></keybind>
         <keybind key="W-S-3"><action name="Execute"><command>screenshot</command></action></keybind>
         <keybind key="W-S-4"><action name="Execute"><command>screenshot-active-application</command></action></keybind>
+        <keybind key="W-x"><action name="Exit"><prompt>no</prompt></action></keybind>
     </keyboard>
     <mouse>
         <dragThreshold>1</dragThreshold>
@@ -113,12 +117,6 @@
             <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
             <mousebind button="Middle" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
             <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
-        </context>
-        <context name="Frame">
-            <mousebind button="A-Left A-Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="Unshade"/></mousebind>
-            <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
-            <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
-            <mousebind button="A-Middle" action="Press"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></mousebind>
         </context>
         <context name="Desktop">
             <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
