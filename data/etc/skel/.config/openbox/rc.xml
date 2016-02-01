@@ -50,6 +50,12 @@
         <keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>amixer set Master 5%+</command></action></keybind>
         <keybind key="XF86AudioLowerVolume"><action name="Execute"><command>amixer set Master 5%-</command></action></keybind>
         <keybind key="XF86AudioMute"><action name="Execute"><command>amixer set Master toggle</command></action></keybind>
+        <keybind key="XF86AudioPlay"><action name="Execute"><command>playerctl play</command></action></keybind>
+        <keybind key="XF86AudioPause"><action name="Execute"><command>playerctl pause</command></action></keybind>
+        <keybind key="XF86AudioNext"><action name="Execute"><command>playerctl next</command></action></keybind>
+        <keybind key="XF86AudioPrev"><action name="Execute"><command>playerctl previous</command></action></keybind>
+        <keybind key="XF86MonBrightnessUp"><action name="Execute"><command>xbacklight +10</command></action></keybind>
+        <keybind key="XF86MonBrightnessDown"><action name="Execute"><command>xbacklight -10</command></action></keybind>
         <keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
         <keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
         <keybind key="W-S-Left"><action name="DirectionalCycleWindows"><direction>left</direction></action></keybind>
