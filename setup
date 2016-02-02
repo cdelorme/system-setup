@@ -239,6 +239,7 @@ export UCF_FORCE_CONFOLD=true
 export DEBIAN_FRONTEND=noninteractive
 aptitude clean
 aptitude update
+alias ai='aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
 if ! which netselect-apt &>/dev/null
 then
 	aptitude install -ryq netselect-apt
@@ -259,32 +260,32 @@ fi
 which avahi-autoipd &>/dev/null && aptitude remove -yq avahi-autoipd
 
 # install all useful system utilities & initialize command-not-found
-aptitude install -ryq screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
+ai screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
 update-command-not-found
 
 # handle laptop packages & configuration
 if [ "$is_laptop" = "y" ]
 then
-	aptitude install -ryq laptop-mode-tools
+	ai laptop-mode-tools
 	sed -i 's/battery = 0/battery = 1/' /etc/skel/.config/tint2/tint2rc
 fi
 
 # detect & install firmware (primarily for networking devices)
 if [ $(lspci | grep -ci "realtek") -gt 0 ]
 then
-	aptitude install -ryq firmware-realtek
+	ai firmware-realtek
 fi
 if [ $(lspci | grep -i "wireless" | grep -ci "atheros") -gt 0 ]
 then
-	aptitude install -ryq firmware-atheros
+	ai firmware-atheros
 fi
 if [ $(lspci | grep -i "wireless" | grep -ci "broadcom") -gt 0 ]
 then
-	aptitude install -ryq firmware-brcm80211
+	ai firmware-brcm80211
 fi
 if [ $(lspci | grep -i "wireless" | grep -ci "intel") -gt 0 ]
 then
-	aptitude install -ryq firmware-iwlwifi
+	ai firmware-iwlwifi
 fi
 
 ##
@@ -330,10 +331,10 @@ fi
 [ ! -f /etc/skel/.vim/colors/sunburst.vim ] && curl -Lso /etc/skel/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
 
 # download ~/.git-completion
-curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
+[ ! -f /etc/skel/.git-completion ] && curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
 
 # download ~/.githelpers
-curl -Lso /etc/skel/.githelpers "https://raw.githubusercontent.com/garybernhardt/dotfiles/master/.githelpers"
+[ ! -f /etc/skel/.githelpers ] && curl -Lso /etc/skel/.githelpers "https://raw.githubusercontent.com/garybernhardt/dotfiles/master/.githelpers"
 
 
 ##
@@ -341,26 +342,31 @@ curl -Lso /etc/skel/.githelpers "https://raw.githubusercontent.com/garybernhardt
 ##
 
 # conditionally install weechat
-[ "$install_weechat" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" weechat
+[ "$install_weechat" = "y" ] && ai weechat
 
 # conditionally install transmission
 if [ "$install_transmission" = "y" ]
 then
-	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
+	ai transmission-daemon
 	systemctl stop transmission-daemon
 
 	# configure transmission directory
-	mkdir -p /media/transmission/{torrents,incomplete,downloads}
-	chown -R debian-transmission:debian-transmission /media/transmission
-	chmod -R 6775 /media/transmission
+	if id debian-transmission &>/dev/null
+		mkdir -p /media/transmission/{torrents,incomplete,downloads}
+		chown -R debian-transmission:debian-transmission /media/transmission
+		chmod -R 6775 /media/transmission
+	fi
 fi
 
 # conditionally install video, audio, and graphics processing utilities
 if [ "$install_processing_tools" = "y" ]
 then
 	aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools id3
-	curl https://yt-dl.org/downloads/2015.07.18/youtube-dl -o /usr/local/bin/youtube-dl
-	chmod a+rx /usr/local/bin/youtube-dl
+	if which youtube-dl &>/dev/null
+	then
+		curl https://yt-dl.org/latest/youtube-dl -o /usr/local/bin/youtube-dl
+		chmod a+rx /usr/local/bin/youtube-dl
+	fi
 fi
 
 # conditionally setup web server folder permissions
@@ -383,7 +389,7 @@ if [ "${install_nginx:-}" = "y" ]
 then
 
 	# install nginx
-	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx-full
+	ai nginx-full
 
 	# configure nginx folder layout
 	rm -f /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
@@ -391,23 +397,27 @@ then
 fi
 
 # conditionally install mongodb
-[ "${install_mongodb:-}" = "y" ] && aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" mongodb
+[ "${install_mongodb:-}" = "y" ] && ai mongodb
 
 # conditionally install postgresql
 if [ "${install_postgresql:-}" = "y" ]
 then
-	wget --no-check-certificate -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-	echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list
+	if [ ! -f /etc/apt/sources.list.d/postgres.list ]
+	then
+		wget --no-check-certificate -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+		echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list
+	fi
 	aptitude clean
 	aptitude update
-	aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql
+	ai postgresql
 fi
 
 # install msmtp mail server
 if [ "${install_mail_server:-}" = "y" ]
 then
+
 	# install msmtp-mta and all related/useful components
-	aptitude install -ryq msmtp-mta
+	ai msmtp-mta
 
 	# ensure permissions on the msmtprc file are strict (will contain password in plain-text)
 	chmod 0600 /etc/msmtprc
@@ -424,9 +434,12 @@ then
 
 	# enable multiarch
 	dpkg --add-architecture i386
+	aptitude clean
+	aptitude update
+	aptitude upgrade -yq
 
 	# install workstation packages
-	aptitude install -ryq firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
+	ai firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
@@ -438,18 +451,17 @@ then
 	# conditionally install development tools
 	if [ "${install_development_tools:-}" = "y" ]
 	then
-		aptitude install -ryq build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
+		ai build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install gvm
 		set +eu
-		if [ "${install_golang:-}" = "y" ]
+		if [ "${install_golang:-}" = "y" ] && ! which go &>/dev/null
 		then
 			[ ! -d $HOME/.gvm ] && curl -Lo- https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
 			. ~/.gvm/scripts/gvm
-			gvm install go1.4.2
-			gvm use go1.4.2
-			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.5
-			gvm use go1.5 --default
+			gvm install go1.4.3
+			gvm use go1.4.3
+			gvm use go1.5.3 --default
 
 			# install go for all users
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
@@ -458,13 +470,13 @@ then
 		fi
 
 		# conditionally install nvm
-		if [ "${install_nodejs:-}" = "y" ]
+		if [ "${install_nodejs:-}" = "y" ] && ! which node &>/dev/null
 		then
 			[ ! -d ~/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 			export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
-			nvm install v4.0.0
-			nvm use v4.0.0
-			nvm alias default v4.0.0
+			nvm install node
+			nvm use node
+			nvm alias default node
 
 			# install node for all users
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | NVM_DIR=/etc/skel/.nvm bash
@@ -473,7 +485,7 @@ then
 		set -eu
 
 		# conditionally install global openjdk
-		if [ "${install_openjdk:-}" = "y" ]
+		if [ "${install_openjdk:-}" = "y" ] && ! which javac &>/dev/null
 		then
 			aptitude install -ryq openjdk-7-jdk openjdk-7-jre
 		fi
@@ -484,48 +496,51 @@ then
 	then
 
 		# add vlc sources
-		echo "# vlc source for dvdcss2" > /etc/apt/sources.list.d/vlc.list
-		echo "deb http://download.videolan.org/pub/debian/stable/ /" >> /etc/apt/sources.list.d/vlc.list
-		echo "deb-src http://download.videolan.org/pub/debian/stable/ /" >> /etc/apt/sources.list.d/vlc.list
-		wget -qO- http://download.videolan.org/pub/debian/videolan-apt.asc | sudo apt-key add -
+		if [ ! -f /etc/apt/sources.list.d/vlc.list ]
+		then
+			echo "# vlc source for dvdcss2" > /etc/apt/sources.list.d/vlc.list
+			echo "deb http://download.videolan.org/pub/debian/stable/ /" >> /etc/apt/sources.list.d/vlc.list
+			echo "deb-src http://download.videolan.org/pub/debian/stable/ /" >> /etc/apt/sources.list.d/vlc.list
+			wget -qO- http://download.videolan.org/pub/debian/videolan-apt.asc | sudo apt-key add -
+		fi
 
 		# install core desktop packages
 		aptitude clean
 		aptitude update
-		aptitude install -ryq openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
+		ai openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio volumeicon-alsa xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
 
 		# build connman-ui
-		rm -rf /tmp/connman-ui
-		git clone https://github.com/tbursztyka/connman-ui.git /tmp/connman-ui
-		pushd /tmp/connman-ui
-		./autogen.sh
-		./configure --prefix=/usr
-		make
-		make install
-		popd
+		if ! which connman-ui &>/dev/null
+		then
+			rm -rf /tmp/connman-ui
+			git clone https://github.com/tbursztyka/connman-ui.git /tmp/connman-ui
+			pushd /tmp/connman-ui
+			./autogen.sh
+			./configure --prefix=/usr
+			make
+			make install
+			popd
+		fi
 
 		# build playerctl
-		git clone https://github.com/acrisci/playerctl /tmp/playerctl
-		pushd /tmp/playerctl
-		./autogen.py --prefix=/usr
-		make
-		make install
-		popd
+		if ! which playerctl &>/dev/null
+		then
+			git clone https://github.com/acrisci/playerctl /tmp/playerctl
+			pushd /tmp/playerctl
+			./autogen.py --prefix=/usr
+			make
+			make install
+			popd
+		fi
 
 		# install slim login manager
-		if [ "$install_login_manager" = "y" ]
-		then
-			aptitude install -ryq slim
-		fi
+		[ "$install_login_manager" = "y" ] && ai slim
 
 		# remove auto-mounted items from fstab
 		sed -i '/auto/d' /etc/fstab
 
 		# handle workstation laptop packages
-		if [ "$is_laptop" = "y" ]
-		then
-			aptitude install -ryq xbacklight
-		fi
+		if [ "$is_laptop" = "y" ] && ai xbacklight
 
 		# install tabbedex for urxvt
 		[ ! -f /usr/lib/urxvt/perl/tabbedex ] && curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
@@ -534,7 +549,7 @@ then
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]
 		then
-			aptitude install -ryq libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386
+			ai libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386
 			curl -Lso /tmp/flash.tar.gz https://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
 			tar xf /tmp/flash.tar.gz -C /tmp
 			rm /tmp/flash.tar.gz
@@ -542,16 +557,21 @@ then
 		fi
 
 		# google chrome installation
-		wget --no-check-certificate -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-		echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google.list
-		echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
-		echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google.list
-		echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google.list
-		echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google.list
-		aptitude clean
-		aptitude update
-		aptitude install -ryq chromium google-chrome-stable google-talkplugin
-		rm -f /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google-chrome-unstable.list
+		if ! which google-chrome-stable &>/dev/null
+		then
+			wget --no-check-certificate -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+			echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google-tmp.list
+			echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+			echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+			echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+			echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+			aptitude clean
+			aptitude update
+			ai chromium google-chrome-stable google-talkplugin
+			rm -f /etc/apt/sources.list.d/google-tmp.list /etc/apt/sources.list.d/google-chrome-unstable.list
+			aptitude clean
+			aptitude update
+		fi
 
 		# sublime text 3 installation
 		if ! which subl &>/dev/null
@@ -569,7 +589,7 @@ then
 		set +eu
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null
 		then
-			aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
+			ai linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.63/NVIDIA-Linux-x86_64-352.63.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
@@ -578,31 +598,37 @@ then
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]
 		then
-			aptitude install -ryq xboxdrv playonlinux mednafen cmake libsdl2-dev
+			ai xboxdrv playonlinux mednafen cmake libsdl2-dev
 
 			# enable xbox drv
 			echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
 			systemctl enable xboxdrv.service
-			systemctl start xboxdrv.service
+			systemctl restart xboxdrv.service
 
 			# build & install ppsspp
-			rm -rf /tmp/ppsspp
-			git clone https://github.com/hrydgard/ppsspp.git /tmp/ppsspp
-			pushd /tmp/ppsspp
-			git checkout v1.1.1
-			git submodule update --init
-			./b.sh
-			mkdir /usr/local/ppsspp
-			cp -R build/assets /usr/local/ppsspp/
-			cp -R build/PPSSPPSDL /usr/local/ppsspp/
-			ln -s /usr/local/ppsspp/PPSSPPSDL /usr/local/bin/psp
-			popd
+			if ! which psp &>/dev/null
+			then
+				rm -rf /tmp/ppsspp
+				git clone https://github.com/hrydgard/ppsspp.git /tmp/ppsspp
+				pushd /tmp/ppsspp
+				git checkout v1.1.1
+				git submodule update --init
+				./b.sh
+				mkdir /usr/local/ppsspp
+				cp -R build/assets /usr/local/ppsspp/
+				cp -R build/PPSSPPSDL /usr/local/ppsspp/
+				ln -s /usr/local/ppsspp/PPSSPPSDL /usr/local/bin/psp
+				popd
+			fi
 
 			# install steam dependencies, then download & install steam directly
-			aptitude install -ryq xterm
-			[ ! -f /tmp/steam.deb ] && curl -Lo /tmp/steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
-			[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
-			aptitude install -f
+			if ! which steam &>/dev/null
+			then
+				ai xterm
+				[ ! -f /tmp/steam.deb ] && curl -Lo /tmp/steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
+				[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
+				aptitude install -f
+			fi
 		fi
 	fi
 fi
@@ -619,7 +645,7 @@ then
 	then
 
 		# install dependencies
-		aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant linux-headers-amd64
+		ai build-essential module-assistant linux-headers-amd64
 
 		# run the installation & setup
 		if [ $(mount | grep -c '/tmp/vbox') -eq 0 ]
@@ -776,19 +802,19 @@ fc-cache -fr
 ##
 
 update-alternatives --set editor /usr/bin/vim.basic
-if which google-chrome-stable &> /dev/null
+if which google-chrome-stable &>/dev/null
 then
 	update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
 fi
-if which openbox-session &> /dev/null
+if which openbox-session &>/dev/null
 then
 	update-alternatives --set x-session-manager /usr/bin/openbox-session
 fi
-if which openbox &> /dev/null
+if which openbox &>/dev/null
 then
 	update-alternatives --set x-window-manager /usr/bin/openbox
 fi
-if which urxvt &> /dev/null
+if which urxvt &>/dev/null
 then
 	update-alternatives --set x-terminal-emulator /usr/bin/urxvt
 fi
@@ -832,7 +858,7 @@ find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 ##
 
 # create the user & add to basic groups
-id $username &> /dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
+id $username &>/dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
 usermod -aG sudo,users,disk,adm,netdev,plugdev $username
 [ "$is_a_workstation" = "y" ] && usermod -aG bluetooth,input,audio,video $username
 [ "${install_nginx:-}" = "y" ] && usermod -aG www-data,gitdev $username

@@ -20,4 +20,9 @@ then
 	aptitude update
 fi
 aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+
+# update youtube-dl
+which youtube-dl &>/dev/null && youtube-dl -U
+
+# update command list
 update-command-not-found
