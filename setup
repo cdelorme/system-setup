@@ -184,8 +184,9 @@ fi
 # 	fi
 # fi
 
-# if they have btrfs, ask if they want to optimize
-if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ]
+# offer to optimize btrfs root
+export btrfs_optimizations="noatime,autodefrag"
+if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ] && [[ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 || "$(btrfs subvol list / | awk '{print $9}')" != "home" ]]
 then
 	grab_yes_no "optimize_btrfs" "do you want to optimize your btrfs"
 
@@ -200,9 +201,6 @@ then
 			find /home.bak -mindepth 1 -maxdepth 1 -exec cp -R {} /home/ \;
 			rm -rf /home.bak/
 		fi
-
-		# set optimizations to be applied to the disk
-		export btrfs_optimizations="noatime,autodefrag"
 
 		# check whether fstab already contains optimizations
 		if [ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 ]
