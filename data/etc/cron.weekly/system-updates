@@ -12,6 +12,8 @@ export DEBIAN_FRONTEND=noninteractive
 # update mirror (fallback to old mirror on failure)
 mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
 netselect-apt -c US -fsno /etc/apt/sources.list stable
+grep -r "security.debian" /etc/apt/sources.list.bak >> /etc/apt/sources.list
+grep -r "jessie-updates" /etc/apt/sources.list.bak >> /etc/apt/sources.list
 aptitude clean
 if ! aptitude update
 then
