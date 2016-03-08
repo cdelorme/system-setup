@@ -17,17 +17,7 @@ If you encrypt your drive prior to downloading the latest updates, you may need 
 
 **Which leads us to the first post-install step:**
 
-- check for updates.
-
-
-## firewall
-
-I highly recommend turning the firewall on by default, and setting stealth mode.
-
-![firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/firewall-system-preferences.png)
-![advanced firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/advanced-firewall-system-preferences.png)
-
-In certain cases, when software self-updates it may ask for permissions again from the firewall.  This is a fairly new feature, and may be improved as time passes.
+- open the app store and check for updates.
 
 
 ## system preferences
@@ -35,348 +25,291 @@ In certain cases, when software self-updates it may ask for permissions again fr
 Here are some suggested changes to `System Preferences`:
 
 - General
-    - Graphite Color-scheme
-    - Recent Items: None
+    - Appearance: `Graphite`
+    - check `Use dark menu bar and Dock`
+    - check `Automatically hide and show the menu bar`
+    - Default web browser: `Google Chrome` (_requires installation_)
+    - Recent Items: `None`
+    - uncheck `Allow Handoff between this Mac and your iCloud devices`
 
-![general system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/general-system-preferences.png)
+_The `Handoff` functionality is really cool but still feels very disruptive so I choose to disable it on workstations._
+
+- Desktop & Screen Saver
+    - check `Change picture`: `Every 5 minutes`
+
+_I generally rotate from `~/Pictures/wallpaper/`._
 
 - Dock
-    - Smaller Size (slider)
-    - Slight Maginification (slider)
-    - Align Right (radio)
-    - Scale effect (dropdown)
-    - All checkboxes
-        - Double-click a window's title bar to minimize
-        - Minimize windows into application icon
-        - Animate opening applications
-        - Autmatically hide and show the dock
-        - Show indicator lights for open applications
-
-![dock system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/dock-system-preferences.png)
+    - Size: _smaller_
+    - Magnification: _closer to min_
+    - Position on screen: `Right`
+    - Minimize windows using: `Scale effect`
+    - check `Minimize windows into application icon`
+    - check `Automatically hide and show the Dock`
 
 - Mission Control
-    - Do Not "Show Dashboard from F12" (checkbox)
-    - Do Not "Automatically rearrange Spaces based on most recent use" (checkbox)
-    - _I prefer not to switch to a Space with open windows, but most users will probably find that helpful_
-    - Check the remaining boxes
-    - Hot Corners
-        - Show Desktop (top right)
+    - uncheck `Automatically rearrange Spaces based on most recent use`
+    - uncheck `When switching to an application, switch to a Space with open windows for the application`
+    - uncheck `Displays have separate Spaces`
+    - Show Dashboard: `-` (_disable_)
+    - Hot Corners...
+        - Top Right: `Show Desktop`
+        - Top Left: `Start Screen Saver`
 
-_I generally activate mission control and manually add one desktop for a total of 2 available by default._
-
-![mission control system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/mission-control-system-preferences.png)
-![mission control hot corners system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/hot-corners-mission-control-system-preferences.png)
+_I use the hot corner with security settings to easily lock my system when I step away._  I also usually pre-emptively create at least two `Spaces`.
 
 - Language & Region
-    - 24-Hour Time (checkbox)
+    - Time Format: check `24-Hour Time`
 
-![language & region system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/region-and-language-system-preferences.png)
+_I spent a lot of time dealing with time conversion and UTC, for me military time is significantly easier to deal with._
 
 - Security & Privacy
     - General
-        - Require Password 1 Minute after Display Sleep
+        - check `Require Password **1 Minute** after sleep or screen saver begins`
     - Firewall
         - Turn Firewall On
         - Firewall Options:
             - Stealth Mode
+    - Advanced...
+        - check `Log out after 60 minutes of inactivity`
+        - check `Require an administrator password to access system-wide preferences`
 
-![general security & privacy system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/general-security-and-privacy-system-preferences.png)
-![firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/firewall-system-preferences.png)
-![advanced firewall system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/advanced-firewall-system-preferences.png)
+_I generally wait until the system has been fully configured before turning on FileVault, which has become less beneficial with the latest drives being soldered to the motherboard._
 
 - Spotlight
-    - Uncheck all but `Applications` and `System Preferences`
-    - Privacy tab: Add user home folder (you will have a dialog to confirm)
+    - Search Results
+        - uncheck `Bing Web Searches`
+        - uncheck `Bookmarks and History`
+        - uncheck `Calculator`
+        - uncheck `Contacts`
+        - uncheck `Conversion`
+        - uncheck `Definition`
+        - uncheck `Documents`
+        - uncheck `Events and Reminders`
+        - uncheck `Folders`
+        - uncheck `Fonts`
+        - uncheck `Images`
+        - uncheck `Mail and Messages`
+        - uncheck `Movies`
+        - uncheck `Music`
+        - uncheck `Other`
+        - uncheck `PDF Documents`
+        - uncheck `Presentations`
+        - uncheck `Spotlight Suggestions`
+        - uncheck `Spreadsheets`
+        - uncheck `Allow Spotlight Suggetions in Spotlight and Look up`
+    - Privacy
+        - Add `~/`
 
-![spotlight system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/spotlight-system-preferences.png)
-![spotlight privacy system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/spotlight-privacy-system-preferences.png)
+_Some might find the above list convenient, I generally know where my stuff is and have a dozen other solutions that don't expose my file system to a search system that goes to the internet._
 
-- Display
-    - Disable "Automatically adjust brightness"
+- Notifications
+    - Safari
+        - _disable all_
+    - Game Center
+        - _disable all_
+    - Mail
+        - _disable all_
+    - Photos
+        - _disable all_
 
-![display system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/display-system-preferences.png)
+_The updated notifications system is very well integrated with other mobile devices or even other laptops, but some notifications are totally unnecessary._
+
+- Displays
+    - uncheck `Automatically adjust brightness`
+
+_The multimedia hotkeys to control brightness are often far more useful._
 
 - Energy Saver
-    - Battery Display Sleep after 5 Minutes (slider)
-    - Computer sleep after 10 minutes (slider)
+    - Battery
+        - Turn display off after `15 min`
+    - Power Adapter
+        - Turn display off after `3 hrs`
+        - check `Prevent computer from sleeping automatically when the display is off`
+        - uncheck `Enable Power Nap while plugged into a power adapter`
 
-_I usually select the battery from the top menu to change it to display its percent._
-
-![energy saver system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/energy-saver-system-preferences.png)
+_When I am plugged in but idle this is generally because I am watching a video or waiting for someone to contact me, so the display going to sleep is a nuisance._  This is also why the hot corner is useful when I step away and _want_ to sleep the display.
 
 - Keyboard
     - Keyboard
-        - Turn off key backlighting after 10 seconds of inactivity
-        - Modifier Keys:
+        - Turn off when computer is not used for: `10 secs`
+        - Modifier Keys...
             - Caps Lock > Control
-    - Shortcuts
-        - Launchpad & Dock
-            - Disable toggle dock hiding
-        - Mission Control
-            - Disable "Show Dashboard" (F12)
-            - Enable "Show Desktop" (F11) (checkbox)
-            - Turn on control hotkey Switch to Desktops 1 & 2
-        - Keyboard
-            - Disable "Turn keyboard access on or off" (checkbox)
-            - Disable "Change the way Tab moves focus" (checkbox)
-        - Input Sources
-            - Enable "Select next source in Input menu" (cmd+alt+space) (checkbox)
-        - Spotlight
-            - Disable "Show spotlight window" (checkbox)
-            - De-select personal folders
-        - Accessibility
-            - Disable "Turn VoiceOver on or off" (checkbox)
-            - Disable "Show Accessibility controls" (checkbox)
-        - App Shortcuts
-            - All Applications: `Zoom` via `cmd+alt+m`
-            - Google Chrome: `Zoom` via `shift+cmd+m`
-        - Select "All controls" at bottom (radio)
     - Input Sources
         - Add Japanese
-        - Show in menu bar (checkbox)
+    - Shortcuts
+        - Input Sources
+            - check `Select the previous input source`
+        - Launchpad & Dock
+            - uncheck `Turn Dock Hiding On/Off`
+        - Keyboard
+            - uncheck `Change the way Tab moves focus`
+            - uncheck `Turn keyboard access on or off`
+        - Spotlight
+            - uncheck `Show Finder search window`
+        - Accessibility
+            - uncheck `Turn VoiceOver on or off`
+            - uncheck `Show Accessibility controls`
+        - App Shortcuts
+            - All Applications
+                - `Zoom`: `cmd+alt+m`
+            - Google Chrome
+                - `Zoom`: `shift+cmd+m`
+        - All Controls (_select_)
 
-_The zoom hotkey comes from the [iterm2](http://iterm2.com/) shortcut, and is a very helpful addition for those who like applications to fill-the-screen.  However, google chrome's default assumption for `Zoom` is to adjust the height and not fill the screen.  However, they interpret shift as a desire to fill vs full-height, thus if the hotkey contains the shift key it will do a proper fill, and needs its own special-case._
+_Since I am still trying to learn the language, I add Japanese input and Input Sources to easily switch input modes when desired._  Apply makes the input switching absolutely beautiful with the latest release.
 
-![keyboard system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-system-preferences.png)
-![keyboard modifiers system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keymoard-modifiers-system-preferences.png)
-![keyboard shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-system-preferences.png)
-![keyboard mission control shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-mission-control-system-preferences.png)
-![keyboard input source shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-input-system-preferences.png)
-![keyboard launchpad & dock shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-launchpad-system-preferences.png)
-![keyboard application shortcuts system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-shortcuts-custom-system-preferences.png)
-![input sources system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/keyboard-input-sources-system-preferences.png)
+_A lot of hotkeys I disable to save me days spent confused as to why behavior changed after I accidentally fumbled the keyboard._
+
+_The zoom hotkey for Chrome differs to force fill-screen, while for other applications it matches the [iterm2](http://iterm2.com/) shortcut._
 
 - Trackpad
     - Point & Click
-        - Enable "Tap to Click" (checkbox)
-        - Disable "Look Up" 3 finger tap
-        - Increase "Tracking Speed" (slider)
+        - check `Tap to click`
+        - Tracking Speed: _increase_
     - More Gestures
-        - Enable App Expose (three finger down)
-        - Disable Launchpad
-        - Disable "Swipe between pages"
+        - uncheck `Switch between pages`
+        - check `App Expose`
+        - uncheck `Launchpad`
 
-![point & click trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-point-and-click-system-preferences.png)
-![Scroll & Zoom trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-scroll-and-zoom-system-preferences.png)
-![More Gestures trackpad system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/trackpad-more-gestures-system-preferences.png)
+_I find that browser controls to switch between pages are extra sensitive and often don't work as desired, especially if that page happened to be wider than my display._
 
 - Sound
-    - Tink (Alert Sound)
-    - Reduced Alert Volume
-    - Disable "Play feedback when volume is changed" (checkbox)
+    - Sound Effects
+        - Select an alert sound: `Tink`
+        - Alert Volume: _reduced_
+        - uncheck `Play user interface sound effects`
 
-![sound system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/sound-effects-system-preferences.png)
+- iCloud
+    - check `Keychain`
+
+_I find keychain backups to be super useful, because copying my keychain files from `~/Library` and `/Library`, then importing them is often painful._
+
+- Internet Accounts
+    - Google
+
+_For calendar synchronization, I generally like to connect my gmail account._
+
+- Extensions
+    - Share Menu: _disable everything_
+
+_Nothing about this new feature appeals to me._
 
 - Bluetooth
-    - "Turn Bluetooth Off" (conserves battery)
+    - click `Turn Bluetooth Off`
 
-![bluetooth system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/bluetooth-system-preferences.png)
+_I prefer to conserve battery, but if you have bluetooth devices re-entering isn't too difficult._
 
 - Sharing
-    - Set your hostname to something less obnoxiously long (usually "full first & lastname's macbook")
+    - Computer Name: _anything short and simple_
 
-![sharing system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/sharing-system-preferences.png)
+_The default is generally a page and a half longer than it should be._
 
-- Time Machine
-    - Do not show menu bar icon
+- App Store
+    - check `Automatically check for updates`
+    - Free Downloads: `Save Password`
 
-![time machine system preferences](https://d2xxklvztqk0jd.cloudfront.net/images/git/time-machine-system-preferences.png)
-
-
-## spotlight cache
-
-If you end up with a problem with spotlight you can clear it's cache from command line:
-
-    sudo mdutil -E /
-
-_Be aware, this can take quite a while to rebuild._
+_You might be prompted ahead of time to do so, but the new auto-update feature is by default not disruptive and I recommend it._  I also find it annoying to have to enter my password for free downloads.
 
 
-## [custom fonts](software/fonts.md)
+### safari configuration
 
-Review the referenced document, and you can optionally download and install them onto OSX.
+I don't use safari, but I do modify the default configuration just in case I need to:
 
-Installing fonts can be done by opening them and clicking the install button, or you can install them locally into `~/Library/Fonts/`, or globally `/Library/Fonts`.
+- General:
+    - Safari opens with: `All windows from last session`
+    - Homepage: `https://www.google.com`
+    - Remove history items: `After one day`
+    - Top Sites shows: `6 sites`
+    - Remove download list items: `Upon successful download`
+- Search:
+    - uncheck `Include Safari Suggestions`
+    - uncheck `Enable Quick Website Search`
+    - uncheck `Preload Top Hit in the background`
+    - uncheck `Show Favorites`
+- Advanced:
+    - check `Show full website address`
+    - Default encoding: `Unicode (UTF-8)`
+    - check `Show Develop menu in menu bar`
 
 
-## disable dashboard
+### finder configuration
 
-I think the dashboard is a waste of space and resources and elect to disable it.  Applications load fast enough on SSD's that micro-applications are not nearly as useful as they may have been years back.
+Surprisingly, finder has **four** configuration screens, making it fairly complex to work with.
 
-To stop the dashboard from starting by default:
-
-    defaults write com.apple.dashboard mcx-disabled -boolean YES
-    killall Dock
-
-_This may not even be necessary with the latest release, yosemite._
-
-
-## finder settings
-
-Finder has two sections for configuration.  Starting with preferences (accessed via "command + ,") I generally use the following:
+The first is the global configuration accessed via `cmd+,`:
 
 - General
-    - All Checkboxes for "Show on Desktop"
-    - New Finder windows show my user home folder
-    - uncheck Springload animation
-- Tags
-    - I uncheck all tags, I don't use them
+    - check `Hard Disks`
+    - check `Connected Servers`
+    - New Finder windows show: `~/` (_your user folder_)
 - Sidebar
     - Favorites
-        - uncheck "All my Files", "AirDrop", "Movies", "Music", and "Pictures"
-        - Check "Applications", "Desktop", "Documents", "Downloads", and user home folder
+        - uncheck `All My Files`
+        - uncheck `iCloud Drive`
+        - uncheck `AirDrop`
+        - check `~/` (_your user folder_)
     - Shared
-        - uncheck all
+        - uncheck `Back to My Mac`
+        - uncheck `Bonjour computers`
     - Devices
-        - check all
-    - tags
-        - unchecked
+        - check `/` (the system drive)
+    - Tags
+        - uncheck `Recent Tags`
 - Advanced
-    - Check all boxes
-    - Search using current folder
+    - check `Show all filename extensions`
+    - uncheck `Show warning before changing an extension`
+    - uncheck `Show warning before emptying trash`
+    - When performing a search: `Search the Current Folder`
 
-![general finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-general-settings.png)
-![tags finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-tags-settings.png)
-![sidebar finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-sidebar-settings.png)
-![advanced finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-advanced-settings.png)
+Next, from the user home folder you can open general folder configuration via `cmd+j`:
 
-You can open the finder settings menu with "command + j".  _The desktop has a separate menu, so be sure you have opened a finder window and that it is in focus before using the hotkey._
+- check `Always open in list view`
+- check `Date Created`
+- check `Calculate all sizes`
+- check `Show Library Folder`
 
-![folder finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-folder-settings.png)
-![desktop finder settings](https://d2xxklvztqk0jd.cloudfront.net/images/git/finder-desktop-settings.png)
+When finished click `Use as Defaults` to enforce these changes system-wide.  _If you wish to override in any particular folder you can use `cmd_+j` again from any other folder._
 
-I generally check the box to force `List View` as the default.  I make sure to check all four of these options:
-
-- Use relative dates
-- Calculate all sizes
-- Show icon preview
-- Show Library Folder
-
-While it was wonderful that this is now a setting, you can always use the `chflags nohidden ~/Library` command from terminal as well.
-
-**Be sure you select "Use as Defaults" at the bottom or it won't take globally.**  Afterwards you'll want to remove saved view settings (the `.DS_Store` hidden files) recursively and globally to ensure the new settings take and are not overwritten locally per directory.
-
-After making all of these changes to settings you can wipe out the previously cached view settings with two commands:
-
-    sudo find / -name ".DS_Store" -depth -exec rm {} \;
-    killall Finder
-
-
-## set hostname & domain name
-
-You will want to set the machines host name, by default it will be your full name, which is often obnoxiously long for a network name.  You can set your hostname in `System Settings` under `Sharing`.  It can also be done via command line, but may not take affect globally until a reboot.
-
-You can set your hostname and domain name via command line as well:
-
-    sudo scutil --set HostName mypc
-    domainname example.loc
-
-_Effects may not be complete until rebooting, so the gui is preferred._
-
-
-## configure terminal
-
-I generally install and use [iTerm2](http://www.iterm2.com/#/section/home), but I also configure the default terminal just in case I need to use it.
-
-I set the default color scheme to `Homebrew` with my choice of custom font (ForMateKonaVe) size 14.  I also go to the window tab and click the color & background button to set opacity to 40% with a 5% blur.
-
-
-## app store
-
-Here are some items I always grab from the App Store:
-
-- [Dash](https://itunes.apple.com/us/app/dash-docs-snippets/id458034879?mt=12)
-- [Unarchiver](https://itunes.apple.com/us/app/the-unarchiver/id425424353?mt=12)
-- [XCode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12)
-
-_Dash is a mac only software that costs money, but it is a worth-while purchase.  It gives you a complete comprehensive local copy of documentation for multiple languages.  This is awesome for travel purposes, or even just quick-checks on object types or method arguments.  I highly recommend it._
-
-I would consider XCode optional.  If you do not plan to be developing for Mac using their specific libraries and Objective-C, then you probably don't need it.  _Also it cane take upwards of two hours to download on moderately fast internet connections._
+Finally, if you activate the desktop and use `cmd+j` you will have desktop settings.  **They finally did such a good job that I have no desire to change the defaults.**
 
 
 ## software
 
-Here is a list of software I install:
-
-- [Google Chrome Dev Channel](http://www.chromium.org/getting-involved/dev-channel)
+- [homebrew](http://brew.sh/)
+- [Dash](https://itunes.apple.com/us/app/dash-docs-snippets/id458034879?mt=12)
+- [Unarchiver](https://itunes.apple.com/us/app/the-unarchiver/id425424353?mt=12)
+- [XCode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12)
+- [Google Chrome](https://www.chromium.org/getting-involved/dev-channel)
 - [Google Hangouts Plugin](https://www.google.com/tools/dlpage/hangoutplugin)
-- [Sublime Text](http://www.sublimetext.com/3)
-- [RoboMongo](http://robomongo.org/)
-- [Sequel Pro (aka Pancakes)](http://www.sequelpro.com/)
 - [iTerm2](http://www.iterm2.com/#/section/home)
+- [Sublime Text](http://www.sublimetext.com/3)
 - [VirtualBox](https://www.virtualbox.org/)
+- [VirtualBox Extensions](https://www.virtualbox.org/wiki/Downloads)
 - [Transmission](http://www.transmissionbt.com/download/)
 - [Adobe Flash Projector](http://www.adobe.com/support/flashplayer/downloads.html)
-- [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
-[Radiant Player](http://www.sajidanwar.me/radiant-player-mac/)
+- [go version manager](https://github.com/creationix/nvm)
+- [node version manager](https://github.com/moovweb/gvm)
 
-VirtualBox is a free Virtual Machine software with better linux guest support than leading commercial software such as Parallels and VMWare.  It is also cross platform, allowing you to create a virtual machine and transfer it anywhere with no major changes to interface or drivers.  _If you need 3D capabilities you will want to look at [Parallels Desktop](http://www.parallels.com/products/desktop/)._
+The homebrew package manager saves the day when it comes to a myriad of support tools.
 
-In spite of the fact that flash is a dying industry, I often find myself in need of the ability to run an swf file, and the Flash Projector comes in a debug flavor, which makes it super easy to have a tiny executable that can run and test flash files without browser concerns.
+Dash and Sublime Text are not free, but come highly recommended.  **If you are a developer and can afford to buy a copy, you should.**
 
+_Installing the entire XCode toolkit is entirely optional, most will settle on the command line tools installed during homebrew installation._
 
-## configuring installed software
+_While flash might cater to a dying industry, I still like the option of being able to run swf files locally without browser plugins as a dependency._
 
-### dash
-
-Let's start with some basic configuration options.
-
-To validate your purchased copy you may have to visit the `Purchase` tab and pick the appropriate option.
-
-I use the HUD mode with `alt + space` as the hotkey to pull it up.  It starts with my system, and turn off its dock icon.  I show the menubar icon, but tell clicking to open the menu (not the application).
-
-Here is a list of documentation I generally select (there are tons more):
-
-- Bash
-- Bootstrap 3
-- C
-- C++
-- Cmake
-- CSS
-- Emmet
-- GLib
-- Go
-- HTML
-- Java EE7
-- JavaScript
-- jQuery
-- Man Pages
-- Markdown
-- Mongodb
-- MySQL
-- Nginx
-- Node.js
-- OpenGL 3
-- OpenGL 4
-- Python 2
-- Python 3
-
-The latest release also offers Cheat Sheets, which I also downloaded a few from:
-
-- Git
-- Git Flow
-- HTML Entities
-- Regular Expressions
-- Sublime Text
-- Tmux
-- Vim
-
-While I install a large number of docsets, I generally only enable the docsets related to the things I am working on.  So as I switch between projects I may tweek what docs are displayed when I search for things.
-
-There are also many integration options for Dash.  For example you can configure it to run directly inside of tools like Sublime Text and XCode.
-
-You will also want to register a quick-display hotkey.  I generally go with `alt+space`.
+The version managers for go and node are for developers, and simplify installation of the latest versions of our favorite toys.
 
 
-### the unarchiver
+### [custom fonts](software/fonts.md)
 
-Preferred Settings:
+Many of my configuration files depend on custom fonts added to `/Library/Fonts` or at least `~/Library/Fonts`.
 
-- Select all archive formats for affiliation
-- Select to always extract to the same folder as the archive is
-- Create a new folder if there is more than one top-level item
-- Move the archive to the trash after extraction
-- Under advanced set automatic detection confidence level to 100%
+
+### [sublime text](software/sublime-text.md)
+
+Visit the shared document for steps and configuration file templates.
 
 
 ### iterm2
@@ -396,154 +329,36 @@ Now go to "Profiles" > "Keys" and add these key combinations:
 
 This will allow you to use alt to jump between words while in iTerm2 (eg delete whole word, go back a word, go forward a word).
 
-Finally, import the [`Solarized High Contrast Dark`](https://github.com/mariozaizar/dotfiles/blob/master/themes/iTerm2/Solarized%20High%20Contrast%20Dark.itermcolors) color scheme from the GUI.
-
-_Color schemes in iterm are loaded into a plist file and so doing so from command line is not as easy.  I may document the process in the future if I ever have time._
+Finally, import the [`Solarized High Contrast Dark`](https://gist.github.com/jvandellen/2892531) color scheme from the GUI from "Profiles" > "Colors".
 
 
 ### virtualbox
 
-VirtualBox offers USB 2.0 support, but you have to download and install the [Extension Pack](https://www.virtualbox.org/wiki/Downloads).
-
-I also recommend creating a Host-Only network with a predictable IP range, which you can then specify static ip's in your virtual machines.
-
-_Unfortunately VirtualBox caters towards the enterprise crowd and focuses on security at the cost of convenience and usability.  There is no "Shared Adapter" that allows virtual machines to have both internet access and local access, due to a built-in firewall on their NAT.  To gain local access you need a second host-only network device._
+I recommend at least creating a Host-Only network with a predictable IP range, which you can later use to specify static IP's in your virtual machines for more convenient local communication.  _VirtualBox's aim is enterprise security, so by default it forces a NAT firewall around its networking solution._
 
 
-### transmission
+## autoconfig
 
-Transmission is among my favorite software list now.  They provide a client and command line controls, for unix & linux platforms.  So far they have the best customizability, greatest cross platform support (minus windows) and most sensible configuration I've seen for what could operate as a torrent server software.
+To help simplify some of the following steps, you can run this command to download and execute a script instead:
 
-In the settings under "General" I tell it not to prompt when removing a torrent.  I also tell it to display the speeds in the "Badge" (viewed when alt + tabbing).
+    curl -L "https://raw.githubusercontent.com/cdelorme/system-setup/master/osx.sh" | bash
 
-Under the "Transfers" tab I tell it to autoload `.torrent` files from `~/Downloads` and to save finished files there.  I tell it to keep the `.torrent` files inside `~/Downloads/.torrent/` and to keep partial downloads in `~/Downloads/.torrent/downloading/` and to append `.part` to the file names.  I tell it **not** to display confirmation when loading a torrent.
-
-I setup a schedule under the "Bandwidth" tab to accomodate my access times.
-
-Finally under the "Peers" tab I tell it to prefer encrypted peers **and** ignore unencrypted peers.  _This is a decent stop-gap against torrent scanners but won't protect you from bad peers._
+_If you don't trust the script, or wish to perform the operations manually, I have provided some of the details here._
 
 
-## dot-files
+### dot-files
 
-**Next I recommend using my [dot-files repository](https://github.com/cdelorme/dot-files/) to enhance your prompt, vim configuration, and set a bunch of useful configuration defaults.**
-
-Creating a set of useful dot-files is essential to enhancing your command line situation, but not everyone will find all of my settings to be useful.
+**I highly recommend installing [dot-files](https://github.com/cdelorme/dot-files/) to help make the command prompt more user friendly.**  Visit mine to learn more, or find out how to install them.
 
 
-## [homebrew](http://brew.sh/)
+## youtube-dl
 
-OSX lacks a package manager to install additional software without going to the web like you would on Windows.  Fortuntely, because it runs UNIX it is capable of supporting a package manager, and a few have come into being.
+This utility has many uses, and the installation is fairly basic:
 
-I favor homebrew for its user-local approach, which generally does not require sudo operations.  The [macports](http://www.macports.org/) alternative has more packages but tends to **"sudo-all-the-things"**.
+    sudo curl https://yt-dl.org/downloads/2016.03.06/youtube-dl -o /usr/local/bin/youtube-dl
+    sudo chmod a+rx /usr/local/bin/youtube-dl
 
-_A newer package manager has recently come into being called [nix](https://nixos.org/nix/), which works on linux as well as osx.  It does not have great traction on OSX yet, but may be worth checking out in the future._
-
-**Homebrew depends on Command Line Tools, but this should automatically prompt to install on newer versions of OSX.**
-
-For a well-rounded terminal experience with plenty of options, these are the packages I install:
-
-- wget
-- tmux
-- openssl
-- git
-- git-flow
-- mercurial
-- svn
-- bzr
-- go
-- youtube-dl
-- awscli
-- swftools
-- graphicsmagick
-- vim
-- weechat
-- sshfs
-- ffmpeg
-- sfml
-- sdl2
-- sdl2_image
-- sdl2_mixer
-- sdl2_ttf
-- sdl
-- sdl_image
-- sdl_mixer
-- sdl_ttf
-- mplayer
-- node
-
-Some of these packages have special flags for installation.  They should automatically install dependencies, but depending on the package there may be more to it than that.
-
-To check package information prior to installing, you can use `brew info`.
-
-_The first time you attempt to use `sshfs` you will get a warning popup notifying you of an untrusted kext.  The software will still work, but you need to permit it once._
-
-
-##### commands
-
-_Let's start by adding this line (with your own token) to your `~/.bash_profile` to bypass github API traffic limits:_
-
-    export HOMEBREW_GITHUB_API_TOKEN=YOURTOKEN
-
-_If you are using my [dot-files repository](https://github.com/cdelorme/dot-files/), the install script accepts your github username and password, and will auto-detect that you are using OS X and get you a fresh token on install._
-
-_This will install homebrew and my list of packages:_
-
-    ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-    brew doctor
-    brew tap homebrew/versions
-    brew update
-    brew install wget
-    brew install tmux
-    brew install openssl
-    brew install --with-gettext --with-pcre --with-blk-sha1 git
-    brew install git-flow
-    brew install mercurial
-    brew install bzr
-    brew install --with-python svn
-    brew install --with-cc-all go
-    brew install --with-rtmpdump youtube-dl
-    brew install awscli
-    brew install --with-fftw --with-jpeg --with-giflib --with-lame swftools
-    brew install --with-lua --with-python3 --override-system-vi vim
-    brew install --with-lua --with-python --with-guile --with-perl weechat
-    brew install Caskroom/cask/osxfuse
-    brew install sshfs
-    brew install ffmpeg --with-faac --with-fdk-aac --with-freetype --with-libass --with-libvorbis --with-speex --with-theora --with-tools --with-x265 --with-libbluray --with-libcaca --with-libssh --with-libvidstab --with-libvpx --with-openjpeg --with-openssl --with-rtmpdump --with-webp --with-x265
-    brew install sfml
-    brew install --static glfw3
-    brew install sdl2
-    brew install sdl2_image
-    brew install sdl2_mixer
-    brew install sdl2_ttf
-    brew install sdl
-    brew install sdl_image
-    brew install sdl_mixer
-    brew install sdl_ttf
-    brew install --with-libtiff --with-libwmf --with-little-cms2 --with-webp graphicsmagick
-    brew install mplayer
-    brew install node
-    sudo /bin/cp -RfX /usr/local/opt/osxfuse/Library/Filesystems/osxfusefs.fs /Library/Filesystems/
-    sudo chmod +s /Library/Filesystems/osxfusefs.fs/Support/load_osxfusefs
-    aws configure
-    pip3 install --upgrade pip
-    sudo youtube-dl -U
-
-_I recommend creating a file at `/usr/local/bin/brewgrade` with these lines:_
-
-    #!/bin/bash
-    [ ! -x /usr/local/bin/brew ] && exit 1
-    /usr/local/bin/brew update
-    /usr/local/bin/brew upgrade
-    /usr/local/bin/brew cleanup
-    /usr/local/bin/brew doctor
-
-_Then adding a command to a crontab to automate running it:_
-
-    chmod +x /usr/local/bin/brewgrade
-    echo "@daily /usr/local/bin/brewgrade" >> ~/.crontab
-    crontab ~/.crontab
-
-_OSX effectively stopped supporting crontab and is pushing towards its own ctl-style configs with 20+ lines of XML instead of a single line to run a scheduled operation.  As a result it won't let you easily modify the crontab; thus far my experience shows that if you want to change the file you will have to edit it manually with `vim` (or any editor), then reload the file via `crontab ~/.crontab`.  If you attempt to use `crontab -e` it will not save changes or throw errors to indicate why._
+_Further it is self-updating when you use `youtube-dl -U`._
 
 
 ### ssh key generation
@@ -555,39 +370,88 @@ You can easily generate one with the following command:
     ssh-keygen -t rsa -b 4096
     ssh-add -K ~/.ssh/id_rsa
 
-**OS X should automatically remember and reload any keys you have added at reboot.**
+_Using the `-K` will store the passphrase in your keychain, allowing painless reloading on reboot._
 
 
-### git configuration
+### homebrew packages
 
-You will want to set your name, email, and keychain helper using git's global configuration commands:
+Before installing homebrew packages, you should get a token with your github account to prevent rate-limiting when running homebrew operations.  _Setting the token to the `HOMEBREW_GITHUB_API_TOKEN` environment variable in your `~/.bash_profile` is the way to solve it._
+
+If you are a developer, you probably want to install a number of these packages and their dependencies:
+
+- vim (/w `--override-system-vi`)
+- tmux
+- git
+- openssl
+- wget
+- Caskroom/cask/osxfuse
+- Caskroom/cask/sshfs
+- mplayer
+
+There are also many multimedia utilities for video and audio enthusiasts:
+
+- lame
+- jpeg
+- faac
+- libvorbis
+- x264
+- openh264
+- xvid
+- theora
+- graphicsmagick
+- imagemagick
+- swftools
+- ffmpeg (/w `--with-tools`)
+- sfml
+- homebrew/versions/glfw3
+- sdl2_gfx
+- sdl2_image
+- sdl2_mixer
+- sdl2_net
+- sdl2_ttf
+- sdl_gfx
+- sdl_image
+- sdl_mixer
+- sdl_net
+- sdl_rtf
+- sdl_sound
+- sdl_ttf
+
+Finally, for developer machines these are recommended:
+
+- mercurial
+- svn
+- bzr
+- awscli
+- Caskroom/cask/vagrant
+- docker-machine
+- docker-compose
+- terraform
+
+_You can initialize docker-machine via `docker-machine create --driver virtualbox default`, which can then be automatically loaded for  `docker` command access from the host via `eval $(docker-machine env default)` in `~/.bash_profile`._
+
+
+#### git configuration
+
+After installing git with homebrew, you will want to set your name, email, and keychain helper globally to optimize behavior:
 
     git config --global credential.helper osxkeychain
     git config --global user.name <name>
     git config --global user.email <email>
 
-I generally create a `~/git/` folder to store my projects.
+_I generally create a `~/git/` folder to store my projects._
 
 I highly recommend [Ralph Bean's Awesome Git Flow Tutorial](http://threebean.org/presentations/gitflow/#/step-1) and the [Git Bash Completion](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) script as well.  You may also want to download and install `~/.githelpers`, written by [Gary Bernhardt](https://github.com/garybernhardt/dotfiles/blob/master/.githelpers).
 
 
-### [sublime text](software/sublime-text.md)
-
-Visit the shared document for steps and configuration file templates.
-
-
 ## markdown quicklook
 
-I install this so I can easily preview markdown files, the [repository is here](https://github.com/toland/qlmarkdown), but you can [download a prebuilt file here](http://jamesmoss.co.uk/blog/support-for-markdown-in-osx-quicklook/) and toss them into `/Library/QuickLook`.
-
-With this package you can use the space-bar like with images and pdf files, and it will display HTML rendered preview of a markdown file.
+To easily preview markdown files using the quick-look hotkey, you can install an open source generator from [here](https://github.com/toland/qlmarkdown).  Simply download the latest release, and move it to `/Library/QuickLook/`.  _You will be asked for "authenticate"._
 
 
-## conclusion
+## next restart
 
-Thus concludes my comprehensive OS X 10.9 setup and configuration process.
-
-Despite my preferences and installed packages here, a majority of the work I do is done through virtual machines.  If you found this in any way useful, I highly recommend you visit my debian/linux documentation.
+The next time you restart your system, feel free to uncheck `Remember open windows` to prevent the system from keeping track of that stuff.
 
 
 ## references
