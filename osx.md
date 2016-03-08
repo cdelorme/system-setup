@@ -197,6 +197,7 @@ _Nothing about this new feature appeals to me._
 
 - Bluetooth
     - click `Turn Bluetooth Off`
+    - check `Show Bluetooth in menu bar`
 
 _I prefer to conserve battery, but if you have bluetooth devices re-entering isn't too difficult._
 
@@ -210,6 +211,12 @@ _The default is generally a page and a half longer than it should be._
     - Free Downloads: `Save Password`
 
 _You might be prompted ahead of time to do so, but the new auto-update feature is by default not disruptive and I recommend it._  I also find it annoying to have to enter my password for free downloads.
+
+- Accessibility
+    - Display
+        - uncheck `Shake mouse pointer to locate`
+
+_This is confusing, but with this setting enabled if you move your mouse rapidly back and forth it will suddenly grow enormous, which I found distracting._
 
 
 ### safari configuration
