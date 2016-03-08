@@ -185,7 +185,7 @@ fi
 # fi
 
 # offer to optimize btrfs root
-export btrfs_optimizations="noatime,autodefrag"
+export btrfs_optimizations="noatime,compress=lzo,space_cache,autodefrag"
 if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ] && [[ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 || "$(btrfs subvol list / | awk '{print $9}')" != "home" ]]
 then
 	grab_yes_no "optimize_btrfs" "do you want to optimize your btrfs"
@@ -211,7 +211,7 @@ then
 			export root_disk="${root_partition:5:3}"
 			if [ $(cat /sys/block/${root_disk}/queue/rotational) -eq 0 ]
 			then
-				btrfs_optimizations="${btrfs_optimizations},ssd"
+				export btrfs_optimizations="${btrfs_optimizations},ssd"
 			fi
 
 			# add optimizations
@@ -219,7 +219,8 @@ then
 
 			# defragment and rebalance
 			set +eu
-			btrfs filesystem defragment -rf / &>/dev/null
+			btrfs filesystem defragment -rfclzo / &>/dev/null
+			mount -n -o "remount,${btrfs_optimizations}" $root_partition /
 			btrfs balance start /
 			set -eu
 		fi
@@ -239,25 +240,11 @@ export UCF_FORCE_CONFOLD=true
 export DEBIAN_FRONTEND=noninteractive
 aptitude clean
 aptitude update
+aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 alias ai='aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
-if ! which netselect-apt &>/dev/null
-then
-	aptitude install -ryq netselect-apt
-	cp -f /etc/apt/sources.list /etc/apt/sources.list.original
-	mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
-	netselect-apt -c US -fsno /etc/apt/sources.list stable
-	aptitude clean
-	if ! aptitude update
-	then
-		mv -f /etc/apt/sources.list.bak /etc/apt/sources.list
-		aptitude clean
-		aptitude update
-	fi
-	aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-fi
 
 # uninstall avahi-autoipd if it exists
-which avahi-autoipd &>/dev/null && aptitude remove -yq avahi-autoipd
+which avahi-autoipd &>/dev/null && aptitude purge -yq avahi-autoipd
 
 # install all useful system utilities & initialize command-not-found
 ai screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
@@ -333,9 +320,6 @@ fi
 # download ~/.git-completion
 [ ! -f /etc/skel/.git-completion ] && curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
 
-# download ~/.githelpers
-[ ! -f /etc/skel/.githelpers ] && curl -Lso /etc/skel/.githelpers "https://raw.githubusercontent.com/garybernhardt/dotfiles/master/.githelpers"
-
 
 ##
 # install conditional software
@@ -361,10 +345,10 @@ fi
 # conditionally install video, audio, and graphics processing utilities
 if [ "$install_processing_tools" = "y" ]
 then
-	aptitude install -yq graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev libav-tools id3
+	ai graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev id3
 	if which youtube-dl &>/dev/null
 	then
-		curl https://yt-dl.org/latest/youtube-dl -o /usr/local/bin/youtube-dl
+		curl -Lo /usr/local/bin/youtube-dl https://yt-dl.org/latest/youtube-dl
 		chmod a+rx /usr/local/bin/youtube-dl
 	fi
 fi
@@ -439,7 +423,7 @@ then
 	aptitude upgrade -yq
 
 	# install workstation packages
-	ai firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs parted lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
+	ai firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]
@@ -461,12 +445,13 @@ then
 			. ~/.gvm/scripts/gvm
 			gvm install go1.4.3
 			gvm use go1.4.3
-			gvm use go1.5.3 --default
+			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.6
+			gvm use go1.6 --default
 
 			# install go for all users
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
 			echo -e 'export GVM_ROOT=~/.gvm\n. $GVM_ROOT/scripts/gvm-default' > /etc/skel/.gvm/scripts/gvm
-			echo -e '\n# load go version manager\n[[ -s "$HOME/.gvm/scripts/gvm" ]] && . "$HOME/.gvm/scripts/gvm"' >> /etc/skel/.bashrc
+			echo -e '\n# load go version manager\n[[ -s ~/.gvm/scripts/gvm ]] && . ~/.gvm/scripts/gvm' >> /etc/skel/.bash_profile
 		fi
 
 		# conditionally install nvm
@@ -625,8 +610,9 @@ then
 			if ! which steam &>/dev/null
 			then
 				ai xterm
-				[ ! -f /tmp/steam.deb ] && curl -Lo /tmp/steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb
-				[ $(dpkg -l | grep -c steam) -eq 0 ] && dpkg -i /tmp/steam.deb
+				[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
+				curl -Lo /tmp/steam.deb http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
+				dpkg -i /tmp/steam.deb
 				aptitude install -f
 			fi
 		fi
