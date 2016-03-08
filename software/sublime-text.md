@@ -53,7 +53,7 @@ Some platforms are more... privileged than others.  These platforms give you add
 
 You can add a symbolic link to the sublime text application container:
 
-    sudo ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/bin/subl
+    sudo ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
 
 
 ### linux
