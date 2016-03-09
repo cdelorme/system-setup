@@ -242,7 +242,7 @@ then
 	brew_install terraform
 
 	# asynchronously initialize docker-machine and add to `~/.bash_profile`
-	(docker-machine create --driver virtualbox default && echo "eval $(docker-machine env default)" >> ~/.bash_profile) &
+	(docker-machine create --driver virtualbox default && echo 'eval $(docker-machine env default)' >> ~/.bash_profile) && echo '[ "$(docker-machine status)" != "Running" ] && docker-machine start' >> ~/.bash_profile &
 fi
 
 # install (latest) youtube-dl
