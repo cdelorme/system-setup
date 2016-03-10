@@ -1,6 +1,0 @@
-#!/bin/bash
-if [ $(uname) = "Darwin" ]
-then
-	/usr/local/bin/brew update
-	/usr/local/bin/brew upgrade
-fi
