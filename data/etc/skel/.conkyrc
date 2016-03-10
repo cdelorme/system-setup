@@ -1,4 +1,4 @@
-ebackground yes
+background yes
 update_interval 2.0
 cpu_avg_samples 5
 net_avg_samples 5
