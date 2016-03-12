@@ -1,19 +1,15 @@
 
 # flash projector
 
-I often run across old flash files and would like to see what they contained without loading them into a browser.
+I often run old flash files on my system, and would rather do so without the overhead of the web-browser or forcing the insecurity and risks onto the web browser.
 
-This process is relatively simple.  Download the [flash projector](https://www.adobe.com/support/flashplayer/downloads.html) for linux, install the dependencies, decompress and place it somewhere accessible (eg. `/usr/local/bin/`):
+**To solve this adobe supplies the [flash projector](https://www.adobe.com/support/flashplayer/downloads.html).**
 
-	aptitude install -ryq libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386
-	curl -Lso /tmp/flash.tar.gz http://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz
-	tar xf /tmp/flash.tar.gz -C /tmp
-	rm /tmp/flash.tar.gz
-	mv /tmp/flashplayer /usr/local/bin/flashplayer
+This can be downloaded, extracted, and installed into `/usr/local/bin/`, but does have some dependencies you may need to work through.
 
-Finally, you can add these lines to `~/.local/share/applications/mimeapps.list`:
+For ease of access you should create a launcher in `~/.local/share/applications/flash.desktop` and add these lines to `~/.local/share/applications/mimeapps.list`:
 
     application/x-shockwave-flash=flash.desktop;
     application/vnd.adobe.flash.movie=flash.desktop;
 
-An option for convenience would be to create a [`~/.local/share/applications/flash.desktop`](../data/usr/share/applications/flash.desktop) file.  _Don't forget to reload the desktop preferences (`update-desktop-database` with root privileges)_
+_You may have to reload the desktop database for the change to take effect,_ but you can now launch flash locally on your desktop.
