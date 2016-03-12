@@ -318,6 +318,10 @@ Many of my configuration files depend on custom fonts added to `/Library/Fonts` 
 
 Visit the shared document for steps and configuration file templates.
 
+Afterwards, add the command line symlink:
+
+    sudo ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
+
 
 ### iterm2
 
