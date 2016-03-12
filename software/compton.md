@@ -10,4 +10,3 @@ While it can be run without any configuration, to resolve screen tearing issues 
 For my situation, I load it at boot time with openbox via the autostart script.
 
 The `vsync = "opengl-swc"` and `glx-no-rebind-pixmap = true` settings work well with nvidia and intel integrated graphics (I have not tested with amd/ati yet), but do not work well in virtualbox.
-
