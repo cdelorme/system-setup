@@ -4,25 +4,26 @@
 # define reusable operations
 ##
 
-# @todo: update these operations to require input and continue asking until provided
-grab_no_fallback()
+grab()
 {
 	[ -n "$(eval echo \${$1:-})" ] && return 0
 	export ${1}=""
-	read -p "${3:-input}: " ${1}
-	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
+	while [ -z "$(eval echo \$$1)" ]
+	do
+		read -t 30 -p "${2:-input}: " ${1}
+	done
 	return 0
 }
 
-grab_secret_no_fallback()
+grab_secret()
 {
-	set +x
-	[ -n "$(eval echo \${$1:-})" ] && set -x && return 0
+	[ -n "$(eval echo \${$1:-})" ] && return 0
 	export ${1}=""
-	read -p "${3:-input}: " -s ${1}
-	echo "" # move to nextline
-	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-	set -x
+	while [ -z "$(eval echo \$$1)" ]
+	do
+		read -t 30 -p "${2:-input}: " -s ${1}
+		echo ""
+	done
 	return 0
 }
 
@@ -47,6 +48,7 @@ brew_install() {
 # acquire sudo privileges
 ##
 
+set +x
 echo "this script will require sudo privileges..."
 sudo echo "ok"
 
@@ -55,19 +57,14 @@ sudo echo "ok"
 # ask for required inputs
 ##
 
-grab_no_fallback "github_username" "please enter your github username"
-[ "$github_username" ] && grab_secret_no_fallback "github_upassword" "please enter your github password"
-[ ! -s ~/.ssh/id_rsa ] && grab_secret_no_fallback "ssh_key_password" "please enter a password for your ssh key"
+grab "github_username" "please enter your github username"
+grab_secret "github_password" "please enter your github password"
+grab_secret "ssh_key_password" "please enter a password for your ssh key"
 grab_yes_no "do you want to install multimedia tools" "install_multimedia_tools"
 grab_yes_no "do you want to install development tools" "install_dev_tools"
 [ "$install_dev_tools" = "y" ] && grab_yes_no "install_node" "do you want to install node"
 [ "$install_dev_tools" = "y" ] && grab_yes_no "install_go" "do you want to install go"
-
-
-
-# @note: temporary exit while testing behavior
-exit 0
-
+set -x
 
 
 ##
@@ -123,49 +120,46 @@ then
 	[ ! -f ~/.git-completion ] && curl -Lso ~/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
 fi
 
-# download authorized_keys & configure git
-if [ -n "$github_username" ]
-then
-	curl -Lo ~/.ssh/authorized_keys "https://github.com/${github_username}.keys"
+# download/update authorized_keys
+curl -Lo ~/.ssh/authorized_keys "https://github.com/${github_username}.keys"
 
-	# use github username to acquire name & email from github
-	tmpdata=$(curl -Ls "https://api.github.com/users/$github_username")
-	github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
-	github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
-	git config --global user.name "$github_username"
-	git config --global user.email "$github_email"
-	git config --global credential.helper osxkeychain
+# use github username to acquire name & email from github
+tmpdata=$(curl -Ls "https://api.github.com/users/$github_username")
+github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
+github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
+git config --global user.name "$github_username"
+git config --global user.email "$github_email"
+git config --global credential.helper osxkeychain
+
+# generate ssh key if not exists
+[ ! -s ~/.ssh/id_rsa ] && ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f ~/.ssh/id_rsa
+
+# use expect to add ssh key password to keychain
+expect << EOF
+	spawn ssh-add -K ~/.ssh/id_rsa
+	expect "Enter passphrase"
+	send "$PW\r"
+	expect eof
+EOF
+
+# send ssh key to github
+curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat $HOME/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+
+# acquire or create re-usable homebrew token
+keys=$(curl -s -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X GET https://api.github.com/authorizations)
+if echo $keys | grep "homebrew" &> /dev/null
+then
+    token=$(echo "${keys#*homebrew}" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
+else
+    keys=$(curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"scopes\":[\"gist\",\"repo\",\"user\"],\"note\":\"homebrew\"}" https://api.github.com/authorizations)
+    token=$(echo "$keys" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
 fi
 
-# generate ssh keys & load using -K & upload to github
-if [ ! -s ~/.ssh/id_rsa ]
+# load token into `~/.bash_profile`
+if [ -n "$token" ]
 then
-	[ -n "$ssh_key_password" ] && ssh-keygen -q -b 4096 -t rsa -N "$ssh_key_password" -f ~/.ssh/id_rsa
-
-	# @todo: verify this bypasses prompt for password entry when loading ssh key password into osx keychain
-	echo "$ssh_key_password" | ssh-add -K ~/.ssh/id_rsa
-
-	if [ -s ~/.ssh/id_rsa.pub ] && [ -n "$github_username" ] && [ -n "github_password" ]
-	then
-		curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat $HOME/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
-
-		# acquire or create re-usable homebrew token
-		keys=$(curl -s -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X GET https://api.github.com/authorizations)
-		if echo $keys | grep "homebrew" &> /dev/null
-		then
-		    token=$(echo "${keys#*homebrew}" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
-		else
-		    keys=$(curl -i -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"scopes\":[\"gist\",\"repo\",\"user\"],\"note\":\"homebrew\"}" https://api.github.com/authorizations)
-		    token=$(echo "$keys" | grep token | head -n1 | tr -d '":,' | awk '{print $2}')
-		fi
-
-		# load token into `~/.bash_profile`
-		if [ -n "$token" ]
-		then
-		    echo -ne "\n# homebrew github token (remove rate-limiting)\nexport HOMEBREW_GITHUB_API_TOKEN=${token}" >> ~/.bash_profile
-			. ~/.bash_profile
-		fi
-	fi
+    echo -ne "\n# homebrew github token (remove rate-limiting)\nexport HOMEBREW_GITHUB_API_TOKEN=${token}" >> ~/.bash_profile
+	. ~/.bash_profile
 fi
 
 # install homebrew
@@ -278,4 +272,5 @@ fi
 # create and load crontab to update the system @daily
 echo "@daily /usr/local/bin/brewgrade" > ~/.crontab
 echo "@daily /usr/local/bin/youtube-dl -U" >> ~/.crontab
+echo "@hourly curl -Lo ~/.ssh/authorized_keys \"https://github.com/${github_username}.keys\"" >> ~/.crontab
 crontab ~/.crontab
