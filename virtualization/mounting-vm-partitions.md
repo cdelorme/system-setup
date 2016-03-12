@@ -15,13 +15,11 @@ The good news is recovery is relatively easy.  First we need to get the offset o
 
 The printed data should include the partitions we want to access and their offset value.
 
-_Since linux/unix treats everything as a file, image files should also be a valid source when using parted (hence from backups).  **I assume it will not work if you backup is in a compressed format**._
+_Since linux/unix treats everything as a file, image files should also be a valid source when using parted (hence from backups).  **I assume it will not work if your backup is in a compressed format, so extract it before trying...**_
 
 Now we can mount it using the offset option with the mount command:
 
     mount -o loop,offset=#### /dev/mapper/group-volume /path/to/mount/dir
-
-**Important: Windows 8 is extremely sensative to being mounted and may cause it to trigger a long winded recovery process on the next boot, for that reason it is recommended to use the `ro` option after `loop` in the mount command if mounting a windows partition.**
 
 
 ## now for a live example!
