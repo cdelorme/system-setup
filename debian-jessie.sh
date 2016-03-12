@@ -108,10 +108,6 @@ if [ "$is_webserver" = "y" ]
 then
 	grab_yes_no "install_nginx" "do you want to install nginx web & proxy server"
 	[ "$install_nginx" = "y" ] && grab_yes_no "public_nginx" "do you want to open web ports 80 & 443 publicly"
-	grab_yes_no "install_mongodb" "install mongodb"
-	[ "$install_mongodb" = "y" ] && grab_yes_no "public_mongodb" "make mongodb public"
-	grab_yes_no "install_postgresql" "install postgres"
-	[ "$install_postgresql" = "y" ] && grab_yes_no "public_postgresql" "make postgres public"
 	grab_yes_no "install_mail_server" "would you like to install the msmtp mail server"
 	[ "$install_mail_server" = "y" ] && grab_or_fallback "mail_server_username" "$username" "mail server username"
 	[ "$install_mail_server" = "y" ] && grab_secret_or_fallback "mail_server_password" "$password" "mail server password"
@@ -133,7 +129,6 @@ then
 		# languages for development
 		grab_yes_no "install_golang" "do you want to install golang"
 		grab_yes_no "install_nodejs" "do you want to install nodejs"
-		grab_yes_no "install_openjdk" "do you want to install openjdk for java development"
 	fi
 
 	# desktop questions
@@ -380,22 +375,6 @@ then
 	mkdir -p /etc/nginx/ssl
 fi
 
-# conditionally install mongodb
-[ "${install_mongodb:-}" = "y" ] && ai mongodb
-
-# conditionally install postgresql
-if [ "${install_postgresql:-}" = "y" ]
-then
-	if [ ! -f /etc/apt/sources.list.d/postgres.list ]
-	then
-		wget --no-check-certificate -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-		echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list
-	fi
-	aptitude clean
-	aptitude update
-	ai postgresql
-fi
-
 # install msmtp mail server
 if [ "${install_mail_server:-}" = "y" ]
 then
@@ -438,15 +417,16 @@ then
 		ai build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install gvm
-		set +eu
 		if [ "${install_golang:-}" = "y" ] && ! which go &>/dev/null
 		then
 			[ ! -d $HOME/.gvm ] && curl -Lo- https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
+			set +eu
 			. ~/.gvm/scripts/gvm
 			gvm install go1.4.3
 			gvm use go1.4.3
 			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.6
 			gvm use go1.6 --default
+			set -eu
 
 			# install go for all users
 			[ ! -d /etc/skel/.gvm ] && git clone https://github.com/moovweb/gvm /etc/skel/.gvm
@@ -458,21 +438,16 @@ then
 		if [ "${install_nodejs:-}" = "y" ] && ! which node &>/dev/null
 		then
 			[ ! -d ~/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+			set +eu
 			export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
 			nvm install node
 			nvm use node
 			nvm alias default node
+			set -eu
 
 			# install node for all users
 			[ ! -d /etc/skel/.nvm ] && curl -Ls https://raw.githubusercontent.com/creationix/nvm/master/install.sh | NVM_DIR=/etc/skel/.nvm bash
 			echo -e '\n# load node version manager\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /etc/skel/.bashrc
-		fi
-		set -eu
-
-		# conditionally install global openjdk
-		if [ "${install_openjdk:-}" = "y" ] && ! which javac &>/dev/null
-		then
-			aptitude install -ryq openjdk-7-jdk openjdk-7-jre
 		fi
 	fi
 
@@ -813,8 +788,6 @@ fi
 [ "$ssh_port" != "22" ] && sed -i "s/ 22 / $ssh_port /" /etc/iptables/iptables.rules
 [ "$install_transmission" = "y" ] && sed -i "s/#-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/-A INPUT -p udp -m udp --dport 51413 -j ACCEPT/" /etc/iptables/iptables.rules && sed -i "s/#-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT/" /etc/iptables/iptables.rules
 [ "${public_nginx:-}" = "y" ] && sed -i 's/#-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT/' /etc/iptables/iptables.rules
-[ "${public_mongodb:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m multiport --dports 27017:27019 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
-[ "${public_postgresql:-}" = "y" ] && sed -i "s/#-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/-A INPUT -p tcp -m tcp --dport 5432 -m conntrack --ctstate NEW -j ACCEPT/" /etc/iptables/iptables.rules
 
 
 ##
