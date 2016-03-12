@@ -35,5 +35,3 @@ _Obviously substitute your preferences as desired._
 With these changes you should now have infinite history.  You will be automatically connected to freenode at boot, and it will verify your identity with NickServ.
 
 The raw configuration itself is stored as key/value text files (traditional configuration), and can be found in `~/.weechat/` named accordingly (eg. `~/.weechat/irc.conf` and `~/.weechat/weechat.conf`, etc).  **If weechat has not yet been run, then no configuration files may exist.**
-
-
