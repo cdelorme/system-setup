@@ -8,6 +8,7 @@ which hsetroot &>/dev/null && (sleep 1 && hsetroot -solid "#001E27") &
 which tint2 &>/dev/null && (sleep 3 && tint2) &
 which fehbg &>/dev/null && (sleep 4 && fehbg) &
 which volumeicon &>/dev/null && (sleep 5 && volumeicon) &
+which pasystray &>/dev/null && (sleep 5 && pasystray) &
 which clipit &>/dev/null && (sleep 5 && clipit) &
 which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -d) &
 which connman-ui-gtk &>/dev/null && (sleep 5 && connman-ui-gtk) &
