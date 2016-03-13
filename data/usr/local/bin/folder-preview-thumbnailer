@@ -1,0 +1,17 @@
+#!/bin/bash -eu
+IFS=$'\n\t'
+
+# find up to four images within the supplied folder
+files=()
+for f in "$(find "$1" -maxdepth 1 -name '*' -exec file {} \; | grep -o -P '^.+: \w+ image' | sort -n | head -4 | cut -d':' -f1)"; do	files+=($f)
+done
+[ ${#files[*]} -gt 0 ] || exit 1
+
+# piped command method to send out
+montage -geometry "$(($3 * 60 / 200))x$(($3 * 60 / 200))+2+2" -alpha on -background none -tile 2 ${files[*]} miff:- | convert "/usr/share/icons/gnome/$3x$3/places/folder.png" :- -gravity center -composite "$2" 2>/dev/null
+
+# @todo: figure out better method of transposing icon by theme
+# @todo: avoid creating thumbnails on user-directories with special icons (unless I can confirm they will update)
+
+# @note: temporarily spit out info for testing
+echo "done for folder $1 output to $2 with a size of $3" >> /tmp/folder-preview-thumbnailer
