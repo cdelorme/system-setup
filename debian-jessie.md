@@ -122,10 +122,10 @@ _This doesn't mention all the other useful things that get loaded in the backgro
 
 I have also created support documentation for:
 
-- [ssl certificates](ssl-certificates.md)
-- [bare git repositories](bare-git-repositories.md)
-- [virtualbox console dimensions](grub-vm-resolution.md)
-- [virtualbox networking](virtual-network-adapters.md)
+- [ssl certificates](software/ssl-certificates.md)
+- [bare git repositories](software/bare-git-repositories.md)
+- [virtualbox console dimensions](software/grub-vm-resolution.md)
+- [virtualbox networking](virtualization/virtual-network-adapters.md)
 - **[gaming](gaming/)**
 
 
