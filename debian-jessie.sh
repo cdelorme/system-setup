@@ -447,9 +447,10 @@ if [ "$is_a_workstation" = "y" ]; then
 		# handle workstation laptop packages
 		if [ "$is_laptop" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xbacklight
 
-		# install tabbedex for urxvt
+		# install urxvt plugins
 		[ ! -f /usr/lib/urxvt/perl/tabbedex ] && curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
 		[ ! -f /usr/lib/urxvt/perl/font ] && curl -Lo /usr/lib/urxvt/perl/font "https://raw.githubusercontent.com/noah/urxvt-font/master/font"
+		[ ! -f /usr/lib/urxvt/perl/clipboard ] && curl -Lo /usr/lib/urxvt/perl/clipboard "https://raw.githubusercontent.com/muennich/urxvt-perls/master/clipboard"
 
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]; then

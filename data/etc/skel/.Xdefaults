@@ -19,9 +19,11 @@ URxvt.cursorUnderline:      false
 URxvt.pointerBlank:         true
 URxvt*font:                 xft:ForMateKonaVe:pixelsize=14
 URxvt*letterSpace:          -1
-URxvt.perl-ext-common:      default,matcher,tabbedex,font,selection-to-clipboard
+URxvt.perl-ext-common:      default,matcher,tabbedex,font,selection-to-clipboard,clipboard
+URxvt.clipboard.pastecmd:   clipit -c
 URxvt.keysym.C-equal:       perl:font:increment
 URxvt.keysym.C-minus:       perl:font:decrement
+URxvt.keysym.C-v:           perl:clipboard:paste
 URxvt.tabbed.autohide:      true
 URxvt.matcher.button:       1
 URxvt.urlLauncher:          x-www-browser
