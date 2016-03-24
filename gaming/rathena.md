@@ -194,6 +194,7 @@ Next `conf/import/login_conf.txt`:
 
 	use_MD5_passwords: yes
 	new_acc_length_limit: no
+	new_account: no
 
 Finally `conf/import/map_conf.txt`:
 
@@ -207,6 +208,8 @@ _There are a great number of additional settings that can be modified, so be sur
 Using a WAN IP for all servers on a VPS's configuration is the most sane way to get things working.
 
 You are able to use a dns record instead of an IP address, and it will be checked at launch.  _I haven't tested this, but this may mean changing DNS after launching athena will result in the old server IP being used if you split your servers onto separate machines and need to migrate._
+
+The `new_account` setting is helpful for quickly creating new accounts on LAN servers or when in development, and allows you to supply an unused account name and a gender to create when you login.  _For a VPS you may not want it enabled unless you want to get around setting up a registration website._
 
 
 ### execution
