@@ -6,7 +6,7 @@ I am documenting my attempts to provision a private server using the free and op
 These instructions are tailored to work with my debian jessie installation.  It is broken into `Server` and `Client` sections, which are very different processes, _and there seems to be far less clarity around the client setup._
 
 
-## [server](#youtube-link)
+## [server](https://www.youtube.com/watch?v=FhvV6mYiRrU)
 
 Setting up the server is a very easy process and can be done in a matter of minutes if you have a solid understanding of the infrastructure.
 
@@ -122,7 +122,7 @@ Starting with `conf/import/char_conf.txt`:
 	char_ip: 127.0.0.1
 	login_ip: 127.0.0.1
 
-Next is `conf/import/char_conf.txt`:
+Next is `conf/import/inter_conf.txt`:
 
 	login_server_id: ragnarok
 	login_server_pw: secret
@@ -170,7 +170,7 @@ Starting with `conf/import/char_conf.txt`:
 	char_ip: ro.mydns.com
 	login_ip: ro.mydns.com
 
-Next is `conf/import/char_conf.txt`:
+Next is `conf/import/inter_conf.txt`:
 
 	login_server_id: ragnarok
 	login_server_pw: secret
@@ -231,7 +231,7 @@ Alternatively you can run each executable independently:
 _This can help with separately identifying bugs when developing._
 
 
-## [client](#youtube-link)
+## [client](https://www.youtube.com/watch?v=0JpUcb3D43Y)
 
 These are the steps to installing a customized client:
 
