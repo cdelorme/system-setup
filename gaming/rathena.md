@@ -93,7 +93,7 @@ At the time I compiled last, the following patch was necessary to the `chclif_ch
 _This change must be made prior to compiling._
 
 
-### compiling
+### compiling renewal
 
 Next we want to compile the server with a valid `packetver`, which is directly related to the client which it talks to.  Here is how to compile for the 20151029 client:
 
@@ -102,6 +102,17 @@ Next we want to compile the server with a valid `packetver`, which is directly r
 	make server
 
 _Anytime you chance the client you will need to rerun the `./configure` command first.  If you make source code changes but want the same client be sure you run `make clean` first when recompiling._
+
+
+### compiling classic
+
+Compiling for classic mode (eg. Pre-Renewal), you simply add the `--enable-prere` flag when configuring:
+
+	./configure --enable-prere=yes --enable-packetver=20151029
+	make clean
+	make server
+
+_The same client should be compatible, and the translation files used will need to be swapped._
 
 
 ### configuration
@@ -239,6 +250,7 @@ These are the steps to installing a customized client:
 - execute it to extract an `RO/` folder
 - run the `rsu-kro-renewal-lite.exe` patcher and close the window when it completes
 - download the [Translation](https://github.com/ROClientSide/Translation) then merge or replace the `data/` and `System/` folders into of `RO/`
+	- **You may want to merge the files from [this translation](https://github.com/zackdreaver/ROenglishPRE) with the first for classic mode.**
 - update `RO/data/clientinfo.xml` to reflect your expected server settings
 - download the [latest compatible pre-modified client](https://rathena.org/board/topic/104205-2015-client-support/) (20151029)
 - download [NEMO](https://github.com/MStr3am/NEMO.git) and execute it against the pre-modified client
@@ -422,12 +434,18 @@ Map channels are new and confusing, apparently to space out maps for high counts
 The Doram race in rAthena is supported, but their starting map is devoid of monsters and NPC's and completely isolated.  **So creation is possible, but full gameplay may not yet be.**
 
 
+## unsolved
+
+I tried my hand at classic-mode, which runs but seems to have a mixture of renewal menus plus the starting area (without `OldIzlude.grf`) is unpopulated (eg. no NPC's to get you through novice training area) and therefore unplayable without some modification(s).  I may update this guide in the future if/when I have time to solve classic mode.
+
+
 # references
 
 - [rAthena Wiki](https://rathena.org/wiki/Main_Page)
 - [rAthena Debian Installation](https://rathena.org/wiki/Installation_(Debian)
 - [NEMO (client editor)](https://github.com/MStr3am/NEMO.git)
 - [Translation (english layer for kRO)](https://github.com/ROClientSide/Translation)
+- [Translation for Classic (pre-re, missing files or broken?)](https://github.com/zackdreaver/ROenglishPRE)
 - [latest pre-modified client](https://rathena.org/board/topic/104205-2015-client-support/)
 - [decent full stack tutorial tutorial](https://rathena.org/board/topic/104452-tutorial-how-to-create-ragnarok-offline-2015-client/?hl=%2Bragnarok+%2Boffline)
 - [older client tutorial](http://herc.ws/board/topic/7602-guide-client-creation-for-the-clueless/)
