@@ -1,0 +1,74 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-debian-netinst-amd64",
+      "output_directory": "dist/debian-developer-image",
+      "headless": true,
+      "hard_drive_interface": "sata",
+      "disk_size": 65536,
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "1024"],
+        ["modifyvm", "{{.Name}}", "--accelerate3d", "on"]
+      ],
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "Debian_64",
+      "http_directory": "http",
+      "iso_checksum": "1dae8556e57bb04bf380b2dbf64f3e6c61f9c28cbb6518aabae95a003c89739a",
+      "iso_checksum_type": "sha256",
+      "iso_url": "http://cdimage.debian.org/debian-cd/8.3.0/amd64/iso-cd/debian-8.3.0-amd64-CD-1.iso",
+      "boot_command": [
+        "<esc><wait>",
+        "install",
+        " auto",
+        " url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-jessie.cfg",
+        " debian-installer=en_US",
+        " locale=en_US",
+        " keymap=us",
+        " netcfg/get_hostname=vagrant",
+        " netcfg/get_domain=vm ",
+        "<enter>"
+      ],
+      "ssh_port": 22,
+      "ssh_wait_timeout": "15m",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -h now"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "install",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S bash -c '{{.Path}}'",
+      "scripts": [
+        "scripts/debian/optimizations.sh",
+        "scripts/debian/provision.sh",
+        "scripts/debian/vagrant.sh",
+        "scripts/debian/postgresql.sh",
+        "scripts/debian/docker.sh",
+        "scripts/debian/desktop.sh",
+        "scripts/debian/vbox.sh",
+        "scripts/debian/clean.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/debian/nvm.sh",
+        "scripts/debian/gvm.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "dist/debian-developer-image.box"
+    }
+  ]
+}
