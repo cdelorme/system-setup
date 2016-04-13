@@ -15,6 +15,30 @@ IFS=$'\n\t'
 ##
 
 ##
+# abstract and fix safe package installation
+# accepts an array of packages
+##
+safe_aptitude_install() {
+    unset UCF_FORCE_CONFNEW
+    export UCF_FORCE_CONFOLD=true
+    export DEBIAN_FRONTEND=noninteractive
+    aptitude clean
+    aptitude update
+    aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" | tee /tmp/aptitude.log
+    if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
+    then
+        safe_aptitude_install $@
+    fi
+    aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" "$@" 2>&1 | tee /tmp/aptitude.log
+    if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
+    then
+        safe_aptitude_install $@
+    fi
+    return 0
+}
+
+
+##
 # @description request input and optionally apply a fallback/default value
 # @param $1 variable name
 # @param $2 default value
@@ -203,32 +227,21 @@ fi
 # package installation
 ##
 
-# set best mirrors and upgrade existing packages
-unset UCF_FORCE_CONFNEW
-export UCF_FORCE_CONFOLD=true
-export DEBIAN_FRONTEND=noninteractive
-aptitude clean
-aptitude update
-aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-
-# uninstall avahi-autoipd if it exists
+# fix conflicting packages and install system utilities
 which avahi-autoipd &>/dev/null && aptitude purge -yq avahi-autoipd
-
-# install all useful system utilities & initialize command-not-found
-aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
-update-command-not-found
+safe_aptitude_install screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
 
 # handle laptop packages & configuration
 if [ "$is_laptop" = "y" ]; then
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" laptop-mode-tools
+	safe_aptitude_install laptop-mode-tools
 	sed -i 's/battery = 0/battery = 1/' /etc/skel/.config/tint2/tint2rc
 fi
 
 # detect & install firmware (primarily for networking devices)
-[ $(lspci | grep -ci "realtek") -gt 0 ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" firmware-realtek
-[ $(lspci | grep -i "wireless" | grep -ci "atheros") -gt 0 ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" firmware-atheros
-[ $(lspci | grep -i "wireless" | grep -ci "broadcom") -gt 0 ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" firmware-brcm80211
-[ $(lspci | grep -i "wireless" | grep -ci "intel") -gt 0 ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" firmware-iwlwifi
+[ $(lspci | grep -ci "realtek") -gt 0 ] && safe_aptitude_install firmware-realtek
+[ $(lspci | grep -i "wireless" | grep -ci "atheros") -gt 0 ] && safe_aptitude_install firmware-atheros
+[ $(lspci | grep -i "wireless" | grep -ci "broadcom") -gt 0 ] && safe_aptitude_install firmware-brcm80211
+[ $(lspci | grep -i "wireless" | grep -ci "intel") -gt 0 ] && safe_aptitude_install firmware-iwlwifi
 
 
 ##
@@ -281,11 +294,11 @@ fi
 ##
 
 # conditionally install weechat
-[ "$install_weechat" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" weechat
+[ "$install_weechat" = "y" ] && safe_aptitude_install weechat
 
 # conditionally install transmission
 if [ "$install_transmission" = "y" ]; then
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" transmission-daemon
+	safe_aptitude_install transmission-daemon
 	systemctl stop transmission-daemon
 
 	# configure transmission directory
@@ -297,13 +310,7 @@ if [ "$install_transmission" = "y" ]; then
 fi
 
 # conditionally install video, audio, and graphics processing utilities
-if [ "$install_processing_tools" = "y" ]; then
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev id3
-	if which youtube-dl &>/dev/null; then
-		curl -Lo /usr/local/bin/youtube-dl https://yt-dl.org/latest/youtube-dl
-		chmod a+rx /usr/local/bin/youtube-dl
-	fi
-fi
+[ "$install_processing_tools" = "y" ] && safe_aptitude_install graphicsmagick imagemagick libgd-tools libav-tools lame libvorbis-dev libogg-dev libexif-dev libfaac-dev libx264-dev vorbis-tools libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev id3
 
 # conditionally setup web server folder permissions
 if [ "$is_webserver" = "y" ]; then
@@ -323,7 +330,7 @@ fi
 if [ "${install_nginx:-}" = "y" ]; then
 
 	# install nginx
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx-full
+	safe_aptitude_install nginx-full
 
 	# configure nginx folder layout
 	rm -f /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
@@ -334,7 +341,7 @@ fi
 if [ "${install_mail_server:-}" = "y" ]; then
 
 	# install msmtp-mta and all related/useful components
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" msmtp-mta
+	safe_aptitude_install msmtp-mta
 
 	# ensure permissions on the msmtprc file are strict (will contain password in plain-text)
 	chmod 0600 /etc/msmtprc
@@ -355,7 +362,7 @@ if [ "$is_a_workstation" = "y" ]; then
 	aptitude upgrade -yq
 
 	# install workstation packages
-	aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
+	safe_aptitude_install firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]; then
@@ -365,7 +372,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 	# conditionally install development tools
 	if [ "${install_development_tools:-}" = "y" ]; then
-		aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
+		safe_aptitude_install build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
 
 		# conditionally install gvm
 		if [ "${install_golang:-}" = "y" ] && ! which go &>/dev/null; then
@@ -414,7 +421,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		# install core desktop packages
 		aptitude clean
 		aptitude update
-		aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
+		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
 
 		# build connman-ui
 		if ! which connman-ui &>/dev/null; then
@@ -438,14 +445,20 @@ if [ "$is_a_workstation" = "y" ]; then
 			popd
 		fi
 
+		# add youtube-dl utility
+		if which youtube-dl &>/dev/null; then
+			curl -Lo /usr/local/bin/youtube-dl https://yt-dl.org/latest/youtube-dl
+			chmod a+rx /usr/local/bin/youtube-dl
+		fi
+
 		# install slim login manager
-		[ "$install_login_manager" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" slim
+		[ "$install_login_manager" = "y" ] && safe_aptitude_install slim
 
 		# remove auto-mounted items from fstab
 		sed -i '/auto/d' /etc/fstab
 
 		# handle workstation laptop packages
-		if [ "$is_laptop" = "y" ] && aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xbacklight
+		if [ "$is_laptop" = "y" ] && safe_aptitude_install xbacklight
 
 		# install urxvt plugins
 		[ ! -f /usr/lib/urxvt/perl/tabbedex ] && curl -Lso /usr/lib/urxvt/perl/tabbedex "https://raw.githubusercontent.com/shaggytwodope/tabbedex-urxvt/master/tabbedex"
@@ -454,7 +467,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# conditionally install flash projector
 		if [ "$install_flashprojector" = "y" ]; then
-			aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386 libcurl3:i386
+			safe_aptitude_install libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386 libcurl3:i386
 			curl -Lso /tmp/flash.tar.gz "https://fpdownload.macromedia.com/pub/flashplayer/updaters/11/flashplayer_11_sa.i386.tar.gz"
 			tar xf /tmp/flash.tar.gz -C /tmp
 			rm -f /tmp/flash.tar.gz
@@ -471,7 +484,7 @@ if [ "$is_a_workstation" = "y" ]; then
 			echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
 			aptitude clean
 			aptitude update
-			aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" chromium google-chrome-stable google-talkplugin
+			safe_aptitude_install chromium google-chrome-stable google-talkplugin
 			rm -f /etc/apt/sources.list.d/google-tmp.list /etc/apt/sources.list.d/google-chrome-unstable.list
 			aptitude clean
 			aptitude update
@@ -491,7 +504,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		# check for and install nvidia drivers
 		set +eu
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null; then
-			aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" linux-headers-amd64 dkms
+			safe_aptitude_install linux-headers-amd64 dkms
 			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.63/NVIDIA-Linux-x86_64-352.63.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
@@ -499,7 +512,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]; then
-			aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xboxdrv playonlinux mednafen cmake libsdl2-dev
+			safe_aptitude_install xboxdrv playonlinux mednafen cmake libsdl2-dev
 
 			# enable xbox drv
 			echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
@@ -523,7 +536,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 			# install steam dependencies, then download & install steam directly
 			if ! which steam &>/dev/null; then
-				aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xterm
+				safe_aptitude_install xterm
 				[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
 				curl -Lo /tmp/steam.deb http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
 				dpkg -i /tmp/steam.deb
@@ -532,29 +545,6 @@ if [ "$is_a_workstation" = "y" ]; then
 		fi
 	fi
 fi
-
-# detect virtualbox & install guest additions
-set +eu
-if [ $(lspci | grep -ci 'virtualbox') -gt 0 ] && [ $(lsmod | grep -c vbox) -eq 0 ]; then
-	aptitude install -Ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" virtualbox-guest-additions-iso
-	if [ -f /usr/share/virtualbox/VBoxGuestAdditions.iso ]; then
-
-		# install dependencies
-		aptitude install -ryq  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" build-essential module-assistant linux-headers-amd64
-
-		# run the installation & setup
-		if [ $(mount | grep -c '/tmp/vbox') -eq 0 ]; then
-			mkdir -p /tmp/vbox
-			mount -o loop /usr/share/virtualbox/VBoxGuestAdditions.iso /tmp/vbox
-			if [ -x /tmp/vbox/VBoxLinuxAdditions.run ]; then
-				/tmp/vbox/VBoxLinuxAdditions.run
-				systemctl start vboxadd.service || /etc/init.d/vboxadd start
-				[ -x /etc/init.d/vboxadd-x11 ] && /etc/init.d/vboxadd-x11 start
-			fi
-		fi
-	fi
-fi
-set -eu
 
 # secure ssh & restart service
 sed -i "s/Port\s*[0-9].*/Port ${ssh_port:-22}/" /etc/ssh/sshd_config
@@ -702,7 +692,8 @@ if [ "$username" != "root" ]; then
 fi
 set -eu
 
-# restart services whose configuration has been modified
+# update command system, and restart services which may have been configured
+update-command-not-found
 systemctl restart ssh
 [ "$install_transmission" = "y" ] && systemctl restart transmission-daemon
 [ "${install_nginx:-}" = "y" ] && nginx -t && systemctl restart nginx
