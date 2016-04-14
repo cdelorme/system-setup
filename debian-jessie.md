@@ -18,7 +18,7 @@ I highly recommend using the [`btrfs`](software/btrfs.md) file system.  It repla
 
 All of my systems are installed on EFI capable hardware, which is also supported by virtualbox with appropriate [post-install instructions](virtualization/uefi-config.md).
 
-I also recommend using [debian mirrors](http.debian.net) for best package installation results.  It's a portable solution that will identify the closest mirrors when running the package manager.
+I also recommend using [debian mirrors](http://http.debian.net/) for best package installation results.  It's a portable solution that will identify the closest mirrors when running the package manager.
 
 
 ## configuration
@@ -49,6 +49,7 @@ I make a bunch of general optimizations to any system I provision, which include
 - install enhancements to vim and bash globally
 - update locales and fonts and rebuild desktop applications list
 - enabling watchdog to reboot unresponsive systems
+- replace capslock with control (because honestly...)
 
 _The original UMASK defaults come from before linux created a group per user, and is no-longer a necessary restriction.  To modify it reduces the overhead of sharing files between users later, especially when using stickybits._
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xeuo pipefail
+set -euo pipefail
 IFS=$'\n\t'
 
 
@@ -61,13 +61,11 @@ grab_or_fallback()
 ##
 grab_secret_or_fallback()
 {
-	set +x
 	[ -n "$(eval echo \${$1:-})" ] && set -x && return 0
 	export ${1}=""
 	read -p "${3:-input}: " -s ${1}
 	echo "" # move to nextline
 	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-	set -x
 	return 0
 }
 
@@ -168,9 +166,13 @@ fi
 
 
 ##
-# clean up uefi configuration
+# here be dragons
 ##
 
+# enable debug mode so we can witness execution
+set -x
+
+# clean up uefi configuration
 if [ -d "/boot/efi" ]; then
 	mkdir -p /boot/efi/EFI/boot
 	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
@@ -178,11 +180,6 @@ if [ -d "/boot/efi" ]; then
 	# @link: https://svn.code.sf.net/p/edk2/code/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi
 	[ ! -f /boot/efi/shellx64.efi ] && wget --no-check-certificate -qO- "/boot/efi/shellx64.efi" "https://d2xxklvztqk0jd.cloudfront.net/github/Shell.efi" || true
 fi
-
-
-##
-# btrfs optimizations
-##
 
 # offer to optimize btrfs root
 export btrfs_optimizations="noatime,compress=lzo,space_cache,autodefrag"
@@ -217,15 +214,8 @@ if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ] && [[ $(cat /e
 			btrfs balance start /
 			set -eu
 		fi
-
-		# @todo(casey): create initial snapshot for restoration and future iterative backups
 	fi
 fi
-
-
-##
-# package installation
-##
 
 # fix conflicting packages and install system utilities
 which avahi-autoipd &>/dev/null && aptitude purge -yq avahi-autoipd
@@ -242,11 +232,6 @@ fi
 [ $(lspci | grep -i "wireless" | grep -ci "atheros") -gt 0 ] && safe_aptitude_install firmware-atheros
 [ $(lspci | grep -i "wireless" | grep -ci "broadcom") -gt 0 ] && safe_aptitude_install firmware-brcm80211
 [ $(lspci | grep -i "wireless" | grep -ci "intel") -gt 0 ] && safe_aptitude_install firmware-iwlwifi
-
-
-##
-# copy/install global configuration/dot files
-##
 
 # install local files or clone from git
 if [ -d data/ ]; then
@@ -287,11 +272,6 @@ fi
 
 # download ~/.git-completion
 [ ! -f /etc/skel/.git-completion ] && curl -Lso /etc/skel/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
-
-
-##
-# install conditional software
-##
 
 # conditionally install weechat
 [ "$install_weechat" = "y" ] && safe_aptitude_install weechat
@@ -421,7 +401,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		# install core desktop packages
 		aptitude clean
 		aptitude update
-		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer gtk-recordmydesktop openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
+		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer kazam guvcview openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
 
 		# build connman-ui
 		if ! which connman-ui &>/dev/null; then
@@ -626,13 +606,11 @@ if [ -d /etc/pulse ]; then
 	[ ! -e /etc/skel/.pulse ] && cp -R /etc/pulse /etc/skel/.pulse
 fi
 
+# @todo: run im-config
+# @todo: run ibus-setup (as user?)
+
 # install dot-files for root
 find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
-
-
-##
-# configure user
-##
 
 # create the user & add to basic groups
 id $username &>/dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
