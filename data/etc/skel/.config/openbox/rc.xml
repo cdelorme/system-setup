@@ -21,20 +21,14 @@
         <font place="InactiveOnScreenDisplay"><name>ForMateKonaVe</name><size>9</size><weight>bold</weight><slant>normal</slant></font>
     </theme>
     <keyboard>
-        <chainQuitKey>C-g</chainQuitKey>
-        <keybind key="W-d">
-            <keybind key="1"><action name="GoToDesktop"><to>1</to><wrap>no</wrap></action></keybind>
-            <keybind key="2"><action name="GoToDesktop"><to>2</to><wrap>no</wrap></action></keybind>
-            <keybind key="3"><action name="GoToDesktop"><to>3</to><wrap>no</wrap></action></keybind>
-        </keybind>
         <keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
         <keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
         <keybind key="W-A-Tab"><action name="NextWindow"><allDesktops>yes</allDesktops></action></keybind>
         <keybind key="W-A-S-Tab"><action name="PreviousWindow"><allDesktops>yes</allDesktops></action></keybind>
         <keybind key="W-Up"><action name="ToggleMaximizeFull"/></keybind>
         <keybind key="W-Down"><action name="Iconify"/></keybind>
-        <keybind key="W-Left">  <action name="MoveResizeTo"><monitor>1</monitor></action></keybind>
-        <keybind key="W-Right"> <action name="MoveResizeTo"><monitor>2</monitor></action></keybind>
+        <keybind key="W-Left">  <action name="MoveResizeTo"><monitor>prev</monitor></action></keybind>
+        <keybind key="W-Right"> <action name="MoveResizeTo"><monitor>next</monitor></action></keybind>
         <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
         <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
         <keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>
