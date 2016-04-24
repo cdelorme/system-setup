@@ -40,7 +40,7 @@ decompress ()
 	[ ! -f "${1}" ] && return
 
 	# test archive
-	if ! 7z t "${1}" >> "$LOG_FILE" 2>&1; then
+	if ! LANG=C 7z t "${1}" >> "$LOG_FILE" 2>&1; then
 		echo "Failed to extract ${1}..." >> /dev/stdout
 		return
 	fi
@@ -58,7 +58,7 @@ decompress ()
 	mkdir -p "${STORAGE}" >> "$LOG_FILE" 2>&1
 
 	# extract contents
-	if 7z x -y -o"${STORAGE}" "${1}"
+	if LANG=C 7z x -y -o"${STORAGE}" "${1}"
 	then
 
 		# conditionally fix bad characters
