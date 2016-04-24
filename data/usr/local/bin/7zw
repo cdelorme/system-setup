@@ -7,8 +7,7 @@ LOG_FILE="/dev/null"
 SELF_PATH=$(pwd)
 
 # If verbose set to /dev/stdout
-if [[ $1 = "v" ]]
-then
+if [[ $1 = "v" ]]; then
 	LOG_FILE="/dev/stdout"
 fi
 
@@ -16,11 +15,9 @@ fi
 TYPES=('zip' '7z' 'rar')
 
 # If OSX use sysctl
-if [ $(uname) = "Darwin" ]
-then
+if [ $(uname) = "Darwin" ]; then
 	CONCURRENCY=$(sysctl -n hw.ncpu)
-elif which nproc &> /dev/null
-then
+elif which nproc &> /dev/null; then
 	CONCURRENCY=$(nproc)
 else
 	CONCURRENCY=2
@@ -34,92 +31,65 @@ FILES=()
 PROCESSING=()
 
 # Iterate to build list of files by type
-for TYPE in ${TYPES[*]}
-do
+for TYPE in ${TYPES[*]}; do
 	FILES+=(*.${TYPE})
 done
 
 decompress ()
 {
+	[ ! -f "${1}" ] && return
 
-	# Does the file exist?
-	if [ ! -f "${1}" ]
-	then
-		return
-	fi
-
-	# Run test on archive and exit if it fails
-	if ! 7z t "${1}" >> "$LOG_FILE" 2>&1
-	then
+	# test archive
+	if ! 7z t "${1}" >> "$LOG_FILE" 2>&1; then
 		echo "Failed to extract ${1}..." >> /dev/stdout
 		return
 	fi
 
-	# Grab the full path to the file (OSX Compatible)
-	if [ $(uname) = "Darwin" ]
-	then
+	# acquire full path by os
+	if [ $(uname) = "Darwin" ]; then
 		local FILE_PATH=$(cd "$(dirname ${1})"; pwd)
 	else
 		local FILE_NAME=$(readlink -f "${1}")
 		local FILE_PATH=$(dirname "${FILE_NAME}")
 	fi
 
-	# Define temporary storage directory and grab the name for later
+	# prepare temporary storage directory
 	local STORAGE="$FILE_PATH/.7zw/${1%.*}"
-	local NEW_NAME=$(basename "$STORAGE")
-
-	# Create the storage folder
 	mkdir -p "${STORAGE}" >> "$LOG_FILE" 2>&1
 
-	# Run command
+	# extract contents
 	if 7z x -y -o"${STORAGE}" "${1}"
 	then
 
-		# Delete the compressed file
-		rm -rf "${1}"
+		# conditionally fix bad characters
+		which convmv &>/dev/null && (cd "${STORAGE}" && find -exec convmv --notest -f shift-jis -t utf8 {} \;)
 
-		# Get the extracted contents
-		local CONTENTS=("${STORAGE}/"*)
-
-		# Check the number of items
-		if [ ${#CONTENTS[*]} -gt 1 ]
-		then
-
-			# Move the entire package & delete the compressed file on success
-			if mv "${STORAGE}" "${FILE_PATH}/${NEW_NAME}" >> "${LOG_FILE}" 2>&1
-			then
-				rm -rf "${1}"
-			fi
+		# check contents and relocate file
+		if [ $(find ${STORAGE} -type f | wc -l) -eq 1 ]; then
+			cp -Rf "${STORAGE}/"* "${FILE_PATH}" && rm -rf "${STORAGE}"
 		else
-
-			# Move the inner component & delete compressed file on success
-			if cp -Rf "${STORAGE}/"* "${FILE_PATH}"
-			then
-				rm -rf "${1}"
-				rm -rf "${STORAGE}"
-			fi
+			mv "${STORAGE}" "${FILE_PATH}/$(basename ${STORAGE})" >> "${LOG_FILE}" 2>&1
 		fi
+
+		# cleanup original archive
+		rm -rf "${1}"
 	fi
 }
 
 # Iterate the files in parallel sets
-while [ ${#FILES[*]} -gt 0 ] || [ ${#PROCESSING[*]} -gt 0 ]
-do
+while [ ${#FILES[*]} -gt 0 ] || [ ${#PROCESSING[*]} -gt 0 ]; do
 
 	# Check processing array for completed processes
-	for PID in ${PROCESSING[*]}
-	do
+	for PID in ${PROCESSING[*]}; do
 
 		# If PID is done, remove from list
-		if [ -n "${PID}" ] && ! kill -s 0 $PID &> /dev/null
-		then
+		if [ -n "${PID}" ] && ! kill -s 0 $PID &> /dev/null; then
 			PROCESSING=(${PROCESSING[*]/#$PID/})
 		fi
 	done
 
 	# Run unzip commands concurrently
-	while [ ${#FILES[*]} -gt 0 ] && [ ${#PROCESSING[*]} -lt $CONCURRENCY ]
-	do
+	while [ ${#FILES[*]} -gt 0 ] && [ ${#PROCESSING[*]} -lt $CONCURRENCY ]; do
 
 		# Grab file from array & pop array
 		FILE="${FILES[${#FILES[*]}-1]}"
