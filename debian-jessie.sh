@@ -342,7 +342,7 @@ if [ "$is_a_workstation" = "y" ]; then
 	aptitude upgrade -yq
 
 	# install workstation packages
-	safe_aptitude_install firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman
+	safe_aptitude_install firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman convmv
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]; then
