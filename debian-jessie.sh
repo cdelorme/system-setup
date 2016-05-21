@@ -472,7 +472,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# sublime text 3 installation
 		if ! which subl &>/dev/null; then
-			curl -Lso /tmp/sublime.tar.bz2 "https://download.sublimetext.com/sublime_text_3_build_3103_x64.tar.bz2"
+			curl -Lso /tmp/sublime.tar.bz2 "https://download.sublimetext.com/sublime_text_3_build_3114_x64.tar.bz2"
 			tar xf /tmp/sublime.tar.bz2 -C /tmp
 			rm /tmp/sublime.tar.bz2
 			cp -R /tmp/sublime_text_3 /usr/local/sublime-text
