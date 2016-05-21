@@ -361,8 +361,8 @@ if [ "$is_a_workstation" = "y" ]; then
 			. ~/.gvm/scripts/gvm
 			gvm install go1.4.3
 			gvm use go1.4.3
-			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.6
-			gvm use go1.6 --default
+			GOROOT_BOOTSTRAP=$GOROOT gvm install go1.6.2
+			gvm use go1.6.2 --default
 			set -eu
 
 			# install go for all users
