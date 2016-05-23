@@ -19,22 +19,24 @@ IFS=$'\n\t'
 # accepts an array of packages
 ##
 safe_aptitude_install() {
-    unset UCF_FORCE_CONFNEW
-    export UCF_FORCE_CONFOLD=true
-    export DEBIAN_FRONTEND=noninteractive
-    aptitude clean
-    aptitude update
-    aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" | tee /tmp/aptitude.log
-    if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
-    then
-        safe_aptitude_install $@
-    fi
-    aptitude install -ryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" "$@" 2>&1 | tee /tmp/aptitude.log
-    if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
-    then
-        safe_aptitude_install $@
-    fi
-    return 0
+	unset UCF_FORCE_CONFNEW
+	local UCF_FORCE_CONFOLD=true
+	local DEBIAN_FRONTEND=noninteractive
+	aptitude clean
+	aptitude update
+	aptitude upgrade -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" | tee /tmp/aptitude.log
+	if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
+	then
+		safe_aptitude_install $@
+	fi
+	aptitude install -f -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+	[ -z "$@" ] && return 0
+	aptitude install -fryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" "$@" 2>&1 | tee /tmp/aptitude.log
+	if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
+	then
+		safe_aptitude_install $@
+	fi
+	return 0
 }
 
 
@@ -337,9 +339,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 	# enable multiarch
 	dpkg --add-architecture i386
-	aptitude clean
-	aptitude update
-	aptitude upgrade -yq
+	safe_aptitude_install
 
 	# install workstation packages
 	safe_aptitude_install firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman convmv
@@ -399,8 +399,6 @@ if [ "$is_a_workstation" = "y" ]; then
 		fi
 
 		# install core desktop packages
-		aptitude clean
-		aptitude update
 		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer kazam guvcview openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
 
 		# build connman-ui
@@ -462,12 +460,9 @@ if [ "$is_a_workstation" = "y" ]; then
 			echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
 			echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
 			echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
-			aptitude clean
-			aptitude update
 			safe_aptitude_install chromium google-chrome-stable google-talkplugin
 			rm -f /etc/apt/sources.list.d/google-tmp.list /etc/apt/sources.list.d/google-chrome-unstable.list
-			aptitude clean
-			aptitude update
+			safe_aptitude_install
 		fi
 
 		# sublime text 3 installation
@@ -520,7 +515,7 @@ if [ "$is_a_workstation" = "y" ]; then
 				[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
 				curl -Lo /tmp/steam.deb http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
 				dpkg -i /tmp/steam.deb
-				aptitude install -f
+				safe_aptitude_install
 			fi
 		fi
 	fi
