@@ -221,7 +221,7 @@ fi
 
 # fix conflicting packages and install system utilities
 which avahi-autoipd &>/dev/null && aptitude purge -yq avahi-autoipd
-safe_aptitude_install screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3
+safe_aptitude_install screen tmux vim git mercurial bzr subversion command-not-found unzip ntp resolvconf watchdog ssh sudo parted smartmontools htop pv nload iptraf nethogs libcurl3 lzma
 
 # handle laptop packages & configuration
 if [ "$is_laptop" = "y" ]; then
