@@ -1,4 +1,13 @@
 [
     { "keys": ["ctrl+tab"], "command": "next_view" },
-    { "keys": ["ctrl+shift+tab"], "command": "prev_view" }
+    { "keys": ["ctrl+shift+tab"], "command": "prev_view" },
+
+    // tmux hotkeys for origami
+	{ "keys": ["ctrl+b", "\""], "command": "create_pane", "args": {"direction": "down", "give_focus": true} },
+	{ "keys": ["ctrl+b", "%"], "command": "create_pane", "args": {"direction": "right", "give_focus": true} },
+	{ "keys": ["ctrl+b", "x"], "command": "destroy_pane", "args": {"direction": "self"} },
+	{ "keys": ["ctrl+b", "up"], "command": "travel_to_pane", "args": {"direction": "up"} },
+	{ "keys": ["ctrl+b", "right"], "command": "travel_to_pane", "args": {"direction": "right"} },
+	{ "keys": ["ctrl+b", "down"], "command": "travel_to_pane", "args": {"direction": "down"} },
+	{ "keys": ["ctrl+b", "left"], "command": "travel_to_pane", "args": {"direction": "left"} }
 ]
