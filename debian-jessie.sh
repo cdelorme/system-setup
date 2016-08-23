@@ -577,6 +577,18 @@ fi
 # enable watchdog if supported
 [ -f /dev/watchdog ] && systemctl enable watchdog && systemctl start watchdog
 
+# conditionally install virtualbox guest additions /w visual enhancements
+if [ $(dmesg | grep -c "VirtualBox") -gt 0 ] && id vagrant &>/dev/null; then
+	mkdir /tmp/vbox
+	VER=$(cat /home/vagrant/.vbox_version)
+	mount -o loop /home/vagrant/VBoxGuestAdditions_$VER.iso /tmp/vbox
+	sh /tmp/vbox/VBoxLinuxAdditions.run || echo "vbox requires a reboot and exited with bad code..."
+	umount /tmp/vbox
+	rm -f /home/vagrant/VBoxGuestAdditions_$VER.iso
+	echo "# eliminate 3d acceleration for various tools due to borked drivers" >> /etc/skel/.bash_profile
+	echo "export LIBGL_ALWAYS_SOFTWARE=1" >> /etc/skel/.bash_profile
+fi
+
 # enable custom fonts
 [ $(grep "# ja_JP.UTF-8" -F /etc/locale.gen) -eq 0 ] || sed -i "s/# ja_JP\.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/" /etc/locale.gen
 locale-gen
