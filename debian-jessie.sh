@@ -487,9 +487,17 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]; then
-			safe_aptitude_install xboxdrv playonlinux mednafen cmake libsdl2-dev
+			safe_aptitude_install playonlinux mednafen cmake libsdl2-dev libboost1.55-dev scons libusb-1.0-0-dev git-core
 
-			# enable xbox drv
+			# build xboxdrv from source without bugs
+			git clone https://github.com/captin411/xboxdrv.git /tmp/xboxdrv
+			pushd /tmp/xboxdrv
+			git checkout feature-send-disconnect-on-error
+			make
+			make install PREFIX=/usr
+			popd
+
+			# enable xboxdrv
 			echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
 			systemctl enable xboxdrv.service
 			systemctl restart xboxdrv.service
