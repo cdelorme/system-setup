@@ -18,8 +18,6 @@ Next, install [package control](https://sublime.wbond.net/installation) so that 
 
 - [Markdown Preview](https://github.com/revolunet/sublimetext-markdown-preview)
 - [SublimeCodeIntel](https://github.com/SublimeCodeIntel/SublimeCodeIntel)
-- [DefaultFileType](https://github.com/spadgos/sublime-DefaultFileType)
-- [EncodingHelper](https://github.com/SublimeText/EncodingHelper)
 - [GoSublime](https://github.com/DisposaBoy/GoSublime)
 - [Origami](https://github.com/SublimeText/Origami)
 
@@ -35,3 +33,5 @@ Configuration is raw json and should be portable via copy and paste:
 - osx: `~/Library/Application\ Support/Sublime\ Text\ 3/`
 
 Mine can be found [here](../data/etc/skel/.config/sublime-text-3/Packages/User/).
+
+One of the favorite changes is the addition of `tmux` styled hotkeys for the Origami plugin.
