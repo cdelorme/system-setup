@@ -346,8 +346,8 @@ if [ "$is_a_workstation" = "y" ]; then
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]; then
-		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.compton.conf
-		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.compton.conf
+		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.config/compton.conf
+		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.config/compton.conf
 	fi
 
 	# conditionally install development tools
