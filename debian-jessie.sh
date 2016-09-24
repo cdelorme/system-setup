@@ -63,7 +63,7 @@ grab_or_fallback()
 ##
 grab_secret_or_fallback()
 {
-	[ -n "$(eval echo \${$1:-})" ] && set -x && return 0
+	[ -n "$(eval echo \${$1:-})" ] && return 0
 	export ${1}=""
 	read -p "${3:-input}: " -s ${1}
 	echo "" # move to nextline
