@@ -63,7 +63,7 @@ grab_or_fallback()
 ##
 grab_secret_or_fallback()
 {
-	[ -n "$(eval echo \${$1:-})" ] && set -x && return 0
+	[ -n "$(eval echo \${$1:-})" ] && return 0
 	export ${1}=""
 	read -p "${3:-input}: " -s ${1}
 	echo "" # move to nextline
@@ -346,8 +346,8 @@ if [ "$is_a_workstation" = "y" ]; then
 
 	# check graphics card and adjust compton configuration
 	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]; then
-		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.compton.conf
-		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.compton.conf
+		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.config/compton.conf
+		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.config/compton.conf
 	fi
 
 	# conditionally install development tools
@@ -399,7 +399,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		fi
 
 		# install core desktop packages
-		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer kazam guvcview openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection
+		safe_aptitude_install openbox obconf obmenu menu dmz-cursor-theme gnome-icon-theme gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio pavucontrol pasystray xorg xserver-xorg-video-all x11-xserver-utils x11-utils xinit xinput suckless-tools compton desktop-base tint2 conky-all zenity pcmanfm consolekit xarchiver tumbler ffmpegthumbnailer feh hsetroot rxvt-unicode gmrun arandr clipit xsel gksu catfish fbxkb xtightvncviewer gparted vlc mplayer kazam guvcview openshot flashplugin-nonfree gimp gimp-plugin-registry evince viewnior fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc regionset libavcodec-extra dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection hardinfo
 
 		# build connman-ui
 		if ! which connman-ui &>/dev/null; then
@@ -467,7 +467,7 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# sublime text 3 installation
 		if ! which subl &>/dev/null; then
-			curl -Lso /tmp/sublime.tar.bz2 "https://download.sublimetext.com/sublime_text_3_build_3114_x64.tar.bz2"
+			curl -Lso /tmp/sublime.tar.bz2 "https://download.sublimetext.com/sublime_text_3_build_3126_x64.tar.bz2"
 			tar xf /tmp/sublime.tar.bz2 -C /tmp
 			rm /tmp/sublime.tar.bz2
 			cp -R /tmp/sublime_text_3 /usr/local/sublime-text
@@ -487,9 +487,17 @@ if [ "$is_a_workstation" = "y" ]; then
 
 		# conditionally install gaming software
 		if [ "$install_gaming_software" = "y" ]; then
-			safe_aptitude_install xboxdrv playonlinux mednafen cmake libsdl2-dev
+			safe_aptitude_install playonlinux mednafen cmake libsdl2-dev libboost1.55-dev scons libusb-1.0-0-dev git-core
 
-			# enable xbox drv
+			# build xboxdrv from source without bugs
+			git clone https://github.com/captin411/xboxdrv.git /tmp/xboxdrv
+			pushd /tmp/xboxdrv
+			git checkout feature-send-disconnect-on-error
+			make
+			make install PREFIX=/usr
+			popd
+
+			# enable xboxdrv
 			echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
 			systemctl enable xboxdrv.service
 			systemctl restart xboxdrv.service
