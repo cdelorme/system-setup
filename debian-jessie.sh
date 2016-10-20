@@ -472,7 +472,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		set +eu
 		if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null; then
 			safe_aptitude_install linux-headers-amd64 dkms
-			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/352.63/NVIDIA-Linux-x86_64-352.63.run"
+			curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/367.57/NVIDIA-Linux-x86_64-367.57.run"
 			/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/lib/i386-linux-gnu --dkms -X -Z
 		fi
 		set -eu
