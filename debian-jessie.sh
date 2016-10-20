@@ -421,6 +421,25 @@ if [ "$is_a_workstation" = "y" ]; then
 			chmod a+rx /usr/local/bin/youtube-dl
 		fi
 
+		# install dark gtk theme
+		git clone https://github.com/numixproject/numix-gtk-theme /tmp/numix
+		safe_aptitude_install ruby libxml2-utils
+		gem install sass
+		pushd /tmp/numix
+		make
+		make install
+		popd
+		yes | gem uninstall sass
+		aptitude purge -yq ruby libxml2-utils
+
+		# install custom icons
+		git clone https://github.com/snwh/moka-icon-theme /tmp/moka
+		pushd /tmp/moka
+		./autogen.sh
+		make install
+		popd
+		rm -rf /tmp/moka
+
 		# install slim login manager
 		[ "$install_login_manager" = "y" ] && safe_aptitude_install slim
 
