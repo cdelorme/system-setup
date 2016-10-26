@@ -1,18 +1,19 @@
-#!/bin/bash
+#!/bin/bash -eu
 
 if ! which gm &>/dev/null
 then
 	echo "requires gm convert..."
 	exit 1
-fi
-
-if [ -z "$1" ] || [ ! -f "$1" ]
+elif [ -z "${1:-}" ] || [ ! -f "$1" ]
 then
 	echo "No file supplied..."
 	exit 1
 fi
 
-out=$(dir "$1")
-[ -n "$2" ] && [ -d "$2" ] && out="$2"
+out="$(dirname "$1")"
+if [ -n "${2:-}" ] && [[ ! -f "$2" || -d "$2" ]]; then
+	out="$2"
+	mkdir -p "$out" &>/dev/null || true
+fi
 
-gm convert -density 300 "$1" +adjoin -quality 100 ${out}%d.jpg
+gm convert -density 300 "$1" +adjoin -quality 100 ${out}/%d.jpg
