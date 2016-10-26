@@ -1,107 +1,63 @@
 #!/bin/bash
 
-# Set logging
-LOG_FILE="/dev/null"
+# set default concurrency with nproc as maximum
+zw_concurrency=2
+which nproc &>/dev/null && zw_concurrency=$(nproc)
 
-# Get execution path
-SELF_PATH=$(pwd)
-
-# If verbose set to /dev/stdout
-if [[ $1 = "v" ]]; then
-	LOG_FILE="/dev/stdout"
-fi
-
-# Declare Supported Types in space delimited bash array
-TYPES=('zip' '7z' 'rar')
-
-# If OSX use sysctl
-if [ $(uname) = "Darwin" ]; then
-	CONCURRENCY=$(sysctl -n hw.ncpu)
-elif which nproc &> /dev/null; then
-	CONCURRENCY=$(nproc)
-else
-	CONCURRENCY=2
-fi
-
-# Grab Current Directory
-FILE_PATH=$(pwd)
-
-# Create empty files array
-FILES=()
-PROCESSING=()
-
-# Iterate to build list of files by type
-for TYPE in ${TYPES[*]}; do
-	FILES+=(*.${TYPE})
+# prepare a list of files with supported types
+zw_types=("zip" "7z" "rar")
+zw_files=()
+for zwt in ${zw_types[*]}; do
+	while IFS= read -d $'\0' -r file ; do
+		zw_files+=("$file")
+	done < <(find . -iname "*.$zwt" -print0)
 done
 
+# define function for concurrent decompression
 decompress ()
 {
-	[ ! -f "${1}" ] && return
+	[ ! -f "$1" ] && return
 
-	# test archive
-	if ! LANG=C 7z t "${1}" >> "$LOG_FILE" 2>&1; then
-		echo "Failed to extract ${1}..." >> /dev/stdout
+	# test the archive
+	if ! LANG=C 7z t "$1" 1 >&/dev/null ; then
+		echo "Failed to extract ${1}..."
 		return
 	fi
 
-	# acquire full path by os
-	if [ $(uname) = "Darwin" ]; then
-		local FILE_PATH=$(cd "$(dirname ${1})"; pwd)
-	else
-		local FILE_NAME=$(readlink -f "${1}")
-		local FILE_PATH=$(dirname "${FILE_NAME}")
+	# acquire basename, check for conflicts, and move file
+	zw_base="$(basename $1)"
+	zw_dir="${zw_base%.*}"
+	if ! mkdir "$zw_dir"; then
+		echo "conflict when trying to extract ${1}..."
+		return
 	fi
+	mv "$zw_base" "${zw_dir}/"
+	cd "$zw_dir"
 
-	# prepare temporary storage directory
-	local STORAGE="$FILE_PATH/.7zw/${1%.*}"
-	mkdir -p "${STORAGE}" >> "$LOG_FILE" 2>&1
-
-	# extract contents
-	if LANG=C 7z x -y -o"${STORAGE}" "${1}"
-	then
-
-		# conditionally fix bad characters
-		which convmv &>/dev/null && (cd "${STORAGE}" && find -exec convmv --notest -f shift-jis -t utf8 {} \;)
-
-		# check contents and relocate file
-		if [ $(find ${STORAGE} -type f | wc -l) -eq 1 ]; then
-			cp -Rf "${STORAGE}/"* "${FILE_PATH}" && rm -rf "${STORAGE}"
-		else
-			mv "${STORAGE}" "${FILE_PATH}/$(basename ${STORAGE})" >> "${LOG_FILE}" 2>&1
-		fi
-
-		# cleanup original archive
-		rm -rf "${1}"
+	# extract contents, remove the file, and fix depth
+	if LANG=C 7z x -y "$zw_base" >>/dev/null ; then
+		rm "$zw_base"
+		while [ $(find . -mindepth 1 -maxdepth 1 -type f | wc -l) -eq 0 ] && [ $(find . -mindepth 1 -maxdepth 1 -type d | wc -l) -eq 1 ]; do
+			zw_child_dir=$(find . -mindepth 1 -maxdepth 1 -type d)
+			mv "$zw_child_dir"/* .
+			rm -rf "$zw_child_dir"
+		done
 	fi
 }
 
-# Iterate the files in parallel sets
-while [ ${#FILES[*]} -gt 0 ] || [ ${#PROCESSING[*]} -gt 0 ]; do
+# run until no files remain and no processes are running
+while [ ${#zw_files[@]} -gt 0 ] || [ ${#zw_processing[@]} -gt 0 ]; do
 
-	# Check processing array for completed processes
-	for PID in ${PROCESSING[*]}; do
-
-		# If PID is done, remove from list
-		if [ -n "${PID}" ] && ! kill -s 0 $PID &> /dev/null; then
-			PROCESSING=(${PROCESSING[*]/#$PID/})
-		fi
+	# clean process list
+	for zw_pid in ${zw_processing[@]}; do
+		[ -n "$zw_pid" ] && ! kill -s 0 $zw_pid &>/dev/null && zw_processing=(${zw_processing[@]/#$zw_pid/})
 	done
 
-	# Run unzip commands concurrently
-	while [ ${#FILES[*]} -gt 0 ] && [ ${#PROCESSING[*]} -lt $CONCURRENCY ]; do
-
-		# Grab file from array & pop array
-		FILE="${FILES[${#FILES[*]}-1]}"
-		unset FILES[${#FILES[*]}-1]
-
-		# Run operation on file
-		decompress "${FILE}" >> "${LOG_FILE}" 2>&1 & PROCESSING+=($!)
+	# while we have process space pop items off zw_files, send to decompress, and capture the pids
+	while [ ${#zw_files[@]} -gt 0 ] && [ ${#zw_processing[@]} -lt $zw_concurrency ]; do
+		decompress "${zw_files[${#zw_files[@]}-1]}" & zw_processing+=($!)
+		unset zw_files[${#zw_files[@]}-1]
 	done
 
-	# sleep to reduce processing load
-	[[ ${#FILES[*]} -gt 0 ]] && (sleep 0.5 > /dev/null || sleep 1)
+	sleep 1
 done
-
-# Remove the temporary hidden folder/workspace
-rm -rf "${SELF_PATH}/.7zw" >> "$LOG_FILE" 2>&1
