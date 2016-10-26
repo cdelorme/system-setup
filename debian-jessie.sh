@@ -421,6 +421,11 @@ if [ "$is_a_workstation" = "y" ]; then
 			chmod a+rx /usr/local/bin/youtube-dl
 		fi
 
+		# install gif duration script
+		if which gifduration &>/dev/null; then
+			curl -Lo /usr/local/bin/gifduration https://raw.githubusercontent.com/alimony/gifduration/master/gifduration.py
+		fi
+
 		# install dark gtk theme
 		git clone https://github.com/numixproject/numix-gtk-theme /tmp/numix
 		safe_aptitude_install ruby libxml2-utils
