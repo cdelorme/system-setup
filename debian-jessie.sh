@@ -424,6 +424,7 @@ if [ "$is_a_workstation" = "y" ]; then
 		# install gif duration script
 		if which gifduration &>/dev/null; then
 			curl -Lo /usr/local/bin/gifduration https://raw.githubusercontent.com/alimony/gifduration/master/gifduration.py
+			chmod a+rx /usr/local/bin/gifduration
 		fi
 
 		# install dark gtk theme
