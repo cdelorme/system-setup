@@ -344,12 +344,6 @@ if [ "$is_a_workstation" = "y" ]; then
 	# install workstation packages
 	safe_aptitude_install firmware-linux firmware-linux-free firmware-linux-nonfree uuid-runtime fuse exfat-fuse exfat-utils sshfs lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles markdown checkinstall lm-sensors hddtemp cpufrequtils bluez rfkill connman convmv
 
-	# check graphics card and adjust compton configuration
-	if [ $(lspci | grep -i "vga" | grep -ic " intel") -eq 1 ] || [ $(lspci | grep -i "vga" | grep -ic " nvidia") -eq 1 ]; then
-		sed -i 's/#vsync = "opengl-swc";/vsync = "opengl-swc";/' /etc/skel/.config/compton.conf
-		sed -i 's/#glx-no-rebind-pixmap = true;/glx-no-rebind-pixmap = true;/' /etc/skel/.config/compton.conf
-	fi
-
 	# conditionally install development tools
 	if [ "${install_development_tools:-}" = "y" ]; then
 		safe_aptitude_install build-essential dkms cmake bison pkg-config devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libncurses-dev libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev
@@ -447,7 +441,14 @@ if [ "$is_a_workstation" = "y" ]; then
 		rm -rf /tmp/moka
 
 		# install slim login manager
-		[ "$install_login_manager" = "y" ] && safe_aptitude_install slim
+		if [ "$install_login_manager" = "y" ]; then
+			safe_aptitude_install slim
+			systemctl enable slim.service
+			if [ "$username" != "root" ]; then
+				echo "default_user $username" >> /etc/slim.conf
+				echo "auto_login yes" >> /etc/slim.conf
+			fi
+		fi
 
 		# remove auto-mounted items from fstab
 		sed -i '/auto/d' /etc/fstab
