@@ -78,26 +78,11 @@ If you are configuring a VPS or a LAN instance, you will want to open ports for 
 _The default ports can be modified later if preferred in `conf/import/`._
 
 
-#### patches
-
-At the time I compiled last, the following patch was necessary to the `chclif_charlist_notify` function in `src/char/char_clif.c` to avoid crashing the client:
-
-	void chclif_charlist_notify( int fd, struct char_session_data* sd ){
-		WFIFOHEAD(fd, 6);
-		WFIFOW(fd, 0) = 0x9a0;
-		// pages to req / send them all in 1 until mmo_chars_fromsql can split them up
-		WFIFOL(fd, 2) = (sd->char_slots>3)?sd->char_slots/3:1; //int TotalCnt (nb page to load)
-		WFIFOSET(fd,6);
-	}
-
-_This change must be made prior to compiling._
-
-
 ### compiling renewal
 
-Next we want to compile the server with a valid `packetver`, which is directly related to the client which it talks to.  Here is how to compile for the 20151029 client:
+Next we want to compile the server with a valid `packetver`, which is directly related to the client which it talks to.  Here is how to compile for the 20151104 client:
 
-	./configure --enable-packetver=20151029
+	./configure --enable-packetver=20151104
 	make clean
 	make server
 
@@ -108,7 +93,7 @@ _Anytime you chance the client you will need to rerun the `./configure` command 
 
 Compiling for classic mode (eg. Pre-Renewal), you simply add the `--enable-prere` flag when configuring:
 
-	./configure --enable-prere=yes --enable-packetver=20151029
+	./configure --enable-prere=yes --enable-packetver=20151104
 	make clean
 	make server
 
@@ -132,6 +117,7 @@ Starting with `conf/import/char_conf.txt`:
 	char_moves_unlimited: yes
 	char_ip: 127.0.0.1
 	login_ip: 127.0.0.1
+	start_point: izlude,192,210:izlude_a,192,210:izlude_b,192,210:izlude_c,192,210
 
 Next is `conf/import/inter_conf.txt`:
 
@@ -180,6 +166,7 @@ Starting with `conf/import/char_conf.txt`:
 	char_moves_unlimited: yes
 	char_ip: ro.mydns.com
 	login_ip: ro.mydns.com
+	start_point: izlude,192,210:izlude_a,192,210:izlude_b,192,210:izlude_c,192,210
 
 Next is `conf/import/inter_conf.txt`:
 
@@ -252,7 +239,7 @@ These are the steps to installing a customized client:
 - download the [Translation](https://github.com/ROClientSide/Translation) then merge or replace the `data/` and `System/` folders into of `RO/`
 	- **You may want to merge the files from [this translation](https://github.com/zackdreaver/ROenglishPRE) with the first for classic mode.**
 - update `RO/data/clientinfo.xml` to reflect your expected server settings
-- download the [latest compatible pre-modified client](https://rathena.org/board/topic/104205-2015-client-support/) (20151029)
+- download the [latest compatible pre-modified client](https://rathena.org/board/topic/104205-2015-client-support/) (20151104)
 - download [NEMO](https://github.com/MStr3am/NEMO.git) and execute it against the pre-modified client
 - copy the custom client into the `RO/` folder
 - add shortcuts to `RO/Setup.exe` and `RO/custom.exe` (or w/e you named it)
@@ -273,7 +260,7 @@ If you are using multiple monitors, you may find that 3D Acceleration won't work
 
 ### clientinfo.xml
 
-Here is a sample clientinfo.xml, with valid `version` code for the 20151029 client and fixed admin accounts:
+Here is a sample clientinfo.xml, with valid `version` code for the 20151104 client and fixed admin accounts:
 
 	<?xml version="1.0" encoding="euc-kr" ?>
 	<clientinfo>
@@ -284,7 +271,7 @@ Here is a sample clientinfo.xml, with valid `version` code for the 20151029 clie
 			<display>ServerName</display>
 	      	<address>127.0.0.1</address>
 	      	<port>6900</port>
-	      	<version>54</version>
+	      	<version>55</version>
 	      	<langtype>0</langtype>
 			<registrationweb>www.ragnarok.com</registrationweb>
 			<loading>
@@ -352,6 +339,8 @@ There is a neat `Culling` setting that adds opacity to foreground elements such 
 
 ### [black background with new character at login](https://rathena.org/board/topic/105174-new-character-black-background/)
 
+**Edit: A better solution is to simply set `start_point: izlude,192,210:izlude_a,192,210:izlude_b,192,210:izlude_c,192,210` in your `char_conf.txt`.**
+
 To fix this, download `OldIzlude.grf` and add it to `RO/`, then modify `RO/DATA.INI` by adding the line `1=OldIzlude.grf` before `2=data.grf` and save the file.
 
 _The file and overview with more details can be found in the both linked by the header._
@@ -391,11 +380,15 @@ I do not know how else to resolve it though, so if you run into it I guess you j
 While the game loads `RO/data.grf` by default from `RO/DATA.INI`, some folks have mentioned loading `RO/rdata.grf` in their `RO/DATA.INI`, but I have no details on what is contained within.
 
 
+## 20151029 client
+
+I saw reports that this client throws some erratic packets causing disconnects.  To avoid this, they suggest the newer 20151104 client release.
+
+
 ## future
 
 Future additions to this documentation may include:
 
-- youtube video tutorials with links for setting up a server and a client
 - updated iptables to reduce exposed security holes (if able, may already be locked down)
 - creating a registration web server (FluxCP and custom-rigged)
 - adding and supplying a patcher
