@@ -1,0 +1,1 @@
+../../linux/software/git-bare-repositories.md
