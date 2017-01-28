@@ -28,10 +28,6 @@ _The only flaw of this editor is the lack of automation support exposed through 
 
 Configuration is raw json and should be portable via copy and paste:
 
-- windows: `~/AppData/Roaming/Sublime Text 3/`
 - linux: `~/.config/sublime-text-3/`
-- osx: `~/Library/Application\ Support/Sublime\ Text\ 3/`
 
-Mine can be found [here](../data/etc/skel/.config/sublime-text-3/Packages/User/).
-
-One of the favorite changes is the addition of `tmux` styled hotkeys for the Origami plugin.
+Mind can be found [here](../debian/data/desktop/etc/skel/.config/sublime-text-3/Packages/User/).

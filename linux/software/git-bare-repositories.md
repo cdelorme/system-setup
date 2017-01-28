@@ -1,5 +1,5 @@
 
-# bare git repositories
+# git bare repositories
 
 In my case I have sometimes wanted to use my own server to store a copy of my projects and act as an intermediary to pushing changes out.  Using a bare repository and post-receive hooks this is not only possible but super useful when you need a locally deployed development copy of your project in a shared environment.
 

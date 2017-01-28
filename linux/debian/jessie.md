@@ -23,15 +23,13 @@ I also recommend using [debian mirrors](http://http.debian.net/) for best packag
 
 ## configuration
 
-I automatically copy all files from [data](data/) onto the system, which includes:
+I have organized various [configuration files and fonts](data/) into folders that can be directly copied based on what is being installed.
 
 - global configuration into `/etc/`
-- [custom fonts](software/fonts.md) into `/usr/share/fonts/`
+- [custom fonts](../software/fonts.md) into `/usr/share/fonts/`
 - desktop application launchers into `/usr/share/applications/`
 - helpful executables into `/usr/local/bin/`
 - user configuration files into `/etc/skel`
-
-_I chose to install all these files even when not all are used since it was the simplest automated solution with no real negative consequences outside of unused text files._
 
 
 ## optimizations

@@ -7,7 +7,7 @@ However if you need a mail service, then msmtp is likely your best option.  Here
 
     aptitude install -ryq msmtp-mta
 
-To configure it, create a file at [`/etc/msmtprc`](../data/etc/msmtprc), and replace the usernames.  To secure it make sure this file has `0600` permissions, since it will store passwords in plain text.
+To configure it, create a file at [`/etc/msmtprc`](../debian/data/extras/etc/msmtprc), and replace the usernames.  To secure it make sure this file has `0600` permissions, since it will store passwords in plain text.
 
 _You can create multiple accounts and are not limited to just one, this allows you to change sender data accordingly._
 

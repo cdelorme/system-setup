@@ -10,5 +10,5 @@ _I did have to modify the EPSON Kyoukashoutai font, because the file was uploade
 
 To avoid problems with either host going down, or needing to modify fonts during the install, I include a copy of them:
 
-- [ForMateKonaVe](../data/usr/share/fonts/truetype/jis/ForMateKonaVe.ttf)
-- [EPSON Kyoukashoutai](../data/usr/share/fonts/truetype/jis/epkyouka.ttf)
+- [ForMateKonaVe](../debian/data/desktop/usr/share/fonts/truetype/jis/ForMateKonaVe.ttf)
+- [EPSON Kyoukashoutai](../debian/data/desktop/usr/share/fonts/truetype/jis/epkyouka.ttf)

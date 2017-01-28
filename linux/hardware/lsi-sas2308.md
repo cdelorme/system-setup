@@ -10,9 +10,9 @@ At the same time, these cards come default configured to be fully managed raid c
 
 ## a brief opinionated rant
 
-Many years ago when processors were not as capable, hardware raid was a very good solution to offload the handling of calculations.  That said, in current day hardware raid has several failings.  To transfer a hardware raid configuration you need a compatible card, and often those cards cost a boatload and are only on the market for a fixed period of time.
+Many years ago when processors were not as capable, hardware raid was a very good solution to offload heavy computation of sharding data across many disks.  However, even in its day it had several failings; the most aggregious of which was the fact that not all hardware was equal or compatible, thus to ensure long-term safety you would often buy a spare controller which already cost a hefty premium.
 
-With the growing rate of new hardware being released, the changes of hard-ware raid being useful for a very long period are only getting lower and lower.  Meanwhile, advances in multi-core and parallel processing have only made software raid a more appealing option.
+The rapid advancement of harddrive hardware, and the ascension of multicore processors, combined with continued improvement in operation system stability at this point in time trump the performance benefits hardware raid offers and make software raid all the more appealing.
 
 I use software raid, because I can spinup any copy of linux or unix with mdadm support and access my data, on any set of hardware I wire them into.
 

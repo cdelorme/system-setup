@@ -31,3 +31,33 @@ I also add color-schemes that make the editor a bit more readable or easy-on-the
 
 - [VividChalk](https://github.com/tpope/vim-vividchalk)
 - [Sunbirst](https://github.com/tangphillip/SunburstVIM.git)
+
+
+## automation
+
+I used to automate the installation of plugins and color schemes:
+
+	# install vim packages & fonts
+	mkdir -p ~/.vim/colors
+	if [ ! -d /tmp/vim-ctrlp ]
+	then
+		git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
+		find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
+	fi
+	if [ ! -d /tmp/vim-json ]
+	then
+		git clone "https://github.com/elzr/vim-json" /tmp/vim-json
+		find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
+	fi
+	if [ ! -d /tmp/vim-node ] && [ "$install_node" = "y" ]
+	then
+		git clone "https://github.com/moll/vim-node" /tmp/vim-node
+		find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
+	fi
+	if [ ! -d /tmp/vim-go ] && [ "$install_go" = "y" ]
+	then
+		git clone "https://github.com/fatih/vim-go" /tmp/vim-go
+		find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
+	fi
+	[ ! -f ~/.vim/colors/vividchalk.vim ] && curl -Lso ~/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
+	[ ! -f ~/.vim/colors/sunburst.vim ] && curl -Lso ~/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
