@@ -10,7 +10,7 @@ zw_files=()
 for zwt in ${zw_types[*]}; do
 	while IFS= read -d $'\0' -r file ; do
 		zw_files+=("$file")
-	done < <(find . -iname "*.$zwt" -print0)
+	done < <(find . -mindepth 1 -maxdepth 1 -type f -iname "*.$zwt" -print0)
 done
 
 # define function for concurrent decompression
@@ -25,7 +25,7 @@ decompress ()
 	fi
 
 	# acquire basename, check for conflicts, and move file
-	zw_base="$(basename $1)"
+	zw_base=$(basename "$1")
 	zw_dir="${zw_base%.*}"
 	if ! mkdir "$zw_dir"; then
 		echo "conflict when trying to extract ${1}..."
