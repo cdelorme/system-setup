@@ -71,10 +71,10 @@ set -x
 # here be dragons
 ##
 
-# install fonts
+# install data files
 mkdir -p ~/Library/Fonts
-[ ! -f ~/Library/Fonts/ForMateKonaVe.ttf ] && curl -Lo ~/Library/Fonts/ForMateKonaVe.ttf "https://github.com/cdelorme/system-setup/raw/master/data/usr/share/fonts/truetype/jis/ForMateKonaVe.ttf"
-[ ! -f ~/Library/Fonts/epkyouka.ttf ] && curl -Lo ~/Library/Fonts/epkyouka.ttf "https://github.com/cdelorme/system-setup/raw/master/data/usr/share/fonts/truetype/jis/epkyouka.ttf"
+[ ! -f ~/Library/Fonts/ForMateKonaVe.ttf ] && curl -Lo ~/Library/Fonts/ForMateKonaVe.ttf "https://github.com/cdelorme/system-setup/raw/master/linux/debian/data/desktop/usr/share/fonts/truetype/jis/ForMateKonaVe.ttf"
+[ ! -f ~/Library/Fonts/epkyouka.ttf ] && curl -Lo ~/Library/Fonts/epkyouka.ttf "https://github.com/cdelorme/system-setup/raw/master/linux/debian/data/desktop/usr/share/fonts/truetype/jis/epkyouka.ttf"
 
 # install markdown quicklook generator
 if [ ! -f /tmp/qlgen.zip ]
@@ -91,30 +91,9 @@ then
 	curl -L "https://raw.githubusercontent.com/cdelorme/dot-files/master/install" | bash -s -- -q
 	. ~/.bash_profile
 
-	# install vim packages & fonts
+	# download vim color file
 	mkdir -p ~/.vim/colors
-	if [ ! -d /tmp/vim-ctrlp ]
-	then
-		git clone "https://github.com/kien/ctrlp.vim" /tmp/vim-ctrlp
-		find /tmp/vim-ctrlp/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
-	fi
-	if [ ! -d /tmp/vim-json ]
-	then
-		git clone "https://github.com/elzr/vim-json" /tmp/vim-json
-		find /tmp/vim-json/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
-	fi
-	if [ ! -d /tmp/vim-node ] && [ "$install_node" = "y" ]
-	then
-		git clone "https://github.com/moll/vim-node" /tmp/vim-node
-		find /tmp/vim-node/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
-	fi
-	if [ ! -d /tmp/vim-go ] && [ "$install_go" = "y" ]
-	then
-		git clone "https://github.com/fatih/vim-go" /tmp/vim-go
-		find /tmp/vim-go/* -maxdepth 0 -type d -exec cp -R {} ~/.vim/ \;
-	fi
-	[ ! -f ~/.vim/colors/vividchalk.vim ] && curl -Lso ~/.vim/colors/vividchalk.vim "https://raw.githubusercontent.com/tpope/vim-vividchalk/master/colors/vividchalk.vim"
-	[ ! -f ~/.vim/colors/sunburst.vim ] && curl -Lso ~/.vim/colors/sunburst.vim "https://raw.githubusercontent.com/tangphillip/SunburstVIM/master/colors/sunburst.vim"
+	[ ! -f ~/.vim/colors/vividchalk.vim ] && curl -Lso ~/.vim/colors/vividchalk.vim "https://github.com/cdelorme/system-setup/raw/master/linux/debian/data/base/etc/skel/.vim/colors/vividchalk.vim"
 
 	# download ~/.git-completion
 	[ ! -f ~/.git-completion ] && curl -Lso ~/.git-completion "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
