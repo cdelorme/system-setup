@@ -17,75 +17,37 @@ safe_aptitude_install() {
 	then
 		safe_aptitude_install $@
 	fi
-	aptitude install -f -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-	[ -z "$@" ] && return 0
 	aptitude install -fryq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" "$@" 2>&1 | tee /tmp/aptitude.log
 	if [ $(grep -c "E: Failed" /tmp/aptitude.log) -ne 0 ] || [ $(grep -c "W: Failed" /tmp/aptitude.log) -ne 0 ]
 	then
 		safe_aptitude_install $@
 	fi
-	return 0
 }
 
-##
-# @description request input and optionally apply a fallback/default value
-# @param $1 variable name
-# @param $2 default value
-# @param $3 description
-##
-grab_or_fallback()
-{
-	[ -n "$(eval echo \${$1:-})" ] && return 0
-	export ${1}=""
-	read -p "${3:-input}: " ${1}
-	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-	return 0
-}
-
-##
-# @description request secret input (eg. passwords) and optionally apply a fallback/default value
-# @param $1 variable name
-# @param $2 default value
-# @param $3 description
-##
-grab_secret_or_fallback()
-{
-	[ -n "$(eval echo \${$1:-})" ] && return 0
-	export ${1}=""
-	read -p "${3:-input}: " -s ${1}
-	echo "" # move to nextline
-	[ -z "$(eval echo \$$1)" ] && export ${1}="${2:-}"
-	return 0
-}
-
-##
-# @description ask for yes/no response via y/n
-# @param $1 variable to handle input
-# @param $2 description
-##
-grab_yes_no()
-{
-	[[ "$(eval echo \${$1:-})" = "y" || "$(eval echo \${$1:-})" = "n" ]] && return 0
-	export ${1}=""
-	until [[ "$(eval echo \$$1)" = "y" || "$(eval echo \$$1)" = "n" ]]; do
-		read -p "${2:-} (yn)? " ${1}
+# loop read-input until env var is populated
+grab_input() {
+	until [ -n "$(eval echo \${$1:-})" ]; do
+		read -p "${2:-input}: " ${1}
 	done
-	return 0
+}
+
+# loop hidden read-input until env var is populated
+grab_password() {
+	until [ -n "$(eval echo \${$1:-})" ]; do
+		read -p "${2:-input}: " -s ${1}
+		echo ""
+	done
+}
+
+# loop read-input until env var is populated with y or n
+grab_yn() {
+	until [[ "$(eval echo \${$1:-})" = "y" || "$(eval echo \${$1:-})" = "n" ]]; do
+		read -p "${2:-input} (y/n)? " ${1}
+	done
 }
 
 # gather configuration details via user input
-# grab_or_fallback "username" "root" "enter your username"
-# grab_secret_or_fallback "password" "" "enter your user password"
-# [ ! -f "/home/$username/.ssh/id_rsa" ] && grab_yes_no "generate_ssh_key" "create an ssh key"
-# grab_or_fallback "github_username" "" "enter your github username"
-# if [ -n "$github_username" ]; then
-# 	if [ -f "/home/$username/.ssh/id_rsa" ] || [ "${generate_ssh_key:-}" = "y" ]; then
-# 		grab_yes_no "github_ssh_key" "upload ssh key to github"
-# 		[ "$github_ssh_key" = "y" ] && grab_secret_or_fallback "github_password" "" "enter your github password"
-# 	fi
-# fi
-# grab_yes_no "workstation" "is this a workstation"
-# @note: automatically assume all work/development and gaming software packages
+grab_yn "workstation" "is this a workstation"
 
 # enable debug mode so we can witness execution
 set -x
@@ -93,16 +55,24 @@ set -x
 # install baseline utilities
 safe_aptitude_install ssh sudo parted lm-sensors lzma unzip screen tmux vim ntp resolvconf libcurl3 git mercurial bzr subversion command-not-found
 
+# set vim.basic as the default editor
+update-alternatives --set editor /usr/bin/vim.basic
+
 # detect & install firmware packages based on known device names
 [ $(lspci | grep -ci "realtek") -gt 0 ] && safe_aptitude_install firmware-realtek
 [ $(lspci | grep -i "wireless" | grep -ci "atheros") -gt 0 ] && safe_aptitude_install firmware-atheros
 [ $(lspci | grep -i "wireless" | grep -ci "broadcom") -gt 0 ] && safe_aptitude_install firmware-brcm80211
 [ $(lspci | grep -i "wireless" | grep -ci "intel") -gt 0 ] && safe_aptitude_install firmware-iwlwifi
 
-# @todo: revisit nvidia installation here or within desktop block
-
 # configure sensors
 which sensors-detect &>/dev/null && (yes | sensors-detect) || true
+
+# optimize uefi boot
+if [ -f /boot/efi/EFI/debian/grubx64.efi ]; then
+	mkdir -p /boot/efi/EFI/boot
+	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
+	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+fi
 
 # optimize btrfs
 if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ]; then
@@ -136,17 +106,20 @@ if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ]; then
 	fi
 fi
 
-# install local files or from git repository
-if [ -d data/ ]; then
-	cp -fR data/* /
+# install base data files
+if [ -d linux/debian/data/base ]; then
+	cp -fR linux/debian/data/base/* /
 else
-	rm -rf /tmp/system-setup
-	git clone https://github.com/cdelorme/system-setup /tmp/system-setup
-	cp -fR /tmp/system-setup/data/* /
+	([ -d /tmp/system-setup ] && cd /tmp/system-setup && git pull ) || git clone https://github.com/cdelorme/system-setup /tmp/system-setup
+	cp -fR /tmp/system-setup/linux/debian/data/base/* /
 fi
 
 # install global dot-files
 curl -Ls https://raw.githubusercontent.com/cdelorme/dot-files/master/install | bash -s -- -q
+
+# reboot after timeout on kernel panic
+[ $(grep -c "panic=10" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 panic=10"/' /etc/default/grub
+[ $(grep -c "panic = 10" /etc/sysctl.conf) -eq 0 ] && echo "kernel.panic = 10" >> /etc/sysctl.conf
 
 # add pam tally locking
 [ $(grep -c "pam_tally2" /etc/pam.d/common-auth) -eq 0 ] && echo "auth required pam_tally2.so deny=4 even_deny_root onerr=fail unlock_time=600 root_unlock_time=60" >> /etc/pam.d/common-auth
@@ -186,62 +159,17 @@ fi
 locale-gen
 fc-cache -fr
 
-# @todo: add desktop installation steps
-# @todo: as part of desktop mode, try to detect battery for automatic laptop utilities & config
-
 # update command not found archive
 update-command-not-found
 
 # install dot-files for root
 find /etc/skel -mindepth 1 -maxdepth 1 -exec cp -R {} /root/ \;
 
-# @todo: rebuild user configuration section
-
-# # create the user & add to basic groups
-# id $username &>/dev/null || useradd -m -s /bin/bash -p $(mkpasswd -m md5 "$password") $username
-# usermod -aG sudo,users,disk,adm,netdev,plugdev $username
-# [ "$desktop" = "y" ] && usermod -aG bluetooth,input,audio,video $username
-
-# # generate ssh key & optionally upload to github
-# if [ "$username" != "root" ] && [ "${generate_ssh_key:-}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]; then
-# 	ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
-# 	[ -d /home/$username/.ssh ] && chmod 600 /home/$username/.ssh/*
-# 	if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-}" = "y" ]; then
-# 		curl -Li -u "${github_username}:${github_password}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
-# 	fi
-# fi
-
-# # prepare crontab for non-root user
-# if [ "$username" != "root" ]; then
-# 	export cronfile="/var/spool/cron/crontabs/${username}"
-# 	[ -f "$cronfile" ] || touch "$cronfile"
-# 	chown $username:crontab $cronfile
-# 	chmod 600 $cronfile
-
-# 	# update ssh keys using github account
-# 	set +eu
-# 	if [ -n "$github_username" ]; then
-# 		[ $(grep -c "update-keys" "$cronfile") -eq 1 ] || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
-# 		su $username -c "which update-keys &>/dev/null && update-keys $github_username"
-# 	fi
-# 	set -eu
-# fi
-
-# # ensure ownership for users folder
-# [ -d /home/$username/.ssh ] && chown -R $username:$username /home/$username/.ssh/
-
-# # use github username to acquire name & email from github
-# if [ -n "$github_username" ]; then
-# 	tmpdata=$(curl -Ls "https://api.github.com/users/${github_username}")
-# 	github_name=$(echo "$tmpdata" | grep name | cut -d ':' -f2 | tr -d '",' | sed "s/^ *//")
-# 	github_email=$(echo "$tmpdata" | grep email | cut -d ':' -f2 | tr -d '":,' | sed "s/^ *//")
-# 	su $username -c "cd && git config --global user.name $github_username"
-# 	su $username -c "cd && git config --global user.email $github_email"
-# fi
-
 # reload ssh and iptables
 systemctl restart ssh
 /etc/network/if-up.d/iptables
 
 # finish with a positive exit code
-exit 0
+[ "${workstation:-n}" != "y" ] && exit 0
+
+echo "configuration workstation"
