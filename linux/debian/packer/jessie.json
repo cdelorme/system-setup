@@ -4,37 +4,37 @@
 			"type": "virtualbox-iso",
 			"virtualbox_version_file": ".vbox_version",
 			"vm_name": "packer-debian-jessie-image",
-			"output_directory": "dist/debian-jessie",
-			"headless": false,
-			"hard_drive_interface": "sata",
-			"disk_size": 65536,
-			"vboxmanage": [
-				["modifyvm", "{{.Name}}", "--memory", "1024"],
-				["modifyvm", "{{.Name}}", "--accelerate3d", "on"]
-			],
 			"guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
 			"guest_os_type": "Debian_64",
 			"iso_url": "https://cdimage.debian.org/debian-cd/8.7.1/amd64/iso-cd/debian-8.7.1-amd64-CD-1.iso",
 			"iso_checksum": "065c90fa72ed51b7ce06ecfdc660b083e7b0c40bbf63fd58559c8bf7df7752da",
 			"iso_checksum_type": "sha256",
+			"iso_interface": "sata",
+			"hard_drive_interface": "sata",
+			"disk_size": 65536,
+			"vboxmanage": [
+				["modifyvm", "{{.Name}}", "--firmware", "efi"],
+				["modifyvm", "{{.Name}}", "--memory", "1024"],
+				["modifyvm", "{{.Name}}", "--accelerate3d", "on"]
+			],
+			"headless": false,
 			"http_directory": "http",
 			"boot_command": [
-				"<esc><wait>",
-				"install",
-				" auto",
-				" url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/jessie.cfg",
-				" debian-installer=en_US",
-				" locale=en_US",
-				" keymap=us",
-				" netcfg/get_hostname=jessie",
-				" netcfg/get_domain=vm ",
-				"<enter>"
+				"<wait>c<wait>linux /install.amd/vmlinuz ",
+				"auto=true ",
+				"url=http://{{.HTTPIP}}:{{.HTTPPort}}/jessie.cfg ",
+				"hostname=jessie ",
+				"domain=vm ",
+				"vga=788 --- quiet<enter>",
+				"initrd /install.amd/initrd.gz<enter>",
+				"boot<enter>"
 			],
 			"ssh_port": 22,
 			"ssh_wait_timeout": "15m",
 			"ssh_username": "root",
 			"ssh_password": "root",
-			"shutdown_command": "shutdown -h now"
+			"shutdown_command": "shutdown -h now",
+			"output_directory": "dist/debian-jessie"
 		}
 	],
 	"provisioners": [
