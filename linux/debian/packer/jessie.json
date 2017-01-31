@@ -17,7 +17,7 @@
 				["modifyvm", "{{.Name}}", "--memory", "1024"],
 				["modifyvm", "{{.Name}}", "--accelerate3d", "on"]
 			],
-			"headless": false,
+			"headless": true,
 			"http_directory": "http",
 			"boot_command": [
 				"<wait>c<wait>linux /install.amd/vmlinuz ",

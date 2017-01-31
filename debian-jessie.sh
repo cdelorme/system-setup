@@ -201,10 +201,10 @@ exit 0
 # register other sources for installation
 wget --no-check-certificate -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google-tmp.list
-echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
-echo "deb http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
-echo "deb http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
-echo "deb http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+echo "deb [arch=amd64] http://dl.google.com/linux/talkplugin/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+echo "deb [arch=amd64] http://dl.google.com/linux/earth/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
+echo "deb [arch=amd64] http://dl.google.com/linux/musicmanager/deb/ stable main" >> /etc/apt/sources.list.d/google-tmp.list
 echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list
 
 # enable multiarch
@@ -213,23 +213,18 @@ dpkg --add-architecture i386
 # install desktop utilities
 apt-get clean
 apt-get update
-until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y linux-headers-amd64 dkms menu build-essential gcc-multilib cmake pkg-config libncurses-dev firmware-linux uuid-runtime exfat-fuse exfat-utils libimobiledevice-utils gvfs-bin ssh sshfs bluez xboxdrv lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles xorg xinit consolekit openbox obconf obmenu pcmanfm tint2 conky-all xarchiver feh hsetroot rxvt-unicode gparted hardinfo gmrun clipit graphicsmagick lame libvorbis-dev vorbis-tools libogg-dev libexif-dev libfaac-dev libx264-dev id3 mplayer kazam guvcview openshot gimp gimp-plugin-registry viewnior evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc pulseaudio pavucontrol pasystray compton ffmpeg ffmpegthumbnailer chromium google-chrome-stable google-talkplugin playonlinux mednafen mame joystick libgtk2.0-0:i386 libxt6:i386 libnss3:i386 libcurl3:i386; do sleep 1; done
+until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y linux-headers-amd64 dkms menu build-essential gcc-multilib g++-multilib cmake pkg-config libncurses-dev firmware-linux uuid-runtime exfat-fuse exfat-utils libimobiledevice-utils gvfs-bin ssh sshfs bluez xboxdrv lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles xorg xinit consolekit openbox obconf obmenu pcmanfm tint2 conky-all xarchiver feh hsetroot rxvt-unicode gparted hardinfo gmrun clipit graphicsmagick lame libvorbis-dev vorbis-tools libogg-dev libexif-dev libfaac-dev libx264-dev id3 mplayer kazam guvcview openshot gimp gimp-plugin-registry viewnior evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc pulseaudio pavucontrol pasystray compton ffmpeg ffmpegthumbnailer chromium google-chrome-stable google-talkplugin playonlinux mednafen mame joystick libgtk2.0-0:i386 libxt6:i386 libnss3:i386 libcurl3:i386; do sleep 1; done
 
 # cleanup duplicate sources post-installation
 rm -f /etc/apt/sources.list.d/google-tmp.list
 apt-get clean
 apt-get update
 
-# add user-controlled pulse configuration
-cp -R /etc/pulse /etc/skel/.pulse
-su $username -c 'cp -R /etc/pulse ~/.pulse'
-
 # install steam
 if ! which steam &>/dev/null; then
 	[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
 	curl -Lo /tmp/steam.deb http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
-	dpkg -i /tmp/steam.deb
-	apt-get install -f
+	dpkg -i /tmp/steam.deb || apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -fy
 fi
 
 # detect & install firmware packages based on known device names
@@ -248,29 +243,28 @@ if [ ! -d /usr/local/src/SDL2-2.0.5 ]; then
 	curl -Lso /tmp/sdl2.tar.gz https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
 	tar -C /usr/local/src -xf /tmp/sdl2.tar.gz
 	rm /tmp/sdl2.tar.gz
-	mkdir /usr/local/src/SDL2-2.0.5/{build,build_i386}
+fi
+mkdir -p /usr/local/src/SDL2-2.0.5/{build,build_i386}
+if ! which sdl2-config &>/dev/null; then
+	pushd /usr/local/src/SDL2-2.0.5/build
+	../configure
+	make
+	make install
+	popd
 
-	if which ! sdl2-config &>/dev/null; then
-		pushd /usr/local/src/SDL2-2.0.5/build
-		../configure
-		make
-		make install
-		popd
+	pushd /usr/local/src/SDL2-2.0.5/build_i386
+	CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32 ../configure --build=i386-linux
+	CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32 make
+	make install
+	popd
 
-		pushd /usr/local/src/SDL2-2.0.5/build_i386
-		CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32 ../configure --build=i386-linux
-		CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32 make
-		make install
-		popd
-
-		ldconfig
-	fi
+	ldconfig
 fi
 
 # build koku-xinput-wine as a wine/playonlinux controller plugin
 if [ -d ]; then
-	git clone https://github.com/KoKuToru/koku-xinput-wine.git /usr/local/src/
-	mkdir /usr/local/src/koku-xinput-wine/build
+	git clone https://github.com/KoKuToru/koku-xinput-wine.git /usr/local/src/koku-xinput-wine
+	mkdir -p /usr/local/src/koku-xinput-wine/build
 	pushd /usr/local/src/koku-xinput-wine/build
 	cmake ..
 	make
@@ -303,7 +297,7 @@ fi
 
 # look for packer supplied version file to install vbox guest additions
 if [ -f ~/.vbox_version ]; then
-	mkdir /tmp/vbox
+	mkdir -p /tmp/vbox
 	VER=$(cat ~/.vbox_version 2>/dev/null)
 	mount -o loop ~/VBoxGuestAdditions_$VER.iso /tmp/vbox
 	sh /tmp/vbox/VBoxLinuxAdditions.run || echo "vbox requires a reboot and returned a bad exit code..."
@@ -311,6 +305,8 @@ if [ -f ~/.vbox_version ]; then
 	rm -f ~/VBoxGuestAdditions_$VER.iso
 	echo "# eliminate 3d acceleration for various tools due to borked drivers" >> /etc/skel/.bash_profile
 	echo "export LIBGL_ALWAYS_SOFTWARE=1" >> /etc/skel/.bash_profile
+	su $username -c 'echo "# eliminate 3d acceleration for various tools due to borked drivers" >> ~/.bash_profile'
+	su $username -c 'echo "export LIBGL_ALWAYS_SOFTWARE=1" >> ~/.bash_profile'
 fi
 
 # add youtube-dl utility
@@ -336,20 +332,8 @@ if ! which subl &>/dev/null; then
 	curl -Lso "/etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package" "https://sublime.wbond.net/Package%20Control.sublime-package"
 fi
 
-# install urxvt plugins
+# install urxvt font plugin
 [ ! -f /usr/lib/urxvt/perl/font ] && curl -Lo /usr/lib/urxvt/perl/font "https://raw.githubusercontent.com/noah/urxvt-font/master/font"
-[ ! -f /usr/lib/urxvt/perl/clipboard ] && curl -Lo /usr/lib/urxvt/perl/clipboard "https://raw.githubusercontent.com/muennich/urxvt-perls/master/clipboard"
-
-# build & install ppsspp
-if ! which psp &>/dev/null; then
-	git clone https://github.com/hrydgard/ppsspp.git /usr/local/src/
-	pushd /usr/local/src/ppsspp
-	git checkout v1.3
-	git submodule update --init
-	./b.sh
-	ln -fs /usr/local/src/ppsspp/build/PPSSPPSDL /usr/local/bin/psp
-	popd
-fi
 
 # update alternative default softwares
 update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
@@ -363,6 +347,6 @@ if [ "$username" != "root" ]; then
 
 	# install go & node with user gvm/nvm
 	set +eu
-	[ "$username" != "root" ] && su $username -c 'cd && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.7.5 && gvm use go1.7.5 --default && gvm uninstall go1.4.2'
+	[ "$username" != "root" ] && su $username -c '[ ! -d /etc/skel/.gvm ] && (curl -Ls "https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer" | bash) && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.7.5 && gvm use go1.7.5 --default && gvm uninstall go1.4.2'
 	set -eu
 fi
