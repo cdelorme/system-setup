@@ -194,10 +194,6 @@ fi
 # finish with a positive exit code
 [ "${workstation:-n}" != "y" ] && exit 0
 
-# @temp: testing workstation behavior
-cp -R /tmp/system-setup /root/
-exit 0
-
 # register other sources for installation
 wget --no-check-certificate -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 echo "# Google Chrome repo http://www.google.com/linuxrepositories/" > /etc/apt/sources.list.d/google-tmp.list
