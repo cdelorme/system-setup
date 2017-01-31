@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<openbox_menu xmlns="http://openbox.org/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://openbox.org/
-    file:///usr/share/openbox/menu.xsd">
-    <menu id="root-menu" label="Openbox 3">
-        <item label="web"><action name="Execute"><execute>x-www-browser</execute></action></item>
-        <item label="editor"><action name="Execute"><execute>subl</execute></action></item>
-        <item label="cli"><action name="Execute"><execute>x-terminal-emulator</execute></action></item>
-        <item label="files"><action name="Execute"><execute>pcmanfm</execute></action></item>
-        <menu id="/Debian" />
-        <separator />
-        <menu id="client-list-menu" />
-        <separator />
-        <item label="reload"><action name="Reconfigure" /></item>
-        <item label="logout"><action name="Exit"><prompt>no</prompt></action></item>
-        <item label="reboot"><action name="Execute"><execute>gksudo 'shutdown -r now' -m "Are you sure you want to reboot?"</execute></action></item>
-        <item label="shutdown"><action name="Execute"><execute>gksudo 'shutdown -h now' -m "Are you sure you want to shutdown?"</execute></action></item>
-    </menu>
+<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/ file:///usr/share/openbox/menu.xsd">
+	<menu id="root-menu" label="Openbox 3">
+		<item label="web"><action name="Execute"><execute>x-www-browser</execute></action></item>
+		<item label="editor"><action name="Execute"><execute>subl</execute></action></item>
+		<item label="cli"><action name="Execute"><execute>x-terminal-emulator</execute></action></item>
+		<item label="files"><action name="Execute"><execute>pcmanfm</execute></action></item>
+		<menu id="/Debian" />
+		<separator />
+		<menu id="client-list-menu" />
+		<separator />
+		<item label="reload"><action name="Reconfigure" /></item>
+		<item label="logout"><action name="Exit"><prompt>no</prompt></action></item>
+		<item label="reboot"><action name="Execute"><prompt>Are you sure you want to reboot?</prompt><execute>systemctl reboot -i</execute></action></item>
+		<item label="shutdown"><action name="Execute"><prompt>Are you sure you want to shutdown?</prompt><execute>systemctl poweroff</execute></action></item>
+	</menu>
 </openbox_menu>

@@ -41,7 +41,13 @@
 		{
 			"type": "shell",
 			"environment_vars": [
-				"workstation=y"
+				"workstation=y",
+				"username=test",
+				"password=testing123",
+				"generate_ssh_key=y",
+				"github_username=cdelorme",
+				"github_ssh_key=n",
+				"github_password=test"
 			],
 			"script": "../../../debian-jessie.sh"
 		}

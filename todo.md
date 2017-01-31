@@ -1,62 +1,51 @@
 
 # todo
 
-- remove `catfish` hotkey from openbox
-- remove `gksu` from shutdown/restart (add sudoers rules?)
-	- `%admin ALL=NOPASSWD: /sbin/reboot, /sbin/halt, /sbin/shutdown`
-- fix maximize & restore window decoration behavior
-	- probably involves modifying [contexts](http://openbox.org/wiki/Help:Bindings#Context)
-- add hotkeys for window-alignment with resolution detection for intelligent resizing?
-- fill out `openbox.md` with hotkey details
-- move iptable rules to nginx and transmission documentation
+- craft a script to install at `/usr/local/bin/pulseshort` for pulseaudio behaviors
+	- apply behaviors: toggle mute, increase by 5%, decrease by 5%
+	- iterate **all** sinks in RUNNING state to apply the change
+		- `pactl list short sinks | grep RUNNING | awk '{print $1}'`?
+
+- move iptable rules to `nginx.md` and `transmission.md` documentation
+
+- add a `btrfs.md` document
+	- document benefits of mirrored raid for data-safety
 
 
 ---
 
-- make sure source packages are installed at the right places
+- build a new box with no provisioner steps
+	- load that box into vagrant to test everything else manually!
+	- launch instance and verify configuration has enabled audio
+	- take a snapshot prior to testing further code
 
-- verify retry logic for package installation
-- fix remaining syntax errors found in automation
+- execute my script starting with workstation behaviors:
+	- verify i386 does not break
+	- verify steam installs from downloaded deb
 
-- load exported box into vagrant
-- get Vagrantfile to launch uefi box image
+- verify audio works
 
-- verify that all workstation files are correctly copied
-- verify vbox guest additions are installed
-- verify `xboxdrv` was installed
-- verify raw `apt-get` commands work (consistently over several runs)
-- verify 64bit `flashplayer` works and is not missing any dependencies
-- verify availability of `ffmpeg` from backports
-- verify availability of `steam` from i386
-	- test that we can perform a scripted non-interactive install
-	- revert to the former .deb direct download as a fallback
+- debug xdefaults
+	- test urxvt resize hotkeys
+	- test clipboard on highlight
 
-- checkout good builtin openbox themes
+- verify that `ffmpeg` replaces `libav-tools` and these others:
+	-`libavcodec-extra libavcodec-dev libavfilter-dev libavdevice-dev libavutil-dev`
+
+- identify a superior "dark" openbox theme to use
 	- update configuration files
-	- test availability in a fresh automation (add missing obconf commands?)
 
-- figure out how to automate `ibus-mozc`, `ibus-setup`, and `im-config`
+- test i386 flashplayer does not crash like the 64bit did
+	- also make sure it doesn't print a bunch of missing module errors when run from terminal
 
-- test on real hardware /w an nvidia card that the nvidia installation block works
-- verify `koku-xinput-wine` can be used
+- test that openbox `reboot` and `shutdown` menu options work
+
+
+---
 
 - check through usage for unavailable functionality and errors that may explain these:
-	- old packages `nfs-common perl markdown checkinstall convmv bison devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio-module-bluetooth xserver-xorg-video-all x11-xserver-utils x11-utils xinput suckless-tools desktop-base zenity tumbler arandr catfish xsel gksu fbxkb xtightvncviewer flashplugin-nonfree regionset dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection libsdl2-dev libboost1.55-dev scons libusb-1.0-0-dev git-core libgd-tools rfkill`
-	- ??? `libharfbuzz-dev:i386 libxcomposite-dev:i386 libpixman-1-dev:i386`
-	- flashplayer 32bit `libgtk-3-0:i386 libgtk2.0-0:i386 libasound2-plugins:i386 libxt-dev:i386 libnss3 libnss3:i386 libcurl3:i386`
-
-
----
-
-- verify that my final image with desktop tools does not have `avahi-autoipd`
-- further optimize preseed by identifying which undocumented gpt label lines are actually needed and removing the rest
-
-
----
-
-- revisit and test the `7zw` script extensively
-
-- figure out hyperspin or hyperloop and create a gui mednafen wrapper
+	- old: `nfs-common perl markdown checkinstall convmv bison devscripts python-dev python3-dev python-pip python3-pip bpython bpython3 libmcrypt-dev libperl-dev libconfig-dev libpcre3-dev libsdl2-dev libglfw3-dev libsfml-dev gnome-icon-theme-extras lxappearance alsa-base alsa-utils alsa-tools pulseaudio-module-bluetooth xserver-xorg-video-all x11-xserver-utils x11-utils xinput suckless-tools desktop-base zenity tumbler arandr catfish xsel gksu fbxkb xtightvncviewer flashplugin-nonfree regionset dh-autoreconf intltool libgtk-3-dev gtk-doc-tools gobject-introspection libsdl2-dev libboost1.55-dev scons libusb-1.0-0-dev git-core libgd-tools rfkill`
+	- 386 `libharfbuzz-dev:i386 libxcomposite-dev:i386 libpixman-1-dev:i386 libgtk-3-0:i386 libasound2-plugins:i386`
 
 - upgrade conkyrc
 	- consider launcher script to parameterize details
@@ -67,7 +56,33 @@
 	- add datetime before uptime
 	- add temperature reporting
 
-- investigate `scim` for debian japanese input support
+- revisit the `7zw` script and see if we can extend it at all
+
+- figure out how to automate `ibus-mozc`, `ibus-setup`, and `im-config`
+
+- figure out how to setup either `hyperspin` or `hyperloop` as frontends to launch mame & mednafen
+
+
+---
+
+- test on real hardware /w an nvidia card that the nvidia installation block works
+- verify xboxdrv works on real hardware (crashing in vbox)
+- verify working pulse audio (no extra steps?)
+	- saved settings are stored in `~/.config`, hence the copy of the files is to ensure user-owned modifiable for saves
+	- this includes things like the volume controls, and default sinks/sources
+- verify working bluetooth (no extra steps or `rfkill` dependencies?)
+- verify `koku-xinput-wine` can be used (install steam and a game, try controller)
+
+
+---
+
+- optimize preseed by identifying which undocumented gpt partition table lines are actually needed
+	- disable all lines
+	- add `exit 0` to top of script temporarily
+	- keep only one line enabled at a time, or until we get past the preseed automation
+	- once we reach the os, verify with parted that a valid gpt partition table was used
+- test preseed with fixed-size swap for greater predictability in partitions (useful for btrfs raid1)
+- test building ppsspp 1.3 and keeping the entire source at `/usr/local/src/`
 
 
 ---
@@ -107,18 +122,6 @@
 
 ## desktop
 
-Install steam via manual download:
-
-	# install steam dependencies, then download & install steam directly
-	if ! which steam &>/dev/null; then
-		safe_aptitude_install xterm
-		[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
-		curl -Lo /tmp/steam.deb http://repo.steampowered.com/steam/archive/precise/steam_latest.deb
-		dpkg -i /tmp/steam.deb
-		safe_aptitude_install
-	fi
-
-
 Do we need to build xboxdrv from source?:
 
 	# build xboxdrv from source without bugs
@@ -135,12 +138,6 @@ Do we need to build xboxdrv from source?:
 	systemctl restart xboxdrv.service
 
 
-Do we need to remove auto mounted items from fstab?
-
-	# remove auto-mounted items from fstab
-	sed -i '/auto/d' /etc/fstab
-
-
 Is this really how to configure pulse audio?:
 
 	# configure audio
@@ -148,18 +145,6 @@ Is this really how to configure pulse audio?:
 	if [ -d /etc/pulse ]; then
 		[ ! -e /etc/skel/.pulse ] && cp -R /etc/pulse /etc/skel/.pulse
 	fi
-
-
-Installing gvm/go (as/for user?):
-
-	[ ! -d $HOME/.gvm ] && curl -Lo- https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
-	set +eu
-	. ~/.gvm/scripts/gvm
-	gvm install go1.4.3
-	gvm use go1.4.3
-	GOROOT_BOOTSTRAP=$GOROOT gvm install go1.6.2
-	gvm use go1.6.2 --default
-	set -eu
 
 
 ## user configuration
