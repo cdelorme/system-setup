@@ -36,8 +36,10 @@
 		<keybind key="W-Left"><action name="MoveResizeTo"><monitor>prev</monitor></action></keybind>
 		<keybind key="W-C-Right"><action name="Unmaximize"/><action name="MoveResizeTo"><width>50%</width><height>100%</height><x>-0</x><y>0</y><monitor>current</monitor></action></keybind>
 		<keybind key="W-C-Left"><action name="Unmaximize"/><action name="MoveResizeTo"><width>50%</width><height>100%</height><x>0</x><y>0</y><monitor>current</monitor></action></keybind>
-        <keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
-        <keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+		<keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+		<keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
+		<keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
+		<keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
 		<keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>pactl set-sink-volume 0 +5%</command></action></keybind>
 		<keybind key="XF86AudioLowerVolume"><action name="Execute"><command>pactl set-sink-volume 0 -- -5%</command></action></keybind>
 		<keybind key="XF86AudioMute"><action name="Execute"><command>pactl set-sink-mute 0 toggle</command></action></keybind>
