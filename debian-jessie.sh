@@ -71,7 +71,7 @@ if [ "$(mount -t btrfs | awk '{print $3}' | grep -c '/')" -gt 0 ]; then
 	fi
 
 	# check whether fstab already contains optimizations
-	if [ $(cat /etc/fstab | grep ' / ' | grep -c "${btrfs_optimizations}") -eq 0 ]; then
+	if [ $(grep '\s/\s' /etc/fstab | grep -c "${btrfs_optimizations}") -eq 0 ]; then
 
 		# verify if ssd is being used
 		export root_partition="$(mount | awk -v dev='/' '$3==dev {print $1}')"
@@ -258,7 +258,7 @@ if ! which sdl2-config &>/dev/null; then
 fi
 
 # build koku-xinput-wine as a wine/playonlinux controller plugin
-if [ -d ]; then
+if [ ! -d /usr/local/src/koku-xinput-wine ]; then
 	git clone https://github.com/KoKuToru/koku-xinput-wine.git /usr/local/src/koku-xinput-wine
 	mkdir -p /usr/local/src/koku-xinput-wine/build
 	pushd /usr/local/src/koku-xinput-wine/build
@@ -292,17 +292,17 @@ if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-in
 fi
 
 # look for packer supplied version file to install vbox guest additions
-if [ -f ~/.vbox_version ]; then
+if [ -f ~/.vbox_version ] && [ $(lsmod | grep vbox) -eq 0 ]; then
 	mkdir -p /tmp/vbox
 	VER=$(cat ~/.vbox_version 2>/dev/null)
 	mount -o loop ~/VBoxGuestAdditions_$VER.iso /tmp/vbox
 	sh /tmp/vbox/VBoxLinuxAdditions.run || echo "vbox requires a reboot and returned a bad exit code..."
 	umount /tmp/vbox
-	rm -f ~/VBoxGuestAdditions_$VER.iso
 	echo "# eliminate 3d acceleration for various tools due to borked drivers" >> /etc/skel/.bash_profile
 	echo "export LIBGL_ALWAYS_SOFTWARE=1" >> /etc/skel/.bash_profile
 	su $username -c 'echo "# eliminate 3d acceleration for various tools due to borked drivers" >> ~/.bash_profile'
 	su $username -c 'echo "export LIBGL_ALWAYS_SOFTWARE=1" >> ~/.bash_profile'
+	rm -f ~/VBoxGuestAdditions_$VER.iso ~/.vbox_version
 fi
 
 # add youtube-dl utility
@@ -343,6 +343,6 @@ if [ "$username" != "root" ]; then
 
 	# install go & node with user gvm/nvm
 	set +eu
-	[ "$username" != "root" ] && su $username -c '[ ! -d /etc/skel/.gvm ] && (curl -Ls "https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer" | bash) && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.7.5 && gvm use go1.7.5 --default && gvm uninstall go1.4.2'
+	[ "$username" != "root" ] && su $username -c '[ ! -d ~/.gvm ] && cd && (curl -Ls "https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer" | bash) && . ~/.gvm/scripts/gvm && gvm install go1.4.2 && gvm use go1.4.2 && GOROOT_BOOTSTRAP=$GOROOT gvm install go1.7.5 && gvm use go1.7.5 --default && gvm uninstall go1.4.2'
 	set -eu
 fi
