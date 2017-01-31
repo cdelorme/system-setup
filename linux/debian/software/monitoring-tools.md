@@ -5,6 +5,12 @@ There are plenty of tools you can add to monitor traffic.  These are mostly usef
 
 For more advanced monitoring than `top` try `htop`.
 
+For more detailed CPU information try `cpufrequtils`.
+
+If you want to check HDD temperatures then `hddtemp` is fantastic.
+
+For rudimentary benchmarking you may like `hdparm`.
+
 For active network monitoring try these:
 
 - `nload`

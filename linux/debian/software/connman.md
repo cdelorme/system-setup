@@ -12,6 +12,9 @@ It depends on three packages:
 - `libdbus-1-dev`
 - `libglib2.0-dev`
 - `libgtk-3-dev`
+- `connman`
+
+_The UI package is merely a frontend to the daemon, so the `connman` package must be installed._
 
 Compilation can be safely automated as follows:
 
