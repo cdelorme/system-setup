@@ -33,7 +33,7 @@ grab_input "username" "enter your username"
 grab_password "password" "enter your user password"
 [ ! -f "/home/$username/.ssh/id_rsa" ] || grab_yn "generate_ssh_key" "create an ssh key"
 grab_input "github_username" "enter your github username"
-{[ -f "/home/$username/.ssh/id_rsa" ] || [ "${generate_ssh_key:-n}" = "y" ]} && grab_yn "github_ssh_key" "upload ssh key to github"
+su $username -c '[ ! -f ~/.ssh/id_rsa ]' && [ "${generate_ssh_key:-n}" = "y" ] && grab_yn "github_ssh_key" "upload ssh key to github"
 [ "${github_ssh_key:-n}" = "y" ] && grab_password "github_password" "enter your github password"
 
 # enable debug mode so we can witness execution
