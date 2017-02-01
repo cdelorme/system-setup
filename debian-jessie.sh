@@ -254,9 +254,8 @@ if [ ! -d /usr/local/src/SDL2-2.0.5 ]; then
 	curl -Lso /tmp/sdl2.tar.gz https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
 	tar -C /usr/local/src -xf /tmp/sdl2.tar.gz
 	rm /tmp/sdl2.tar.gz
-fi
-mkdir -p /usr/local/src/SDL2-2.0.5/{build,build_i386}
-if ! which sdl2-config &>/dev/null; then
+	mkdir -p /usr/local/src/SDL2-2.0.5/{build,build_i386}
+
 	pushd /usr/local/src/SDL2-2.0.5/build
 	../configure
 	make
