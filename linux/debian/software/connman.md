@@ -9,6 +9,8 @@ There is one problem, if the taskbar is at the bottom of the screen then the ui 
 
 It depends on three packages:
 
+- `dh-autoreconf`
+- `intltool`
 - `libdbus-1-dev`
 - `libglib2.0-dev`
 - `libgtk-3-dev`
@@ -20,11 +22,11 @@ Compilation can be safely automated as follows:
 
 	# build connman-ui
 	if ! which connman-ui &>/dev/null; then
-		rm -rf /tmp/connman-ui
-		git clone https://github.com/tbursztyka/connman-ui.git /tmp/connman-ui
-		pushd /tmp/connman-ui
+		rm -rf /usr/local/src/connman-ui
+		git clone https://github.com/tbursztyka/connman-ui.git /usr/local/src/connman-ui
+		pushd /usr/local/src/connman-ui
 		./autogen.sh
-		./configure --prefix=/usr
+		./configure --prefix=/usr/local
 		make
 		make install
 		popd

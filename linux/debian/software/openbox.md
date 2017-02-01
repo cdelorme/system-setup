@@ -97,3 +97,10 @@ By default it only runs a single X instance, which treats multiple monitors like
 It also treats all monitors as a single virtual desktop, which means changing desktops will effect all monitors at once.  _This is generally easy to reason about with pinning applications to all desktops._
 
 The only "bug" I have encountered is the `ToggleMaximize` and `MoveResizeTo` behavior.  To send the currently active application to another monitor the `MoveResizeTo` operation can be called.  I have been unable to get `Unmaximize` behavior to correctly remain on the current monitor if `Maximize` was applied on another.  _I can only assume that `ToggleMaximize` saves the current dimensions and coordinates that are not updated by `MoveResizeTo`._
+
+
+## reboot & shutdown
+
+Because rebooting a shutting down a system require root privileges, this may take a bit of effort to implement.
+
+Namely, a modification to `/etc/sudoers` that will allow folks in the users group to run the commands without a password, and then adding `sudo reboot` and `sudo shutdown -h 0` to the `menu.xml` that openbox uses.

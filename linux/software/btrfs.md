@@ -1,31 +1,43 @@
 
 # btrfs
 
-I began using btrfs six months ago, and have been quite pleased with both its performance and feature-set.  Thus far it has shown to be very stable as a primary file system, and reliable for file storage as well.
+I have been using btrfs for roughly 3 years now and am incredibly fond of it.  Not because it is the most trouble-free file system, but because it offers some of the best features that have saved my data numerous times and helped me identify hardware problems that would have otherwise gone unnoticed while corrupting my system.
 
-There are specific features, such as snapshots and time-slices that I would like to eventually take advantage of.
+See, btrfs uses file checksums, which means bad memory or disk will lead to errors in your logs.  If you use a mirrored raid then you also get the benefit of automatic correction of corrupted data, since it has two checksums to compare.
 
-I will describe a basic root partition configuration, optimizations, and maintenance for using btrfs.
+_While there are certainly a myriad of incomplete features, the main benefits right now is that it has these checksums plus LVM-lik management, plus builtin raid._
 
-
-## root partition schema
-
-_With btrfs you can use qgroups to assign disk quota's without creating separated partitions._
-
-Here is my latest approach to partitioning:
-
-- 250M efi boot partition
-- 2-8G swap file partition
-- remainder btrfs
+Other features that are spectacular if not a bit buggy still are subvolumes, snapshots, quotas, and file deduplication.  The ability to define subvolumes lets you describe a boundary for separating ownership.  This combines with snapshots and quotas, letting you backup only part of a disk and limit available space.  Finally, file deduplication can run in the background to compare checksums and automatically convert/merge duplicate data into hard-links reducing the overall space consumed.
 
 
-## optimizations
+## maintenance
 
-These optimizations should be added to the `/etc/fstab` so they are kept on subsequent reboots of the system:
+While the auto-defragment option works wonderfully, you may want to run this at least once after setting the `/etc/fstab` compression to recompress the root file system (and possibly weekly afterwards just in case):
+
+    btrfs filesystem defragment -r -clzo /
+
+On a weekly basis it is also wise to rebalance the data across all disks:
+
+    btrfs balance start /
+
+This can take some time, so it may not be wise to do daily, or in the middle of anything important.  _If you are running low on disk space you may want to try adding `-dusage=#` or `-musage=#` flags, and start with smaller values before running the final balance command._
+
+Finally, you should try to run a scrub daily:
+
+    btrfs scrub start /
+
+I usually have a [crontab script](debian/data/base/etc/cron.weekly/disk-maintenace) prepared for this.
+
+
+### optimizations
+
+There are several optimizations that can, and should, be added to your btrfs mount (preferrably through the fstab).
+
+Here is a universal set of optimizations that you can apply to any btrfs mount:
 
     noatime,compress=lzo,ssd,space_cache,autodefrag
 
-Here is a breakdown of what each flag offers:
+Here are some descriptions plus a couple of extra flags:
 
 - `noatime`: reduce io by not updating access times
 - `compress=lzo`: apply compression to all _new_ files going forward, using lzo is best for performance
@@ -35,30 +47,13 @@ Here is a breakdown of what each flag offers:
 - `ssd`: treat the drive as a solid state drive, various optimizations are made (best results with kernel 3.14 or newer).
 
 
-### about compression
+#### about compression
 
 Initially it may sound counter-productive to compress the root partition, but in truth it is exceptionally useful.
 
 For the same reason the kernel is often compressed, the time it takes to read from the disk is always going to be slower than the speed of your CPU, therefore even with the fastest hard disk if the amount of data that needs to be loaded into memory is smaller, then you can gain performance by loading compressed data into memory and decompressing it from there.
 
 In otherwords, compression increases both the performance of your drive, and its longevity due to the reduced amount of actual IO happening on-disk.
-
-
-## maintenance
-
-While the auto-defragment option works wonderfully, you may want to run this at least once after setting the `/etc/fstab` compression to recompress the root file system (and possibly weekly afterwards just in case):
-
-    btrfs filesystem defragment -r -clzo /
-
-On a weekly basis it is also wise to rebalance the data on disk:
-
-    btrfs balance start /
-
-_This can take some time, so it may not be wise to do daily, or in the middle of anything important._
-
-Finally, you should try to run a scrub daily:
-
-        btrfs scrub start /
 
 
 ### checking the status
@@ -144,6 +139,10 @@ The easiest way to test whether your quota is working is to create a file using 
 
 ### snapshots
 
+One thing worth mentioning is that the snapshots are setup so that they can be piped, and they even provide support for over-network steams.  This means you could "send" a backup over the network to another system, or restore the system from a network backup directly even!
+
+Another really cool functionality is you can combine the stream behavior with compression tools **and** diffing tools.  _Imagine being able to make time-sliced diffs before and after every system update, allowing easy restoration with only a fraction of the data traditional tools might use._
+
 A basic snapshot grabs the current state of a subvolume excluding child subvolumes.
 
 For example, to create a root snapshot is as simple as:
@@ -200,9 +199,9 @@ Here is an example of sending from root and receiving at any other path:
 _Because a subvolume is created with the receive command it will infer the parent volume._
 
 
-## raid10
+## raid
 
-**I plan to test out ext4 on mdadm raid10 with 8 disks and compare the performance against btrfs.  I will likely choose btrfs because of its compression, improved inode handling, and copy-on-write sanity checking, all of which greatly improve the reliability of a raid.**  It is also much simpler to create the same effect of multiple partitions without the same performance problems as lvm or restrictions as raw ext4 partitions.
+With btrfs it is very simple to create the same effect of multiple partitions without the same performance problems as lvm or restrictions as raw ext4 partitions when using mdadm.  Add compression, snapshots, and the other features and you have yourself an excellent storage system.
 
 Creating a raid 10 configuration with both metadata and data spread across all disks:
 
@@ -220,8 +219,53 @@ Finally, you can mount the entire group by specifying _any_ of the disks in the 
 
 Alternatively you can use `btrfs dev scan` to find the optimal disk to use to mount the disks.
 
+If using btrfs on your root system, you may still find raid1 to be an enormous benefit for recovery.  With checksum comparisons it becomes possible to more easily recover from corrupt data.
 
-# tips and tricks
+With an EFI installation, one of the questions I ran into was whether to use mdadm raid1 in combination with btrfs's own raid, so that I could mirror the gpt efi partition and swap space.
+
+Turns out that while raid1 may mirror the gpt boot partition, the bios won't see it unless each disk is explicitly registered, so there is no point.  Also if data changes out-of-band it may not be caught by the software raid or could cause degraded raid.
+
+Additionally, there is conflicting opinions about the kernel better handling load balancing between two separate swap partitions instead of mirrored swap.  _As a staging area for volatile memory I see no reason why raid1 would be necessary here, **unless you are trying to debug kernel panic core dumps.**_
+
+**In conclusion: Don't use mdadm!**
+
+
+### debian
+
+The easiest way to configure the system is just to partition from the debian installer.
+
+Unfortunately the installer will not give you an option to configure raid, so instead you should create equal sized partitions as unused (free) space on the second disk.
+
+After the system has booted, you can run these commands to format and connect the second disk to the first, effectively "upgrading to raid1" using btrfs (_again, btrfs is awesome_):
+
+    btrfs device add /dev/sdb3 /
+    btrfs balance start -dconvert=raid1 -mconvert=raid1 /
+
+_The first step will add a volume, which can be used to extend space like traditional `jbod`, but the second step converts the treatment of both volumes to be mirrored, and begins the process of duplicating the data between them._
+
+
+### arch
+
+For arch, where you do everything by hand, here are some parted instructions:
+
+    parted /dev/sda
+    unit MiB
+    mklabel gpt
+    mkpart esp fat32 1 2048
+    mkpart primary linux-swap 2048 4096
+    mkpart primary btrfs 4096 -1
+
+    parted /dev/sdb
+    unit MiB
+    mklabel gpt
+    mkpart primary 1 2048
+    mkpart primary linux-swap 2048 4096
+    mkpart primary btrfs 4096 -1
+
+_You can also format btrfs as raid1 up-front instead of convert/upgrade post-install._
+
+
+## tips and tricks
 
 If you want to mount a subvolume without mounting the entire pool or "root" subvolume, you can do so using its volume id:
 
@@ -232,6 +276,9 @@ If you want to mount a subvolume without mounting the entire pool or "root" subv
 
 # references
 
+- [efi/swap instructions](https://wiki.archlinux.org/index.php/GNU_Parted)
+- [general purpose with mdadm](https://gist.github.com/jirutka/990d25662e729669b3ce)
+- [install debian onto raid1](https://danielpocock.com/install-debian-directly-with-btrfs-raid1)
 - [guide part 1](http://www.linux.com/learn/tutorials/767332-howto-manage-btrfs-storage-pools-subvolumes-and-snapshots-on-linux-part-1)
 - [guide part 2](http://www.linux.com/learn/tutorials/767683-how-to-create-and-manage-btrfs-snapshots-and-rollbacks-on-linux-part-2)
 - [raid10](http://superuser.com/questions/364222/btrfs-on-top-of-a-mdadm-raid10-or-btrfs-raid10-on-bare-devices)

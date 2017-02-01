@@ -13,6 +13,8 @@ In general these are the three steps for my automation:
 - download and execute the nvidia driver
 - apply `nomodeset` to grub configuration
 
+**If you are using a newer nvidia card during installation of debian, you may get a black screen or even less useful a screen that appears to have locked up leaving partial boot text.**  Simply reboot to the grub menu and use `e` to edit and add `nomodeset` to the end of the `linux ` line then press F10 to start.
+
 
 ## black screen
 
