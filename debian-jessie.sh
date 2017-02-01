@@ -31,13 +31,16 @@ grab_yn() {
 grab_yn "workstation" "is this a workstation"
 grab_input "username" "enter your username"
 grab_password "password" "enter your user password"
-[ ! -f "/home/$username/.ssh/id_rsa" ] || grab_yn "generate_ssh_key" "create an ssh key"
 grab_input "github_username" "enter your github username"
-su $username -c '[ ! -f ~/.ssh/id_rsa ]' && [ "${generate_ssh_key:-n}" = "y" ] && grab_yn "github_ssh_key" "upload ssh key to github"
+su $username -c '[ -f ~/.ssh/id_rsa ]' 2>/dev/null || grab_yn "generate_ssh_key" "create an ssh key"
+(su $username -c '[ -f ~/.ssh/id_rsa ]' 2>/dev/null || [ "${generate_ssh_key:-n}" = "y" ]) && grab_yn "github_ssh_key" "upload ssh key to github"
 [ "${github_ssh_key:-n}" = "y" ] && grab_password "github_password" "enter your github password"
 
 # enable debug mode so we can witness execution
 set -x
+
+# remove cdrom entries from apt sources
+sed -i '/cdrom/d' /etc/apt/sources.list
 
 # install baseline utilities
 apt-get clean
@@ -51,11 +54,11 @@ update-alternatives --set editor /usr/bin/vim.basic
 # configure sensors
 which sensors-detect &>/dev/null && (yes | sensors-detect) || true
 
-# optimize uefi boot
-if [ -f /boot/efi/EFI/debian/grubx64.efi ]; then
-	mkdir -p /boot/efi/EFI/boot
+# optimize uefi boot (case sensitive)
+if [ ! -d /boot/efi/EFI/BOOT ]; then
+	mkdir -p /boot/efi/EFI/BOOT
 	echo "FS0:\EFI\debian\grubx64.efi" > /boot/efi/startup.nsh
-	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+	cp -f /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/BOOT/bootx64.efi
 fi
 
 # optimize btrfs
@@ -104,7 +107,7 @@ fi
 curl -Ls https://raw.githubusercontent.com/cdelorme/dot-files/master/install | bash -s -- -q
 
 # reboot after timeout on kernel panic
-[ $(grep -c "panic=10" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 panic=10"/' /etc/default/grub
+[ $(grep -c "panic=10" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 panic=10"/' /etc/default/grub && update-grub
 [ $(grep -c "panic = 10" /etc/sysctl.conf) -eq 0 ] && echo "kernel.panic = 10" >> /etc/sysctl.conf
 
 # add pam tally locking
@@ -209,7 +212,7 @@ dpkg --add-architecture i386
 # install desktop utilities
 apt-get clean
 apt-get update
-until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y linux-headers-amd64 dkms menu build-essential gcc-multilib g++-multilib cmake pkg-config libncurses-dev firmware-linux uuid-runtime exfat-fuse exfat-utils libimobiledevice-utils gvfs-bin ssh sshfs bluez xboxdrv lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles xorg xinit consolekit openbox obconf obmenu pcmanfm tint2 conky-all xarchiver feh hsetroot rxvt-unicode gparted hardinfo gmrun clipit graphicsmagick lame libvorbis-dev vorbis-tools libogg-dev libexif-dev libfaac-dev libx264-dev id3 mplayer kazam guvcview openshot gimp gimp-plugin-registry viewnior evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc pulseaudio pavucontrol pasystray compton ffmpeg ffmpegthumbnailer chromium google-chrome-stable google-talkplugin playonlinux mednafen mame joystick libgtk2.0-0:i386 libxt6:i386 libnss3:i386 libcurl3:i386; do sleep 1; done
+until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y linux-headers-amd64 dkms menu build-essential gcc-multilib g++-multilib cmake bison pkg-config libncurses-dev firmware-linux uuid-runtime exfat-fuse exfat-utils libimobiledevice-utils gvfs-bin ssh sshfs bluez xboxdrv libsdl1.2-dev libsdl2-dev lzop p7zip-full p7zip-rar zip unzip unrar unace rzip unalz zoo arj anacron miscfiles xorg xinit consolekit openbox obconf obmenu pcmanfm tint2 conky-all xarchiver feh hsetroot rxvt-unicode gparted hardinfo gmrun clipit graphicsmagick lame libvorbis-dev vorbis-tools libogg-dev libexif-dev libfaac-dev libx264-dev id3 mplayer kazam guvcview openshot gimp gimp-plugin-registry viewnior evince fonts-droid fonts-freefont-ttf fonts-liberation fonts-takao ttf-mscorefonts-installer ibus-mozc pulseaudio pavucontrol pasystray compton ffmpeg ffmpegthumbnailer chromium google-chrome-stable google-talkplugin playonlinux mednafen mame joystick libgtk2.0-0:i386 libxt6:i386 libnss3:i386 libcurl3:i386; do sleep 1; done
 
 # cleanup duplicate sources post-installation
 rm -f /etc/apt/sources.list.d/google-tmp.list
@@ -234,6 +237,18 @@ echo "blacklist xpad" > /etc/modprobe.d/blacklist-xpad.conf
 systemctl enable xboxdrv.service
 systemctl restart xboxdrv.service
 
+# build and install ppsspp
+[ -d /usr/local/src/ppsspp ] || git clone https://github.com/hrydgard/ppsspp.git /usr/local/src/ppsspp
+if ! which psp &>/dev/null; then
+	pushd /usr/local/src/ppsspp
+	git pull
+	git checkout v1.3
+	git submodule update --init --recursive
+	./b.sh
+	ln -fs /usr/local/src/ppsspp/build/PPSSPPSDL /usr/local/bin/psp
+	popd
+fi
+
 # build 32&64 sdl2
 if [ ! -d /usr/local/src/SDL2-2.0.5 ]; then
 	curl -Lso /tmp/sdl2.tar.gz https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
@@ -245,7 +260,6 @@ if ! which sdl2-config &>/dev/null; then
 	pushd /usr/local/src/SDL2-2.0.5/build
 	../configure
 	make
-	make install
 	popd
 
 	pushd /usr/local/src/SDL2-2.0.5/build_i386
@@ -282,13 +296,13 @@ mv /tmp/flashplayer /usr/local/bin/flashplayer
 # mv /tmp/flashplayer /usr/local/bin/flashplayer
 
 # attempt to install nvidia if a vga pci device with their name exists
-if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -ge 1 ] && ! which nvidia-installer &>/dev/null; then
+if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -gt 0 ] && ! which nvidia-installer &>/dev/null; then
 	curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/375.26/NVIDIA-Linux-x86_64-375.26.run"
 	set +eu
 	/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/usr/lib/i386-linux-gnu --dkms -X -Z || echo "failed to install nvidia driver..."
 	set -eu
-	[ $(grep -c "nomodeset" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 nomodeset"/' /etc/default/grub
 	ldconfig
+	[ $(grep -c "nomodeset" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 nomodeset"/' /etc/default/grub && update-grub
 fi
 
 # look for packer supplied version file to install vbox guest additions

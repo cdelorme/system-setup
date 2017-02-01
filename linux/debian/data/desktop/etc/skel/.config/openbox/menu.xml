@@ -11,7 +11,5 @@
 		<separator />
 		<item label="reload"><action name="Reconfigure" /></item>
 		<item label="logout"><action name="Exit"><prompt>no</prompt></action></item>
-		<item label="reboot"><action name="Execute"><prompt>Are you sure you want to reboot?</prompt><execute>systemctl reboot -i</execute></action></item>
-		<item label="shutdown"><action name="Execute"><prompt>Are you sure you want to shutdown?</prompt><execute>systemctl poweroff</execute></action></item>
 	</menu>
 </openbox_menu>
