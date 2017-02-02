@@ -172,19 +172,17 @@ if [ "$username" != "root" ]; then
 	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
 
 	# generate ssh key and optionally upload to github
-	if [ "${generate_ssh_key:-n}" = "y" ] && [ ! -f /home/$username/.ssh/id_rsa ]; then
-		ssh-keygen -q -b 4096 -t rsa -N "$password" -f "/home/$username/.ssh/id_rsa"
-		[ -d /home/$username/.ssh ] && chmod 600 /home/$username/.ssh/*
-		if [ -f "/home/$username/.ssh/id_rsa.pub" ] && [ "${github_ssh_key:-n}" = "y" ]; then
-			curl -Li -u "${github_username}:${github_password:-}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat /home/${username}/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
+	if [ "${generate_ssh_key:-n}" = "y" ] && su $username -c '[ ! -f ~/.ssh/id_rsa ]' 2>/dev/null; then
+		su $username -c "cd && ssh-keygen -q -b 4096 -t rsa -N "$password" -f ~/.ssh/id_rsa"
+		su $username -c "cd && chmod 600 ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa.pub"
+		if su $username -c '[ -f ~/.ssh/id_rsa.pub ]' 2>/dev/null && [ "${github_ssh_key:-n}" = "y" ]; then
+			su $username -c "cd && curl -Li -u '${github_username}:${github_password:-}' -H 'Content-Type: application/json' -H 'Accept: application/json' -X POST -d \"{\\\"title\\\":\\\"$(hostname -s) ($(date '+%Y/%m/%d'))\\\",\\\"key\\\":\\\"$(cat ~/.ssh/id_rsa.pub)\\\"}\" https://api.github.com/user/keys"
+			# curl -Li -u "${github_username}:${github_password:-}" -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d "{\"title\":\"$(hostname -s) ($(date '+%Y/%m/%d'))\",\"key\":\"$(cat ~/.ssh/id_rsa.pub)\"}" https://api.github.com/user/keys
 
 			# optimize gitconfig to use loaded ssh key
-			su $username -c "git config --global url.git@github.com:.insteadOf https://github.com"
+			su $username -c "cd && git config --global url.git@github.com:.insteadOf https://github.com"
 		fi
 	fi
-
-	# ensure ownership for users folder
-	[ -d /home/$username/.ssh ] && chown -R $username:$username /home/$username/.ssh/
 
 	# use github username to acquire name & email from github
 	tmpdata=$(curl -Ls "https://api.github.com/users/${github_username}")
