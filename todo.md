@@ -1,14 +1,7 @@
 
 # todo
 
-- verify ppsspp build works (can be done inside vm now)
-- continue hardware installation checks using `tee` to log results
-- verify nvidia installation works & nomodeset is available on reboot
-- verify bluetooth works without `rfkill` or `connman` as dependencies
-	- verify it works on reboot
-	- verify connected devices automatically reconnect on reboot
-- install `playonlinux` /w a game to test `koku-xinput-wine` works (valid permissions?)
-
+- test ssh key generation & upload logic without `/home/$username` assumed path (can be done from VM)
 - investigate a method of checking for and adding backports (otherwise packages like `ffmpeg` will not exist)
 
 - figure out how to automate `ibus-mozc`, `ibus-setup`, and `im-config`
