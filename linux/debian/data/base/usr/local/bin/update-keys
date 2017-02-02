@@ -1,10 +1,4 @@
 #!/bin/bash
-user="$1"
-if [ -n "$user" ] && [ "$user" != "root" ]
-then
-	if curl -Lso /tmp/authorized_keys "https://github.com/${user}.keys"
-	then
-		[ ! -d ~/.ssh ] && mkdir ~/.ssh && chmod 700 ~/.ssh
-		mv /tmp/authorized_keys ~/.ssh/authorized_keys
-	fi
-fi
+[[ -z "$1" || "$1" = "root" ]] && exit 1
+[ ! -d ~/.ssh ] && mkdir ~/.ssh && chmod 700 ~/.ssh
+curl -Lso /tmp/authorized_keys "https://github.com/${1}.keys" && mv -f /tmp/authorized_keys ~/.ssh/authorized_keys

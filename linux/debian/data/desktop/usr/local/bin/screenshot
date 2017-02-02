@@ -1,6 +1,6 @@
 #!/bin/sh
-[ -d ~/Pictures/Screenshots ] || mkdir -p ~/Pictures/Screenshots
+[ -d ~/Pictures/screenshots ] || mkdir -p ~/Pictures/screenshots
 xdpyinfo -ext XINERAMA | sed '/^  head #/!d;s///' |
 while IFS=' :x@,' read i w h x y; do
-	import -window root -crop ${w}x$h+$x+$y ~/Pictures/Screenshots/$(date +%F_%H%M%S_%N)-${i}.png
+	import -window root -crop ${w}x$h+$x+$y ~/Pictures/screenshots/$(date +%F_%H%M%S_%N)-${i}.png
 done

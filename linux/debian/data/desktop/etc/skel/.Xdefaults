@@ -5,7 +5,7 @@ Xft.hinting:                true
 Xft.hintstyle:              hintslight
 URxvt.depth:                32
 URxvt.geometry:             80x24
-URxvt*background:           [30]#001E27
+URxvt*background:           [70]#001E27
 URxvt.fading:               0
 URxvt.loginShell:           true
 URxvt.saveLines:            1000000

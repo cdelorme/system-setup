@@ -1,5 +1,0 @@
-#!/bin/bash
-# scrub btrfs daily
-for filesystem in $(mount -t btrfs | awk '{print $3}'); do
-	btrfs scrub start -qdB "$filesystem"
-done

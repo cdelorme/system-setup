@@ -1,11 +1,11 @@
 #!/bin/bash
+# recommended weekly disk maintenance
 
 # search and destroy garbage files
 find / -type f -iname "thumbs.db" -exec rm {} \;
 find / -type f -iname ".ds_store" -exec rm {} \;
 find / -type f -name '._*' -exec rm -rf {} \;
 
-# functions for asynchronous operations
 cleanup_ext4()
 {
 	fstrim "$1"
@@ -16,6 +16,7 @@ cleanup_ext4()
 cleanup_btrfs()
 {
 	fstrim "$1"
+	btrfs scrub start -qdB "$filesystem"
 
 	btrfs balance start -dusage=1 "$1"
 	btrfs balance start -dusage=5 "$1"
@@ -33,13 +34,12 @@ cleanup_btrfs()
 	# @todo: zenity to warn if nearly full
 }
 
-# defragment and fstrim ext4 weekly
+# defragment and fstrim ext4 in parallel
 for filesystem in $(mount -t ext4 | awk '{print $3}'); do
 	cleanup_ext4 "$filesystem" &
 done
 
-# defragment and rebalance btrfs weekly
-for filesystem in $(mount -t btrfs | awk '{print $3}')
-do
+# defragment and rebalance btrfs in parallel
+for filesystem in $(mount -t btrfs | awk '{print $3}'); do
 	cleanup_btrfs "$filesystem" &
 done

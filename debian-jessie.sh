@@ -164,9 +164,11 @@ if [ "$username" != "root" ]; then
 	usermod -aG sudo,users,disk,adm,netdev,plugdev $username
 
 	# add crontab entry for user to run update-keys with github username hourly
-	{[ -f "/var/spool/cron/crontabs/${username}" ] && [ $(grep -c "update-keys" "$cronfile") -eq 1 ]} || echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
-	chown $username:crontab "/var/spool/cron/crontabs/${username}"
-	chmod 600 "/var/spool/cron/crontabs/${username}"
+	if [ ! -f "/var/spool/cron/crontabs/${username}" ] || [ $(grep -c "update-keys" "/var/spool/cron/crontabs/${username}") -eq 0 ]; then
+		echo "@hourly /usr/local/bin/update-keys $github_username" >> /var/spool/cron/crontabs/$username
+		chown $username:crontab "/var/spool/cron/crontabs/${username}"
+		chmod 600 "/var/spool/cron/crontabs/${username}"
+	fi
 
 	# run update-keys as the user now
 	su $username -c "which update-keys &>/dev/null && update-keys $github_username"
@@ -335,8 +337,6 @@ if ! which subl &>/dev/null; then
 	rm /tmp/sublime.tar.bz2
 	cp -R /tmp/sublime_text_3 /usr/local/sublime-text
 	ln -nsf /usr/local/sublime-text/sublime_text /usr/local/bin/subl
-	mkdir -p "/etc/skel/.config/sublime-text-3/Installed Packages/"
-	curl -Lso "/etc/skel/.config/sublime-text-3/Installed Packages/Package Control.sublime-package" "https://sublime.wbond.net/Package%20Control.sublime-package"
 fi
 
 # install urxvt font plugin

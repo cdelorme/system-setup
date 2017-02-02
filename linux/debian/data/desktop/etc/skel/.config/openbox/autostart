@@ -9,12 +9,6 @@ which tint2 &>/dev/null && (sleep 3 && tint2) &
 which fehbg &>/dev/null && (sleep 4 && fehbg) &
 which pasystray &>/dev/null && (sleep 5 && pasystray) &
 which clipit &>/dev/null && (sleep 5 && clipit) &
-which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -d) &
+which ibus-daemon &>/dev/null && (sleep 5 && ibus-daemon -rd) &
 which connman-ui-gtk &>/dev/null && (sleep 5 && connman-ui-gtk) &
-if [ $(xrandr -d :0 -q | grep -c " connected") -ge 2 ]
-then
-	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc1) &
-	which conky &> /dev/null && (sleep 10 && conky -d -q -c ~/.conky/rc2) &
-else
-	which conky &> /dev/null && (sleep 10 && conky -d -q) &
-fi
+which conky &> /dev/null && (sleep 10 && conky -d -q) &

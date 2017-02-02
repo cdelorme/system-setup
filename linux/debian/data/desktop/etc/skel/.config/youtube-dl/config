@@ -1,4 +1,4 @@
 # set sane defaults to ensure video and audio work always
 
 -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-
+--audio-format=mp3
