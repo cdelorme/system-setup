@@ -1,15 +1,6 @@
 
 # todo
 
-- test ssh key generation & upload logic without `/home/$username` assumed path (can be done from VM)
-- investigate a method of checking for and adding backports (otherwise packages like `ffmpeg` will not exist)
-
-- figure out how to automate `ibus-mozc`, `ibus-setup`, and `im-config`
-- figure out how to setup either `hyperspin` or `hyperloop` as frontends to launch mame & mednafen
-
-- verify that 7zw works correctly still (test against large folders of compressed files)
-	- fix bugs and improve stability/performance
-
 - craft a smarter script for pulseaudio commands (eg. `/usr/local/bin/pulseshort`)
 	- provide behaviors like `mute` toggle, increase, and decrease volume
 	- iterate **all** sinks in RUNNING state to apply the change
@@ -20,6 +11,14 @@
 	- detect: hard drives, monitors, valid network address(es), optionally temperatures of cpu/disk
 	- generate a template per monitor
 	- launch as many conky as there are monitors
+
+- figure out how to setup either `hyperspin` or `hyperloop` as frontends to launch mame & mednafen
+- test ssh key generation & upload logic without `/home/$username` assumed path (can be done from VM)
+- investigate a method of checking for and adding backports (otherwise packages like `ffmpeg` will not exist)
+- figure out how to automate `ibus-mozc`, `ibus-setup`, and `im-config`
+
+
+---
 
 - investigate creating `debian/stretch.sh`
 	- test using a preseed that upgrades to `testing` via:
@@ -37,22 +36,3 @@
 - continue investigating thumbnailers for folders
 	- try patching pcmanfm and compiling from source (yay my favorite!?)
 	- try out a heavier file browser with folder thumbnail support?
-
-
-## ppsspp
-
-We ran into errors attempting to compile ppsspp inside virtualbox, possibly due to the fact that we needed a reboot after installing vbox guest additions.
-
-I may have to turn this into something we run post-boot, like `/usr/local/sbin/install-ppsspp`:
-
-	# build & install ppsspp
-	[ -d /usr/local/src/ppsspp ] || git clone https://github.com/hrydgard/ppsspp.git /usr/local/src/ppsspp
-	if ! which psp &>/dev/null; then
-		pushd /usr/local/src/ppsspp
-		git pull
-		git checkout v1.3
-		git submodule update --init --recursive
-		./b.sh
-		ln -fs /usr/local/src/ppsspp/build/PPSSPPSDL /usr/local/bin/psp
-		popd
-	fi
