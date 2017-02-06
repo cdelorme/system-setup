@@ -47,3 +47,4 @@ These are just some of the many online resources I used during construction:
 - [automated installation](https://debian-handbook.info/browse/stable/sect.automated-installation.html)
 - [extremely complicated parameterized debian uefi packer kit](https://github.com/tylert/packer-build)
 - [Everything you need to know about conffiles: configuration files managed by dpkg](https://raphaelhertzog.com/2010/09/21/debian-conffile-configuration-file-managed-by-dpkg/)
+- [sway (i3 for wayland)](http://swaywm.org/)
