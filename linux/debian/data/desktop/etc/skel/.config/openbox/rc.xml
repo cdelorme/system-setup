@@ -40,9 +40,9 @@
 		<keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
 		<keybind key="S-A-Right"><action name="SendToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
 		<keybind key="S-A-Left"><action name="SendToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
-		<keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>pactl set-sink-volume 0 +5%</command></action></keybind>
-		<keybind key="XF86AudioLowerVolume"><action name="Execute"><command>pactl set-sink-volume 0 -- -5%</command></action></keybind>
-		<keybind key="XF86AudioMute"><action name="Execute"><command>pactl set-sink-mute 0 toggle</command></action></keybind>
+		<keybind key="XF86AudioRaiseVolume"><action name="Execute"><command>pash increase</command></action></keybind>
+		<keybind key="XF86AudioLowerVolume"><action name="Execute"><command>pash decrease</command></action></keybind>
+		<keybind key="XF86AudioMute"><action name="Execute"><command>pash mute</command></action></keybind>
 		<keybind key="XF86MonBrightnessUp"><action name="Execute"><command>xbacklight +10</command></action></keybind>
 		<keybind key="XF86MonBrightnessDown"><action name="Execute"><command>xbacklight -10</command></action></keybind>
 		<keybind key="W-S-3"><action name="Execute"><command>screenshot</command></action></keybind>

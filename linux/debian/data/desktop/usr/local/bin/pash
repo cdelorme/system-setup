@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# define functions to assist with operations
+pash_increase() {
+	echo "increasing volume on all active sinks..."
+	local sinks=$(pactl list short sinks | grep "RUNNING\|IDLE" | awk '{print $1}')
+	echo "$sinks" | while IFS= read -r sink ; do pactl set-sink-volume $sink +5%; done
+}
+
+pash_decrease() {
+	echo "decreasing volume on all active sinks..."
+	local sinks=$(pactl list short sinks | grep "RUNNING\|IDLE" | awk '{print $1}')
+	echo "$sinks" | while IFS= read -r sink ; do pactl set-sink-volume $sink -- -5%; done
+}
+
+pash_mute() {
+	echo "toggling mute on all active sinks..."
+	local sinks=$(pactl list short sinks | grep "RUNNING\|IDLE" | awk '{print $1}')
+	echo "$sinks" | while IFS= read -r sink ; do pactl set-sink-mute $sink toggle; done
+}
+
+# select operation from list
+case $1 in
+	increase)
+		pash_increase
+		;;
+	decrease)
+		pash_decrease
+		;;
+	mute)
+		pash_mute
+		;;
+	*)
+		echo "unknown command ${1}..."
+		;;
+esac
+
