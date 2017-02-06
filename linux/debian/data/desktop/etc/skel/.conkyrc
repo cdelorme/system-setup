@@ -19,4 +19,4 @@ own_window_argb_visual yes
 own_window_argb_value 80
 double_buffer yes
 TEXT
-${exec ip addr show | grep -v "127.0.0." | grep -v "169.254." | grep -o 'inet [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | grep -o [0-9].*}    uptime ${uptime}    cpu ${cpu cpu0}% ${cpubar cpu0 8,120}    mem (${memperc}%) ${mem}/${memmax} ${membar 5,120}    / (${fs_used_perc /}%) ${fs_bar 5,120 /}
+${exec ip addr show | grep -v "127.0.0." | grep -v "169.254." | grep -o 'inet [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | grep -o [0-9].*}    ${exec date +'%F %H:%M:%S'} (${uptime})    cpu (${cpu cpu0}%) ${cpubar cpu0 8,120}    ${mem}/${memmax} (${memperc}%) ${membar 5,120}    / (${fs_used_perc /}%) ${fs_bar 5,120 /}
