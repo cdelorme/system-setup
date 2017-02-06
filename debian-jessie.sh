@@ -219,6 +219,12 @@ rm -f /etc/apt/sources.list.d/google-tmp.list
 apt-get clean
 apt-get update
 
+# install nvidia driver from backports
+if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -gt 0 ];
+	apt-get install -yt jessie-backports nvidia-driver
+	[ $(grep -c "nomodeset" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 nomodeset"/' /etc/default/grub && update-grub
+fi
+
 # install steam
 if ! which steam &>/dev/null; then
 	[ -f /tmp/steam.deb ] && rm -f /tmp/steam.deb
@@ -294,16 +300,6 @@ mv /tmp/flashplayer /usr/local/bin/flashplayer
 # rm -f /tmp/flash.tar.gz
 # mv /tmp/flashplayer /usr/local/bin/flashplayer
 
-# attempt to install nvidia if a vga pci device with their name exists
-if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -gt 0 ] && ! which nvidia-installer &>/dev/null; then
-	curl -Lso "/tmp/nvidia.run" "http://us.download.nvidia.com/XFree86/Linux-x86_64/375.26/NVIDIA-Linux-x86_64-375.26.run"
-	set +eu
-	/bin/bash /tmp/nvidia.run -a -q -s -n --install-compat32-libs --compat32-libdir=/usr/lib/i386-linux-gnu --dkms -X -Z || echo "failed to install nvidia driver..."
-	set -eu
-	ldconfig
-	[ $(grep -c "nomodeset" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 nomodeset"/' /etc/default/grub && update-grub
-fi
-
 # look for packer supplied version file to install vbox guest additions
 if [ -f ~/.vbox_version ] && [ $(lsmod | grep vbox) -eq 0 ]; then
 	mkdir -p /tmp/vbox
@@ -325,7 +321,7 @@ if which youtube-dl &>/dev/null; then
 fi
 
 # install gif duration script
-if which gifduration &>/dev/null; then
+if ! which gifduration &>/dev/null; then
 	curl -Lo /usr/local/bin/gifduration https://raw.githubusercontent.com/alimony/gifduration/master/gifduration.py
 	chmod a+rx /usr/local/bin/gifduration
 fi

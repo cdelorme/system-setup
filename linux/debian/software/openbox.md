@@ -87,6 +87,8 @@ While not a direct openbox feature, you can augment icons used by the file brows
 	popd
 	rm -rf /tmp/moka
 
+If you want to customize the cursor then the `xcursor-themes` package should be installed to add `x-cursor-theme` to `update-alternatives`.  _It may be possible to setup cursors without this, but also more work._
+
 
 ## multihead
 

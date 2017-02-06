@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Default Web Browser
+Exec=/usr/bin/x-www-browser %U
+Terminal=false
+Icon=x-www-browser
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;

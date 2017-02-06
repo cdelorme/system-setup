@@ -27,6 +27,17 @@ To address both of these problems I craft a [go-transmission-helper](https://git
 _It may be equally possible to run `transmission-daemon` in userspace with a custom `systemctl` unit file, but I have not spent the time to verify the setup._
 
 
+## ownership
+
+If you wish to run the service as a specific user, you can modify the systemd unit file located at `/lib/systemd/system/transmission-daemon.service` and set another user.
+
+You will need to run `systemctl daemon-reload`, then `systemctl restart transmission-daemon.service`.
+
+This will automatically generate a `~/.config/transmission-daemon/` folder with `settings.json` and the former `/var/lib/transmission-daemon/.config/` metadata now under your users ownership.
+
+Remember to stop `transmission-daemon` before modifying the settings.json, or using `kill -HUP ` to ask transmission to reload the settings.json instead.
+
+
 ## iptables
 
 While you may find dynamic port mapping works well enough, I prefer fixed ports.
@@ -42,3 +53,13 @@ For the web interface here is how you can lock it down to the current machine:
 	-A INPUT -s 127.0.0.1 -p tcp -m tcp --dport 9091 -j ACCEPT
 
 _You could also use a local address and subnet mask to allow anyone on the same private network to access (eg. `192.168.0.0/24`)._
+
+
+## optimizations
+
+You may encounter messages in your logs suggesting an increase to receive and send buffer sizes.  Those messages relate to handling connection metadata and these changes can help alleviate the errors while boosting performance:
+
+	echo 'net.core.rmem_max = 16777216' >> /etc/sysctl.conf
+	echo 'net.core.wmem_max = 4194304' >> /etc/sysctl.conf
+
+_For these changes to take effect the `transmission-daemon` must be restarted._
