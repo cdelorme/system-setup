@@ -93,18 +93,6 @@ Once you have a website you want to enable, you can do so via:
 To verify your configuration is error-free, run `nginx -t` as root, then restart the nginx service to load the new system.
 
 
-## [monit](../data/etc/monit/monitrc.d/nginx.conf)
-
-Besides keeping nginx itself alive, you can also check whether a specific site is up with:
-
-    check host example.com with address example.com
-        restart program = "/etc/init.d/nginx restart"
-        if failed port 80 protocol http for 2 cycles then restart
-        if failed port 443 protocol https for 2 cycles then restart
-
-_I don't think systemd provides a way to do this currently, which makes monit pretty cool._
-
-
 ## iptables
 
 We only need to add one line, but this is required to enable http and https traffic (it is also acceptable to use the strings "http,https" in place of "80,443", which can be more humanly readable):

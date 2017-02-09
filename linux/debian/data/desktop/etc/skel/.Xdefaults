@@ -19,7 +19,7 @@ URxvt.cursorUnderline:      false
 URxvt.pointerBlank:         true
 URxvt*font:                 xft:ForMateKonaVe:pixelsize=14
 URxvt*letterSpace:          -1
-URxvt.perl-ext-common:      default,matcher,font,selection-to-clipboard,clipboard
+URxvt.perl-ext-common:      default,matcher,font,selection-to-clipboard
 URxvt.clipboard.pastecmd:   clipit -c
 URxvt.keysym.C-equal:       perl:font:increment
 URxvt.keysym.C-minus:       perl:font:decrement
