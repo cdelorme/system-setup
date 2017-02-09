@@ -16,11 +16,11 @@ The automation has been written purely to scratch my own itch.  However, I docum
 
 For mac optimizations, try this:
 
-	curl -Lo osx.sh "https://raw.githubusercontent.com/cdelorme/system-setup/master/osx.sh" && bash osx.sh
+	curl -Lo osx.sh "https://raw.githubusercontent.com/cdelorme/system-setup/master/osx/el-capitan.sh" && bash osx.sh
 
 For debian automation, give this a shot:
 
-	wget --no-check-certificate -qO debian-jessie.sh "https://raw.githubusercontent.com/cdelorme/system-setup/master/debian-jessie.sh" && bash debian-jessie.sh
+	wget --no-check-certificate -qO debian.sh "https://raw.githubusercontent.com/cdelorme/system-setup/master/linux/debian/jessie.sh" && bash debian.sh
 
 _This script may ask for input, which can be preseeded with environment variables._
 

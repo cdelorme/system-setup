@@ -49,7 +49,7 @@
 				"github_ssh_key=n",
 				"github_password=test"
 			],
-			"script": "../../../debian-jessie.sh"
+			"script": "../jessie.sh"
 		}
 	],
 	"post-processors": [

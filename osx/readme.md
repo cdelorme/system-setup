@@ -352,7 +352,7 @@ I recommend at least creating a Host-Only network with a predictable IP range, w
 
 To help simplify some of the following steps, you can run this command to download and execute a script instead:
 
-    curl -L "https://raw.githubusercontent.com/cdelorme/system-setup/master/osx.sh" | bash
+    curl -L "https://raw.githubusercontent.com/cdelorme/system-setup/master/osx/el-capitan.sh" | bash
 
 _If you don't trust the script, or wish to perform the operations manually, I have provided some of the details here._
 

@@ -3,9 +3,9 @@
 
 **I love debian.**
 
-After trying a number of distributions (ubuntu, mint, fedora, centos, arch, etc...) I found myself coming back to debian every time for rock-solid stability and its familiar, agreeable, toolstack.
+After trying a number of distributions (ubuntu, mint, fedora, centos, [arch](../arch/readme.md), etc...) I found myself coming back to debian every time for rock-solid stability and its familiar, agreeable, toolstack.
 
-This document is a brief overview of how I install and configure my systems [via automation](debian-jessie.sh).
+This document is a brief overview of how I install and configure my systems [via automation](jessie.sh).
 
 
 ## [installation](#)
