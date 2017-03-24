@@ -28,8 +28,6 @@
 		<keybind key="A-Escape"><action name="Lower"/><action name="FocusToBottom"/><action name="Unfocus"/></keybind>
 		<keybind key="A-Tab"><action name="NextWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
 		<keybind key="A-S-Tab"><action name="PreviousWindow"><finalactions><action name="Focus"/><action name="Raise"/><action name="Unshade"/></finalactions></action></keybind>
-		<keybind key="C-A-Right"><action name="GoToDesktop"><to>right</to><wrap>no</wrap></action></keybind>
-		<keybind key="C-A-Left"><action name="GoToDesktop"><to>left</to><wrap>no</wrap></action></keybind>
 		<keybind key="W-Up"><action name="ToggleMaximizeFull"/></keybind>
 		<keybind key="W-C-Up"><action name="ToggleMaximizeFull"/></keybind>
 		<keybind key="W-Right"><action name="MoveResizeTo"><monitor>next</monitor></action></keybind>
