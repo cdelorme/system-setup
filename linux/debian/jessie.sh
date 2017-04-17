@@ -220,7 +220,7 @@ apt-get clean
 apt-get update
 
 # install nvidia driver from backports
-if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -gt 0 ];
+if [ $(lspci | grep -i " vga" | grep -ci " nvidia") -gt 0 ]; then
 	apt-get install -yt jessie-backports nvidia-driver
 	[ $(grep -c "nomodeset" /etc/default/grub) -eq 0 ] && sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 nomodeset"/' /etc/default/grub && update-grub
 fi
