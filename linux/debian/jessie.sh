@@ -46,7 +46,7 @@ sed -i '/cdrom/d' /etc/apt/sources.list
 apt-get clean
 apt-get update
 apt-get upgrade -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y
-until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y ssh sudo parted lm-sensors lzma unzip screen tmux vim ntp resolvconf ntp curl git mercurial bzr subversion command-not-found; do sleep 1; done
+until apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y ssh sudo parted lm-sensors lzma unzip screen tmux vim resolvconf ntp curl git mercurial bzr subversion command-not-found; do sleep 1; done
 
 # set vim.basic as the default editor
 update-alternatives --set editor /usr/bin/vim.basic
