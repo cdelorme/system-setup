@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=MPlayer
 Comment=The Movie Player for Linux
-Exec=mplayer
+Exec=mplayer --player-operation-mode=pseudo-gui --osc
 Icon=mplayer
 Terminal=false
 Type=Application
