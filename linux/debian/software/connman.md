@@ -5,7 +5,7 @@ A user-interface for a connection manager, which covers wired and wireless conne
 
 This is absolutely essential for laptop users, and was a convenient tool for a desktop to toggle the devices on and off.
 
-There is one problem, if the taskbar is at the bottom of the screen then the ui package breaks.  To fix it, you can move the taskbar to the top of the screen, or compile the software yourself.
+There is one problem, if the taskbar is at the bottom of the screen then the ui package breaks.  To fix it, you can move the taskbar to the top of the screen, or compile the latest patched version yourself.
 
 It depends on three packages:
 

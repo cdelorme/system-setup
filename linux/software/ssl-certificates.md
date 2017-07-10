@@ -3,94 +3,66 @@
 
 SSL allows HTTPS traffic on port 443, and enables content encryption between the server and client.  This is exceptionally beneficial if the site has a login or any administrative features.
 
-There is absolutely no excuse not to have https on your sites today; you can get class 1 certificates for free and class 2 which support wildcard subdomains for as little as $70 every two years and an authentication process.  Configuring nginx for ssl literally takes 5 minutes.  Redirecting to it is 3 lines of configuration as well.
+There is absolutely no excuse not to have https on your sites today, as ssl certificates can be requested and renewed for free using [letsencrypt](https://letsencrypt.org/) so long as you can prove site ownership.  _A particularly useful web-driven implementation can be found ad [sslforfree.com](https://www.sslforfree.com/)._
 
-If you are hosting multiple sites using nginx on a single server, be sure you are using a version of NGINX with the SNI module otherwise conflicts may occur when using multiple SSL certificates (eg. 2 or more secured sites).
+Not only is adding ssl to [nginx](../debian/data/extras/etc/nginx/sites-available/example.com) fast and easy, traffic can be redirected with as few as 3 lines as well.
+
+_If you are hosting multiple sites using nginx on a single server, be sure you are using a version of NGINX with the SNI module otherwise conflicts may occur when using multiple SSL certificates (eg. 2 or more secured sites)._
 
 
 ## generating a host key
 
-There are two parts, a signed key, and a host key.  The host can can be re-used, but the signed key is either self-signed or needs to be provided by a service like startssl.
+You generally want to create a host key for creating or requesting certificates.
 
-Start by creating a server key:
+Start by creating a host key:
 
-    openssl genrsa -des3 -out host.key 2048
+    openssl genrsa -des3 -out encrypted-host.key 2048
 
-You will be prompted for a password.  Next we will want to remove the passphrase from this key, so we can load it in nginx without entering a password everytime it restarts:
+You will be prompted for a password.  Next we will want to remove the passphrase from this key, so we can load it in nginx without entering a password every time it restarts:
 
-    openssl rsa -in host.key -out server.key
+    openssl rsa -in encrypted-host.key -out host.key
 
-_You will need to enter the password for this._
-
-We can now use the `host.key` to generate "certificate requests", and `server.key` can be used by nginx as the host key.
+_You will need to enter the password for this._  This file is used by nginx and when creating certificate requests.
 
 
 ## generating a signed certificate request
+
+Next you need to supply a signed certificate request.  _Some services can and will generate this for you, which is useful when requesting an ssl certificate with support for multiple domains (eg. "alternative names")._
 
 We can generate a "Signed Certificate Request" or `.csr` using our host key and this command:
 
     openssl req -new -key host.key -out example.com.csr
 
-You will be prompted to enter location and company information, and **most importantly** you will be asked for the FQDN!
-
-**If you have wildcard support be sure to enter `*.domain.com`, otherwise, you should pick a valid or common subdomain, such as `www.domain.com`.  Omitting the prefix may lead to only `domain.com` being valid.**
-
-_This `.csr` file can now be supplied to a company such as startssl for a legitimate signed certificate._
+_In this example you will be prompted to enter location, company information, and a single FQDN (important when dealing with wildcard certificates or the standard www subdomain._
 
 
-### wildcard certificates
+### certificate bundles
 
-It is possible to get free single-level wildcard certificates.  Through StartSSL you will need to file "Personal Identify Validation" (or a corporate identity validation), which requires photocopied id's be submitted and a charge of $60 _to be manually processed by a human being_.
+For additional security, many browsers (especially on mobile devices) will require a complete "certificate chain" before treating a site as secure.
 
-**Afterwards, you get the ability to issue wildcard certificates for up to 2 years.**
+The certificate provider will generally supply an "intermediate certificate" with your request, and their own "CA Certificate" that identifies the certificate authority.
 
+To create a bundle that creates a full validation chain the three files must be added to one file in this order:
 
-## using a signed certificate request
-
-Most certificate providers will ask you for a `.csr`, _or offer to generate one on your behalf._
-
-For example, if you are using StartSSL you will be allowed to skip and paste the contents of your own `.csr` into a form.  It will ask for the subdomain and domain it applies to, then confirm the valid domains supported by that certificate.
-
-**This is important, because if you forgot to add `www.` to the signed certificate request you may only see the raw domain supported by the certificate they will generate.**
-
-After confirming, you will be given a certificate file or `.crt` for your domain.
-
-You will also be given two more files; an "intermediate certificate" and "ca certificate" ("certificate authority"'s certificate).  **You will need all three to create a certificate chain.**
-
-
-### certificate chains
-
-While the `.crt` file alone may be valid, but some browsers require a complete "certificate chain" (aka bundle file) for security.
-
-The certificate chain is the combination of the three files from the last step in the following order:
-
-- new new domain's `.crt`
+- the domain's certificate (eg. `.crt`)
 - the intermediate certificate
 - the certificate authority's certificate
 
-Now you supply the bundle `.crt` file to your web server.
-
-If you wish to verify that the chain is valid, you can use an [ssl validator](https://www.sslshopper.com/ssl-checker.html).
+Supply this `bundle.crt` to the web server and you can check with an [ssl validator](https://www.sslshopper.com/ssl-checker.html).
 
 
 ## self signed certificates
 
-This is an alternative, useful for testing but even then it can be a hassle.  An unsigned key will result in your web browser complaining every attempt to load it, and if you do not add the certificate to your local system as trusted it'll prevent you from making much use of it
+While this can be useful for development, it will not allow others to access your site without security warnings.  _Basically, they must explicitly choose to trust your certificate, and that means you can't use it for much else besides local testing._
 
-However, in the event that you do need one temporarily, here is how to create it!
+However, using the host key and certificate request we can generate a self signed certificate like so:
 
-Using the passwordless server key, and the certificate request from the previous steps, we can generate a self-signed certificate.
-
-Taking the host key we generated previously, we will feed it to a request for generating a self-signed certificate:
-
-     openssl x509 -req -days 365 -in example.com.csr -signkey server.key -out example.com.crt
+     openssl x509 -req -days 365 -in example.com.csr -signkey host.key -out example.com.crt
 
 We can now use our self-signed `.crt` file for development.
 
 
 # references
 
-- [ssl certificates can be acquired for free](https://www.startssl.com/)
 - [nginx SNI allows multiple ssl certificates per ip](https://www.digitalocean.com/community/tutorials/how-to-set-up-multiple-ssl-certificates-on-one-ip-with-nginx-on-ubuntu-12-04)
-- [startssl intermediate chain](https://www.startssl.com/?app=42)
 - [verify your ssl status](https://www.sslshopper.com/ssl-checker.html)

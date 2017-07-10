@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# search and destroy garbage files
+# search and destroy garbage files in root
 find / -type f -iname "thumbs.db" -exec rm {} \;
 find / -type f -iname ".ds_store" -exec rm {} \;
 find / -type f -name '._*' -exec rm -rf {} \;
@@ -44,4 +44,3 @@ done
 for j in $(jobs -p); do
 	wait $j
 done
-

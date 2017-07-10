@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# @todo(casey): execute btrfs snapshot prior to running updates
-
 # set headless flags and update packages
 unset UCF_FORCE_CONFNEW
 export UCF_FORCE_CONFOLD=true
