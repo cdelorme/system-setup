@@ -185,7 +185,8 @@ then
 	brew_install graphicsmagick
 	brew_install imagemagick
 	brew_install swftools
-	brew_install --with-tools ffmpeg
+	brew_install --without-ant libbluray
+	brew_install --with-fdk-aac --with-libass --with-libssh --with-libvidstab --with-openjpeg --with-openssl --with-rtmpdump --with-tools --with-webp --with-x265 --with-fontconfig --with-freetype --with-libbluray --with-libcaca --with-libvorbis --with-libvpx --with-speex --with-theora --with-game-music-emu --with-openh264 ffmpeg
 	brew_install sdl2_gfx
 	brew_install sdl2_image
 	brew_install sdl2_mixer
