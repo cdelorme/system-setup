@@ -1,0 +1,69 @@
+#!/bin/bash -ex
+# @note: the builds can take upwards of 9GB and may be worth emptying once finished
+
+# make sure correct permissions are available
+[ "$EUID" -ne 0 ] && echo "this script requires root permissions..." && exit 1
+
+# define dependent variables for caching, threads, and paths
+export CC="ccache gcc"
+export threads=$(( $(nproc) + 1 ))
+export workspace="/usr/local/src/wine"
+export source_path="${workspace}/git"
+export build_version="${1:-master}"
+export workspace_builds="${workspace}/builds/${build_version}"
+export workspace_output_path="${workspace}/dist/${build_version}"
+export workspace_wine64="${workspace_builds}/wine64"
+export workspace_wine32="${workspace_builds}/wine32"
+export workspace_wine32_tools="${workspace_builds}/wine32_tools"
+
+# if output exists then terminate
+[ -d "$workspace_output_path" ] && echo "that version was already built, delete ${workspace_output_path} first..." && exit 0
+rm -rf "$workspace_builds"
+echo "installing wine version: ${build_version}..."
+
+# install dependencies
+apt install -y ccache schroot debootstrap flex bison libcapi20-dev libgnutls28-dev libgphoto2-dev libgsm1-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libjpeg-dev liblcms2-dev libldap2-dev libmpg123-dev libosmesa6-dev libpcap-dev libpulse-dev libsane-dev libsane-extras-dev libtiff5-dev libv4l-dev libva-dev libgtk-3-dev libxslt1-dev ocl-icd-opencl-dev ocl-icd-opencl-dev
+
+# if no chroot exists, create it, link it to schroot, setup binds, and install dependencies
+if [ ! -d /usr/local/src/stretch-i386 ]; then
+	rm -rf /usr/local/src/stretch-i386
+	debootstrap --arch i386 stretch /usr/local/src/stretch-i386
+	echo -e "[stretch-i386]\ndescription=stretch 32bit build environment\ntype=directory\ndirectory=/usr/local/src/stretch-i386\nusers=root\nroot-groups=root\nprofile=desktop\npersonality=linux\npreserve-environment=true" > /etc/schroot/chroot.d/stretch-i386.conf.test
+	sed -i "\;${workspace};d" /etc/schroot/desktop/fstab
+	echo "${workspace} ${workspace} none rw,bind 0 0" >> /etc/schroot/desktop/fstab
+	schroot -d / -c stretch-i386 -- /bin/sh -l -c "apt install -y ccache flex bison libcapi20-dev libgnutls28-dev libgphoto2-dev libgsm1-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libjpeg-dev liblcms2-dev libldap2-dev libmpg123-dev libosmesa6-dev libpcap-dev libpulse-dev libsane-dev libsane-extras-dev libtiff5-dev libv4l-dev libva-dev libgtk-3-dev libxslt1-dev ocl-icd-opencl-dev"
+fi
+
+# prepare workspace paths
+mkdir -p "$workspace_wine64" "$workspace_wine32" "$workspace_wine32_tools" "$workspace_output_path"
+
+# clone repository if not exists, and checkout version
+[ ! -d "$source_path" ] && git clone git://source.winehq.org/git/wine.git "${source_path}"
+git -C "$source_path" reset --hard
+git -C "$source_path" fetch
+git -C "$source_path" checkout "$build_version"
+
+# compile 64bit wine
+cd "$workspace_wine64"
+"${source_path}/configure" --prefix="${workspace_output_path}" --enable-win64 | tee "${workspace_wine64}/configure.log"
+make -j${threads} | tee "${workspace_wine64}/make.log"
+
+# compile 32bit in chroot
+schroot -d / -c stretch-i386 -- /bin/sh -l -c "cd '${workspace_wine32_tools}' && ${source_path}/configure --prefix='${workspace_output_path}'  | tee '${workspace_wine32_tools}/configure.log' && make -j${threads} | tee '${workspace_wine32_tools}/make.log'"
+
+# compile and install 32bit binaries combining 32bit and 64bit tools
+schroot -d / -c stretch-i386 -- /bin/sh -l -c "cd '${workspace_wine32}' && ${source_path}/configure --prefix='${workspace_output_path}' --with-wine64='${workspace_wine64}' --with-wine-tools='${workspace_wine32_tools}' | tee '${workspace_wine32}/configure.log' && make -j${threads} | tee '${workspace_wine32}/make.log' && make install"
+
+# install 64bit binaries last
+cd "$workspace_wine64"
+make install
+
+# create symlinks overwriting conflicts
+ln -s "${workspace_output_path}"/bin/* /usr/local/bin/
+
+# install winetricks
+if ! which winetricks &>/dev/null; then
+	curl -Lo /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x /usr/local/bin/winetricks
+fi
+
