@@ -152,16 +152,16 @@ _When I am plugged in but idle this is generally because I am watching a video o
             - uncheck `Show Accessibility controls`
         - App Shortcuts
             - All Applications
-                - `Zoom`: `cmd+alt+m`
+                - `Zoom`: `ctrl+alt+=`
             - Google Chrome
-                - `Zoom`: `shift+cmd+m`
+                - `Zoom`: `shift+ctrl+=`
         - All Controls (_select_)
 
 _Since I am still trying to learn the language, I add Japanese input and Input Sources to easily switch input modes when desired._  Apply makes the input switching absolutely beautiful with the latest release.
 
 _A lot of hotkeys I disable to save me days spent confused as to why behavior changed after I accidentally fumbled the keyboard._
 
-_The zoom hotkey for Chrome differs to force fill-screen, while for other applications it matches the [iterm2](http://iterm2.com/) shortcut._
+_The zoom hotkey for Chrome requires shift to fill width, but for other applications shift may not work, so we use a more acceptable combination by default._
 
 - Trackpad
     - Point & Click
